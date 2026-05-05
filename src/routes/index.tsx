@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { CARDS, type Card } from "@/data/cards";
 import { CardItem } from "@/components/catalog/CardItem";
@@ -201,11 +201,29 @@ function Index() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
-              {filtered.map((card) => (
-                <CardItem key={card.id} card={card} onClick={() => setActive(card)} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+                {filtered.slice(0, visibleCount).map((card) => (
+                  <CardItem key={card.id} card={card} onClick={() => setActive(card)} />
+                ))}
+              </div>
+              {visibleCount < filtered.length && (
+                <div
+                  ref={sentinelRef}
+                  className="mt-12 grid place-items-center py-8 text-xs text-muted-foreground"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
+                    Carregando mais cartas...
+                  </div>
+                </div>
+              )}
+              {visibleCount >= filtered.length && filtered.length > BATCH_SIZE && (
+                <p className="mt-12 text-center text-xs text-muted-foreground">
+                  Você viu todas as {filtered.length} cartas.
+                </p>
+              )}
+            </>
           )}
         </section>
       </main>
