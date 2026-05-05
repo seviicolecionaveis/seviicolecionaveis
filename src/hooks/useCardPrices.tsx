@@ -69,12 +69,13 @@ export function useCardPrices(): CardPriceLookup {
     const listener = (m: Map<string, number>) => mounted && setPrices(m);
     listeners.add(listener);
     if (!cache) {
-      refreshPrices().then((m) => {
-        if (mounted) {
-          setPrices(m);
-          setLoading(false);
-        }
-      });
+      refreshPrices()
+        .then((m) => {
+          if (mounted) setPrices(m);
+        })
+        .finally(() => mounted && setLoading(false));
+    } else {
+      setLoading(false);
     }
     return () => {
       mounted = false;
