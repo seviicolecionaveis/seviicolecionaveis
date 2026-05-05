@@ -1289,7 +1289,7 @@
   {
     "id": 118,
     "name": "Bunnelby",
-    "image": "https://placehold.co/420x586/png?text=Bunnelby",
+    "image": "https://images.scrydex.com/pokemon/me3-64/large",
     "number": "064/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Normal",
@@ -1300,7 +1300,7 @@
   {
     "id": 119,
     "name": "Bunnelby",
-    "image": "https://placehold.co/420x586/png?text=Bunnelby",
+    "image": "https://images.scrydex.com/pokemon/me3-64/large",
     "number": "064/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Normal",
@@ -1311,7 +1311,7 @@
   {
     "id": 120,
     "name": "Bunnelby",
-    "image": "https://placehold.co/420x586/png?text=Bunnelby",
+    "image": "https://images.scrydex.com/pokemon/me3-64/large",
     "number": "064/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Reverse Foil",
@@ -1520,7 +1520,7 @@
   {
     "id": 139,
     "name": "Cascoon",
-    "image": "https://placehold.co/420x586/png?text=Cascoon",
+    "image": "https://images.scrydex.com/pokemon/ex1-26/large",
     "number": "26/109",
     "collection": "RS - Rubi & Safira",
     "finish": "Normal",
@@ -2763,7 +2763,7 @@
   {
     "id": 252,
     "name": "Diggersby",
-    "image": "https://placehold.co/420x586/png?text=Diggersby",
+    "image": "https://images.scrydex.com/pokemon/me3-65/large",
     "number": "065/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Reverse Foil",
@@ -2774,7 +2774,7 @@
   {
     "id": 253,
     "name": "Diggersby",
-    "image": "https://placehold.co/420x586/png?text=Diggersby",
+    "image": "https://images.scrydex.com/pokemon/me3-65/large",
     "number": "065/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Normal",
@@ -2785,7 +2785,7 @@
   {
     "id": 254,
     "name": "Diggersby",
-    "image": "https://placehold.co/420x586/png?text=Diggersby",
+    "image": "https://images.scrydex.com/pokemon/me3-65/large",
     "number": "065/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Normal",
@@ -3851,8 +3851,8 @@
   },
   {
     "id": 352,
-    "name": "Flerchinder",
-    "image": "https://placehold.co/420x586/png?text=Flerchinder",
+    "name": "Fletchinder",
+    "image": "https://images.scrydex.com/pokemon/me3-13/large",
     "number": "013/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Normal",
@@ -3862,8 +3862,8 @@
   },
   {
     "id": 353,
-    "name": "Flerchinder",
-    "image": "https://placehold.co/420x586/png?text=Flerchinder",
+    "name": "Fletchinder",
+    "image": "https://images.scrydex.com/pokemon/me3-13/large",
     "number": "013/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Normal",
@@ -3873,8 +3873,8 @@
   },
   {
     "id": 354,
-    "name": "Flerchinder",
-    "image": "https://placehold.co/420x586/png?text=Flerchinder",
+    "name": "Fletchinder",
+    "image": "https://images.scrydex.com/pokemon/me3-13/large",
     "number": "013/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Reverse Foil",
@@ -3884,8 +3884,8 @@
   },
   {
     "id": 355,
-    "name": "Fletching",
-    "image": "https://placehold.co/420x586/png?text=Fletching",
+    "name": "Fletchling",
+    "image": "https://images.scrydex.com/pokemon/me3-66/large",
     "number": "066/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Normal",
@@ -3895,8 +3895,8 @@
   },
   {
     "id": 356,
-    "name": "Fletching",
-    "image": "https://placehold.co/420x586/png?text=Fletching",
+    "name": "Fletchling",
+    "image": "https://images.scrydex.com/pokemon/me3-66/large",
     "number": "066/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Normal",
@@ -6162,8 +6162,8 @@
   {
     "id": 562,
     "name": "Litwick",
-    "image": "https://placehold.co/420x586/png?text=Litwick",
-    "number": "16/086",
+    "image": "https://images.scrydex.com/pokemon/rsv10pt5-16/large",
+    "number": "016/086",
     "collection": "WHT - Fogo Branco",
     "finish": "Normal",
     "language": "Português",
@@ -8736,7 +8736,7 @@
   {
     "id": 796,
     "name": "Primeape",
-    "image": "https://placehold.co/420x586/png?text=Primeape",
+    "image": "https://images.scrydex.com/pokemon/sv4pt5-46/large",
     "number": "046/091",
     "collection": "PAF - Destinos de Paldea",
     "finish": "Normal",
@@ -8967,8 +8967,8 @@
   {
     "id": 817,
     "name": "Purrloin da Marine",
-    "image": "https://placehold.co/420x586/png?text=Purrloin+da+Marine",
-    "number": "",
+    "image": "https://images.scrydex.com/pokemon/sv10-130/large",
+    "number": "130/182",
     "collection": "DRI - Rivais Predestinados",
     "finish": "Reverse Foil",
     "language": "Português",
@@ -8978,8 +8978,8 @@
   {
     "id": 818,
     "name": "Purrloin do N",
-    "image": "https://placehold.co/420x586/png?text=Purrloin+do+N",
-    "number": "",
+    "image": "https://images.scrydex.com/pokemon/sv9-96/large",
+    "number": "096/159",
     "collection": "JTG -Amigos de Jornada",
     "finish": "Normal",
     "language": "Português",
@@ -9198,7 +9198,7 @@
   {
     "id": 838,
     "name": "Raticate",
-    "image": "https://placehold.co/420x586/png?text=Raticate",
+    "image": "https://images.scrydex.com/pokemon/me3-61/large",
     "number": "061/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Normal",
@@ -9209,7 +9209,7 @@
   {
     "id": 839,
     "name": "Raticate",
-    "image": "https://placehold.co/420x586/png?text=Raticate",
+    "image": "https://images.scrydex.com/pokemon/me3-61/large",
     "number": "061/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Normal",
@@ -9220,7 +9220,7 @@
   {
     "id": 840,
     "name": "Raticate",
-    "image": "https://placehold.co/420x586/png?text=Raticate",
+    "image": "https://images.scrydex.com/pokemon/me3-61/large",
     "number": "061/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Reverse Foil",
@@ -9231,7 +9231,7 @@
   {
     "id": 841,
     "name": "Raticate",
-    "image": "https://placehold.co/420x586/png?text=Raticate",
+    "image": "https://images.scrydex.com/pokemon/me3-61/large",
     "number": "061/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Reverse Foil",
@@ -9242,7 +9242,7 @@
   {
     "id": 842,
     "name": "Rattata",
-    "image": "https://placehold.co/420x586/png?text=Rattata",
+    "image": "https://images.scrydex.com/pokemon/me3-60/large",
     "number": "060/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Normal",
@@ -9253,7 +9253,7 @@
   {
     "id": 843,
     "name": "Rattata",
-    "image": "https://placehold.co/420x586/png?text=Rattata",
+    "image": "https://images.scrydex.com/pokemon/me3-60/large",
     "number": "060/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Reverse Foil",
@@ -9264,7 +9264,7 @@
   {
     "id": 844,
     "name": "Rattata",
-    "image": "https://placehold.co/420x586/png?text=Rattata",
+    "image": "https://images.scrydex.com/pokemon/me3-60/large",
     "number": "060/88",
     "collection": "POR - Equilíbrio Perfeito",
     "finish": "Normal",
