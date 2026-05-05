@@ -7,7 +7,7 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function runUpdate(runId: string) {
+async function runUpdate(runId: string, requestUrl: string) {
   let updated = 0;
   let errors = 0;
   let total = 0;
