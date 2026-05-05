@@ -127,7 +127,7 @@ async function runUpdate(runId: string, requestUrl: string) {
 export const Route = createFileRoute("/api/public/hooks/update-prices")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
         // Cria registro de execução
         const { data: run, error } = await supabaseAdmin
           .from("price_update_runs")
@@ -143,7 +143,7 @@ export const Route = createFileRoute("/api/public/hooks/update-prices")({
         }
 
         // Dispara em background — retorna imediatamente para não dar timeout no cron
-        runUpdate(run.id);
+        runUpdate(run.id, request.url);
 
         return new Response(
           JSON.stringify({ ok: true, runId: run.id }),
