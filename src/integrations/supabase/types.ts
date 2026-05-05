@@ -104,6 +104,48 @@ export type Database = {
         }
         Relationships: []
       }
+      cards: {
+        Row: {
+          base_price_cents: number | null
+          card_number: string
+          collection: string
+          created_at: string
+          finish: Database["public"]["Enums"]["card_finish"]
+          id: string
+          image: string
+          language: Database["public"]["Enums"]["card_language"]
+          name: string
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          base_price_cents?: number | null
+          card_number: string
+          collection: string
+          created_at?: string
+          finish: Database["public"]["Enums"]["card_finish"]
+          id?: string
+          image?: string
+          language: Database["public"]["Enums"]["card_language"]
+          name: string
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          base_price_cents?: number | null
+          card_number?: string
+          collection?: string
+          created_at?: string
+          finish?: Database["public"]["Enums"]["card_finish"]
+          id?: string
+          image?: string
+          language?: Database["public"]["Enums"]["card_language"]
+          name?: string
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           card_id: string
@@ -301,6 +343,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      card_finish:
+        | "Normal"
+        | "Foil"
+        | "Reverse Foil"
+        | "Pokebola"
+        | "Energia"
+        | "Promo"
+      card_language: "Português" | "Inglês" | "Italiano" | "Espanhol"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -429,6 +479,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      card_finish: [
+        "Normal",
+        "Foil",
+        "Reverse Foil",
+        "Pokebola",
+        "Energia",
+        "Promo",
+      ],
+      card_language: ["Português", "Inglês", "Italiano", "Espanhol"],
     },
   },
 } as const
