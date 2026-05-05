@@ -5,9 +5,11 @@ export interface CardPriceLookup {
   // key: `${cardName}__${collection}__${number}__${finish}__${language}`
   prices: Map<string, number>;
   loading: boolean;
+  refresh: () => Promise<void>;
 }
 
 let cache: Map<string, number> | null = null;
+let inFlight: Promise<Map<string, number>> | null = null;
 const listeners = new Set<(m: Map<string, number>) => void>();
 
 export function priceLookupKey(
@@ -45,29 +47,47 @@ async function loadPrices(): Promise<Map<string, number>> {
   return map;
 }
 
+async function refreshPrices(): Promise<Map<string, number>> {
+  if (!inFlight) {
+    inFlight = loadPrices().then((m) => {
+      cache = m;
+      listeners.forEach((l) => l(m));
+      return m;
+    }).finally(() => {
+      inFlight = null;
+    });
+  }
+  return inFlight;
+}
+
 export function useCardPrices(): CardPriceLookup {
   const [prices, setPrices] = useState<Map<string, number>>(cache ?? new Map());
   const [loading, setLoading] = useState(!cache);
 
   useEffect(() => {
     let mounted = true;
-    if (!cache) {
-      loadPrices().then((m) => {
-        cache = m;
-        if (mounted) {
-          setPrices(m);
-          setLoading(false);
-        }
-        listeners.forEach((l) => l(m));
-      });
-    }
     const listener = (m: Map<string, number>) => mounted && setPrices(m);
     listeners.add(listener);
+    refreshPrices().then((m) => {
+      if (mounted) {
+        setPrices(m);
+        setLoading(false);
+      }
+    });
     return () => {
       mounted = false;
       listeners.delete(listener);
     };
   }, []);
 
-  return { prices, loading };
+  return {
+    prices,
+    loading,
+    refresh: async () => {
+      setLoading(true);
+      const m = await refreshPrices();
+      setPrices(m);
+      setLoading(false);
+    },
+  };
 }
