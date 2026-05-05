@@ -1,11 +1,11 @@
-import { type Card } from "@/data/cards";
+import { type Card, type Finish } from "@/data/cards";
 
-const conditionClass: Record<string, string> = {
-  Mint: "bg-condition-mint text-white",
-  "Near Mint": "bg-condition-near-mint text-white",
-  Excellent: "bg-condition-excellent text-foreground",
-  Played: "bg-condition-played text-white",
-  Poor: "bg-condition-poor text-white",
+const finishBadge: Record<Finish, string> = {
+  Normal: "bg-background/90 text-foreground",
+  Foil: "bg-brand-gold text-brand-gold-foreground",
+  "Reverse Foil": "bg-type-psychic text-white",
+  Pokebola: "bg-type-fire text-white",
+  Promo: "bg-type-electric text-foreground",
 };
 
 interface Props {
@@ -25,10 +25,10 @@ export function CardItem({ card, onClick }: Props) {
           src={card.image}
           alt={`${card.name} — ${card.collection} ${card.number}`}
           loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).src =
-              `https://placehold.co/400x560/eeeeee/cccccc?text=${encodeURIComponent(card.name)}`;
+              `https://placehold.co/400x560/eeeeee/999999?text=${encodeURIComponent(card.name)}`;
           }}
         />
         <div className="absolute top-3 left-3">
@@ -37,8 +37,8 @@ export function CardItem({ card, onClick }: Props) {
           </span>
         </div>
         <div className="absolute bottom-3 right-3">
-          <span className={`rounded-full px-2 py-1 text-[10px] font-bold shadow-sm ${conditionClass[card.condition]}`}>
-            {card.condition.toUpperCase()}
+          <span className={`rounded-full px-2 py-1 text-[10px] font-bold shadow-sm ${finishBadge[card.finish]}`}>
+            {card.finish.toUpperCase()}
           </span>
         </div>
         {out && (
@@ -53,11 +53,13 @@ export function CardItem({ card, onClick }: Props) {
         <div className="min-w-0">
           <h4 className="truncate text-sm font-semibold">{card.name}</h4>
           <p className="truncate text-xs text-muted-foreground uppercase">
-            {card.collection} • {card.language}
+            {card.collection}
           </p>
         </div>
         <p className="shrink-0 text-sm font-bold">
-          R$ {card.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+          {card.price != null
+            ? `R$ ${card.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+            : <span className="text-muted-foreground font-medium">Sob consulta</span>}
         </p>
       </div>
       <div className="mt-2 flex items-center gap-2">
@@ -73,7 +75,7 @@ export function CardItem({ card, onClick }: Props) {
           {card.stock === 0 ? "Indisponível" : `${card.stock} em estoque`}
         </span>
         <span className="h-1 w-1 rounded-full bg-border" />
-        <span className="text-[10px] text-muted-foreground">{card.rarity}</span>
+        <span className="text-[10px] text-muted-foreground">{card.language}</span>
       </div>
     </button>
   );

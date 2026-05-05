@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { type Card, TYPE_LABELS } from "@/data/cards";
+import { type Card } from "@/data/cards";
 
 interface Props {
   card: Card | null;
@@ -19,7 +19,7 @@ export function CardModal({ card, onClose }: Props) {
                 className="max-h-[70vh] w-auto object-contain rounded-lg shadow-2xl"
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src =
-                    `https://placehold.co/600x840/eeeeee/cccccc?text=${encodeURIComponent(card.name)}`;
+                    `https://placehold.co/600x840/eeeeee/999999?text=${encodeURIComponent(card.name)}`;
                 }}
               />
             </div>
@@ -30,20 +30,19 @@ export function CardModal({ card, onClose }: Props) {
               <DialogTitle className="mt-2 text-3xl font-bold tracking-tight">
                 {card.name}
               </DialogTitle>
-              <p className="mt-1 text-sm text-muted-foreground">{card.rarity}</p>
 
               <dl className="mt-6 grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <dt className="text-xs uppercase text-muted-foreground tracking-wider">Tipo</dt>
-                  <dd className="font-medium">{TYPE_LABELS[card.type]}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase text-muted-foreground tracking-wider">Condição</dt>
-                  <dd className="font-medium">{card.condition}</dd>
+                  <dt className="text-xs uppercase text-muted-foreground tracking-wider">Acabamento</dt>
+                  <dd className="font-medium">{card.finish}</dd>
                 </div>
                 <div>
                   <dt className="text-xs uppercase text-muted-foreground tracking-wider">Idioma</dt>
                   <dd className="font-medium">{card.language}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase text-muted-foreground tracking-wider">Numeração</dt>
+                  <dd className="font-medium">{card.number}</dd>
                 </div>
                 <div>
                   <dt className="text-xs uppercase text-muted-foreground tracking-wider">Estoque</dt>
@@ -54,7 +53,9 @@ export function CardModal({ card, onClose }: Props) {
               <div className="mt-auto pt-8">
                 <p className="text-xs uppercase text-muted-foreground tracking-wider">Preço</p>
                 <p className="text-4xl font-bold">
-                  R$ {card.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  {card.price != null
+                    ? `R$ ${card.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                    : <span className="text-2xl text-muted-foreground">Sob consulta</span>}
                 </p>
                 <button
                   disabled={card.stock === 0}
