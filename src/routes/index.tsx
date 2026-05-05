@@ -37,12 +37,16 @@ const DEFAULT_FILTERS: FilterState = {
 
 type Sort = "relevance" | "price-asc" | "price-desc" | "name";
 
+const BATCH_SIZE = 36;
+
 function Index() {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<Sort>("relevance");
   const [active, setActive] = useState<Card | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const filtered = useMemo(() => {
     const hasMin = filters.priceMin !== "";
@@ -87,6 +91,27 @@ function Index() {
     setFilters(DEFAULT_FILTERS);
     setQuery("");
   };
+
+  // Reset visible count when filters/search/sort change
+  useEffect(() => {
+    setVisibleCount(BATCH_SIZE);
+  }, [filters, query, sort]);
+
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((v) => v + BATCH_SIZE);
+        }
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [visibleCount, filtered.length]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
