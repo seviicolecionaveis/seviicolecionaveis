@@ -52,13 +52,22 @@ export function HeaderActions({ onCartOpen }: Props) {
                   <ShoppingBag className="h-4 w-4" /> Meus pedidos
                 </Link>
                 {isAdmin && (
-                  <Link
-                    to="/admin"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
-                  >
-                    <LayoutDashboard className="h-4 w-4" /> Admin
-                  </Link>
+                  <>
+                    <Link
+                      to="/admin"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
+                    >
+                      <LayoutDashboard className="h-4 w-4" /> Admin · Pedidos
+                    </Link>
+                    <Link
+                      to="/admin/cards"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
+                    >
+                      <Tag className="h-4 w-4" /> Preços (Liga Pokémon)
+                    </Link>
+                  </>
                 )}
                 <button
                   onClick={async () => {
