@@ -16,6 +16,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AdminCardsRouteImport } from './routes/admin.cards'
+import { Route as AdminCardsManageRouteImport } from './routes/admin.cards.manage'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const OrdersRoute = OrdersRouteImport.update({
@@ -53,6 +54,11 @@ const AdminCardsRoute = AdminCardsRouteImport.update({
   path: '/cards',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCardsManageRoute = AdminCardsManageRouteImport.update({
+  id: '/manage',
+  path: '/manage',
+  getParentRoute: () => AdminCardsRoute,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -66,8 +72,9 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/orders': typeof OrdersRoute
-  '/admin/cards': typeof AdminCardsRoute
+  '/admin/cards': typeof AdminCardsRouteWithChildren
   '/checkout/return': typeof CheckoutReturnRoute
+  '/admin/cards/manage': typeof AdminCardsManageRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -76,8 +83,9 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/orders': typeof OrdersRoute
-  '/admin/cards': typeof AdminCardsRoute
+  '/admin/cards': typeof AdminCardsRouteWithChildren
   '/checkout/return': typeof CheckoutReturnRoute
+  '/admin/cards/manage': typeof AdminCardsManageRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -87,8 +95,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/orders': typeof OrdersRoute
-  '/admin/cards': typeof AdminCardsRoute
+  '/admin/cards': typeof AdminCardsRouteWithChildren
   '/checkout/return': typeof CheckoutReturnRoute
+  '/admin/cards/manage': typeof AdminCardsManageRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/admin/cards'
     | '/checkout/return'
+    | '/admin/cards/manage'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/admin/cards'
     | '/checkout/return'
+    | '/admin/cards/manage'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/admin/cards'
     | '/checkout/return'
+    | '/admin/cards/manage'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -184,6 +196,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCardsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/cards/manage': {
+      id: '/admin/cards/manage'
+      path: '/manage'
+      fullPath: '/admin/cards/manage'
+      preLoaderRoute: typeof AdminCardsManageRouteImport
+      parentRoute: typeof AdminCardsRoute
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -194,12 +213,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminCardsRouteChildren {
+  AdminCardsManageRoute: typeof AdminCardsManageRoute
+}
+
+const AdminCardsRouteChildren: AdminCardsRouteChildren = {
+  AdminCardsManageRoute: AdminCardsManageRoute,
+}
+
+const AdminCardsRouteWithChildren = AdminCardsRoute._addFileChildren(
+  AdminCardsRouteChildren,
+)
+
 interface AdminRouteChildren {
-  AdminCardsRoute: typeof AdminCardsRoute
+  AdminCardsRoute: typeof AdminCardsRouteWithChildren
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminCardsRoute: AdminCardsRoute,
+  AdminCardsRoute: AdminCardsRouteWithChildren,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

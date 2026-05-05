@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
-import { CARDS, type Card } from "@/data/cards";
+import { type Card } from "@/data/cards";
+import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
 import { Filters, type FilterState } from "@/components/catalog/Filters";
@@ -42,6 +43,7 @@ type Sort = "relevance" | "price-asc" | "price-desc" | "name";
 const BATCH_SIZE = 36;
 
 function Index() {
+  const { cards: CARDS, loading: cardsLoading } = useCardsCatalog();
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<Sort>("relevance");
@@ -96,7 +98,7 @@ function Index() {
       default:
         return list;
     }
-  }, [filters, query, sort]);
+  }, [filters, query, sort, CARDS]);
 
   const reset = () => {
     setFilters(DEFAULT_FILTERS);
