@@ -58,7 +58,11 @@ function Index() {
     const numQ = filters.numberQuery.trim().toLowerCase();
 
     const list = CARDS.filter((c) => {
-      if (filters.finishes.length && !filters.finishes.includes(c.finish)) return false;
+      if (
+        filters.finishes.length &&
+        !c.variants.some((v) => filters.finishes.includes(v.finish))
+      )
+        return false;
       if (filters.collection && c.collection !== filters.collection) return false;
       if (filters.languages.length && !filters.languages.includes(c.language)) return false;
       if (filters.inStockOnly && c.stock === 0) return false;
