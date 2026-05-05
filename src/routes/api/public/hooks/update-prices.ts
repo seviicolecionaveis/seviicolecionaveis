@@ -13,6 +13,9 @@ async function runUpdate(runId: string) {
   let total = 0;
 
   try {
+    const url = new URL(req.url);
+    const onlyMissing = url.searchParams.get("onlyMissing") !== "false"; // default true
+
     // Busca todas as variantes únicas com estoque
     const { data: variants, error: vErr } = await supabaseAdmin
       .from("cards")
@@ -21,14 +24,31 @@ async function runUpdate(runId: string) {
 
     if (vErr) throw vErr;
 
-    // Deduplica (uma carta pode ter várias linhas pra mesma combinação)
+    // Deduplica
     const seen = new Set<string>();
-    const unique = (variants ?? []).filter((v) => {
+    const dedup = (variants ?? []).filter((v) => {
       const key = `${v.name}__${v.collection}__${v.card_number}__${v.finish}__${v.language}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
+
+    // Se onlyMissing, exclui as que já têm preço (price_cents not null)
+    let unique = dedup;
+    if (onlyMissing) {
+      const { data: existing } = await supabaseAdmin
+        .from("card_prices")
+        .select("card_name, collection, card_number, finish, language")
+        .not("price_cents", "is", null);
+      const have = new Set(
+        (existing ?? []).map((p) =>
+          `${p.card_name}__${p.collection}__${p.card_number}__${p.finish}__${p.language}`,
+        ),
+      );
+      unique = dedup.filter((v) => !have.has(
+        `${v.name}__${v.collection}__${v.card_number}__${v.finish}__${v.language}`,
+      ));
+    }
 
     total = unique.length;
     await supabaseAdmin
