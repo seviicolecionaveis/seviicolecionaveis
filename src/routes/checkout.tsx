@@ -77,7 +77,7 @@ function CheckoutPage() {
         ...f,
         recipientName: addr?.recipient_name ?? profile?.full_name ?? "",
         cpf: profile?.cpf ?? "",
-        phone: addr?.phone ?? profile?.phone ?? "",
+        phone: profile?.phone ?? "",
         cep: addr?.cep ?? "",
         street: addr?.street ?? "",
         number: addr?.number ?? "",
