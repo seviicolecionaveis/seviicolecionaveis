@@ -1,5 +1,8 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { type Card, type Finish } from "@/data/cards";
+import { useCart } from "@/hooks/useCart";
+import { Plus, Check } from "lucide-react";
+import { useState } from "react";
 
 interface Props {
   card: Card | null;
@@ -16,6 +19,26 @@ const finishDot: Record<Finish, string> = {
 };
 
 export function CardModal({ card, onClose }: Props) {
+  const { add } = useCart();
+  const [added, setAdded] = useState<string | null>(null);
+  const handleAdd = (lang: string, v: { finish: Finish; price: number | null; stock: number }) => {
+    if (!card || v.price == null || v.stock === 0) return;
+    const id = `${card.id}|${v.finish}|${lang}`;
+    add({
+      id,
+      cardId: card.id,
+      name: card.name,
+      image: card.image,
+      collection: card.collection,
+      number: card.number,
+      finish: v.finish,
+      language: lang,
+      unitPrice: v.price,
+      maxStock: v.stock,
+    });
+    setAdded(id);
+    setTimeout(() => setAdded((cur) => (cur === id ? null : cur)), 1500);
+  };
   return (
     <Dialog open={!!card} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl p-0 overflow-hidden bg-background max-h-[90vh] overflow-y-auto">
