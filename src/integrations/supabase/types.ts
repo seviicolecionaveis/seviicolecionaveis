@@ -62,6 +62,48 @@ export type Database = {
         }
         Relationships: []
       }
+      card_prices: {
+        Row: {
+          card_name: string
+          card_number: string
+          collection: string
+          created_at: string
+          finish: string
+          id: string
+          language: string
+          last_error: string | null
+          price_cents: number | null
+          source_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          card_name: string
+          card_number: string
+          collection: string
+          created_at?: string
+          finish: string
+          id?: string
+          language: string
+          last_error?: string | null
+          price_cents?: number | null
+          source_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          card_name?: string
+          card_number?: string
+          collection?: string
+          created_at?: string
+          finish?: string
+          id?: string
+          language?: string
+          last_error?: string | null
+          price_cents?: number | null
+          source_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           card_id: string
