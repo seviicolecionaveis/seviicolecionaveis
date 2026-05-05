@@ -64,7 +64,11 @@ function Index() {
       )
         return false;
       if (filters.collection && c.collection !== filters.collection) return false;
-      if (filters.languages.length && !filters.languages.includes(c.language)) return false;
+      if (
+        filters.languages.length &&
+        !c.languages.some((l) => filters.languages.includes(l.language))
+      )
+        return false;
       if (filters.inStockOnly && c.stock === 0) return false;
       if (priceFilterActive) {
         if (c.price == null) return false;
