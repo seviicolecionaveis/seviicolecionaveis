@@ -268,6 +268,7 @@ function Index() {
       </main>
 
       <CardModal card={active} onClose={() => setActive(null)} />
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
 
       <footer className="border-t border-border mt-16 py-8">
         <p className="text-center text-xs text-muted-foreground">
