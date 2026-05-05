@@ -14,16 +14,251 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      addresses: {
+        Row: {
+          cep: string
+          city: string
+          complement: string | null
+          created_at: string
+          id: string
+          is_default: boolean
+          label: string | null
+          neighborhood: string
+          number: string
+          recipient_name: string
+          state: string
+          street: string
+          user_id: string
+        }
+        Insert: {
+          cep: string
+          city: string
+          complement?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string | null
+          neighborhood: string
+          number: string
+          recipient_name: string
+          state: string
+          street: string
+          user_id: string
+        }
+        Update: {
+          cep?: string
+          city?: string
+          complement?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string | null
+          neighborhood?: string
+          number?: string
+          recipient_name?: string
+          state?: string
+          street?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          card_id: string
+          card_image: string | null
+          card_name: string
+          card_number: string | null
+          collection: string | null
+          created_at: string
+          finish: string | null
+          id: string
+          language: string | null
+          order_id: string
+          quantity: number
+          unit_price_cents: number
+        }
+        Insert: {
+          card_id: string
+          card_image?: string | null
+          card_name: string
+          card_number?: string | null
+          collection?: string | null
+          created_at?: string
+          finish?: string | null
+          id?: string
+          language?: string | null
+          order_id: string
+          quantity: number
+          unit_price_cents: number
+        }
+        Update: {
+          card_id?: string
+          card_image?: string | null
+          card_name?: string
+          card_number?: string | null
+          collection?: string | null
+          created_at?: string
+          finish?: string | null
+          id?: string
+          language?: string | null
+          order_id?: string
+          quantity?: number
+          unit_price_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          cep: string
+          city: string
+          complement: string | null
+          cpf: string | null
+          created_at: string
+          email: string
+          id: string
+          neighborhood: string
+          notes: string | null
+          number: string
+          phone: string | null
+          recipient_name: string
+          shipping_cost_cents: number
+          shipping_method: string
+          state: string
+          status: string
+          street: string
+          stripe_payment_intent: string | null
+          stripe_session_id: string | null
+          subtotal_cents: number
+          total_cents: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cep: string
+          city: string
+          complement?: string | null
+          cpf?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          neighborhood: string
+          notes?: string | null
+          number: string
+          phone?: string | null
+          recipient_name: string
+          shipping_cost_cents?: number
+          shipping_method: string
+          state: string
+          status?: string
+          street: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          subtotal_cents: number
+          total_cents: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cep?: string
+          city?: string
+          complement?: string | null
+          cpf?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          neighborhood?: string
+          notes?: string | null
+          number?: string
+          phone?: string | null
+          recipient_name?: string
+          shipping_cost_cents?: number
+          shipping_method?: string
+          state?: string
+          status?: string
+          street?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          subtotal_cents?: number
+          total_cents?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          cpf: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cpf?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cpf?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +385,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
