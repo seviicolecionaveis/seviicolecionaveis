@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { type Card, type Finish } from "@/data/cards";
 import { useCart } from "@/hooks/useCart";
+import { useCardPrices, priceLookupKey } from "@/hooks/useCardPrices";
 import { Plus, Check } from "lucide-react";
 import { useState } from "react";
 
@@ -20,7 +21,15 @@ const finishDot: Record<Finish, string> = {
 
 export function CardModal({ card, onClose }: Props) {
   const { add } = useCart();
+  const { prices } = useCardPrices();
   const [added, setAdded] = useState<string | null>(null);
+
+  const resolvePrice = (finish: Finish, language: string): number | null => {
+    if (!card) return null;
+    const key = priceLookupKey(card.name, card.collection, card.number, finish, language);
+    const fromDb = prices.get(key);
+    return fromDb != null ? fromDb / 100 : null;
+  };
   const handleAdd = (lang: string, v: { finish: Finish; price: number | null; stock: number }) => {
     if (!card || v.price == null || v.stock === 0) return;
     const id = `${card.id}|${v.finish}|${lang}`;
