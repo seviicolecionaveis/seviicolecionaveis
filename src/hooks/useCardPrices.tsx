@@ -66,7 +66,11 @@ export function useCardPrices(): CardPriceLookup {
 
   useEffect(() => {
     let mounted = true;
-    const listener = (m: Map<string, number>) => mounted && setPrices(m);
+    const listener = (m: Map<string, number>) => {
+      if (!mounted) return;
+      setPrices(m);
+      setLoading(false);
+    };
     listeners.add(listener);
     if (!cache) {
       refreshPrices()
