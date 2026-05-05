@@ -1,6 +1,6 @@
 import rawCards from "./cards.json";
 
-export type Finish = "Normal" | "Foil" | "Reverse Foil" | "Pokebola" | "Promo";
+export type Finish = "Normal" | "Foil" | "Reverse Foil" | "Pokebola" | "Energia" | "Promo";
 export type Language = "Português" | "Inglês" | "Italiano" | "Espanhol";
 
 export interface RawCard {
@@ -46,8 +46,8 @@ export interface Card {
 
 const RAW: RawCard[] = rawCards as RawCard[];
 
-const FINISH_PRIORITY: Finish[] = ["Promo", "Pokebola", "Foil", "Reverse Foil", "Normal"];
-const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Promo"];
+const FINISH_PRIORITY: Finish[] = ["Promo", "Pokebola", "Energia", "Foil", "Reverse Foil", "Normal"];
+const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo"];
 const LANGUAGE_ORDER: Language[] = ["Português", "Inglês", "Espanhol", "Italiano"];
 
 function pickHeadlineFinish(variants: FinishVariant[]): Finish {
@@ -152,7 +152,7 @@ export const COLLECTIONS = Array.from(
   new Set(CARDS.map((c) => c.collection).filter(Boolean)),
 ).sort();
 
-export const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Promo"];
+export const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo"];
 
 export const LANGUAGES = Array.from(
   new Set(CARDS.flatMap((c) => c.languages.map((l) => l.language)).filter(Boolean)),
