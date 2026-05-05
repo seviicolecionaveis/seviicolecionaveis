@@ -13,7 +13,7 @@ async function runUpdate(runId: string, requestUrl: string) {
   let total = 0;
 
   try {
-    const url = new URL(req.url);
+    const url = new URL(requestUrl);
     const onlyMissing = url.searchParams.get("onlyMissing") !== "false"; // default true
 
     // Busca todas as variantes únicas com estoque
