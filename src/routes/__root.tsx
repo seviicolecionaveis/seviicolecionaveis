@@ -29,14 +29,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Sevii Colecionáveis" },
+      { name: "description", content: "A Pokémon Card Gallery website for cataloging and displaying Pokémon cards with advanced filtering and image viewing." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Sevii Colecionáveis" },
+      { property: "og:description", content: "A Pokémon Card Gallery website for cataloging and displaying Pokémon cards with advanced filtering and image viewing." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Sevii Colecionáveis" },
+      { name: "twitter:description", content: "A Pokémon Card Gallery website for cataloging and displaying Pokémon cards with advanced filtering and image viewing." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/25b6f12f-a487-4cc6-9c81-8cd9418a012f/id-preview-be88fb60--392637a4-5b2d-43f0-a643-ac0dba0c2366.lovable.app-1777949491317.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/25b6f12f-a487-4cc6-9c81-8cd9418a012f/id-preview-be88fb60--392637a4-5b2d-43f0-a643-ac0dba0c2366.lovable.app-1777949491317.png" },
     ],
     links: [
       {
