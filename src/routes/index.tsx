@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
-import { CARDS, type Card } from "@/data/cards";
+import { type Card } from "@/data/cards";
+import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
 import { Filters, type FilterState } from "@/components/catalog/Filters";
@@ -42,6 +43,7 @@ type Sort = "relevance" | "price-asc" | "price-desc" | "name";
 const BATCH_SIZE = 36;
 
 function Index() {
+  const { cards: CARDS, loading: cardsLoading } = useCardsCatalog();
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<Sort>("relevance");
@@ -96,7 +98,7 @@ function Index() {
       default:
         return list;
     }
-  }, [filters, query, sort]);
+  }, [filters, query, sort, CARDS]);
 
   const reset = () => {
     setFilters(DEFAULT_FILTERS);
@@ -227,7 +229,14 @@ function Index() {
             </select>
           </div>
 
-          {filtered.length === 0 ? (
+          {cardsLoading && filtered.length === 0 ? (
+            <div className="grid place-items-center py-16 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
+                Carregando catálogo...
+              </div>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-12 text-center">
               <p className="text-sm text-muted-foreground">
                 Nenhuma carta encontrada com os filtros atuais.

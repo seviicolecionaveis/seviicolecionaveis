@@ -62,6 +62,7 @@ function AdminPage() {
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
           <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis · Admin</Link>
           <div className="flex gap-3 text-xs">
+            <Link to="/admin/cards/manage" className="font-semibold text-foreground hover:underline">Gerenciar cartas</Link>
             <Link to="/admin/cards" className="font-semibold text-foreground hover:underline">Preços (Liga Pokémon)</Link>
             <Link to="/" className="text-muted-foreground hover:text-foreground">← Catálogo</Link>
           </div>
