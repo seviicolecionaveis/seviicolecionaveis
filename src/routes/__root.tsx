@@ -1,6 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import pokemonBg from "@/assets/pokemon-bg.jpg";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
@@ -75,6 +76,17 @@ function RootComponent() {
   return (
     <AuthProvider>
       <CartProvider>
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 -z-10 bg-background"
+          style={{
+            backgroundImage: `url(${pokemonBg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+            opacity: 0.18,
+          }}
+        />
         <PaymentTestModeBanner />
         <Outlet />
       </CartProvider>
