@@ -162,6 +162,7 @@ function Index() {
               <SlidersHorizontal className="h-4 w-4" /> Filtros
             </button>
           </div>
+        </div>
 
         <div className="md:hidden border-t border-border px-4 py-3">
           <div className="relative">
