@@ -229,7 +229,14 @@ function Index() {
             </select>
           </div>
 
-          {filtered.length === 0 ? (
+          {cardsLoading && filtered.length === 0 ? (
+            <div className="grid place-items-center py-16 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
+                Carregando catálogo...
+              </div>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-12 text-center">
               <p className="text-sm text-muted-foreground">
                 Nenhuma carta encontrada com os filtros atuais.
