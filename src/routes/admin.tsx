@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,9 +20,11 @@ const STATUS_LABEL: Record<string, string> = {
 function AdminPage() {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const nav = useNavigate();
+  const location = useLocation();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const isOrdersRoute = location.pathname === "/admin";
 
   useEffect(() => {
     if (!authLoading) {
@@ -42,8 +44,8 @@ function AdminPage() {
   };
 
   useEffect(() => {
-    if (isAdmin) load();
-  }, [isAdmin]);
+    if (isAdmin && isOrdersRoute) load();
+  }, [isAdmin, isOrdersRoute]);
 
   const updateStatus = async (id: string, status: string) => {
     await supabase.from("orders").update({ status }).eq("id", id);
@@ -52,6 +54,10 @@ function AdminPage() {
 
   if (authLoading || !isAdmin) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
+  }
+
+  if (!isOrdersRoute) {
+    return <Outlet />;
   }
 
   const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
