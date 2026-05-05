@@ -5,6 +5,8 @@ import { CARDS, type Card } from "@/data/cards";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
 import { Filters, type FilterState } from "@/components/catalog/Filters";
+import { HeaderActions } from "@/components/HeaderActions";
+import { CartDrawer } from "@/components/CartDrawer";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -47,6 +49,7 @@ function Index() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const [cartOpen, setCartOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const hasMin = filters.priceMin !== "";
@@ -150,13 +153,15 @@ function Index() {
             />
           </div>
 
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="flex lg:hidden items-center gap-2 rounded-full border border-border px-3 py-2 text-xs font-medium"
-          >
-            <SlidersHorizontal className="h-4 w-4" /> Filtros
-          </button>
-        </div>
+          <div className="flex items-center gap-1">
+            <HeaderActions onCartOpen={() => setCartOpen(true)} />
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="flex lg:hidden items-center gap-2 rounded-full border border-border px-3 py-2 text-xs font-medium ml-1"
+            >
+              <SlidersHorizontal className="h-4 w-4" /> Filtros
+            </button>
+          </div>
 
         <div className="md:hidden border-t border-border px-4 py-3">
           <div className="relative">
