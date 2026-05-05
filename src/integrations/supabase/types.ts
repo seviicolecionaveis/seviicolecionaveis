@@ -277,6 +277,42 @@ export type Database = {
         }
         Relationships: []
       }
+      price_update_runs: {
+        Row: {
+          error_count: number
+          finished_at: string | null
+          id: string
+          notes: string | null
+          started_at: string
+          status: string
+          total_variants: number
+          trigger: string
+          updated_count: number
+        }
+        Insert: {
+          error_count?: number
+          finished_at?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string
+          status?: string
+          total_variants?: number
+          trigger?: string
+          updated_count?: number
+        }
+        Update: {
+          error_count?: number
+          finished_at?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string
+          status?: string
+          total_variants?: number
+          trigger?: string
+          updated_count?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           cpf: string | null
