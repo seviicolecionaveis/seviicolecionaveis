@@ -94,7 +94,11 @@ function AdminCardsPage() {
     const key = priceKey(card.name, card.collection, card.number, finish, language);
     setLoadingKeys((s) => new Set(s).add(key));
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) throw new Error("Sessão expirada. Faça login novamente.");
       const result = await fetchLigaPrice({
+        headers: { Authorization: `Bearer ${token}` },
         data: {
           cardName: card.name,
           collection: card.collection,
