@@ -21,7 +21,7 @@ const finishDot: Record<Finish, string> = {
 
 export function CardModal({ card, onClose }: Props) {
   const { add } = useCart();
-  const { prices } = useCardPrices();
+  const { prices, loading: pricesLoading } = useCardPrices();
   const [added, setAdded] = useState<string | null>(null);
 
   const resolvePrice = (finish: Finish, language: string): number | null => {
@@ -99,7 +99,8 @@ export function CardModal({ card, onClose }: Props) {
                       <ul className="divide-y divide-border rounded-lg border border-border overflow-hidden">
                         {lang.finishes.map((v) => {
                           const out = v.stock === 0;
-                          const effectivePrice = resolvePrice(v.finish, lang.language) ?? v.price;
+                          const ligaPrice = resolvePrice(v.finish, lang.language);
+                          const effectivePrice = ligaPrice ?? v.price;
                           const effectiveVariant = { ...v, price: effectivePrice };
                           const id = `${card.id}|${v.finish}|${lang.language}`;
                           const isAdded = added === id;
@@ -126,10 +127,14 @@ export function CardModal({ card, onClose }: Props) {
                                 >
                                   {out ? "Esgotado" : `${v.stock} un.`}
                                 </span>
-                                <span className="text-sm font-bold tabular-nums">
-                                  {effectivePrice != null
-                                    ? `R$ ${effectivePrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
-                                    : <span className="text-xs text-muted-foreground font-medium">Sob consulta</span>}
+                                <span className="min-w-[94px] text-right text-sm font-bold tabular-nums">
+                                  {effectivePrice != null ? (
+                                    `R$ ${effectivePrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                                  ) : pricesLoading ? (
+                                    <span className="text-xs text-muted-foreground font-medium">Carregando...</span>
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground font-medium">Preço pendente</span>
+                                  )}
                                 </span>
                                 {!out && effectivePrice != null && (
                                   <button

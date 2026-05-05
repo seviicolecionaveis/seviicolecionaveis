@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { CARDS, type Card, type Finish, type Language } from "@/data/cards";
 import { fetchLigaPrice } from "@/utils/cardPrices.functions";
+import { useCardPrices } from "@/hooks/useCardPrices";
 
 export const Route = createFileRoute("/admin/cards")({
   head: () => ({ meta: [{ title: "Preços das cartas — Admin" }] }),
@@ -44,6 +45,7 @@ function timeAgo(iso: string) {
 
 function AdminCardsPage() {
   const { user, isAdmin, loading: authLoading } = useAuth();
+  const { refresh: refreshCatalogPrices } = useCardPrices();
   const nav = useNavigate();
   const [search, setSearch] = useState("");
   const [prices, setPrices] = useState<Map<string, PriceRow>>(new Map());
@@ -105,6 +107,7 @@ function AdminCardsPage() {
         alert(`⚠️ ${card.name} (${finish}, ${language}): ${result.error}`);
       }
       await loadPrices();
+      await refreshCatalogPrices();
     } catch (e) {
       alert(`Erro: ${(e as Error).message}`);
     } finally {

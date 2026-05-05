@@ -1,4 +1,5 @@
 import { type Card, type Finish } from "@/data/cards";
+import { priceLookupKey, useCardPrices } from "@/hooks/useCardPrices";
 
 const finishBadge: Record<Finish, string> = {
   Normal: "bg-background/90 text-foreground",
@@ -15,7 +16,15 @@ interface Props {
 }
 
 export function CardItem({ card, onClick }: Props) {
+  const { prices, loading } = useCardPrices();
   const out = card.stock === 0;
+  const catalogPrices = card.languages.flatMap((lang) =>
+    lang.finishes.map((variant) =>
+      prices.get(priceLookupKey(card.name, card.collection, card.number, variant.finish, lang.language)),
+    ),
+  ).filter((price): price is number => price != null);
+  const displayPrice = catalogPrices.length ? Math.min(...catalogPrices) / 100 : card.price;
+
   return (
     <button
       onClick={onClick}
@@ -58,9 +67,13 @@ export function CardItem({ card, onClick }: Props) {
           </p>
         </div>
         <p className="shrink-0 text-sm font-bold">
-          {card.price != null
-            ? `R$ ${card.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
-            : <span className="text-muted-foreground font-medium">Sob consulta</span>}
+          {displayPrice != null ? (
+            `R$ ${displayPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+          ) : loading ? (
+            <span className="text-muted-foreground font-medium">Carregando...</span>
+          ) : (
+            <span className="text-muted-foreground font-medium">Preço pendente</span>
+          )}
         </p>
       </div>
       <div className="mt-2 flex items-center gap-2 flex-wrap">
