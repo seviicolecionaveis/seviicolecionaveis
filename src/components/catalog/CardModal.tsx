@@ -90,6 +90,8 @@ export function CardModal({ card, onClose }: Props) {
                       <ul className="divide-y divide-border rounded-lg border border-border overflow-hidden">
                         {lang.finishes.map((v) => {
                           const out = v.stock === 0;
+                          const id = `${card.id}|${v.finish}|${lang.language}`;
+                          const isAdded = added === id;
                           return (
                             <li
                               key={v.finish}
@@ -118,6 +120,15 @@ export function CardModal({ card, onClose }: Props) {
                                     ? `R$ ${v.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
                                     : <span className="text-xs text-muted-foreground font-medium">Sob consulta</span>}
                                 </span>
+                                {!out && v.price != null && (
+                                  <button
+                                    onClick={() => handleAdd(lang.language, v)}
+                                    className="grid h-7 w-7 place-items-center rounded-full bg-foreground text-background hover:bg-foreground/90 transition"
+                                    aria-label="Adicionar ao carrinho"
+                                  >
+                                    {isAdded ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                                  </button>
+                                )}
                               </div>
                             </li>
                           );
@@ -126,15 +137,6 @@ export function CardModal({ card, onClose }: Props) {
                     </div>
                   );
                 })}
-              </div>
-
-              <div className="mt-auto pt-6">
-                <button
-                  disabled={card.stock === 0}
-                  className="w-full rounded-full bg-foreground py-3 text-sm font-semibold text-background hover:bg-foreground/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {card.stock === 0 ? "Indisponível" : "Reservar carta"}
-                </button>
               </div>
             </div>
           </div>
