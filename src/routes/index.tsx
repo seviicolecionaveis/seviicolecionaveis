@@ -26,9 +26,8 @@ export const Route = createFileRoute("/")({
 });
 
 const DEFAULT_FILTERS: FilterState = {
-  types: [],
+  finishes: [],
   collection: "",
-  conditions: [],
   languages: [],
   inStockOnly: false,
   priceMin: "",
@@ -46,31 +45,37 @@ function Index() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const filtered = useMemo(() => {
-    const min = filters.priceMin ? Number(filters.priceMin) : -Infinity;
-    const max = filters.priceMax ? Number(filters.priceMax) : Infinity;
+    const hasMin = filters.priceMin !== "";
+    const hasMax = filters.priceMax !== "";
+    const min = hasMin ? Number(filters.priceMin) : -Infinity;
+    const max = hasMax ? Number(filters.priceMax) : Infinity;
+    const priceFilterActive = hasMin || hasMax;
     const q = query.trim().toLowerCase();
     const numQ = filters.numberQuery.trim().toLowerCase();
 
     const list = CARDS.filter((c) => {
-      if (filters.types.length && !filters.types.includes(c.type)) return false;
+      if (filters.finishes.length && !filters.finishes.includes(c.finish)) return false;
       if (filters.collection && c.collection !== filters.collection) return false;
-      if (filters.conditions.length && !filters.conditions.includes(c.condition)) return false;
       if (filters.languages.length && !filters.languages.includes(c.language)) return false;
       if (filters.inStockOnly && c.stock === 0) return false;
-      if (c.price < min || c.price > max) return false;
+      if (priceFilterActive) {
+        if (c.price == null) return false;
+        if (c.price < min || c.price > max) return false;
+      }
       if (numQ && !c.number.toLowerCase().includes(numQ)) return false;
       if (q) {
-        const hay = `${c.name} ${c.collection} ${c.rarity}`.toLowerCase();
+        const hay = `${c.name} ${c.collection}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
     });
 
+    const priceVal = (p: number | null) => (p == null ? Infinity : p);
     switch (sort) {
       case "price-asc":
-        return [...list].sort((a, b) => a.price - b.price);
+        return [...list].sort((a, b) => priceVal(a.price) - priceVal(b.price));
       case "price-desc":
-        return [...list].sort((a, b) => b.price - a.price);
+        return [...list].sort((a, b) => priceVal(b.price) - priceVal(a.price));
       case "name":
         return [...list].sort((a, b) => a.name.localeCompare(b.name));
       default:
