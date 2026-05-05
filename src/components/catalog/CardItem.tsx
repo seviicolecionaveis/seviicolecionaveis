@@ -75,7 +75,11 @@ export function CardItem({ card, onClick }: Props) {
           {card.stock === 0 ? "Indisponível" : `${card.stock} em estoque`}
         </span>
         <span className="h-1 w-1 rounded-full bg-border" />
-        <span className="text-[10px] text-muted-foreground">{card.language}</span>
+        <span className="text-[10px] text-muted-foreground">
+          {card.languages.length === 1
+            ? card.languages[0].language
+            : `${card.languages.length} idiomas`}
+        </span>
         {card.variants.length > 1 && (
           <>
             <span className="h-1 w-1 rounded-full bg-border" />
