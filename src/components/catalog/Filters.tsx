@@ -43,7 +43,7 @@ export function Filters({ filters, onChange, onReset }: Props) {
 
       <section>
         <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          Acabamento
+          Extras
         </h4>
         <div className="flex flex-wrap gap-1.5">
           {FINISHES.map((f) => {
