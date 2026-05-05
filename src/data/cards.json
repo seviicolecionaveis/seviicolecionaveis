@@ -3597,17 +3597,6 @@
     "price": null
   },
   {
-    "id": 328,
-    "name": "Energia de Fogo",
-    "image": "https://placehold.co/420x586/png?text=Energia+de+Fogo",
-    "number": "165/149",
-    "collection": "SM - Sol e Lua",
-    "finish": "Normal",
-    "language": "Português",
-    "stock": 0,
-    "price": null
-  },
-  {
     "id": 329,
     "name": "Entei",
     "image": "https://images.scrydex.com/pokemon/me2pt5-25E/large",
