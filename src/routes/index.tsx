@@ -9,13 +9,13 @@ import { Filters, type FilterState } from "@/components/catalog/Filters";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PokéVault — Catálogo de Cartas Pokémon" },
+      { title: "Sevii Colecionáveis — Catálogo de Cartas Pokémon" },
       {
         name: "description",
         content:
           "Catálogo completo de cartas Pokémon com filtros por tipo, coleção, condição, idioma e preço. Galeria visual com estoque em tempo real.",
       },
-      { property: "og:title", content: "PokéVault — Catálogo de Cartas Pokémon" },
+      { property: "og:title", content: "Sevii Colecionáveis — Catálogo de Cartas Pokémon" },
       {
         property: "og:description",
         content: "Encontre cartas Pokémon raras e colecionáveis com filtros avançados.",
@@ -131,7 +131,7 @@ function Index() {
             </div>
             <div>
               <h1 className="text-base font-bold tracking-tight uppercase sm:text-lg">
-                PokéVault
+                Sevii Colecionáveis
               </h1>
               <p className="hidden text-[10px] uppercase tracking-widest text-muted-foreground sm:block">
                 Cartas Pokémon • Catálogo
@@ -265,7 +265,7 @@ function Index() {
 
       <footer className="border-t border-border mt-16 py-8">
         <p className="text-center text-xs text-muted-foreground">
-          © PokéVault — Catálogo de cartas colecionáveis
+          © Sevii Colecionáveis — Catálogo de cartas colecionáveis
         </p>
       </footer>
     </div>
