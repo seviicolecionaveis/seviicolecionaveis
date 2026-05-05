@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { CARDS, type Card } from "@/data/cards";
 import { CardItem } from "@/components/catalog/CardItem";
@@ -37,12 +37,16 @@ const DEFAULT_FILTERS: FilterState = {
 
 type Sort = "relevance" | "price-asc" | "price-desc" | "name";
 
+const BATCH_SIZE = 36;
+
 function Index() {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<Sort>("relevance");
   const [active, setActive] = useState<Card | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const filtered = useMemo(() => {
     const hasMin = filters.priceMin !== "";
@@ -87,6 +91,27 @@ function Index() {
     setFilters(DEFAULT_FILTERS);
     setQuery("");
   };
+
+  // Reset visible count when filters/search/sort change
+  useEffect(() => {
+    setVisibleCount(BATCH_SIZE);
+  }, [filters, query, sort]);
+
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((v) => v + BATCH_SIZE);
+        }
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [visibleCount, filtered.length]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -201,11 +226,29 @@ function Index() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
-              {filtered.map((card) => (
-                <CardItem key={card.id} card={card} onClick={() => setActive(card)} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+                {filtered.slice(0, visibleCount).map((card) => (
+                  <CardItem key={card.id} card={card} onClick={() => setActive(card)} />
+                ))}
+              </div>
+              {visibleCount < filtered.length && (
+                <div
+                  ref={sentinelRef}
+                  className="mt-12 grid place-items-center py-8 text-xs text-muted-foreground"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
+                    Carregando mais cartas...
+                  </div>
+                </div>
+              )}
+              {visibleCount >= filtered.length && filtered.length > BATCH_SIZE && (
+                <p className="mt-12 text-center text-xs text-muted-foreground">
+                  Você viu todas as {filtered.length} cartas.
+                </p>
+              )}
+            </>
           )}
         </section>
       </main>
