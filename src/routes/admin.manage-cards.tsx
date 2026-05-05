@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { invalidateCardsCache } from "@/hooks/useCardsCatalog";
 import type { Finish, Language } from "@/data/cards";
 
-export const Route = createFileRoute("/admin/cards/manage")({
+export const Route = createFileRoute("/admin/manage-cards")({
   head: () => ({ meta: [{ title: "Gerenciar cartas — Admin" }] }),
   component: AdminCardsManagePage,
 });
