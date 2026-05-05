@@ -59,9 +59,12 @@ function AdminPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border px-4 py-4">
-        <div className="mx-auto max-w-6xl flex items-center justify-between">
+        <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
           <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis · Admin</Link>
-          <Link to="/" className="text-xs text-muted-foreground hover:text-foreground">← Catálogo</Link>
+          <div className="flex gap-3 text-xs">
+            <Link to="/admin/cards" className="font-semibold text-foreground hover:underline">Preços (Liga Pokémon)</Link>
+            <Link to="/" className="text-muted-foreground hover:text-foreground">← Catálogo</Link>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8">
