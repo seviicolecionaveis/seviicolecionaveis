@@ -108,8 +108,12 @@ async function findCardUrl(
   apiKey: string,
 ): Promise<{ url: string | null; error: string | null }> {
   const collectionShort = input.collection.replace(/^[A-Z]{2,4}\s*-\s*/, "").trim();
-  const cardNumberShort = input.cardNumber.split("/")[0];
-  const query = `${input.cardName} ${cardNumberShort} ${collectionShort} ${languageHint(input.language)} site:ligapokemon.com.br`.trim();
+  // Remove leading zeros: "060" -> "60" (Liga normalmente usa o número limpo)
+  const cardNumberShort = input.cardNumber.split("/")[0].replace(/^0+/, "") || "0";
+  // Não incluímos o idioma na query: a página da carta no Liga é única e
+  // contém todos os idiomas/finishes na mesma tabela. Adicionar "português"
+  // ou "inglês" só atrapalha o ranking do Google.
+  const query = `${input.cardName} ${cardNumberShort} ${collectionShort} site:ligapokemon.com.br`.trim();
 
   try {
     const res = await fetch(FIRECRAWL_SEARCH, {
@@ -126,13 +130,25 @@ async function findCardUrl(
     }
     const data = await res.json();
     const results: any[] = data?.data?.web ?? data?.data ?? [];
-    // Prefer URL that contains the card number AND is a card view page.
-    const card = results.find(
-      (r: any) =>
-        r?.url?.includes("ligapokemon.com.br") &&
-        r?.url?.includes("view=cards") &&
-        r?.url?.includes(cardNumberShort),
-    ) ?? results.find((r: any) => r?.url?.includes("ligapokemon.com.br"));
+    const cardNumberRaw = input.cardNumber.split("/")[0];
+    // Match contra número com ou sem zeros à esquerda
+    const matchesNumber = (u: string) =>
+      u.includes(`(${cardNumberRaw}/`) ||
+      u.includes(`(${cardNumberShort}/`) ||
+      u.includes(`%20${cardNumberRaw}`) ||
+      u.includes(`%20${cardNumberShort}`);
+    const card =
+      results.find(
+        (r: any) =>
+          r?.url?.includes("ligapokemon.com.br") &&
+          r?.url?.includes("view=cards") &&
+          matchesNumber(r.url),
+      ) ??
+      results.find(
+        (r: any) =>
+          r?.url?.includes("ligapokemon.com.br") && r?.url?.includes("view=cards"),
+      ) ??
+      results.find((r: any) => r?.url?.includes("ligapokemon.com.br"));
     return { url: card?.url ?? null, error: card ? null : "Carta não encontrada no Liga Pokémon" };
   } catch (e) {
     return { url: null, error: `Erro de rede (search): ${(e as Error).message}` };
