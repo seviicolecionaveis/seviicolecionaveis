@@ -130,13 +130,25 @@ async function findCardUrl(
     }
     const data = await res.json();
     const results: any[] = data?.data?.web ?? data?.data ?? [];
-    // Prefer URL that contains the card number AND is a card view page.
-    const card = results.find(
-      (r: any) =>
-        r?.url?.includes("ligapokemon.com.br") &&
-        r?.url?.includes("view=cards") &&
-        r?.url?.includes(cardNumberShort),
-    ) ?? results.find((r: any) => r?.url?.includes("ligapokemon.com.br"));
+    const cardNumberRaw = input.cardNumber.split("/")[0];
+    // Match contra número com ou sem zeros à esquerda
+    const matchesNumber = (u: string) =>
+      u.includes(`(${cardNumberRaw}/`) ||
+      u.includes(`(${cardNumberShort}/`) ||
+      u.includes(`%20${cardNumberRaw}`) ||
+      u.includes(`%20${cardNumberShort}`);
+    const card =
+      results.find(
+        (r: any) =>
+          r?.url?.includes("ligapokemon.com.br") &&
+          r?.url?.includes("view=cards") &&
+          matchesNumber(r.url),
+      ) ??
+      results.find(
+        (r: any) =>
+          r?.url?.includes("ligapokemon.com.br") && r?.url?.includes("view=cards"),
+      ) ??
+      results.find((r: any) => r?.url?.includes("ligapokemon.com.br"));
     return { url: card?.url ?? null, error: card ? null : "Carta não encontrada no Liga Pokémon" };
   } catch (e) {
     return { url: null, error: `Erro de rede (search): ${(e as Error).message}` };
