@@ -108,8 +108,12 @@ async function findCardUrl(
   apiKey: string,
 ): Promise<{ url: string | null; error: string | null }> {
   const collectionShort = input.collection.replace(/^[A-Z]{2,4}\s*-\s*/, "").trim();
-  const cardNumberShort = input.cardNumber.split("/")[0];
-  const query = `${input.cardName} ${cardNumberShort} ${collectionShort} ${languageHint(input.language)} site:ligapokemon.com.br`.trim();
+  // Remove leading zeros: "060" -> "60" (Liga normalmente usa o número limpo)
+  const cardNumberShort = input.cardNumber.split("/")[0].replace(/^0+/, "") || "0";
+  // Não incluímos o idioma na query: a página da carta no Liga é única e
+  // contém todos os idiomas/finishes na mesma tabela. Adicionar "português"
+  // ou "inglês" só atrapalha o ranking do Google.
+  const query = `${input.cardName} ${cardNumberShort} ${collectionShort} site:ligapokemon.com.br`.trim();
 
   try {
     const res = await fetch(FIRECRAWL_SEARCH, {
