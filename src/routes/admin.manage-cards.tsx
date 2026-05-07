@@ -89,14 +89,24 @@ function AdminCardsManagePage() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("cards")
-      .select("*")
-      .order("name", { ascending: true })
-      .order("collection", { ascending: true })
-      .order("card_number", { ascending: true })
-      .limit(5000);
-    if (!error) setRows((data ?? []) as CardRow[]);
+    const all: CardRow[] = [];
+    const CHUNK = 1000;
+    let from = 0;
+    while (true) {
+      const { data, error } = await supabase
+        .from("cards")
+        .select("*")
+        .order("name", { ascending: true })
+        .order("collection", { ascending: true })
+        .order("card_number", { ascending: true })
+        .range(from, from + CHUNK - 1);
+      if (error) break;
+      const batch = (data ?? []) as CardRow[];
+      all.push(...batch);
+      if (batch.length < CHUNK) break;
+      from += CHUNK;
+    }
+    setRows(all);
     setLoading(false);
   };
 
