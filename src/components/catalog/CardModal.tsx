@@ -100,7 +100,8 @@ export function CardModal({ card, onClose }: Props) {
                         {lang.finishes.map((v) => {
                           const out = v.stock === 0;
                           const ligaPrice = resolvePrice(v.finish, lang.language);
-                          const effectivePrice = ligaPrice ?? v.price;
+                          // Prioridade: preço manual (base_price_cents) > Liga
+                          const effectivePrice = v.price ?? ligaPrice;
                           const effectiveVariant = { ...v, price: effectivePrice };
                           const id = `${card.id}|${v.finish}|${lang.language}`;
                           const isAdded = added === id;
