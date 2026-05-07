@@ -64,6 +64,21 @@ function AdminCardsManagePage() {
   const [quickForm, setQuickForm] = useState<FormState>(EMPTY_FORM);
   const [quickSaving, setQuickSaving] = useState(false);
   const [quickMsg, setQuickMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [uploadingMain, setUploadingMain] = useState(false);
+  const [uploadingQuick, setUploadingQuick] = useState(false);
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("card-images").upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type,
+    });
+    if (error) { alert(`Erro ao enviar imagem: ${error.message}`); return null; }
+    const { data } = supabase.storage.from("card-images").getPublicUrl(path);
+    return data.publicUrl;
+  };
 
   useEffect(() => {
     if (!authLoading) {
@@ -189,13 +204,13 @@ function AdminCardsManagePage() {
     const payload = {
       stock: Math.max(0, parseInt(quickForm.stock) || 0),
       base_price_cents: quickForm.price.trim() === "" ? null : Math.round(parseFloat(quickForm.price.replace(",", ".")) * 100),
+      image: quickForm.image.trim(),
     };
     const { error } = await supabase.from("cards").update(payload).eq("id", id);
     setQuickSaving(false);
     if (error) { setQuickMsg({ type: "err", text: error.message }); return; }
     setQuickMsg({ type: "ok", text: "Salvo!" });
     invalidateCardsCache();
-    // Update local row without reordering
     setRows((prev) => prev.map((row) => row.id === id ? { ...row, ...payload } as CardRow : row));
     setTimeout(() => { setQuickEditId((cur) => cur === id ? null : cur); setQuickMsg(null); }, 600);
   };
@@ -309,14 +324,33 @@ function AdminCardsManagePage() {
             </label>
 
             <label className="text-xs space-y-1 sm:col-span-2">
-              <span className="font-semibold">URL da imagem</span>
-              <input
-                type="url"
-                value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
-                placeholder="https://images.scrydex.com/pokemon/..."
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-              />
+              <span className="font-semibold">Imagem</span>
+              <div className="flex gap-2 items-start">
+                <input
+                  type="url"
+                  value={form.image}
+                  onChange={(e) => setForm({ ...form, image: e.target.value })}
+                  placeholder="Cole uma URL ou clique em + para enviar arquivo"
+                  className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
+                />
+                <label className="cursor-pointer rounded border border-border bg-secondary px-3 py-2 text-sm font-bold hover:bg-secondary/70 shrink-0">
+                  {uploadingMain ? "..." : "+"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingMain}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]; e.target.value = "";
+                      if (!file) return;
+                      setUploadingMain(true);
+                      const url = await uploadImage(file);
+                      setUploadingMain(false);
+                      if (url) setForm((f) => ({ ...f, image: url }));
+                    }}
+                  />
+                </label>
+              </div>
               {form.image && (
                 <img src={form.image} alt="preview" className="mt-2 h-32 w-auto rounded border border-border object-contain bg-secondary" />
               )}
@@ -430,6 +464,38 @@ function AdminCardsManagePage() {
                           />
                         </label>
                       </div>
+                      <label className="mt-3 block text-xs space-y-1">
+                        <span className="font-semibold">Imagem</span>
+                        <div className="flex gap-2 items-start">
+                          <input
+                            type="url"
+                            value={quickForm.image}
+                            onChange={(e) => setQuickForm({ ...quickForm, image: e.target.value })}
+                            placeholder="URL ou clique em + para enviar"
+                            className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
+                          />
+                          <label className="cursor-pointer rounded border border-border bg-secondary px-3 py-2 text-sm font-bold hover:bg-secondary/70 shrink-0">
+                            {uploadingQuick ? "..." : "+"}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={uploadingQuick}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0]; e.target.value = "";
+                                if (!file) return;
+                                setUploadingQuick(true);
+                                const url = await uploadImage(file);
+                                setUploadingQuick(false);
+                                if (url) setQuickForm((f) => ({ ...f, image: url }));
+                              }}
+                            />
+                          </label>
+                        </div>
+                        {quickForm.image && (
+                          <img src={quickForm.image} alt="preview" className="mt-2 h-24 w-auto rounded border border-border object-contain bg-secondary" />
+                        )}
+                      </label>
                       <div className="mt-3 flex flex-wrap items-center gap-2">
                         <button
                           onClick={() => handleQuickSave(r.id)}
