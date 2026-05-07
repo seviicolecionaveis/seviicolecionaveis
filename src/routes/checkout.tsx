@@ -146,6 +146,7 @@ function CheckoutPage() {
             number: i.number,
             finish: i.finish,
             language: i.language,
+            condition: i.condition,
             unitPrice: i.unitPrice,
             quantity: i.quantity,
           })),
@@ -305,7 +306,7 @@ function CheckoutPage() {
               <li key={i.id} className="flex justify-between gap-2">
                 <span className="truncate">
                   {i.quantity}× {i.name}
-                  <span className="block text-[10px] text-muted-foreground">{i.finish} · {i.language}</span>
+                  <span className="block text-[10px] text-muted-foreground">{i.finish} · {i.language} · {i.condition}</span>
                 </span>
                 <span className="tabular-nums shrink-0">
                   R$ {(i.unitPrice * i.quantity).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
