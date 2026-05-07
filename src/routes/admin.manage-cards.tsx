@@ -318,6 +318,17 @@ function AdminCardsManagePage() {
             </label>
 
             <label className="text-xs space-y-1">
+              <span className="font-semibold">Condição *</span>
+              <select
+                value={form.condition}
+                onChange={(e) => setForm({ ...form, condition: e.target.value as Condition })}
+                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+              >
+                {CONDITIONS.map((c) => <option key={c} value={c}>{CONDITION_LABEL[c]}</option>)}
+              </select>
+            </label>
+
+            <label className="text-xs space-y-1">
               <span className="font-semibold">Estoque *</span>
               <input
                 type="number"
