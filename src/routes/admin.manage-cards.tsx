@@ -54,6 +54,8 @@ function AdminCardsManagePage() {
   const [rows, setRows] = useState<CardRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(100);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -71,23 +73,34 @@ function AdminCardsManagePage() {
     const { data, error } = await supabase
       .from("cards")
       .select("*")
-      .order("created_at", { ascending: false })
-      .limit(2000);
+      .order("name", { ascending: true })
+      .order("collection", { ascending: true })
+      .order("card_number", { ascending: true })
+      .limit(5000);
     if (!error) setRows((data ?? []) as CardRow[]);
     setLoading(false);
   };
 
   useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
 
-  const filtered = useMemo(() => {
+  const filteredAll = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return rows.slice(0, 100);
+    if (!q) return rows;
     return rows.filter((r) =>
       r.name.toLowerCase().includes(q) ||
       r.collection.toLowerCase().includes(q) ||
       r.card_number.toLowerCase().includes(q),
-    ).slice(0, 200);
+    );
   }, [rows, search]);
+
+  useEffect(() => { setPage(1); }, [search, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAll.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const filtered = useMemo(
+    () => filteredAll.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filteredAll, currentPage, pageSize],
+  );
 
   const collections = useMemo(() => {
     return Array.from(new Set(rows.map((r) => r.collection))).sort();
@@ -350,10 +363,40 @@ function AdminCardsManagePage() {
               {filtered.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-6">Nenhuma carta encontrada.</p>
               )}
-              {!search && rows.length > 100 && (
-                <p className="text-xs text-muted-foreground text-center py-2">
-                  Mostrando primeiras 100. Use a busca para encontrar outras.
-                </p>
+
+              {filteredAll.length > 0 && (
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-border">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>Mostrando {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredAll.length)} de {filteredAll.length}</span>
+                    <label className="flex items-center gap-1 ml-2">
+                      <span>Por página:</span>
+                      <select
+                        value={pageSize}
+                        onChange={(e) => setPageSize(parseInt(e.target.value))}
+                        className="rounded border border-border bg-background px-2 py-1"
+                      >
+                        {[50, 100, 200, 500].map((n) => <option key={n} value={n}>{n}</option>)}
+                      </select>
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage <= 1}
+                      className="rounded border border-border px-2 py-1 text-xs disabled:opacity-40 hover:bg-secondary"
+                    >
+                      ← Anterior
+                    </button>
+                    <span className="text-xs px-2">Página {currentPage} / {totalPages}</span>
+                    <button
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage >= totalPages}
+                      className="rounded border border-border px-2 py-1 text-xs disabled:opacity-40 hover:bg-secondary"
+                    >
+                      Próxima →
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           )}
