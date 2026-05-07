@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-cards'
 import { Route as AdminCardsRouteImport } from './routes/admin.cards'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -50,6 +51,11 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   path: '/return',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminManageCardsRoute = AdminManageCardsRouteImport.update({
   id: '/manage-cards',
   path: '/manage-cards',
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/orders': typeof OrdersRoute
   '/admin/cards': typeof AdminCardsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/orders': typeof OrdersRoute
   '/admin/cards': typeof AdminCardsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/orders': typeof OrdersRoute
   '/admin/cards': typeof AdminCardsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/admin/cards'
     | '/admin/manage-cards'
+    | '/admin/users'
     | '/checkout/return'
     | '/api/public/hooks/update-prices'
     | '/api/public/payments/webhook'
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/admin/cards'
     | '/admin/manage-cards'
+    | '/admin/users'
     | '/checkout/return'
     | '/api/public/hooks/update-prices'
     | '/api/public/payments/webhook'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/admin/cards'
     | '/admin/manage-cards'
+    | '/admin/users'
     | '/checkout/return'
     | '/api/public/hooks/update-prices'
     | '/api/public/payments/webhook'
@@ -203,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/manage-cards': {
       id: '/admin/manage-cards'
       path: '/manage-cards'
@@ -237,11 +256,13 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminCardsRoute: typeof AdminCardsRoute
   AdminManageCardsRoute: typeof AdminManageCardsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminCardsRoute: AdminCardsRoute,
   AdminManageCardsRoute: AdminManageCardsRoute,
+  AdminUsersRoute: AdminUsersRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
