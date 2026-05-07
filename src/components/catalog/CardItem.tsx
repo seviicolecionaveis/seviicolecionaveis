@@ -18,12 +18,14 @@ interface Props {
 export function CardItem({ card, onClick }: Props) {
   const { prices, loading } = useCardPrices();
   const out = card.stock === 0;
-  const catalogPrices = card.languages.flatMap((lang) =>
-    lang.finishes.map((variant) =>
-      prices.get(priceLookupKey(card.name, card.collection, card.number, variant.finish, lang.language)),
-    ),
-  ).filter((price): price is number => price != null);
-  const displayPrice = catalogPrices.length ? Math.min(...catalogPrices) / 100 : card.price;
+  // Per-variant: prefer manual base price (already in card.price as reais), fallback to Liga price
+  const variantPrices = card.languages.flatMap((lang) =>
+    lang.finishes.map((variant) => {
+      if (variant.price != null) return variant.price * 100; // manual base, in cents
+      return prices.get(priceLookupKey(card.name, card.collection, card.number, variant.finish, lang.language));
+    }),
+  ).filter((p): p is number => p != null);
+  const displayPrice = variantPrices.length ? Math.min(...variantPrices) / 100 : null;
 
   return (
     <button
