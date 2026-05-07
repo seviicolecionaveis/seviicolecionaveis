@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export interface CartItem {
-  id: string; // unique key: cardId|finish|language
+  id: string; // unique key: cardId|finish|language|condition
   cardId: string;
   name: string;
   image: string;
@@ -9,7 +9,8 @@ export interface CartItem {
   number: string;
   finish: string;
   language: string;
-  unitPrice: number; // in BRL, e.g. 12.5
+  condition: string;
+  unitPrice: number;
   quantity: number;
   maxStock: number;
 }
