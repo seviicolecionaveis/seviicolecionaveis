@@ -438,7 +438,7 @@ function AdminCardsManagePage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate">{r.name}</p>
                       <p className="text-xs text-muted-foreground truncate">
-                        {r.collection} · #{r.card_number} · {r.finish} · {r.language}
+                        {r.collection} · #{r.card_number} · {r.finish} · {r.language} · <span className="font-bold">{r.condition ?? "NM"}</span>
                       </p>
                     </div>
                     <div className="text-xs text-right shrink-0">
@@ -470,7 +470,17 @@ function AdminCardsManagePage() {
                   {quickEditId === r.id && (
                     <div className="mt-2 rounded-lg border border-primary/40 bg-card p-4 shadow-lg">
                       <p className="text-xs font-bold uppercase tracking-wide mb-3">Edição rápida</p>
-                      <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        <label className="text-xs space-y-1">
+                          <span className="font-semibold">Condição</span>
+                          <select
+                            value={quickForm.condition}
+                            onChange={(e) => setQuickForm({ ...quickForm, condition: e.target.value as Condition })}
+                            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                          >
+                            {CONDITIONS.map((c) => <option key={c} value={c}>{CONDITION_LABEL[c]}</option>)}
+                          </select>
+                        </label>
                         <label className="text-xs space-y-1">
                           <span className="font-semibold">Estoque</span>
                           <input
