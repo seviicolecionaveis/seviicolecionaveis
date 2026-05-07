@@ -48,7 +48,7 @@ export function CartDrawer({ open, onClose }: Props) {
                       {i.collection} • #{i.number}
                     </p>
                     <p className="text-[10px] text-muted-foreground">
-                      {i.finish} · {i.language}
+                      {i.finish} · {i.language} · <span className="font-bold">{i.condition}</span>
                     </p>
                     <div className="mt-2 flex items-center justify-between">
                       <div className="flex items-center gap-1 border border-border rounded-full">

@@ -80,7 +80,7 @@ function OrdersPage() {
                 <ul className="text-sm space-y-1 mb-3">
                   {o.order_items?.map((it: any) => (
                     <li key={it.id} className="flex justify-between gap-2">
-                      <span className="truncate">{it.quantity}× {it.card_name} <span className="text-muted-foreground text-xs">({it.finish}, {it.language})</span></span>
+                      <span className="truncate">{it.quantity}× {it.card_name} <span className="text-muted-foreground text-xs">({it.finish}, {it.language}{it.condition ? `, ${it.condition}` : ""})</span></span>
                       <span className="tabular-nums shrink-0">R$ {(it.unit_price_cents * it.quantity / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
                     </li>
                   ))}

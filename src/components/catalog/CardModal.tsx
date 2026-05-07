@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { type Card, type Finish } from "@/data/cards";
+import { type Card, type Condition, type Finish, CONDITION_LABEL } from "@/data/cards";
 import { useCart } from "@/hooks/useCart";
 import { useCardPrices, priceLookupKey } from "@/hooks/useCardPrices";
 import { Plus, Check } from "lucide-react";
@@ -30,9 +30,9 @@ export function CardModal({ card, onClose }: Props) {
     const fromDb = prices.get(key);
     return fromDb != null ? fromDb / 100 : null;
   };
-  const handleAdd = (lang: string, v: { finish: Finish; price: number | null; stock: number }) => {
+  const handleAdd = (lang: string, v: { finish: Finish; condition: Condition; price: number | null; stock: number }) => {
     if (!card || v.price == null || v.stock === 0) return;
-    const id = `${card.id}|${v.finish}|${lang}`;
+    const id = `${card.id}|${v.finish}|${lang}|${v.condition}`;
     add({
       id,
       cardId: card.id,
@@ -42,6 +42,7 @@ export function CardModal({ card, onClose }: Props) {
       number: card.number,
       finish: v.finish,
       language: lang,
+      condition: v.condition,
       unitPrice: v.price,
       maxStock: v.stock,
     });
@@ -100,14 +101,13 @@ export function CardModal({ card, onClose }: Props) {
                         {lang.finishes.map((v) => {
                           const out = v.stock === 0;
                           const ligaPrice = resolvePrice(v.finish, lang.language);
-                          // Prioridade: preço manual (base_price_cents) > Liga
                           const effectivePrice = v.price ?? ligaPrice;
                           const effectiveVariant = { ...v, price: effectivePrice };
-                          const id = `${card.id}|${v.finish}|${lang.language}`;
+                          const id = `${card.id}|${v.finish}|${lang.language}|${v.condition}`;
                           const isAdded = added === id;
                           return (
                             <li
-                              key={v.finish}
+                              key={`${v.finish}-${v.condition}`}
                               className={`flex items-center justify-between gap-3 px-3 py-2.5 text-sm ${
                                 out ? "opacity-50" : ""
                               }`}
@@ -115,6 +115,12 @@ export function CardModal({ card, onClose }: Props) {
                               <div className="flex items-center gap-2 min-w-0">
                                 <span className={`h-2 w-2 rounded-full ${finishDot[v.finish]}`} />
                                 <span className="font-medium truncate">{v.finish}</span>
+                                <span
+                                  className="rounded border border-border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground"
+                                  title={CONDITION_LABEL[v.condition]}
+                                >
+                                  {v.condition}
+                                </span>
                               </div>
                               <div className="flex items-center gap-3 shrink-0">
                                 <span

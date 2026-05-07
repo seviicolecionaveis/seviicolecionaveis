@@ -32,6 +32,7 @@ const DEFAULT_FILTERS: FilterState = {
   finishes: [],
   collection: "",
   languages: [],
+  conditions: [],
   inStockOnly: false,
   priceMin: "",
   priceMax: "",
@@ -72,6 +73,11 @@ function Index() {
       if (
         filters.languages.length &&
         !c.languages.some((l) => filters.languages.includes(l.language))
+      )
+        return false;
+      if (
+        filters.conditions.length &&
+        !c.variants.some((v) => filters.conditions.includes(v.condition))
       )
         return false;
       if (filters.inStockOnly && c.stock === 0) return false;

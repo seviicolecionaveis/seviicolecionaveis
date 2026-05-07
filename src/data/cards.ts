@@ -2,6 +2,17 @@ import rawCards from "./cards.json";
 
 export type Finish = "Normal" | "Foil" | "Reverse Foil" | "Pokebola" | "Energia" | "Promo";
 export type Language = "Português" | "Inglês" | "Italiano" | "Espanhol";
+export type Condition = "M" | "NM" | "SP" | "MP" | "HP" | "D";
+
+export const CONDITIONS: Condition[] = ["M", "NM", "SP", "MP", "HP", "D"];
+export const CONDITION_LABEL: Record<Condition, string> = {
+  M: "M (Lacrada)",
+  NM: "NM (Praticamente nova)",
+  SP: "SP (Levemente usada)",
+  MP: "MP (Moderadamente usada)",
+  HP: "HP (Muito usada)",
+  D: "D (Danificada)",
+};
 
 export interface RawCard {
   id: number;
@@ -11,12 +22,14 @@ export interface RawCard {
   collection: string;
   finish: Finish;
   language: Language;
+  condition: Condition;
   stock: number;
   price: number | null;
 }
 
 export interface FinishVariant {
   finish: Finish;
+  condition: Condition;
   stock: number;
   price: number | null;
 }
@@ -24,7 +37,7 @@ export interface FinishVariant {
 export interface LanguageVariant {
   language: Language;
   finishes: FinishVariant[];
-  stock: number; // sum across finishes for this language
+  stock: number;
 }
 
 export interface Card {
@@ -33,18 +46,18 @@ export interface Card {
   image: string;
   number: string;
   collection: string;
-  // All language groups, each with its own finishes
   languages: LanguageVariant[];
-  // Flattened finishes across all languages (for filtering)
   variants: FinishVariant[];
-  // Aggregates for listing/filtering
-  language: Language; // primary language (first available)
+  language: Language;
   stock: number;
-  price: number | null; // lowest available price across all variants
-  finish: Finish; // representative finish (most "premium" available, for badge)
+  price: number | null;
+  finish: Finish;
 }
 
-const RAW: RawCard[] = rawCards as RawCard[];
+const RAW: RawCard[] = (rawCards as any[]).map((c) => ({
+  ...c,
+  condition: (c.condition as Condition) ?? "NM",
+})) as RawCard[];
 
 const FINISH_PRIORITY: Finish[] = ["Promo", "Pokebola", "Energia", "Foil", "Reverse Foil", "Normal"];
 const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo"];
@@ -59,7 +72,6 @@ function pickHeadlineFinish(variants: FinishVariant[]): Finish {
   return pool[0]?.finish ?? "Normal";
 }
 
-// Group ignoring language so the same card across idiomas vira uma única entrada
 function groupKey(c: RawCard) {
   return `${c.name}__${c.collection}__${c.number}`;
 }
@@ -70,7 +82,8 @@ interface WorkingCard {
   image: string;
   number: string;
   collection: string;
-  byLanguage: Map<Language, Map<Finish, FinishVariant>>;
+  // language -> (finish|condition) -> variant
+  byLanguage: Map<Language, Map<string, FinishVariant>>;
 }
 
 const map = new Map<string, WorkingCard>();
@@ -88,7 +101,6 @@ for (const c of RAW) {
     };
     map.set(key, wc);
   }
-  // Prefer non-placeholder image
   if (wc.image.includes("placehold.co") && !c.image.includes("placehold.co")) {
     wc.image = c.image;
   }
@@ -97,15 +109,15 @@ for (const c of RAW) {
     langMap = new Map();
     wc.byLanguage.set(c.language, langMap);
   }
-  const existing = langMap.get(c.finish);
+  const vKey = `${c.finish}|${c.condition}`;
+  const existing = langMap.get(vKey);
   if (existing) {
     existing.stock += c.stock;
     if (c.price != null) {
-      existing.price =
-        existing.price == null ? c.price : Math.min(existing.price, c.price);
+      existing.price = existing.price == null ? c.price : Math.min(existing.price, c.price);
     }
   } else {
-    langMap.set(c.finish, { finish: c.finish, stock: c.stock, price: c.price });
+    langMap.set(vKey, { finish: c.finish, condition: c.condition, stock: c.stock, price: c.price });
   }
 }
 
@@ -113,9 +125,11 @@ const finalCards: Card[] = [];
 for (const wc of map.values()) {
   const languages: LanguageVariant[] = [];
   for (const [lang, finishMap] of wc.byLanguage.entries()) {
-    const finishes = Array.from(finishMap.values()).sort(
-      (a, b) => FINISH_ORDER.indexOf(a.finish) - FINISH_ORDER.indexOf(b.finish),
-    );
+    const finishes = Array.from(finishMap.values()).sort((a, b) => {
+      const f = FINISH_ORDER.indexOf(a.finish) - FINISH_ORDER.indexOf(b.finish);
+      if (f !== 0) return f;
+      return CONDITIONS.indexOf(a.condition) - CONDITIONS.indexOf(b.condition);
+    });
     const langStock = finishes.reduce((s, f) => s + f.stock, 0);
     languages.push({ language: lang, finishes, stock: langStock });
   }
@@ -127,7 +141,6 @@ for (const wc of map.values()) {
   const totalStock = languages.reduce((s, l) => s + l.stock, 0);
   const prices = allVariants.map((v) => v.price).filter((p): p is number => p != null);
 
-  // Choose primary language: prefer one with stock, in LANGUAGE_ORDER
   const primary =
     languages.find((l) => l.stock > 0)?.language ?? languages[0]?.language ?? "Português";
 

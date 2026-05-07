@@ -1,9 +1,10 @@
-import { COLLECTIONS, FINISHES, LANGUAGES, type Finish, type Language } from "@/data/cards";
+import { COLLECTIONS, CONDITIONS, CONDITION_LABEL, FINISHES, LANGUAGES, type Condition, type Finish, type Language } from "@/data/cards";
 
 export interface FilterState {
   finishes: Finish[];
   collection: string;
   languages: Language[];
+  conditions: Condition[];
   inStockOnly: boolean;
   priceMin: string;
   priceMax: string;
@@ -94,6 +95,27 @@ export function Filters({ filters, onChange, onReset }: Props) {
           onChange={(e) => onChange({ ...filters, numberQuery: e.target.value })}
           className="w-full rounded-md border border-border bg-background p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold"
         />
+      </section>
+
+      <section>
+        <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          Condição
+        </h4>
+        <div className="space-y-2">
+          {CONDITIONS.map((c) => (
+            <label key={c} className="flex items-center gap-2 text-xs cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filters.conditions.includes(c)}
+                onChange={() =>
+                  onChange({ ...filters, conditions: toggle(filters.conditions, c) })
+                }
+                className="rounded border-border accent-foreground"
+              />
+              {CONDITION_LABEL[c]}
+            </label>
+          ))}
+        </div>
       </section>
 
       <section>

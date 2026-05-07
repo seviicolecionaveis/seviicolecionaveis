@@ -12,6 +12,7 @@ const ItemSchema = z.object({
   number: z.string().max(50).optional().nullable(),
   finish: z.string().max(50),
   language: z.string().max(50),
+  condition: z.string().max(10).optional().nullable(),
   unitPrice: z.number().positive().max(100000),
   quantity: z.number().int().positive().max(100),
 });
@@ -95,6 +96,7 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
       card_number: i.number ?? null,
       finish: i.finish,
       language: i.language,
+      condition: i.condition ?? null,
       quantity: i.quantity,
       unit_price_cents: Math.round(i.unitPrice * 100),
     }));
@@ -106,7 +108,7 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
       price_data: {
         currency: "brl",
         product_data: {
-          name: `${i.name} (${i.finish}, ${i.language})`,
+          name: `${i.name} (${i.finish}, ${i.language}${i.condition ? `, ${i.condition}` : ""})`,
           ...(i.image && i.image.startsWith("http") ? { images: [i.image] } : {}),
         },
         unit_amount: Math.round(i.unitPrice * 100),

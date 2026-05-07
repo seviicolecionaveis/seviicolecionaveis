@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Card, Finish, FinishVariant, Language, LanguageVariant, RawCard } from "@/data/cards";
+import type { Card, Condition, Finish, FinishVariant, Language, LanguageVariant, RawCard } from "@/data/cards";
+import { CONDITIONS } from "@/data/cards";
 
 const FINISH_PRIORITY: Finish[] = ["Promo", "Pokebola", "Energia", "Foil", "Reverse Foil", "Normal"];
 const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo"];
@@ -16,7 +17,7 @@ function pickHeadlineFinish(variants: FinishVariant[]): Finish {
 function buildCards(raw: RawCard[]): Card[] {
   const map = new Map<string, {
     id: string; name: string; image: string; number: string; collection: string;
-    byLanguage: Map<Language, Map<Finish, FinishVariant>>;
+    byLanguage: Map<Language, Map<string, FinishVariant>>;
   }>();
   for (const c of raw) {
     const key = `${c.name}__${c.collection}__${c.number}`;
@@ -28,19 +29,24 @@ function buildCards(raw: RawCard[]): Card[] {
     if (wc.image.includes("placehold.co") && !c.image.includes("placehold.co")) wc.image = c.image;
     let langMap = wc.byLanguage.get(c.language);
     if (!langMap) { langMap = new Map(); wc.byLanguage.set(c.language, langMap); }
-    const existing = langMap.get(c.finish);
+    const vKey = `${c.finish}|${c.condition}`;
+    const existing = langMap.get(vKey);
     if (existing) {
       existing.stock += c.stock;
       if (c.price != null) existing.price = existing.price == null ? c.price : Math.min(existing.price, c.price);
     } else {
-      langMap.set(c.finish, { finish: c.finish, stock: c.stock, price: c.price });
+      langMap.set(vKey, { finish: c.finish, condition: c.condition, stock: c.stock, price: c.price });
     }
   }
   const out: Card[] = [];
   for (const wc of map.values()) {
     const languages: LanguageVariant[] = [];
     for (const [lang, finishMap] of wc.byLanguage.entries()) {
-      const finishes = Array.from(finishMap.values()).sort((a, b) => FINISH_ORDER.indexOf(a.finish) - FINISH_ORDER.indexOf(b.finish));
+      const finishes = Array.from(finishMap.values()).sort((a, b) => {
+        const f = FINISH_ORDER.indexOf(a.finish) - FINISH_ORDER.indexOf(b.finish);
+        if (f !== 0) return f;
+        return CONDITIONS.indexOf(a.condition) - CONDITIONS.indexOf(b.condition);
+      });
       languages.push({ language: lang, finishes, stock: finishes.reduce((s, f) => s + f.stock, 0) });
     }
     languages.sort((a, b) => LANGUAGE_ORDER.indexOf(a.language) - LANGUAGE_ORDER.indexOf(b.language));
@@ -62,11 +68,21 @@ let inFlight: Promise<Card[]> | null = null;
 const listeners = new Set<(c: Card[]) => void>();
 
 async function loadCards(): Promise<Card[]> {
-  const { data, error } = await supabase
-    .from("cards")
-    .select("name, card_number, collection, language, finish, stock, base_price_cents, image");
-  if (error) { console.error("loadCards", error); return []; }
-  const raw: RawCard[] = (data ?? []).map((r, i) => ({
+  const all: any[] = [];
+  const CHUNK = 1000;
+  let from = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from("cards")
+      .select("name, card_number, collection, language, finish, condition, stock, base_price_cents, image")
+      .range(from, from + CHUNK - 1);
+    if (error) { console.error("loadCards", error); break; }
+    const batch = data ?? [];
+    all.push(...batch);
+    if (batch.length < CHUNK) break;
+    from += CHUNK;
+  }
+  const raw: RawCard[] = all.map((r, i) => ({
     id: i,
     name: r.name as string,
     image: (r.image as string) || `https://placehold.co/400x560/eeeeee/999999?text=${encodeURIComponent(r.name as string)}`,
@@ -74,6 +90,7 @@ async function loadCards(): Promise<Card[]> {
     collection: r.collection as string,
     finish: r.finish as Finish,
     language: r.language as Language,
+    condition: ((r.condition as Condition) ?? "NM"),
     stock: (r.stock as number) ?? 0,
     price: r.base_price_cents != null ? (r.base_price_cents as number) / 100 : null,
   }));
