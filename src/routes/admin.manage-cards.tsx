@@ -324,14 +324,33 @@ function AdminCardsManagePage() {
             </label>
 
             <label className="text-xs space-y-1 sm:col-span-2">
-              <span className="font-semibold">URL da imagem</span>
-              <input
-                type="url"
-                value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
-                placeholder="https://images.scrydex.com/pokemon/..."
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-              />
+              <span className="font-semibold">Imagem</span>
+              <div className="flex gap-2 items-start">
+                <input
+                  type="url"
+                  value={form.image}
+                  onChange={(e) => setForm({ ...form, image: e.target.value })}
+                  placeholder="Cole uma URL ou clique em + para enviar arquivo"
+                  className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
+                />
+                <label className="cursor-pointer rounded border border-border bg-secondary px-3 py-2 text-sm font-bold hover:bg-secondary/70 shrink-0">
+                  {uploadingMain ? "..." : "+"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingMain}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]; e.target.value = "";
+                      if (!file) return;
+                      setUploadingMain(true);
+                      const url = await uploadImage(file);
+                      setUploadingMain(false);
+                      if (url) setForm((f) => ({ ...f, image: url }));
+                    }}
+                  />
+                </label>
+              </div>
               {form.image && (
                 <img src={form.image} alt="preview" className="mt-2 h-32 w-auto rounded border border-border object-contain bg-secondary" />
               )}
