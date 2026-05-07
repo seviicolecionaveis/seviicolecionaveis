@@ -205,14 +205,30 @@ export async function scrapeLigaPokemon(input: ScrapeInput): Promise<ScrapedPric
     return { priceCents: null, sourceUrl: null, error: "FIRECRAWL_API_KEY não configurado" };
   }
 
-  // 1. Find the canonical card page URL via search.
-  const { url, error: urlErr } = await findCardUrl(input, apiKey);
-  if (!url) {
-    return { priceCents: null, sourceUrl: null, error: urlErr ?? "URL não encontrada" };
+  // 1. Tenta URL direta (sem gastar busca). Se a página não tiver tabela de
+  // preços, faz fallback para o search do Firecrawl.
+  let url = buildDirectUrl(input);
+  let scrapeErr: string | null = null;
+  let markdown: string | null = null;
+
+  if (url) {
+    const r = await scrapePage(url, apiKey);
+    markdown = r.markdown;
+    scrapeErr = r.error;
   }
 
-  // 2. Scrape that page directly.
-  const { markdown, error: scrapeErr } = await scrapePage(url, apiKey);
+  // Fallback para search se a URL direta não trouxe conteúdo válido
+  if (!markdown || !markdown.includes("Preço Médio de Venda no Marketplace")) {
+    const { url: searchUrl, error: urlErr } = await findCardUrlViaSearch(input, apiKey);
+    if (!searchUrl) {
+      return { priceCents: null, sourceUrl: url, error: urlErr ?? "URL não encontrada" };
+    }
+    url = searchUrl;
+    const r = await scrapePage(searchUrl, apiKey);
+    markdown = r.markdown;
+    scrapeErr = r.error;
+  }
+
   if (!markdown) {
     return { priceCents: null, sourceUrl: url, error: scrapeErr };
   }
