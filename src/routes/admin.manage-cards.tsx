@@ -60,6 +60,10 @@ function AdminCardsManagePage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [quickEditId, setQuickEditId] = useState<string | null>(null);
+  const [quickForm, setQuickForm] = useState<FormState>(EMPTY_FORM);
+  const [quickSaving, setQuickSaving] = useState(false);
+  const [quickMsg, setQuickMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -161,6 +165,39 @@ function AdminCardsManagePage() {
     if (error) { alert(error.message); return; }
     invalidateCardsCache();
     await load();
+  };
+
+  const openQuickEdit = (r: CardRow) => {
+    if (quickEditId === r.id) { setQuickEditId(null); return; }
+    setQuickEditId(r.id);
+    setQuickMsg(null);
+    setQuickForm({
+      name: r.name,
+      card_number: r.card_number,
+      collection: r.collection,
+      language: r.language,
+      finish: r.finish,
+      stock: String(r.stock),
+      price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
+      image: r.image,
+    });
+  };
+
+  const handleQuickSave = async (id: string) => {
+    setQuickSaving(true);
+    setQuickMsg(null);
+    const payload = {
+      stock: Math.max(0, parseInt(quickForm.stock) || 0),
+      base_price_cents: quickForm.price.trim() === "" ? null : Math.round(parseFloat(quickForm.price.replace(",", ".")) * 100),
+    };
+    const { error } = await supabase.from("cards").update(payload).eq("id", id);
+    setQuickSaving(false);
+    if (error) { setQuickMsg({ type: "err", text: error.message }); return; }
+    setQuickMsg({ type: "ok", text: "Salvo!" });
+    invalidateCardsCache();
+    // Update local row without reordering
+    setRows((prev) => prev.map((row) => row.id === id ? { ...row, ...payload } as CardRow : row));
+    setTimeout(() => { setQuickEditId((cur) => cur === id ? null : cur); setQuickMsg(null); }, 600);
   };
 
   if (authLoading || !isAdmin) {
@@ -328,36 +365,99 @@ function AdminCardsManagePage() {
           ) : (
             <div className="space-y-2">
               {filtered.map((r) => (
-                <div key={r.id} className="flex items-center gap-3 rounded border border-border bg-card px-3 py-2">
-                  {r.image ? (
-                    <img src={r.image} alt={r.name} className="w-10 h-14 object-contain rounded shrink-0 bg-secondary" loading="lazy" />
-                  ) : (
-                    <div className="w-10 h-14 rounded bg-secondary shrink-0" />
+                <div key={r.id} className="relative">
+                  <div className="flex items-center gap-3 rounded border border-border bg-card px-3 py-2">
+                    {r.image ? (
+                      <img src={r.image} alt={r.name} className="w-10 h-14 object-contain rounded shrink-0 bg-secondary" loading="lazy" />
+                    ) : (
+                      <div className="w-10 h-14 rounded bg-secondary shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate">{r.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {r.collection} · #{r.card_number} · {r.finish} · {r.language}
+                      </p>
+                    </div>
+                    <div className="text-xs text-right shrink-0">
+                      <p>Estoque: <strong>{r.stock}</strong></p>
+                      <p className="text-muted-foreground">
+                        {r.base_price_cents != null ? `R$ ${(r.base_price_cents / 100).toFixed(2)}` : "—"}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => openQuickEdit(r)}
+                      className={`rounded border px-2 py-1 text-[10px] font-bold hover:bg-secondary ${quickEditId === r.id ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}
+                    >
+                      {quickEditId === r.id ? "Fechar" : "Editar"}
+                    </button>
+                    <button
+                      onClick={() => handleEdit(r)}
+                      className="rounded border border-border px-2 py-1 text-[10px] font-bold hover:bg-secondary"
+                      title="Editar tudo no formulário acima"
+                    >
+                      ⋯
+                    </button>
+                    <button
+                      onClick={() => handleDelete(r)}
+                      className="rounded border border-destructive px-2 py-1 text-[10px] font-bold text-destructive hover:bg-destructive/10"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                  {quickEditId === r.id && (
+                    <div className="mt-2 rounded-lg border border-primary/40 bg-card p-4 shadow-lg">
+                      <p className="text-xs font-bold uppercase tracking-wide mb-3">Edição rápida</p>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="text-xs space-y-1">
+                          <span className="font-semibold">Estoque</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={quickForm.stock}
+                            onChange={(e) => setQuickForm({ ...quickForm, stock: e.target.value })}
+                            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                          />
+                        </label>
+                        <label className="text-xs space-y-1">
+                          <span className="font-semibold">Preço (R$)</span>
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={quickForm.price}
+                            onChange={(e) => setQuickForm({ ...quickForm, price: e.target.value })}
+                            placeholder="vazio = usar Liga"
+                            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                          />
+                        </label>
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <button
+                          onClick={() => handleQuickSave(r.id)}
+                          disabled={quickSaving}
+                          className="rounded bg-primary px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                        >
+                          {quickSaving ? "Salvando..." : "💾 Salvar"}
+                        </button>
+                        <button
+                          onClick={() => setQuickEditId(null)}
+                          className="rounded border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          onClick={() => handleEdit(r)}
+                          className="rounded border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary"
+                        >
+                          Editar tudo no topo →
+                        </button>
+                        {quickMsg && (
+                          <span className={`text-xs ${quickMsg.type === "ok" ? "text-condition-mint" : "text-destructive"}`}>
+                            {quickMsg.text}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate">{r.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {r.collection} · #{r.card_number} · {r.finish} · {r.language}
-                    </p>
-                  </div>
-                  <div className="text-xs text-right shrink-0">
-                    <p>Estoque: <strong>{r.stock}</strong></p>
-                    <p className="text-muted-foreground">
-                      {r.base_price_cents != null ? `R$ ${(r.base_price_cents / 100).toFixed(2)}` : "—"}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => handleEdit(r)}
-                    className="rounded border border-border px-2 py-1 text-[10px] font-bold hover:bg-secondary"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(r)}
-                    className="rounded border border-destructive px-2 py-1 text-[10px] font-bold text-destructive hover:bg-destructive/10"
-                  >
-                    Remover
-                  </button>
                 </div>
               ))}
               {filtered.length === 0 && (
