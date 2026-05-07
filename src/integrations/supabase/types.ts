@@ -156,6 +156,7 @@ export type Database = {
           card_name: string
           card_number: string | null
           collection: string | null
+          condition: string | null
           created_at: string
           finish: string | null
           id: string
@@ -170,6 +171,7 @@ export type Database = {
           card_name: string
           card_number?: string | null
           collection?: string | null
+          condition?: string | null
           created_at?: string
           finish?: string | null
           id?: string
@@ -184,6 +186,7 @@ export type Database = {
           card_name?: string
           card_number?: string | null
           collection?: string | null
+          condition?: string | null
           created_at?: string
           finish?: string | null
           id?: string
