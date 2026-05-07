@@ -1,0 +1,1 @@
+DELETE FROM public.card_prices WHERE last_error IS NOT NULL AND price_cents IS NULL;
