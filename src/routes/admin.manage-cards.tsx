@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateCardsCache } from "@/hooks/useCardsCatalog";
-import type { Finish, Language } from "@/data/cards";
+import type { Condition, Finish, Language } from "@/data/cards";
+import { CONDITIONS, CONDITION_LABEL } from "@/data/cards";
 
 export const Route = createFileRoute("/admin/manage-cards")({
   head: () => ({ meta: [{ title: "Gerenciar cartas — Admin" }] }),
@@ -20,6 +21,7 @@ interface CardRow {
   collection: string;
   language: Language;
   finish: Finish;
+  condition: Condition;
   stock: number;
   base_price_cents: number | null;
   image: string;
@@ -32,6 +34,7 @@ interface FormState {
   collection: string;
   language: Language;
   finish: Finish;
+  condition: Condition;
   stock: string;
   price: string;
   image: string;
@@ -43,6 +46,7 @@ const EMPTY_FORM: FormState = {
   collection: "",
   language: "Português",
   finish: "Normal",
+  condition: "NM",
   stock: "1",
   price: "",
   image: "",
@@ -151,6 +155,7 @@ function AdminCardsManagePage() {
       collection: form.collection.trim(),
       language: form.language,
       finish: form.finish,
+      condition: form.condition,
       stock: Math.max(0, parseInt(form.stock) || 0),
       base_price_cents: form.price.trim() === "" ? null : Math.round(parseFloat(form.price.replace(",", ".")) * 100),
       image: form.image.trim(),
@@ -160,7 +165,7 @@ function AdminCardsManagePage() {
       : await supabase.from("cards").insert(payload);
     setSaving(false);
     if (error) {
-      setMsg({ type: "err", text: error.message.includes("duplicate") ? "Essa combinação já existe (nome+coleção+número+finish+idioma)." : error.message });
+      setMsg({ type: "err", text: error.message.includes("duplicate") ? "Essa combinação já existe (nome+coleção+número+finish+idioma+condição)." : error.message });
       return;
     }
     setMsg({ type: "ok", text: editingId ? "Carta atualizada!" : "Carta adicionada!" });
@@ -177,6 +182,7 @@ function AdminCardsManagePage() {
       collection: r.collection,
       language: r.language,
       finish: r.finish,
+      condition: r.condition ?? "NM",
       stock: String(r.stock),
       price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
       image: r.image,
@@ -185,7 +191,7 @@ function AdminCardsManagePage() {
   };
 
   const handleDelete = async (r: CardRow) => {
-    if (!confirm(`Remover "${r.name}" (${r.finish}, ${r.language})?`)) return;
+    if (!confirm(`Remover "${r.name}" (${r.finish}, ${r.language}, ${r.condition ?? "NM"})?`)) return;
     const { error } = await supabase.from("cards").delete().eq("id", r.id);
     if (error) { alert(error.message); return; }
     invalidateCardsCache();
@@ -202,6 +208,7 @@ function AdminCardsManagePage() {
       collection: r.collection,
       language: r.language,
       finish: r.finish,
+      condition: r.condition ?? "NM",
       stock: String(r.stock),
       price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
       image: r.image,
@@ -212,6 +219,7 @@ function AdminCardsManagePage() {
     setQuickSaving(true);
     setQuickMsg(null);
     const payload = {
+      condition: quickForm.condition,
       stock: Math.max(0, parseInt(quickForm.stock) || 0),
       base_price_cents: quickForm.price.trim() === "" ? null : Math.round(parseFloat(quickForm.price.replace(",", ".")) * 100),
       image: quickForm.image.trim(),
