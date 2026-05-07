@@ -363,10 +363,40 @@ function AdminCardsManagePage() {
               {filtered.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-6">Nenhuma carta encontrada.</p>
               )}
-              {!search && rows.length > 100 && (
-                <p className="text-xs text-muted-foreground text-center py-2">
-                  Mostrando primeiras 100. Use a busca para encontrar outras.
-                </p>
+
+              {filteredAll.length > 0 && (
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-border">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>Mostrando {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredAll.length)} de {filteredAll.length}</span>
+                    <label className="flex items-center gap-1 ml-2">
+                      <span>Por página:</span>
+                      <select
+                        value={pageSize}
+                        onChange={(e) => setPageSize(parseInt(e.target.value))}
+                        className="rounded border border-border bg-background px-2 py-1"
+                      >
+                        {[50, 100, 200, 500].map((n) => <option key={n} value={n}>{n}</option>)}
+                      </select>
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage <= 1}
+                      className="rounded border border-border px-2 py-1 text-xs disabled:opacity-40 hover:bg-secondary"
+                    >
+                      ← Anterior
+                    </button>
+                    <span className="text-xs px-2">Página {currentPage} / {totalPages}</span>
+                    <button
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage >= totalPages}
+                      className="rounded border border-border px-2 py-1 text-xs disabled:opacity-40 hover:bg-secondary"
+                    >
+                      Próxima →
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           )}
