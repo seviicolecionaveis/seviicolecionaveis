@@ -464,6 +464,38 @@ function AdminCardsManagePage() {
                           />
                         </label>
                       </div>
+                      <label className="mt-3 block text-xs space-y-1">
+                        <span className="font-semibold">Imagem</span>
+                        <div className="flex gap-2 items-start">
+                          <input
+                            type="url"
+                            value={quickForm.image}
+                            onChange={(e) => setQuickForm({ ...quickForm, image: e.target.value })}
+                            placeholder="URL ou clique em + para enviar"
+                            className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
+                          />
+                          <label className="cursor-pointer rounded border border-border bg-secondary px-3 py-2 text-sm font-bold hover:bg-secondary/70 shrink-0">
+                            {uploadingQuick ? "..." : "+"}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={uploadingQuick}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0]; e.target.value = "";
+                                if (!file) return;
+                                setUploadingQuick(true);
+                                const url = await uploadImage(file);
+                                setUploadingQuick(false);
+                                if (url) setQuickForm((f) => ({ ...f, image: url }));
+                              }}
+                            />
+                          </label>
+                        </div>
+                        {quickForm.image && (
+                          <img src={quickForm.image} alt="preview" className="mt-2 h-24 w-auto rounded border border-border object-contain bg-secondary" />
+                        )}
+                      </label>
                       <div className="mt-3 flex flex-wrap items-center gap-2">
                         <button
                           onClick={() => handleQuickSave(r.id)}
