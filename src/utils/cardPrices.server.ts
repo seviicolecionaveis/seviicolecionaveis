@@ -103,16 +103,31 @@ function findFinishPrice(
   return null;
 }
 
-async function findCardUrl(
+function extractCollectionCode(collection: string): string | null {
+  // Pega as 2-4 primeiras letras maiúsculas (ex: "PRE - Evoluções..." -> "PRE",
+  // "JTG -Amigos..." -> "JTG"). Retorna null se não casar.
+  const m = collection.match(/^([A-Z]{2,4})\b/);
+  return m ? m[1] : null;
+}
+
+function buildDirectUrl(input: ScrapeInput): string | null {
+  const code = extractCollectionCode(input.collection);
+  if (!code) return null;
+  const parts = input.cardNumber.split("/");
+  if (parts.length !== 2) return null;
+  const num = parts[0];
+  const total = parts[1];
+  // Padrão observado no Liga: card=Nome%20(num/total)&ed=CODIGO&num=num
+  const cardParam = encodeURIComponent(`${input.cardName} (${num}/${total})`);
+  return `https://www.ligapokemon.com.br/?view=cards/card&card=${cardParam}&ed=${code}&num=${num}`;
+}
+
+async function findCardUrlViaSearch(
   input: ScrapeInput,
   apiKey: string,
 ): Promise<{ url: string | null; error: string | null }> {
-  const collectionShort = input.collection.replace(/^[A-Z]{2,4}\s*-\s*/, "").trim();
-  // Remove leading zeros: "060" -> "60" (Liga normalmente usa o número limpo)
+  const collectionShort = input.collection.replace(/^[A-Z]{2,4}\s*-?\s*/, "").trim();
   const cardNumberShort = input.cardNumber.split("/")[0].replace(/^0+/, "") || "0";
-  // Não incluímos o idioma na query: a página da carta no Liga é única e
-  // contém todos os idiomas/finishes na mesma tabela. Adicionar "português"
-  // ou "inglês" só atrapalha o ranking do Google.
   const query = `${input.cardName} ${cardNumberShort} ${collectionShort} site:ligapokemon.com.br`.trim();
 
   try {
@@ -131,7 +146,6 @@ async function findCardUrl(
     const data = await res.json();
     const results: any[] = data?.data?.web ?? data?.data ?? [];
     const cardNumberRaw = input.cardNumber.split("/")[0];
-    // Match contra número com ou sem zeros à esquerda
     const matchesNumber = (u: string) =>
       u.includes(`(${cardNumberRaw}/`) ||
       u.includes(`(${cardNumberShort}/`) ||
