@@ -99,6 +99,27 @@ export function Filters({ filters, onChange, onReset }: Props) {
 
       <section>
         <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          Condição
+        </h4>
+        <div className="space-y-2">
+          {CONDITIONS.map((c) => (
+            <label key={c} className="flex items-center gap-2 text-xs cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filters.conditions.includes(c)}
+                onChange={() =>
+                  onChange({ ...filters, conditions: toggle(filters.conditions, c) })
+                }
+                className="rounded border-border accent-foreground"
+              />
+              {CONDITION_LABEL[c]}
+            </label>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
           Idioma
         </h4>
         <div className="space-y-2">
