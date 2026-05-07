@@ -64,6 +64,21 @@ function AdminCardsManagePage() {
   const [quickForm, setQuickForm] = useState<FormState>(EMPTY_FORM);
   const [quickSaving, setQuickSaving] = useState(false);
   const [quickMsg, setQuickMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [uploadingMain, setUploadingMain] = useState(false);
+  const [uploadingQuick, setUploadingQuick] = useState(false);
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("card-images").upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type,
+    });
+    if (error) { alert(`Erro ao enviar imagem: ${error.message}`); return null; }
+    const { data } = supabase.storage.from("card-images").getPublicUrl(path);
+    return data.publicUrl;
+  };
 
   useEffect(() => {
     if (!authLoading) {
