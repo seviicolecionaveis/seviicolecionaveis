@@ -73,23 +73,34 @@ function AdminCardsManagePage() {
     const { data, error } = await supabase
       .from("cards")
       .select("*")
-      .order("created_at", { ascending: false })
-      .limit(2000);
+      .order("name", { ascending: true })
+      .order("collection", { ascending: true })
+      .order("card_number", { ascending: true })
+      .limit(5000);
     if (!error) setRows((data ?? []) as CardRow[]);
     setLoading(false);
   };
 
   useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
 
-  const filtered = useMemo(() => {
+  const filteredAll = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return rows.slice(0, 100);
+    if (!q) return rows;
     return rows.filter((r) =>
       r.name.toLowerCase().includes(q) ||
       r.collection.toLowerCase().includes(q) ||
       r.card_number.toLowerCase().includes(q),
-    ).slice(0, 200);
+    );
   }, [rows, search]);
+
+  useEffect(() => { setPage(1); }, [search, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAll.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const filtered = useMemo(
+    () => filteredAll.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filteredAll, currentPage, pageSize],
+  );
 
   const collections = useMemo(() => {
     return Array.from(new Set(rows.map((r) => r.collection))).sort();
