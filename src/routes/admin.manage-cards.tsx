@@ -167,6 +167,39 @@ function AdminCardsManagePage() {
     await load();
   };
 
+  const openQuickEdit = (r: CardRow) => {
+    if (quickEditId === r.id) { setQuickEditId(null); return; }
+    setQuickEditId(r.id);
+    setQuickMsg(null);
+    setQuickForm({
+      name: r.name,
+      card_number: r.card_number,
+      collection: r.collection,
+      language: r.language,
+      finish: r.finish,
+      stock: String(r.stock),
+      price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
+      image: r.image,
+    });
+  };
+
+  const handleQuickSave = async (id: string) => {
+    setQuickSaving(true);
+    setQuickMsg(null);
+    const payload = {
+      stock: Math.max(0, parseInt(quickForm.stock) || 0),
+      base_price_cents: quickForm.price.trim() === "" ? null : Math.round(parseFloat(quickForm.price.replace(",", ".")) * 100),
+    };
+    const { error } = await supabase.from("cards").update(payload).eq("id", id);
+    setQuickSaving(false);
+    if (error) { setQuickMsg({ type: "err", text: error.message }); return; }
+    setQuickMsg({ type: "ok", text: "Salvo!" });
+    invalidateCardsCache();
+    // Update local row without reordering
+    setRows((prev) => prev.map((row) => row.id === id ? { ...row, ...payload } as CardRow : row));
+    setTimeout(() => { setQuickEditId((cur) => cur === id ? null : cur); setQuickMsg(null); }, 600);
+  };
+
   if (authLoading || !isAdmin) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
   }
