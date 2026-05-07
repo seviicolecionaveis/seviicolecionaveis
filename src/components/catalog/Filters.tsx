@@ -1,9 +1,10 @@
-import { COLLECTIONS, FINISHES, LANGUAGES, type Finish, type Language } from "@/data/cards";
+import { COLLECTIONS, CONDITIONS, CONDITION_LABEL, FINISHES, LANGUAGES, type Condition, type Finish, type Language } from "@/data/cards";
 
 export interface FilterState {
   finishes: Finish[];
   collection: string;
   languages: Language[];
+  conditions: Condition[];
   inStockOnly: boolean;
   priceMin: string;
   priceMax: string;
