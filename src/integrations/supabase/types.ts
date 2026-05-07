@@ -109,6 +109,7 @@ export type Database = {
           base_price_cents: number | null
           card_number: string
           collection: string
+          condition: Database["public"]["Enums"]["card_condition"]
           created_at: string
           finish: Database["public"]["Enums"]["card_finish"]
           id: string
@@ -122,6 +123,7 @@ export type Database = {
           base_price_cents?: number | null
           card_number: string
           collection: string
+          condition?: Database["public"]["Enums"]["card_condition"]
           created_at?: string
           finish: Database["public"]["Enums"]["card_finish"]
           id?: string
@@ -135,6 +137,7 @@ export type Database = {
           base_price_cents?: number | null
           card_number?: string
           collection?: string
+          condition?: Database["public"]["Enums"]["card_condition"]
           created_at?: string
           finish?: Database["public"]["Enums"]["card_finish"]
           id?: string
@@ -379,6 +382,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      card_condition: "M" | "NM" | "SP" | "MP" | "HP" | "D"
       card_finish:
         | "Normal"
         | "Foil"
@@ -515,6 +519,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      card_condition: ["M", "NM", "SP", "MP", "HP", "D"],
       card_finish: [
         "Normal",
         "Foil",
