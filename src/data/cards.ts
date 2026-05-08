@@ -158,6 +158,7 @@ for (const wc of map.values()) {
     languages,
     variants: allVariants,
     language: primary,
+    category: "Pokémon",
     stock: totalStock,
     price: prices.length ? Math.min(...prices) : null,
     finish: pickHeadlineFinish(allVariants),
