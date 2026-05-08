@@ -76,7 +76,7 @@ async function loadCards(): Promise<Card[]> {
   while (true) {
     const { data, error } = await supabase
       .from("cards")
-      .select("name, card_number, collection, language, finish, condition, stock, base_price_cents, image")
+      .select("name, card_number, collection, language, finish, condition, stock, base_price_cents, image, category")
       .range(from, from + CHUNK - 1);
     if (error) { console.error("loadCards", error); break; }
     const batch = data ?? [];
@@ -95,6 +95,7 @@ async function loadCards(): Promise<Card[]> {
     condition: ((r.condition as Condition) ?? "NM"),
     stock: (r.stock as number) ?? 0,
     price: r.base_price_cents != null ? (r.base_price_cents as number) / 100 : null,
+    category: (r.category as CardCategory) ?? "Pokémon",
   }));
   return buildCards(raw);
 }
