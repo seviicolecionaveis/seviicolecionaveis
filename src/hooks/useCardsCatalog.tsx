@@ -17,13 +17,14 @@ function pickHeadlineFinish(variants: FinishVariant[]): Finish {
 function buildCards(raw: RawCard[]): Card[] {
   const map = new Map<string, {
     id: string; name: string; image: string; number: string; collection: string;
+    category: CardCategory;
     byLanguage: Map<Language, Map<string, FinishVariant>>;
   }>();
   for (const c of raw) {
     const key = `${c.name}__${c.collection}__${c.number}`;
     let wc = map.get(key);
     if (!wc) {
-      wc = { id: key, name: c.name, image: c.image, number: c.number, collection: c.collection, byLanguage: new Map() };
+      wc = { id: key, name: c.name, image: c.image, number: c.number, collection: c.collection, category: c.category ?? "Pokémon", byLanguage: new Map() };
       map.set(key, wc);
     }
     if (wc.image.includes("placehold.co") && !c.image.includes("placehold.co")) wc.image = c.image;
@@ -58,6 +59,7 @@ function buildCards(raw: RawCard[]): Card[] {
       id: wc.id, name: wc.name, image: wc.image, number: wc.number, collection: wc.collection,
       languages, variants: allVariants, language: primary, stock: totalStock,
       price: prices.length ? Math.min(...prices) : null, finish: pickHeadlineFinish(allVariants),
+      category: wc.category,
     });
   }
   return out.sort((a, b) => a.name.localeCompare(b.name));
