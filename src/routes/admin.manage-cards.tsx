@@ -491,7 +491,7 @@ function AdminCardsManagePage() {
                   {quickEditId === r.id && (
                     <div className="mt-2 rounded-lg border border-primary/40 bg-card p-4 shadow-lg">
                       <p className="text-xs font-bold uppercase tracking-wide mb-3">Edição rápida</p>
-                      <div className="grid gap-3 sm:grid-cols-3">
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         <label className="text-xs space-y-1">
                           <span className="font-semibold">Condição</span>
                           <select
@@ -500,6 +500,16 @@ function AdminCardsManagePage() {
                             className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
                           >
                             {CONDITIONS.map((c) => <option key={c} value={c}>{CONDITION_LABEL[c]}</option>)}
+                          </select>
+                        </label>
+                        <label className="text-xs space-y-1">
+                          <span className="font-semibold">Tipo</span>
+                          <select
+                            value={quickForm.category}
+                            onChange={(e) => setQuickForm({ ...quickForm, category: e.target.value as CardCategory })}
+                            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                          >
+                            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                           </select>
                         </label>
                         <label className="text-xs space-y-1">
