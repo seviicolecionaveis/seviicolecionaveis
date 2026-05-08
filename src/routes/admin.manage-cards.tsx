@@ -14,6 +14,9 @@ export const Route = createFileRoute("/admin/manage-cards")({
 const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo"];
 const LANGUAGES: Language[] = ["Português", "Inglês", "Espanhol", "Italiano"];
 
+type CardCategory = "Pokémon" | "Treinador" | "Energia";
+const CATEGORIES: CardCategory[] = ["Pokémon", "Treinador", "Energia"];
+
 interface CardRow {
   id: string;
   name: string;
@@ -22,6 +25,7 @@ interface CardRow {
   language: Language;
   finish: Finish;
   condition: Condition;
+  category: CardCategory;
   stock: number;
   base_price_cents: number | null;
   image: string;
@@ -35,6 +39,7 @@ interface FormState {
   language: Language;
   finish: Finish;
   condition: Condition;
+  category: CardCategory;
   stock: string;
   price: string;
   image: string;
@@ -47,6 +52,7 @@ const EMPTY_FORM: FormState = {
   language: "Português",
   finish: "Normal",
   condition: "NM",
+  category: "Pokémon",
   stock: "1",
   price: "",
   image: "",
@@ -156,6 +162,7 @@ function AdminCardsManagePage() {
       language: form.language,
       finish: form.finish,
       condition: form.condition,
+      category: form.category,
       stock: Math.max(0, parseInt(form.stock) || 0),
       base_price_cents: form.price.trim() === "" ? null : Math.round(parseFloat(form.price.replace(",", ".")) * 100),
       image: form.image.trim(),
@@ -183,6 +190,7 @@ function AdminCardsManagePage() {
       language: r.language,
       finish: r.finish,
       condition: r.condition ?? "NM",
+      category: r.category ?? "Pokémon",
       stock: String(r.stock),
       price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
       image: r.image,
@@ -209,6 +217,7 @@ function AdminCardsManagePage() {
       language: r.language,
       finish: r.finish,
       condition: r.condition ?? "NM",
+      category: r.category ?? "Pokémon",
       stock: String(r.stock),
       price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
       image: r.image,
@@ -220,6 +229,7 @@ function AdminCardsManagePage() {
     setQuickMsg(null);
     const payload = {
       condition: quickForm.condition,
+      category: quickForm.category,
       stock: Math.max(0, parseInt(quickForm.stock) || 0),
       base_price_cents: quickForm.price.trim() === "" ? null : Math.round(parseFloat(quickForm.price.replace(",", ".")) * 100),
       image: quickForm.image.trim(),
@@ -325,6 +335,17 @@ function AdminCardsManagePage() {
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
               >
                 {CONDITIONS.map((c) => <option key={c} value={c}>{CONDITION_LABEL[c]}</option>)}
+              </select>
+            </label>
+
+            <label className="text-xs space-y-1">
+              <span className="font-semibold">Tipo de carta *</span>
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value as CardCategory })}
+                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+              >
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </label>
 
@@ -470,7 +491,7 @@ function AdminCardsManagePage() {
                   {quickEditId === r.id && (
                     <div className="mt-2 rounded-lg border border-primary/40 bg-card p-4 shadow-lg">
                       <p className="text-xs font-bold uppercase tracking-wide mb-3">Edição rápida</p>
-                      <div className="grid gap-3 sm:grid-cols-3">
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         <label className="text-xs space-y-1">
                           <span className="font-semibold">Condição</span>
                           <select
@@ -479,6 +500,16 @@ function AdminCardsManagePage() {
                             className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
                           >
                             {CONDITIONS.map((c) => <option key={c} value={c}>{CONDITION_LABEL[c]}</option>)}
+                          </select>
+                        </label>
+                        <label className="text-xs space-y-1">
+                          <span className="font-semibold">Tipo</span>
+                          <select
+                            value={quickForm.category}
+                            onChange={(e) => setQuickForm({ ...quickForm, category: e.target.value as CardCategory })}
+                            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                          >
+                            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                           </select>
                         </label>
                         <label className="text-xs space-y-1">

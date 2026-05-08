@@ -108,6 +108,7 @@ export type Database = {
         Row: {
           base_price_cents: number | null
           card_number: string
+          category: Database["public"]["Enums"]["card_category"]
           collection: string
           condition: Database["public"]["Enums"]["card_condition"]
           created_at: string
@@ -122,6 +123,7 @@ export type Database = {
         Insert: {
           base_price_cents?: number | null
           card_number: string
+          category?: Database["public"]["Enums"]["card_category"]
           collection: string
           condition?: Database["public"]["Enums"]["card_condition"]
           created_at?: string
@@ -136,6 +138,7 @@ export type Database = {
         Update: {
           base_price_cents?: number | null
           card_number?: string
+          category?: Database["public"]["Enums"]["card_category"]
           collection?: string
           condition?: Database["public"]["Enums"]["card_condition"]
           created_at?: string
@@ -385,6 +388,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      card_category: "Pokémon" | "Treinador" | "Energia"
       card_condition: "M" | "NM" | "SP" | "MP" | "HP" | "D"
       card_finish:
         | "Normal"
@@ -522,6 +526,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      card_category: ["Pokémon", "Treinador", "Energia"],
       card_condition: ["M", "NM", "SP", "MP", "HP", "D"],
       card_finish: [
         "Normal",
