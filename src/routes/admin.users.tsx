@@ -16,7 +16,7 @@ interface AdminRow {
 }
 
 function AdminUsersPage() {
-  const { user, isAdmin, loading: authLoading } = useAuth();
+  const { user, session, isAdmin, loading: authLoading } = useAuth();
   const nav = useNavigate();
   const fetchAdmins = useServerFn(listAdmins);
   const grant = useServerFn(grantAdmin);
@@ -36,9 +36,16 @@ function AdminUsersPage() {
   }, [authLoading, user, isAdmin, nav]);
 
   const load = async () => {
+    const token = session?.access_token;
+    if (!token) {
+      setMsg({ kind: "err", text: "Sessão expirada. Faça login novamente." });
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      const data = await fetchAdmins();
+      const data = await fetchAdmins({ headers: { Authorization: `Bearer ${token}` } });
       setAdmins(data as AdminRow[]);
     } catch (e: any) {
       setMsg({ kind: "err", text: "Falha ao carregar administradores." });
@@ -58,7 +65,9 @@ function AdminUsersPage() {
     setBusy(true);
     setMsg(null);
     try {
-      await grant({ data: { email: email.trim() } });
+      const token = session?.access_token;
+      if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+      await grant({ headers: { Authorization: `Bearer ${token}` }, data: { email: email.trim() } });
       setMsg({ kind: "ok", text: `${email} agora é admin.` });
       setEmail("");
       await load();
@@ -75,7 +84,9 @@ function AdminUsersPage() {
     setBusy(true);
     setMsg(null);
     try {
-      await revoke({ data: { user_id: uid } });
+      const token = session?.access_token;
+      if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+      await revoke({ headers: { Authorization: `Bearer ${token}` }, data: { user_id: uid } });
       setMsg({ kind: "ok", text: "Acesso removido." });
       await load();
     } catch (e: any) {
