@@ -28,14 +28,24 @@ async function processBatch(onlyMissing: boolean) {
   // 3. Filtra as que já têm preço
   let pool = dedup;
   if (onlyMissing) {
+    // Pula variantes que já têm preço OU que já foram tentadas recentemente (com ou sem erro).
+    // Variantes com erro são reprocessadas a cada 7 dias para checar se o problema foi resolvido.
+    const retryAfter = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const { data: existing } = await supabaseAdmin
       .from("card_prices")
-      .select("card_name, collection, card_number, finish, language")
-      .not("price_cents", "is", null);
+      .select("card_name, collection, card_number, finish, language, price_cents, last_error, updated_at");
     const have = new Set(
-      (existing ?? []).map(
-        (p) => `${p.card_name}__${p.collection}__${p.card_number}__${p.finish}__${p.language}`,
-      ),
+      (existing ?? [])
+        .filter((p) => {
+          // Tem preço válido → pula
+          if (p.price_cents != null && !p.last_error) return true;
+          // Tem erro recente (< 7 dias) → pula desta vez
+          if (p.last_error && p.updated_at && p.updated_at > retryAfter) return true;
+          return false;
+        })
+        .map(
+          (p) => `${p.card_name}__${p.collection}__${p.card_number}__${p.finish}__${p.language}`,
+        ),
     );
     pool = dedup.filter(
       (v) => !have.has(`${v.name}__${v.collection}__${v.card_number}__${v.finish}__${v.language}`),
