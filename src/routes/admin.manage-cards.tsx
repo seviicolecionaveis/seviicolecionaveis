@@ -14,6 +14,9 @@ export const Route = createFileRoute("/admin/manage-cards")({
 const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo"];
 const LANGUAGES: Language[] = ["Português", "Inglês", "Espanhol", "Italiano"];
 
+type CardCategory = "Pokémon" | "Treinador" | "Energia";
+const CATEGORIES: CardCategory[] = ["Pokémon", "Treinador", "Energia"];
+
 interface CardRow {
   id: string;
   name: string;
@@ -22,6 +25,7 @@ interface CardRow {
   language: Language;
   finish: Finish;
   condition: Condition;
+  category: CardCategory;
   stock: number;
   base_price_cents: number | null;
   image: string;
@@ -35,6 +39,7 @@ interface FormState {
   language: Language;
   finish: Finish;
   condition: Condition;
+  category: CardCategory;
   stock: string;
   price: string;
   image: string;
@@ -47,6 +52,7 @@ const EMPTY_FORM: FormState = {
   language: "Português",
   finish: "Normal",
   condition: "NM",
+  category: "Pokémon",
   stock: "1",
   price: "",
   image: "",
