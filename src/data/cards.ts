@@ -56,6 +56,7 @@ export interface Card {
   stock: number;
   price: number | null;
   finish: Finish;
+  category: CardCategory;
 }
 
 const RAW: RawCard[] = (rawCards as any[]).map((c) => ({
