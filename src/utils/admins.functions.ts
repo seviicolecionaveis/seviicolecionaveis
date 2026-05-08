@@ -27,10 +27,16 @@ export const listAdmins = createServerFn({ method: "GET" })
 
     const result: { user_id: string; email: string | null; created_at: string }[] = [];
     for (const r of roles ?? []) {
-      const { data: u } = await supabaseAdmin.auth.admin.getUserById(r.user_id);
+      let email: string | null = null;
+      try {
+        const { data: u } = await supabaseAdmin.auth.admin.getUserById(r.user_id);
+        email = u?.user?.email ?? null;
+      } catch (err) {
+        console.error("[listAdmins] getUserById failed", r.user_id, err);
+      }
       result.push({
         user_id: r.user_id,
-        email: u?.user?.email ?? null,
+        email,
         created_at: r.created_at,
       });
     }
