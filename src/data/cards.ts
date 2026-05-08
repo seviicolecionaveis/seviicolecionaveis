@@ -28,6 +28,7 @@ export interface RawCard {
   condition: Condition;
   stock: number;
   price: number | null;
+  category?: CardCategory;
 }
 
 export interface FinishVariant {
