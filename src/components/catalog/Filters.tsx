@@ -45,6 +45,30 @@ export function Filters({ filters, onChange, onReset }: Props) {
 
       <section>
         <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          Tipo de carta
+        </h4>
+        <div className="flex flex-wrap gap-1.5">
+          {CARD_CATEGORIES.map((cat) => {
+            const active = filters.categories.includes(cat);
+            return (
+              <button
+                key={cat}
+                onClick={() => onChange({ ...filters, categories: toggle(filters.categories, cat) })}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                  active
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border bg-background text-muted-foreground hover:border-foreground/30"
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <section>
+        <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
           Extras
         </h4>
         <div className="flex flex-wrap gap-1.5">
