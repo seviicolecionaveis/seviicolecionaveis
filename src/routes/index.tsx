@@ -29,6 +29,7 @@ export const Route = createFileRoute("/")({
 });
 
 const DEFAULT_FILTERS: FilterState = {
+  categories: [],
   finishes: [],
   collection: "",
   languages: [],
@@ -64,6 +65,7 @@ function Index() {
     const numQ = filters.numberQuery.trim().toLowerCase();
 
     const list = CARDS.filter((c) => {
+      if (filters.categories.length && !filters.categories.includes(c.category)) return false;
       if (
         filters.finishes.length &&
         !c.variants.some((v) => filters.finishes.includes(v.finish))

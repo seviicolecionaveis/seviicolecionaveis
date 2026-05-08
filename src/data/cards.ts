@@ -3,6 +3,9 @@ import rawCards from "./cards.json";
 export type Finish = "Normal" | "Foil" | "Reverse Foil" | "Pokebola" | "Energia" | "Promo";
 export type Language = "Português" | "Inglês" | "Italiano" | "Espanhol";
 export type Condition = "M" | "NM" | "SP" | "MP" | "HP" | "D";
+export type CardCategory = "Pokémon" | "Treinador" | "Energia";
+
+export const CARD_CATEGORIES: CardCategory[] = ["Pokémon", "Treinador", "Energia"];
 
 export const CONDITIONS: Condition[] = ["M", "NM", "SP", "MP", "HP", "D"];
 export const CONDITION_LABEL: Record<Condition, string> = {
@@ -25,6 +28,7 @@ export interface RawCard {
   condition: Condition;
   stock: number;
   price: number | null;
+  category?: CardCategory;
 }
 
 export interface FinishVariant {
@@ -52,6 +56,7 @@ export interface Card {
   stock: number;
   price: number | null;
   finish: Finish;
+  category: CardCategory;
 }
 
 const RAW: RawCard[] = (rawCards as any[]).map((c) => ({
@@ -153,6 +158,7 @@ for (const wc of map.values()) {
     languages,
     variants: allVariants,
     language: primary,
+    category: "Pokémon",
     stock: totalStock,
     price: prices.length ? Math.min(...prices) : null,
     finish: pickHeadlineFinish(allVariants),

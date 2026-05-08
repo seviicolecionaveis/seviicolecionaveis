@@ -1,6 +1,7 @@
-import { COLLECTIONS, FINISHES, LANGUAGES, type Condition, type Finish, type Language } from "@/data/cards";
+import { CARD_CATEGORIES, COLLECTIONS, FINISHES, LANGUAGES, type CardCategory, type Condition, type Finish, type Language } from "@/data/cards";
 
 export interface FilterState {
+  categories: CardCategory[];
   finishes: Finish[];
   collection: string;
   languages: Language[];
@@ -41,6 +42,30 @@ export function Filters({ filters, onChange, onReset }: Props) {
           Limpar
         </button>
       </div>
+
+      <section>
+        <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          Tipo de carta
+        </h4>
+        <div className="flex flex-wrap gap-1.5">
+          {CARD_CATEGORIES.map((cat) => {
+            const active = filters.categories.includes(cat);
+            return (
+              <button
+                key={cat}
+                onClick={() => onChange({ ...filters, categories: toggle(filters.categories, cat) })}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                  active
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border bg-background text-muted-foreground hover:border-foreground/30"
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
       <section>
         <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
