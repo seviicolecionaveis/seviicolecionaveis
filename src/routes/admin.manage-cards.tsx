@@ -162,6 +162,7 @@ function AdminCardsManagePage() {
       language: form.language,
       finish: form.finish,
       condition: form.condition,
+      category: form.category,
       stock: Math.max(0, parseInt(form.stock) || 0),
       base_price_cents: form.price.trim() === "" ? null : Math.round(parseFloat(form.price.replace(",", ".")) * 100),
       image: form.image.trim(),
