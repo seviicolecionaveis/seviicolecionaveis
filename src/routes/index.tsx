@@ -8,6 +8,7 @@ import { CardModal } from "@/components/catalog/CardModal";
 import { Filters, type FilterState } from "@/components/catalog/Filters";
 import { HeaderActions } from "@/components/HeaderActions";
 import { CartDrawer } from "@/components/CartDrawer";
+import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
