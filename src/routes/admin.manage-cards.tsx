@@ -217,6 +217,7 @@ function AdminCardsManagePage() {
       language: r.language,
       finish: r.finish,
       condition: r.condition ?? "NM",
+      category: r.category ?? "Pokémon",
       stock: String(r.stock),
       price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
       image: r.image,
