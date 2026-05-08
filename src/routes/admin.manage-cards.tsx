@@ -339,6 +339,17 @@ function AdminCardsManagePage() {
             </label>
 
             <label className="text-xs space-y-1">
+              <span className="font-semibold">Tipo de carta *</span>
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value as CardCategory })}
+                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+              >
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
+
+            <label className="text-xs space-y-1">
               <span className="font-semibold">Estoque *</span>
               <input
                 type="number"
