@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Card, Condition, Finish, FinishVariant, Language, LanguageVariant, RawCard } from "@/data/cards";
+import type { Card, CardCategory, Condition, Finish, FinishVariant, Language, LanguageVariant, RawCard } from "@/data/cards";
 import { CONDITIONS } from "@/data/cards";
 
 const FINISH_PRIORITY: Finish[] = ["Promo", "Pokebola", "Energia", "Foil", "Reverse Foil", "Normal"];
