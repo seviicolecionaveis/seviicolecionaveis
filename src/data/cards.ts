@@ -3,6 +3,9 @@ import rawCards from "./cards.json";
 export type Finish = "Normal" | "Foil" | "Reverse Foil" | "Pokebola" | "Energia" | "Promo";
 export type Language = "Português" | "Inglês" | "Italiano" | "Espanhol";
 export type Condition = "M" | "NM" | "SP" | "MP" | "HP" | "D";
+export type CardCategory = "Pokémon" | "Treinador" | "Energia";
+
+export const CARD_CATEGORIES: CardCategory[] = ["Pokémon", "Treinador", "Energia"];
 
 export const CONDITIONS: Condition[] = ["M", "NM", "SP", "MP", "HP", "D"];
 export const CONDITION_LABEL: Record<Condition, string> = {
