@@ -29,6 +29,7 @@ export const Route = createFileRoute("/")({
 });
 
 const DEFAULT_FILTERS: FilterState = {
+  categories: [],
   finishes: [],
   collection: "",
   languages: [],
