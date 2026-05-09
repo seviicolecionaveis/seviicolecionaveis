@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateCardsCache } from "@/hooks/useCardsCatalog";
 import type { Condition, Finish, Language } from "@/data/cards";
-import { CONDITIONS, CONDITION_LABEL } from "@/data/cards";
+import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS } from "@/data/cards";
 
 export const Route = createFileRoute("/admin/manage-cards")({
   head: () => ({ meta: [{ title: "Gerenciar cartas — Admin" }] }),
@@ -142,7 +142,7 @@ function AdminCardsManagePage() {
   );
 
   const collections = useMemo(() => {
-    return Array.from(new Set(rows.map((r) => r.collection))).sort();
+    return Array.from(new Set([...rows.map((r) => r.collection), ...EXTRA_COLLECTIONS].filter(Boolean))).sort();
   }, [rows]);
 
   const resetForm = () => { setForm(EMPTY_FORM); setEditingId(null); };
