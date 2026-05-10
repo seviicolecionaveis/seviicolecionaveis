@@ -1,9 +1,34 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { type Card, type Condition, type Finish, CONDITION_LABEL } from "@/data/cards";
+import { type Card, type Condition, type Finish, type FinishVariant, type LanguageVariant, CONDITION_LABEL } from "@/data/cards";
 import { useCart } from "@/hooks/useCart";
 import { useCardPrices, priceLookupKey } from "@/hooks/useCardPrices";
 import { Plus, Check } from "lucide-react";
 import { useState } from "react";
+
+// Para cartas Pokémon, o acabamento "Ímã" é um produto interno disponível
+// automaticamente: R$10 se a carta possui Foil, senão R$9 se possui Normal.
+const MAGNET_VIRTUAL_STOCK = 99;
+function buildLanguagesWithMagnet(card: Card): LanguageVariant[] {
+  if (card.category !== "Pokémon") return card.languages;
+  return card.languages.map((lang) => {
+    if (lang.finishes.some((f) => f.finish === "Ímã")) return lang;
+    const hasFoil = lang.finishes.some((f) => f.finish === "Foil");
+    const hasNormal = lang.finishes.some((f) => f.finish === "Normal");
+    const price = hasFoil ? 10 : hasNormal ? 9 : null;
+    if (price == null) return lang;
+    const magnet: FinishVariant = {
+      finish: "Ímã",
+      condition: "NM",
+      stock: MAGNET_VIRTUAL_STOCK,
+      price,
+    };
+    return {
+      ...lang,
+      finishes: [...lang.finishes, magnet],
+      stock: lang.stock + MAGNET_VIRTUAL_STOCK,
+    };
+  });
+}
 
 interface Props {
   card: Card | null;
@@ -82,7 +107,7 @@ export function CardModal({ card, onClose }: Props) {
               </p>
 
               <div className="mt-6 space-y-5">
-                {card.languages.map((lang) => {
+                {buildLanguagesWithMagnet(card).map((lang) => {
                   const langOut = lang.stock === 0;
                   return (
                     <div key={lang.language}>
