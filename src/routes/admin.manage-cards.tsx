@@ -11,7 +11,30 @@ export const Route = createFileRoute("/admin/manage-cards")({
   component: AdminCardsManagePage,
 });
 
-const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo"];
+const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo", "Ímã"];
+
+// Preço automático para o acabamento "Ímã" (em centavos): R$10 se a carta tem Foil,
+// senão R$9 se tem Normal. Retorna null se não houver base.
+function autoMagnetPriceCents(
+  rows: { name: string; collection: string; card_number: string; finish: Finish; category?: string }[],
+  name: string,
+  collection: string,
+  cardNumber: string,
+  category: string,
+): number | null {
+  if (category !== "Pokémon") return null;
+  const sameCard = rows.filter(
+    (r) =>
+      r.name.trim().toLowerCase() === name.trim().toLowerCase() &&
+      r.collection.trim().toLowerCase() === collection.trim().toLowerCase() &&
+      r.card_number.trim() === cardNumber.trim(),
+  );
+  const hasFoil = sameCard.some((r) => r.finish === "Foil");
+  if (hasFoil) return 1000;
+  const hasNormal = sameCard.some((r) => r.finish === "Normal");
+  if (hasNormal) return 900;
+  return null;
+}
 const LANGUAGES: Language[] = ["Português", "Inglês", "Espanhol", "Italiano"];
 
 type CardCategory = "Pokémon" | "Treinador" | "Energia";
