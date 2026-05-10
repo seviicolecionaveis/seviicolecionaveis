@@ -1,6 +1,6 @@
 import rawCards from "./cards.json";
 
-export type Finish = "Normal" | "Foil" | "Reverse Foil" | "Pokebola" | "Energia" | "Promo";
+export type Finish = "Normal" | "Foil" | "Reverse Foil" | "Pokebola" | "Energia" | "Promo" | "Ímã";
 export type Language = "Português" | "Inglês" | "Italiano" | "Espanhol";
 export type Condition = "M" | "NM" | "SP" | "MP" | "HP" | "D";
 export type CardCategory = "Pokémon" | "Treinador" | "Energia";
