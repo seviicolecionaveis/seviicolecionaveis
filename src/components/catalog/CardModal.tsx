@@ -107,7 +107,7 @@ export function CardModal({ card, onClose }: Props) {
               </p>
 
               <div className="mt-6 space-y-5">
-                {card.languages.map((lang) => {
+                {buildLanguagesWithMagnet(card).map((lang) => {
                   const langOut = lang.stock === 0;
                   return (
                     <div key={lang.language}>
