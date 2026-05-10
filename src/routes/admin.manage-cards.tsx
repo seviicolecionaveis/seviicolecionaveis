@@ -178,6 +178,17 @@ function AdminCardsManagePage() {
       return;
     }
     setSaving(true);
+    let priceCents: number | null =
+      form.price.trim() === "" ? null : Math.round(parseFloat(form.price.replace(",", ".")) * 100);
+    if (form.finish === "Ímã" && priceCents == null) {
+      priceCents = autoMagnetPriceCents(
+        rows,
+        form.name,
+        form.collection,
+        form.card_number,
+        form.category,
+      );
+    }
     const payload = {
       name: form.name.trim(),
       card_number: form.card_number.trim(),
@@ -187,7 +198,7 @@ function AdminCardsManagePage() {
       condition: form.condition,
       category: form.category,
       stock: Math.max(0, parseInt(form.stock) || 0),
-      base_price_cents: form.price.trim() === "" ? null : Math.round(parseFloat(form.price.replace(",", ".")) * 100),
+      base_price_cents: priceCents,
       image: form.image.trim(),
     };
     const { error } = editingId
