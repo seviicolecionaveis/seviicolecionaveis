@@ -26,6 +26,9 @@ interface Form {
   city: string;
   state: string;
   notes: string;
+  favPokemon1: string;
+  favPokemon2: string;
+  favPokemon3: string;
 }
 
 const empty: Form = {
@@ -40,6 +43,9 @@ const empty: Form = {
   city: "",
   state: "",
   notes: "",
+  favPokemon1: "",
+  favPokemon2: "",
+  favPokemon3: "",
 };
 
 function CheckoutPage() {
@@ -163,7 +169,14 @@ function CheckoutPage() {
             city: form.city,
             state: form.state.toUpperCase(),
           },
-          notes: form.notes || null,
+          notes: (() => {
+            const favs = [form.favPokemon1, form.favPokemon2, form.favPokemon3]
+              .map((p) => p.trim())
+              .filter(Boolean);
+            const favsLine = favs.length ? `Pokémons favoritos: ${favs.join(", ")}` : "";
+            const combined = [favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
+            return combined || null;
+          })(),
           returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
           environment: getStripeEnvironment(),
         },
@@ -275,6 +288,18 @@ function CheckoutPage() {
                   <p className="text-xs text-muted-foreground">Sem cobrança de frete agora — combinamos via WhatsApp depois.</p>
                 </div>
               </label>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-bold mb-1">Conte pra gente! ⭐</h2>
+            <p className="text-xs text-muted-foreground mb-3">
+              Quais são seus 3 Pokémons favoritos? (opcional — adoramos saber!)
+            </p>
+            <div className="grid sm:grid-cols-3 gap-3">
+              <Field label="Favorito #1" value={form.favPokemon1} onChange={(v) => setForm({ ...form, favPokemon1: v })} placeholder="Ex: Pikachu" />
+              <Field label="Favorito #2" value={form.favPokemon2} onChange={(v) => setForm({ ...form, favPokemon2: v })} placeholder="Ex: Charizard" />
+              <Field label="Favorito #3" value={form.favPokemon3} onChange={(v) => setForm({ ...form, favPokemon3: v })} placeholder="Ex: Mew" />
             </div>
           </div>
 
