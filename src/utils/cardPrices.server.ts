@@ -200,6 +200,12 @@ async function scrapePage(
 }
 
 export async function scrapeLigaPokemon(input: ScrapeInput): Promise<ScrapedPrice> {
+  // O acabamento "Ímã" é um produto interno (precificado manualmente), não
+  // existe no Liga Pokémon. Devolve sem erro para não poluir card_prices.
+  if (input.finish === "Ímã") {
+    return { priceCents: null, sourceUrl: null, error: null };
+  }
+
   const apiKey = process.env.FIRECRAWL_API_KEY;
   if (!apiKey) {
     return { priceCents: null, sourceUrl: null, error: "FIRECRAWL_API_KEY não configurado" };
