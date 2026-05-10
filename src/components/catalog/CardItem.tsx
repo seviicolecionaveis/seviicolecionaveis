@@ -8,6 +8,7 @@ const finishBadge: Record<Finish, string> = {
   Pokebola: "bg-type-fire text-white",
   Energia: "bg-type-grass text-white",
   Promo: "bg-type-electric text-foreground",
+  "Ímã": "bg-muted text-foreground",
 };
 
 interface Props {

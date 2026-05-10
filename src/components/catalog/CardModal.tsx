@@ -17,6 +17,7 @@ const finishDot: Record<Finish, string> = {
   Pokebola: "bg-type-fire",
   Energia: "bg-type-grass",
   Promo: "bg-type-electric",
+  "Ímã": "bg-muted-foreground",
 };
 
 export function CardModal({ card, onClose }: Props) {

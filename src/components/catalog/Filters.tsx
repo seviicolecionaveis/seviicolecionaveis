@@ -25,6 +25,7 @@ const finishClass: Record<Finish, string> = {
   Pokebola: "bg-type-fire/15 text-type-fire border-type-fire/30",
   Energia: "bg-type-grass/15 text-type-grass border-type-grass/30",
   Promo: "bg-type-electric/20 text-foreground border-type-electric/40",
+  "Ímã": "bg-muted text-foreground border-border",
 };
 
 export function Filters({ filters, onChange, onReset }: Props) {

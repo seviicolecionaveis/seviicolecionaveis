@@ -397,6 +397,7 @@ export type Database = {
         | "Pokebola"
         | "Energia"
         | "Promo"
+        | "Ímã"
       card_language: "Português" | "Inglês" | "Italiano" | "Espanhol"
     }
     CompositeTypes: {
@@ -535,6 +536,7 @@ export const Constants = {
         "Pokebola",
         "Energia",
         "Promo",
+        "Ímã",
       ],
       card_language: ["Português", "Inglês", "Italiano", "Espanhol"],
     },
