@@ -169,7 +169,14 @@ function CheckoutPage() {
             city: form.city,
             state: form.state.toUpperCase(),
           },
-          notes: form.notes || null,
+          notes: (() => {
+            const favs = [form.favPokemon1, form.favPokemon2, form.favPokemon3]
+              .map((p) => p.trim())
+              .filter(Boolean);
+            const favsLine = favs.length ? `Pokémons favoritos: ${favs.join(", ")}` : "";
+            const combined = [favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
+            return combined || null;
+          })(),
           returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
           environment: getStripeEnvironment(),
         },
