@@ -43,6 +43,9 @@ const empty: Form = {
   city: "",
   state: "",
   notes: "",
+  favPokemon1: "",
+  favPokemon2: "",
+  favPokemon3: "",
 };
 
 function CheckoutPage() {
