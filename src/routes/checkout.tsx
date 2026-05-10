@@ -292,6 +292,18 @@ function CheckoutPage() {
           </div>
 
           <div>
+            <h2 className="text-lg font-bold mb-1">Conte pra gente! ⭐</h2>
+            <p className="text-xs text-muted-foreground mb-3">
+              Quais são seus 3 Pokémons favoritos? (opcional — adoramos saber!)
+            </p>
+            <div className="grid sm:grid-cols-3 gap-3">
+              <Field label="Favorito #1" value={form.favPokemon1} onChange={(v) => setForm({ ...form, favPokemon1: v })} placeholder="Ex: Pikachu" />
+              <Field label="Favorito #2" value={form.favPokemon2} onChange={(v) => setForm({ ...form, favPokemon2: v })} placeholder="Ex: Charizard" />
+              <Field label="Favorito #3" value={form.favPokemon3} onChange={(v) => setForm({ ...form, favPokemon3: v })} placeholder="Ex: Mew" />
+            </div>
+          </div>
+
+          <div>
             <label className="block text-xs font-medium uppercase tracking-wide mb-1">Observações (opcional)</label>
             <textarea
               value={form.notes}
