@@ -26,6 +26,9 @@ interface Form {
   city: string;
   state: string;
   notes: string;
+  favPokemon1: string;
+  favPokemon2: string;
+  favPokemon3: string;
 }
 
 const empty: Form = {
