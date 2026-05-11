@@ -116,7 +116,10 @@ function CheckoutPage() {
   };
 
   const shippingCost = shipping === "fixed" ? SHIPPING_FIXED : 0;
-  const total = subtotal + shippingCost;
+  const couponNormalized = form.couponCode.trim().toUpperCase();
+  const couponValid = couponNormalized === "POKEAGIOTAGEM";
+  const discount = couponValid ? subtotal * 0.3 : 0;
+  const total = subtotal - discount + shippingCost;
 
   const handleProceed = async (e: React.FormEvent) => {
     e.preventDefault();
