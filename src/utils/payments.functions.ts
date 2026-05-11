@@ -129,18 +129,23 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
     const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (itemsErr) throw new Error(itemsErr.message);
 
-    // Build Stripe line items
-    const lineItems = data.items.map((i) => ({
-      price_data: {
-        currency: "brl",
-        product_data: {
-          name: `${i.name} (${i.finish}, ${i.language}${i.condition ? `, ${i.condition}` : ""})`,
-          ...(i.image && i.image.startsWith("http") ? { images: [i.image] } : {}),
+    // Build Stripe line items (apply coupon discount per-item if active)
+    const discountMultiplier = appliedCoupon ? (100 - ADMIN_COUPON_PERCENT) / 100 : 1;
+    const lineItems = data.items.map((i) => {
+      const original = Math.round(i.unitPrice * 100);
+      const discounted = Math.round(original * discountMultiplier);
+      return {
+        price_data: {
+          currency: "brl",
+          product_data: {
+            name: `${i.name} (${i.finish}, ${i.language}${i.condition ? `, ${i.condition}` : ""})${appliedCoupon ? ` — cupom ${appliedCoupon} -${ADMIN_COUPON_PERCENT}%` : ""}`,
+            ...(i.image && i.image.startsWith("http") ? { images: [i.image] } : {}),
+          },
+          unit_amount: discounted,
         },
-        unit_amount: Math.round(i.unitPrice * 100),
-      },
-      quantity: i.quantity,
-    }));
+        quantity: i.quantity,
+      };
+    });
     if (shippingCents > 0) {
       lineItems.push({
         price_data: {
