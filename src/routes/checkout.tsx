@@ -182,6 +182,7 @@ function CheckoutPage() {
             const combined = [favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
             return combined || null;
           })(),
+          couponCode: couponNormalized || null,
           returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
           environment: getStripeEnvironment(),
         },
