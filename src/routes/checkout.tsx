@@ -51,7 +51,7 @@ const empty: Form = {
 };
 
 function CheckoutPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, session, loading: authLoading } = useAuth();
   const { items, subtotal, clear } = useCart();
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
@@ -147,7 +147,11 @@ function CheckoutPage() {
         is_default: true,
       });
 
+      const token = session?.access_token;
+      if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+
       const secret = await createOrderCheckout({
+        headers: { Authorization: `Bearer ${token}` },
         data: {
           items: items.map((i) => ({
             cardId: i.cardId,
