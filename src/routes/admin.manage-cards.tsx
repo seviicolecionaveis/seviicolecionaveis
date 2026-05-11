@@ -620,6 +620,30 @@ function AdminCardsManagePage() {
                         >
                           Editar tudo no topo →
                         </button>
+                        <button
+                          onClick={() => {
+                            setEditingId(null);
+                            setForm({
+                              name: r.name,
+                              card_number: r.card_number,
+                              collection: r.collection,
+                              language: r.language,
+                              finish: r.finish,
+                              condition: r.condition ?? "NM",
+                              category: r.category ?? "Pokémon",
+                              stock: "1",
+                              price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
+                              image: r.image,
+                            });
+                            setMsg({ type: "ok", text: "Informações copiadas! Ajuste o que mudar (ex: finish ou idioma) e adicione." });
+                            setQuickEditId(null);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          className="rounded border border-primary/60 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10"
+                          title="Copia todas as informações para o formulário acima como uma nova carta variante"
+                        >
+                          📋 Copiar p/ nova variante
+                        </button>
                         {quickMsg && (
                           <span className={`text-xs ${quickMsg.type === "ok" ? "text-condition-mint" : "text-destructive"}`}>
                             {quickMsg.text}
