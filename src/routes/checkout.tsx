@@ -29,6 +29,7 @@ interface Form {
   favPokemon1: string;
   favPokemon2: string;
   favPokemon3: string;
+  couponCode: string;
 }
 
 const empty: Form = {
