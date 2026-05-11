@@ -310,6 +310,19 @@ function CheckoutPage() {
           </div>
 
           <div>
+            <label className="block text-xs font-medium uppercase tracking-wide mb-1">Cupom de desconto (opcional)</label>
+            <input
+              value={form.couponCode}
+              onChange={(e) => setForm({ ...form, couponCode: e.target.value.toUpperCase() })}
+              placeholder="Insira seu código"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-foreground"
+            />
+            {couponValid && (
+              <p className="mt-1 text-xs text-green-600 font-semibold">✓ Cupom aplicado: 30% de desconto (válido apenas para administradores).</p>
+            )}
+          </div>
+
+          <div>
             <label className="block text-xs font-medium uppercase tracking-wide mb-1">Observações (opcional)</label>
             <textarea
               value={form.notes}
