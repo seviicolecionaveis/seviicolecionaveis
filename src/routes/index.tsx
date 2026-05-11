@@ -139,14 +139,21 @@ function Index() {
     <div className="min-h-screen text-foreground">
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-3">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = "/";
+            }}
+            className="flex items-center gap-3"
+          >
             <img
               src={logoUrl}
               alt="Sevii Colecionáveis"
               className="h-12 w-auto sm:h-14"
             />
             <span className="sr-only">Sevii Colecionáveis</span>
-          </Link>
+          </a>
 
           <div className="relative hidden flex-1 max-w-md md:block">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
