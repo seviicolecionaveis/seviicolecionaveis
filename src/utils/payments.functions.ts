@@ -57,7 +57,28 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
       0,
     );
     const shippingCents = data.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
-    const totalCents = subtotalCents + shippingCents;
+
+    // Validate coupon (admin-only)
+    let discountCents = 0;
+    let appliedCoupon: string | null = null;
+    const submittedCoupon = data.couponCode?.trim().toUpperCase() ?? "";
+    if (submittedCoupon) {
+      if (submittedCoupon !== ADMIN_COUPON_CODE) {
+        throw new Error("Cupom inválido");
+      }
+      const { data: roleRow, error: roleErr } = await supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (roleErr) throw new Error(roleErr.message);
+      if (!roleRow) throw new Error("Cupom restrito a administradores");
+      discountCents = Math.round((subtotalCents * ADMIN_COUPON_PERCENT) / 100);
+      appliedCoupon = ADMIN_COUPON_CODE;
+    }
+
+    const totalCents = subtotalCents - discountCents + shippingCents;
 
     // Get user email
     const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
@@ -72,6 +93,8 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
         shipping_method: data.shippingMethod,
         shipping_cost_cents: shippingCents,
         subtotal_cents: subtotalCents,
+        discount_cents: discountCents,
+        coupon_code: appliedCoupon,
         total_cents: totalCents,
         recipient_name: data.address.recipientName,
         cpf: data.address.cpf,
