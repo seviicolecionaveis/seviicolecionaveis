@@ -35,11 +35,14 @@ const InputSchema = z.object({
   shippingMethod: z.enum(["fixed", "arrange"]),
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
+  couponCode: z.string().max(50).optional().nullable(),
   returnUrl: z.string().url(),
   environment: z.enum(["sandbox", "live"]),
 });
 
 const SHIPPING_FIXED_CENTS = 2500; // R$ 25,00
+const ADMIN_COUPON_CODE = "POKEAGIOTAGEM";
+const ADMIN_COUPON_PERCENT = 30;
 
 export const createOrderCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -54,7 +57,28 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
       0,
     );
     const shippingCents = data.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
-    const totalCents = subtotalCents + shippingCents;
+
+    // Validate coupon (admin-only)
+    let discountCents = 0;
+    let appliedCoupon: string | null = null;
+    const submittedCoupon = data.couponCode?.trim().toUpperCase() ?? "";
+    if (submittedCoupon) {
+      if (submittedCoupon !== ADMIN_COUPON_CODE) {
+        throw new Error("Cupom inválido");
+      }
+      const { data: roleRow, error: roleErr } = await supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (roleErr) throw new Error(roleErr.message);
+      if (!roleRow) throw new Error("Cupom restrito a administradores");
+      discountCents = Math.round((subtotalCents * ADMIN_COUPON_PERCENT) / 100);
+      appliedCoupon = ADMIN_COUPON_CODE;
+    }
+
+    const totalCents = subtotalCents - discountCents + shippingCents;
 
     // Get user email
     const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
@@ -69,6 +93,8 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
         shipping_method: data.shippingMethod,
         shipping_cost_cents: shippingCents,
         subtotal_cents: subtotalCents,
+        discount_cents: discountCents,
+        coupon_code: appliedCoupon,
         total_cents: totalCents,
         recipient_name: data.address.recipientName,
         cpf: data.address.cpf,
@@ -103,18 +129,23 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
     const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (itemsErr) throw new Error(itemsErr.message);
 
-    // Build Stripe line items
-    const lineItems = data.items.map((i) => ({
-      price_data: {
-        currency: "brl",
-        product_data: {
-          name: `${i.name} (${i.finish}, ${i.language}${i.condition ? `, ${i.condition}` : ""})`,
-          ...(i.image && i.image.startsWith("http") ? { images: [i.image] } : {}),
+    // Build Stripe line items (apply coupon discount per-item if active)
+    const discountMultiplier = appliedCoupon ? (100 - ADMIN_COUPON_PERCENT) / 100 : 1;
+    const lineItems = data.items.map((i) => {
+      const original = Math.round(i.unitPrice * 100);
+      const discounted = Math.round(original * discountMultiplier);
+      return {
+        price_data: {
+          currency: "brl",
+          product_data: {
+            name: `${i.name} (${i.finish}, ${i.language}${i.condition ? `, ${i.condition}` : ""})${appliedCoupon ? ` — cupom ${appliedCoupon} -${ADMIN_COUPON_PERCENT}%` : ""}`,
+            ...(i.image && i.image.startsWith("http") ? { images: [i.image] } : {}),
+          },
+          unit_amount: discounted,
         },
-        unit_amount: Math.round(i.unitPrice * 100),
-      },
-      quantity: i.quantity,
-    }));
+        quantity: i.quantity,
+      };
+    });
     if (shippingCents > 0) {
       lineItems.push({
         price_data: {

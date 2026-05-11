@@ -213,8 +213,10 @@ export type Database = {
           cep: string
           city: string
           complement: string | null
+          coupon_code: string | null
           cpf: string | null
           created_at: string
+          discount_cents: number
           email: string
           id: string
           neighborhood: string
@@ -238,8 +240,10 @@ export type Database = {
           cep: string
           city: string
           complement?: string | null
+          coupon_code?: string | null
           cpf?: string | null
           created_at?: string
+          discount_cents?: number
           email: string
           id?: string
           neighborhood: string
@@ -263,8 +267,10 @@ export type Database = {
           cep?: string
           city?: string
           complement?: string | null
+          coupon_code?: string | null
           cpf?: string | null
           created_at?: string
+          discount_cents?: number
           email?: string
           id?: string
           neighborhood?: string

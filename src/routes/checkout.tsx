@@ -29,6 +29,7 @@ interface Form {
   favPokemon1: string;
   favPokemon2: string;
   favPokemon3: string;
+  couponCode: string;
 }
 
 const empty: Form = {
@@ -46,6 +47,7 @@ const empty: Form = {
   favPokemon1: "",
   favPokemon2: "",
   favPokemon3: "",
+  couponCode: "",
 };
 
 function CheckoutPage() {
@@ -114,7 +116,10 @@ function CheckoutPage() {
   };
 
   const shippingCost = shipping === "fixed" ? SHIPPING_FIXED : 0;
-  const total = subtotal + shippingCost;
+  const couponNormalized = form.couponCode.trim().toUpperCase();
+  const couponValid = couponNormalized === "POKEAGIOTAGEM";
+  const discount = couponValid ? subtotal * 0.3 : 0;
+  const total = subtotal - discount + shippingCost;
 
   const handleProceed = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,6 +182,7 @@ function CheckoutPage() {
             const combined = [favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
             return combined || null;
           })(),
+          couponCode: couponNormalized || null,
           returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
           environment: getStripeEnvironment(),
         },
@@ -304,6 +310,19 @@ function CheckoutPage() {
           </div>
 
           <div>
+            <label className="block text-xs font-medium uppercase tracking-wide mb-1">Cupom de desconto (opcional)</label>
+            <input
+              value={form.couponCode}
+              onChange={(e) => setForm({ ...form, couponCode: e.target.value.toUpperCase() })}
+              placeholder="Insira seu código"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-foreground"
+            />
+            {couponValid && (
+              <p className="mt-1 text-xs text-green-600 font-semibold">✓ Cupom aplicado: 30% de desconto (válido apenas para administradores).</p>
+            )}
+          </div>
+
+          <div>
             <label className="block text-xs font-medium uppercase tracking-wide mb-1">Observações (opcional)</label>
             <textarea
               value={form.notes}
@@ -344,6 +363,12 @@ function CheckoutPage() {
               <span className="text-muted-foreground">Subtotal</span>
               <span className="tabular-nums">R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
             </div>
+            {couponValid && (
+              <div className="flex justify-between text-green-600">
+                <span>Desconto (POKEAGIOTAGEM −30%)</span>
+                <span className="tabular-nums">− R$ {discount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Frete</span>
               <span className="tabular-nums">

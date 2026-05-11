@@ -1,0 +1,1 @@
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS discount_cents integer NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS coupon_code text;
