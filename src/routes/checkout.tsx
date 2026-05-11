@@ -363,6 +363,12 @@ function CheckoutPage() {
               <span className="text-muted-foreground">Subtotal</span>
               <span className="tabular-nums">R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
             </div>
+            {couponValid && (
+              <div className="flex justify-between text-green-600">
+                <span>Desconto (POKEAGIOTAGEM −30%)</span>
+                <span className="tabular-nums">− R$ {discount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Frete</span>
               <span className="tabular-nums">
