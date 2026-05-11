@@ -35,11 +35,14 @@ const InputSchema = z.object({
   shippingMethod: z.enum(["fixed", "arrange"]),
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
+  couponCode: z.string().max(50).optional().nullable(),
   returnUrl: z.string().url(),
   environment: z.enum(["sandbox", "live"]),
 });
 
 const SHIPPING_FIXED_CENTS = 2500; // R$ 25,00
+const ADMIN_COUPON_CODE = "POKEAGIOTAGEM";
+const ADMIN_COUPON_PERCENT = 30;
 
 export const createOrderCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
