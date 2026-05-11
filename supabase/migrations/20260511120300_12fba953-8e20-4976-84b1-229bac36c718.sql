@@ -1,0 +1,2 @@
+UPDATE public.cards SET collection = 'MEG - Mega Evolução' WHERE collection = 'ME - Mega Evolução';
+UPDATE public.cards SET collection = 'SVI - Escarlate e Violeta' WHERE collection = 'SV - Escarlate e Violeta';
