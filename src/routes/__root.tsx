@@ -72,6 +72,20 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+if (typeof window !== "undefined") {
+  // Auto-recover from stale chunk imports after a deploy.
+  window.addEventListener("vite:preloadError", (event) => {
+    event.preventDefault();
+    if (!sessionStorage.getItem("__chunk_reload__")) {
+      sessionStorage.setItem("__chunk_reload__", "1");
+      window.location.reload();
+    }
+  });
+  window.addEventListener("load", () => {
+    sessionStorage.removeItem("__chunk_reload__");
+  });
+}
+
 function RootComponent() {
   return (
     <AuthProvider>
