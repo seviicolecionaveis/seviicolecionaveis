@@ -41,19 +41,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      // Ignora eventos que apenas renovam o token (acontece ao trocar de aba)
+      // para não re-disparar loading e desmontar a UI atual.
+      if (event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        setSession(s);
+        setUser(s?.user ?? null);
+        return;
+      }
+      const previousUserId = user?.id ?? null;
+      const nextUserId = s?.user?.id ?? null;
       setSession(s);
       setUser(s?.user ?? null);
-      if (s?.user) {
-        setLoading(true);
-        // defer to avoid deadlock
+      if (!s?.user) {
+        setIsAdmin(false);
+        return;
+      }
+      // Só recarrega isAdmin se mudou de usuário
+      if (nextUserId !== previousUserId) {
         setTimeout(async () => {
           setIsAdmin(await checkIsAdmin(s.user.id));
-          setLoading(false);
         }, 0);
-      } else {
-        setIsAdmin(false);
-        setLoading(false);
       }
     });
 
