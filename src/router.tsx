@@ -4,6 +4,21 @@ import { routeTree } from "./routeTree.gen";
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
 
+  const msg = error?.message ?? "";
+  const isChunkError =
+    /Failed to fetch dynamically imported module/i.test(msg) ||
+    /Importing a module script failed/i.test(msg) ||
+    /ChunkLoadError/i.test(msg) ||
+    /Loading chunk \d+ failed/i.test(msg);
+
+  if (typeof window !== "undefined" && isChunkError) {
+    if (!sessionStorage.getItem("__chunk_reload__")) {
+      sessionStorage.setItem("__chunk_reload__", "1");
+      window.location.reload();
+      return null;
+    }
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
