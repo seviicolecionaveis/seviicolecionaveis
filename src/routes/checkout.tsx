@@ -47,6 +47,7 @@ const empty: Form = {
   favPokemon1: "",
   favPokemon2: "",
   favPokemon3: "",
+  couponCode: "",
 };
 
 function CheckoutPage() {
