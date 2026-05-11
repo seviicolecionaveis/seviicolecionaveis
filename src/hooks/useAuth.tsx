@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -40,26 +40,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const currentUserIdRef = useRef<string | null>(null);
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+      const nextUserId = s?.user?.id ?? null;
       setSession(s);
       setUser(s?.user ?? null);
-      if (s?.user) {
-        setLoading(true);
-        // defer to avoid deadlock
-        setTimeout(async () => {
-          setIsAdmin(await checkIsAdmin(s.user.id));
-          setLoading(false);
-        }, 0);
-      } else {
-        setIsAdmin(false);
-        setLoading(false);
+      if (nextUserId === currentUserIdRef.current) {
+        // Mesma sessão (ex: TOKEN_REFRESHED ao voltar pra aba) — não re-disparar loading.
+        return;
       }
+      currentUserIdRef.current = nextUserId;
+      if (!s?.user) {
+        setIsAdmin(false);
+        return;
+      }
+      setTimeout(async () => {
+        setIsAdmin(await checkIsAdmin(s.user.id));
+      }, 0);
     });
 
     supabase.auth.getSession().then(async ({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
+      currentUserIdRef.current = s?.user?.id ?? null;
       if (s?.user) {
         setIsAdmin(await checkIsAdmin(s.user.id));
       } else {
