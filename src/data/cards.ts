@@ -167,7 +167,7 @@ for (const wc of map.values()) {
 
 export const CARDS: Card[] = finalCards.sort((a, b) => a.name.localeCompare(b.name));
 
-export const EXTRA_COLLECTIONS = ["MEW - 151", "VIV - Voltagem Vívida", "ASR - Estrelas Radiantes", "TEF - Forças Temporais"];
+export const EXTRA_COLLECTIONS = ["MEW - 151", "VIV - Voltagem Vívida", "ASR - Estrelas Radiantes", "TEF - Forças Temporais", "SSH - Espada e Escudo"];
 
 export const COLLECTIONS = Array.from(
   new Set([...CARDS.map((c) => c.collection).filter(Boolean), ...EXTRA_COLLECTIONS]),
