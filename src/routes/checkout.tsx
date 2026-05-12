@@ -354,6 +354,7 @@ function CheckoutPage() {
               <li key={i.id} className="flex justify-between gap-2">
                 <span className="truncate">
                   {i.quantity}× {i.name}
+                  <span className="block text-[10px] text-muted-foreground">{i.collection} · #{i.number}</span>
                   <span className="block text-[10px] text-muted-foreground">{i.finish} · {i.language} · {i.condition}</span>
                 </span>
                 <span className="tabular-nums shrink-0">
