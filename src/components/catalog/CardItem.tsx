@@ -9,6 +9,7 @@ const finishBadge: Record<Finish, string> = {
   Energia: "bg-type-grass text-white",
   Promo: "bg-type-electric text-foreground",
   "Ímã": "bg-muted text-foreground",
+  "Shattered Holo": "bg-type-dragon/15 text-foreground",
 };
 
 interface Props {
