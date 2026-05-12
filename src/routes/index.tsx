@@ -8,6 +8,7 @@ import { CardModal } from "@/components/catalog/CardModal";
 import { Filters, type FilterState } from "@/components/catalog/Filters";
 import { HeaderActions } from "@/components/HeaderActions";
 import { CartDrawer } from "@/components/CartDrawer";
+import { BannerCarousel } from "@/components/BannerCarousel";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
@@ -190,6 +191,8 @@ function Index() {
           </div>
         </div>
       </header>
+
+      <BannerCarousel />
 
       <main className="mx-auto max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:flex">
         {/* Sidebar desktop */}
