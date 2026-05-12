@@ -1,6 +1,6 @@
 import rawCards from "./cards.json";
 
-export type Finish = "Normal" | "Foil" | "Reverse Foil" | "Pokebola" | "Energia" | "Promo" | "Ímã";
+export type Finish = "Normal" | "Foil" | "Reverse Foil" | "Pokebola" | "Energia" | "Promo" | "Ímã" | "Shattered Holo";
 export type Language = "Português" | "Inglês" | "Italiano" | "Espanhol";
 export type Condition = "M" | "NM" | "SP" | "MP" | "HP" | "D";
 export type CardCategory = "Pokémon" | "Treinador" | "Energia";
@@ -173,7 +173,7 @@ export const COLLECTIONS = Array.from(
   new Set([...CARDS.map((c) => c.collection).filter(Boolean), ...EXTRA_COLLECTIONS]),
 ).sort();
 
-export const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo", "Ímã"];
+export const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo", "Ímã", "Shattered Holo"];
 
 export const LANGUAGES = Array.from(
   new Set(CARDS.flatMap((c) => c.languages.map((l) => l.language)).filter(Boolean)),
