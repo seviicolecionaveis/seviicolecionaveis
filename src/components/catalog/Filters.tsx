@@ -26,6 +26,7 @@ const finishClass: Record<Finish, string> = {
   Energia: "bg-type-grass/15 text-type-grass border-type-grass/30",
   Promo: "bg-type-electric/20 text-foreground border-type-electric/40",
   "Ímã": "bg-muted text-foreground border-border",
+  "Shattered Holo": "bg-type-dragon/15 text-foreground border-type-dragon/40",
 };
 
 export function Filters({ filters, onChange, onReset }: Props) {
