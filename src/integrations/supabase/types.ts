@@ -62,6 +62,39 @@ export type Database = {
         }
         Relationships: []
       }
+      banners: {
+        Row: {
+          active: boolean
+          alt: string | null
+          created_at: string
+          id: string
+          image_url: string
+          link_url: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          alt?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          link_url?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          alt?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          link_url?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       card_prices: {
         Row: {
           card_name: string
