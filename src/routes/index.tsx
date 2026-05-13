@@ -101,11 +101,22 @@ function Index() {
     });
 
     const priceVal = (p: number | null) => (p == null ? Infinity : p);
+    // For sorting, ignore the "Ímã" virtual finish (R$9–10) so it doesn't skew results.
+    const realVariants = (c: typeof list[number]) =>
+      c.variants.filter((v) => v.finish !== "Ímã" && v.price != null);
+    const minRealPrice = (c: typeof list[number]) => {
+      const prices = realVariants(c).map((v) => v.price!) ;
+      return prices.length ? Math.min(...prices) : null;
+    };
+    const maxRealPrice = (c: typeof list[number]) => {
+      const prices = realVariants(c).map((v) => v.price!);
+      return prices.length ? Math.max(...prices) : null;
+    };
     switch (sort) {
       case "price-asc":
-        return [...list].sort((a, b) => priceVal(a.price) - priceVal(b.price));
+        return [...list].sort((a, b) => priceVal(minRealPrice(a)) - priceVal(minRealPrice(b)));
       case "price-desc":
-        return [...list].sort((a, b) => priceVal(b.price) - priceVal(a.price));
+        return [...list].sort((a, b) => priceVal(maxRealPrice(b)) - priceVal(maxRealPrice(a)));
       case "name":
         return [...list].sort((a, b) => a.name.localeCompare(b.name));
       default: {
