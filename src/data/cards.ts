@@ -1,7 +1,7 @@
 import rawCards from "./cards.json";
 
 export type Finish = "Normal" | "Foil" | "Reverse Foil" | "Pokebola" | "Energia" | "Promo" | "Ímã" | "Shattered Holo" | "Illustration Rare";
-export type Language = "Português" | "Inglês" | "Italiano" | "Espanhol";
+export type Language = "Português" | "Inglês" | "Italiano" | "Espanhol" | "Japonês" | "Chinês";
 export type Condition = "M" | "NM" | "SP" | "MP" | "HP" | "D";
 export type CardCategory = "Pokémon" | "Treinador" | "Energia";
 
@@ -66,7 +66,7 @@ const RAW: RawCard[] = (rawCards as any[]).map((c) => ({
 
 const FINISH_PRIORITY: Finish[] = ["Promo", "Pokebola", "Energia", "Foil", "Reverse Foil", "Normal"];
 const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo"];
-const LANGUAGE_ORDER: Language[] = ["Português", "Inglês", "Espanhol", "Italiano"];
+const LANGUAGE_ORDER: Language[] = ["Português", "Inglês", "Espanhol", "Italiano", "Japonês", "Chinês"];
 
 function pickHeadlineFinish(variants: FinishVariant[]): Finish {
   const available = variants.filter((v) => v.stock > 0);
