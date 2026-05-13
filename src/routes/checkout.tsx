@@ -222,7 +222,7 @@ function CheckoutPage() {
       await persistAddressAndProfile();
       const token = session?.access_token;
       if (!token) throw new Error("Sessão expirada. Faça login novamente.");
-      const secret = await createOrderCheckout({
+      const result = await createOrderCheckout({
         headers: { Authorization: `Bearer ${token}` },
         data: {
           items: buildItemsPayload(),
@@ -230,11 +230,12 @@ function CheckoutPage() {
           address: buildAddressPayload(),
           notes: buildNotes(),
           couponCode: couponNormalized || null,
-          returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+          returnUrl: `${window.location.origin}/orders/__ORDER__?session_id={CHECKOUT_SESSION_ID}`,
           environment: getStripeEnvironment(),
         },
       });
-      setClientSecret(secret);
+      setClientSecret(result.clientSecret);
+      setStripeOrderId(result.orderId);
       setStep("card");
       clear();
     } catch (e: any) {
