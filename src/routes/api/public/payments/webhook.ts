@@ -1,17 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { type StripeEnv, verifyWebhook } from "@/lib/stripe.server";
-
-let _supabase: SupabaseClient | null = null;
-function getSupabase(): SupabaseClient {
-  if (!_supabase) {
-    _supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
-  }
-  return _supabase;
-}
+import { markOrderPaid, cancelOrder } from "@/lib/orders.server";
 
 async function handleSessionCompleted(session: any) {
   const orderId = session.metadata?.orderId;
@@ -19,24 +8,13 @@ async function handleSessionCompleted(session: any) {
     console.error("No orderId in session metadata");
     return;
   }
-  await getSupabase()
-    .from("orders")
-    .update({
-      status: "paid",
-      stripe_payment_intent: session.payment_intent ?? null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", orderId);
+  await markOrderPaid(orderId, { stripePaymentIntent: session.payment_intent ?? undefined });
 }
 
 async function handleSessionExpired(session: any) {
   const orderId = session.metadata?.orderId;
   if (!orderId) return;
-  await getSupabase()
-    .from("orders")
-    .update({ status: "cancelled", updated_at: new Date().toISOString() })
-    .eq("id", orderId)
-    .eq("status", "pending");
+  await cancelOrder(orderId);
 }
 
 export const Route = createFileRoute("/api/public/payments/webhook")({

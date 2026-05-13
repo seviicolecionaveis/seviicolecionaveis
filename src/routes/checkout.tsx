@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
-import { createOrderCheckout } from "@/utils/payments.functions";
+import { createOrderCheckout, createPixOrder, checkPixOrderStatus } from "@/utils/payments.functions";
+import { toast } from "sonner";
+import { Copy, Check, QrCode } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — Sevii Colecionáveis" }] }),
@@ -50,22 +52,46 @@ const empty: Form = {
   couponCode: "",
 };
 
+type PaymentMethod = "pix" | "card";
+type Step = "address" | "method" | "card" | "pix";
+
+interface PixState {
+  orderId: string;
+  qrCode: string;
+  qrCodeBase64: string;
+  expiresAt: string;
+  totalCents: number;
+}
+
 function CheckoutPage() {
   const { user, session, loading: authLoading } = useAuth();
   const { items, subtotal, clear } = useCart();
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
   const [shipping, setShipping] = useState<"fixed" | "arrange">("fixed");
-  const [step, setStep] = useState<"address" | "payment">("address");
+  const [method, setMethod] = useState<PaymentMethod>("pix");
+  const [step, setStep] = useState<Step>("address");
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [pix, setPix] = useState<PixState | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  // Detect cart expired notice (?expired=1)
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("expired=1")) {
+      toast.warning("Seu carrinho expirou", {
+        description: "A reserva de 5 minutos terminou. Os itens voltaram a ficar disponíveis.",
+      });
+      const u = new URL(window.location.href);
+      u.searchParams.delete("expired");
+      window.history.replaceState({}, "", u.toString());
+    }
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/auth" });
   }, [authLoading, user, nav]);
 
-  // Prefill from profile
   useEffect(() => {
     if (!user) return;
     (async () => {
@@ -117,85 +143,129 @@ function CheckoutPage() {
 
   const shippingCost = shipping === "fixed" ? SHIPPING_FIXED : 0;
   const couponNormalized = form.couponCode.trim().toUpperCase();
-  const couponValid = couponNormalized === "POKEAGIOTAGEM";
-  const discount = couponValid ? subtotal * 0.3 : 0;
+  const couponInfo = (() => {
+    if (couponNormalized === "POKEAGIOTAGEM") return { valid: true, percent: 30, label: "POKEAGIOTAGEM −30% (admin)" };
+    if (couponNormalized === "PRIMEIRACOMPRA10") return { valid: true, percent: 10, label: "PRIMEIRACOMPRA10 −10% (1ª compra)" };
+    return { valid: false, percent: 0, label: "" };
+  })();
+  const discount = couponInfo.valid ? subtotal * (couponInfo.percent / 100) : 0;
   const total = subtotal - discount + shippingCost;
 
-  const handleProceed = async (e: React.FormEvent) => {
+  const persistAddressAndProfile = async () => {
+    if (!user) return;
+    await supabase
+      .from("profiles")
+      .update({ full_name: form.recipientName, cpf: form.cpf, phone: form.phone })
+      .eq("user_id", user.id);
+    await supabase.from("addresses").insert({
+      user_id: user.id,
+      recipient_name: form.recipientName,
+      cep: form.cep,
+      street: form.street,
+      number: form.number,
+      complement: form.complement || null,
+      neighborhood: form.neighborhood,
+      city: form.city,
+      state: form.state.toUpperCase(),
+      is_default: true,
+    });
+  };
+
+  const buildAddressPayload = () => ({
+    recipientName: form.recipientName,
+    cpf: form.cpf || null,
+    phone: form.phone,
+    cep: form.cep,
+    street: form.street,
+    number: form.number,
+    complement: form.complement || null,
+    neighborhood: form.neighborhood,
+    city: form.city,
+    state: form.state.toUpperCase(),
+  });
+
+  const buildItemsPayload = () =>
+    items.map((i) => ({
+      cardId: i.cardId,
+      name: i.name,
+      image: i.image,
+      collection: i.collection,
+      number: i.number,
+      finish: i.finish,
+      language: i.language,
+      condition: i.condition,
+      unitPrice: i.unitPrice,
+      quantity: i.quantity,
+    }));
+
+  const buildNotes = () => {
+    const favs = [form.favPokemon1, form.favPokemon2, form.favPokemon3]
+      .map((p) => p.trim())
+      .filter(Boolean);
+    const favsLine = favs.length ? `Pokémons favoritos: ${favs.join(", ")}` : "";
+    const combined = [favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
+    return combined || null;
+  };
+
+  const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErr(null);
+    setStep("method");
+  };
+
+  const startStripe = async () => {
     if (!user || items.length === 0) return;
     setLoading(true);
     setErr(null);
     try {
-      // Save profile + address
-      await supabase.from("profiles").update({
-        full_name: form.recipientName,
-        cpf: form.cpf,
-        phone: form.phone,
-      }).eq("user_id", user.id);
-
-      await supabase.from("addresses").insert({
-        user_id: user.id,
-        recipient_name: form.recipientName,
-        cep: form.cep,
-        street: form.street,
-        number: form.number,
-        complement: form.complement || null,
-        neighborhood: form.neighborhood,
-        city: form.city,
-        state: form.state.toUpperCase(),
-        is_default: true,
-      });
-
+      await persistAddressAndProfile();
       const token = session?.access_token;
       if (!token) throw new Error("Sessão expirada. Faça login novamente.");
-
       const secret = await createOrderCheckout({
         headers: { Authorization: `Bearer ${token}` },
         data: {
-          items: items.map((i) => ({
-            cardId: i.cardId,
-            name: i.name,
-            image: i.image,
-            collection: i.collection,
-            number: i.number,
-            finish: i.finish,
-            language: i.language,
-            condition: i.condition,
-            unitPrice: i.unitPrice,
-            quantity: i.quantity,
-          })),
+          items: buildItemsPayload(),
           shippingMethod: shipping,
-          address: {
-            recipientName: form.recipientName,
-            cpf: form.cpf || null,
-            phone: form.phone,
-            cep: form.cep,
-            street: form.street,
-            number: form.number,
-            complement: form.complement || null,
-            neighborhood: form.neighborhood,
-            city: form.city,
-            state: form.state.toUpperCase(),
-          },
-          notes: (() => {
-            const favs = [form.favPokemon1, form.favPokemon2, form.favPokemon3]
-              .map((p) => p.trim())
-              .filter(Boolean);
-            const favsLine = favs.length ? `Pokémons favoritos: ${favs.join(", ")}` : "";
-            const combined = [favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
-            return combined || null;
-          })(),
+          address: buildAddressPayload(),
+          notes: buildNotes(),
           couponCode: couponNormalized || null,
           returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
           environment: getStripeEnvironment(),
         },
       });
       setClientSecret(secret);
-      setStep("payment");
+      setStep("card");
       clear();
     } catch (e: any) {
       setErr(e?.message ?? "Erro ao iniciar pagamento");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startPix = async () => {
+    if (!user || items.length === 0) return;
+    setLoading(true);
+    setErr(null);
+    try {
+      await persistAddressAndProfile();
+      const token = session?.access_token;
+      if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+      const result = await createPixOrder({
+        headers: { Authorization: `Bearer ${token}` },
+        data: {
+          items: buildItemsPayload(),
+          shippingMethod: shipping,
+          address: buildAddressPayload(),
+          notes: buildNotes(),
+          couponCode: couponNormalized || null,
+        },
+      });
+      setPix(result);
+      setStep("pix");
+      clear();
+    } catch (e: any) {
+      setErr(e?.message ?? "Erro ao gerar Pix");
     } finally {
       setLoading(false);
     }
@@ -217,19 +287,19 @@ function CheckoutPage() {
     );
   }
 
-  if (step === "payment" && clientSecret) {
+  if (step === "card" && clientSecret) {
     return (
       <div className="min-h-screen bg-background">
         <header className="border-b border-border px-4 py-4">
           <div className="mx-auto max-w-3xl flex items-center justify-between">
             <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis</Link>
-            <button onClick={() => setStep("address")} className="text-xs text-muted-foreground hover:text-foreground">
+            <button onClick={() => setStep("method")} className="text-xs text-muted-foreground hover:text-foreground">
               ← Voltar
             </button>
           </div>
         </header>
         <main className="mx-auto max-w-3xl px-4 py-8">
-          <h1 className="text-2xl font-bold mb-6">Pagamento</h1>
+          <h1 className="text-2xl font-bold mb-6">Pagamento — Cartão</h1>
           <div id="checkout">
             <EmbeddedCheckoutProvider stripe={getStripe()} options={{ clientSecret }}>
               <EmbeddedCheckout />
@@ -240,6 +310,61 @@ function CheckoutPage() {
     );
   }
 
+  if (step === "pix" && pix) {
+    return <PixScreen pix={pix} />;
+  }
+
+  if (step === "method") {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="border-b border-border px-4 py-4">
+          <div className="mx-auto max-w-3xl flex items-center justify-between">
+            <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis</Link>
+            <button onClick={() => setStep("address")} className="text-xs text-muted-foreground hover:text-foreground">
+              ← Voltar
+            </button>
+          </div>
+        </header>
+        <main className="mx-auto max-w-2xl px-4 py-8 space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold">Forma de pagamento</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Total: <span className="font-semibold text-foreground">R$ {total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
+              <input type="radio" checked={method === "pix"} onChange={() => setMethod("pix")} className="mt-1" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold">⚡ Pix — aprovação imediata</p>
+                <p className="text-xs text-muted-foreground">QR Code via Mercado Pago. Estoque reservado por 5 min.</p>
+              </div>
+            </label>
+            <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
+              <input type="radio" checked={method === "card"} onChange={() => setMethod("card")} className="mt-1" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold">💳 Cartão de crédito</p>
+                <p className="text-xs text-muted-foreground">Pagamento seguro via Stripe.</p>
+              </div>
+            </label>
+          </div>
+
+          {err && <p className="text-sm text-red-600">{err}</p>}
+
+          <button
+            onClick={method === "pix" ? startPix : startStripe}
+            disabled={loading}
+            className="w-full rounded-full bg-foreground py-3 text-sm font-semibold uppercase tracking-wide text-background hover:bg-foreground/90 disabled:opacity-50"
+          >
+            {loading ? "Processando..." : method === "pix" ? "Gerar QR Code Pix" : "Pagar com cartão"}
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  // step === "address"
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border px-4 py-4">
@@ -250,7 +375,7 @@ function CheckoutPage() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-8 grid lg:grid-cols-[1fr_360px] gap-8">
-        <form onSubmit={handleProceed} className="space-y-6">
+        <form onSubmit={handleAddressSubmit} className="space-y-6">
           <h1 className="text-2xl font-bold">Endereço de entrega</h1>
 
           <div className="grid gap-4">
@@ -260,14 +385,7 @@ function CheckoutPage() {
               <Field label="Telefone / WhatsApp" required value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(11) 90000-0000" />
             </div>
             <div className="grid sm:grid-cols-[160px_1fr] gap-4">
-              <Field
-                label="CEP"
-                required
-                value={form.cep}
-                onChange={(v) => setForm({ ...form, cep: v })}
-                onBlur={() => lookupCep(form.cep)}
-                placeholder="00000-000"
-              />
+              <Field label="CEP" required value={form.cep} onChange={(v) => setForm({ ...form, cep: v })} onBlur={() => lookupCep(form.cep)} placeholder="00000-000" />
               <Field label="Rua / Logradouro" required value={form.street} onChange={(v) => setForm({ ...form, street: v })} />
             </div>
             <div className="grid sm:grid-cols-[120px_1fr] gap-4">
@@ -288,7 +406,7 @@ function CheckoutPage() {
                 <input type="radio" name="ship" checked={shipping === "fixed"} onChange={() => setShipping("fixed")} className="mt-1" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold">🚚 Mini Envios — R$ 25,00</p>
-                  <p className="text-xs text-muted-foreground">Envio rastreado pelos Correios.</p>
+                  <p className="text-xs text-muted-foreground">Envio rastreado pelos Correios — frete fixo Brasil todo.</p>
                 </div>
               </label>
               <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
@@ -303,9 +421,7 @@ function CheckoutPage() {
 
           <div>
             <h2 className="text-lg font-bold mb-1">Conte pra gente! ⭐</h2>
-            <p className="text-xs text-muted-foreground mb-3">
-              Quais são seus 3 Pokémons favoritos? (opcional — adoramos saber!)
-            </p>
+            <p className="text-xs text-muted-foreground mb-3">Quais são seus 3 Pokémons favoritos? (opcional)</p>
             <div className="grid sm:grid-cols-3 gap-3">
               <Field label="Favorito #1" value={form.favPokemon1} onChange={(v) => setForm({ ...form, favPokemon1: v })} placeholder="Ex: Pikachu" />
               <Field label="Favorito #2" value={form.favPokemon2} onChange={(v) => setForm({ ...form, favPokemon2: v })} placeholder="Ex: Charizard" />
@@ -318,11 +434,11 @@ function CheckoutPage() {
             <input
               value={form.couponCode}
               onChange={(e) => setForm({ ...form, couponCode: e.target.value.toUpperCase() })}
-              placeholder="Insira seu código"
+              placeholder="Ex: PRIMEIRACOMPRA10"
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-foreground"
             />
-            {couponValid && (
-              <p className="mt-1 text-xs text-green-600 font-semibold">✓ Cupom aplicado: 30% de desconto (válido apenas para administradores).</p>
+            {couponInfo.valid && (
+              <p className="mt-1 text-xs text-green-600 font-semibold">✓ Cupom aplicado: {couponInfo.label}</p>
             )}
           </div>
 
@@ -340,10 +456,9 @@ function CheckoutPage() {
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full rounded-full bg-foreground py-3 text-sm font-semibold uppercase tracking-wide text-background hover:bg-foreground/90 disabled:opacity-50"
+            className="w-full rounded-full bg-foreground py-3 text-sm font-semibold uppercase tracking-wide text-background hover:bg-foreground/90"
           >
-            {loading ? "Processando..." : `Ir para pagamento — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+            Continuar — R$ {total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
           </button>
         </form>
 
@@ -368,9 +483,9 @@ function CheckoutPage() {
               <span className="text-muted-foreground">Subtotal</span>
               <span className="tabular-nums">R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
             </div>
-            {couponValid && (
+            {couponInfo.valid && (
               <div className="flex justify-between text-green-600">
-                <span>Desconto (POKEAGIOTAGEM −30%)</span>
+                <span>Desconto −{couponInfo.percent}%</span>
                 <span className="tabular-nums">− R$ {discount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
             )}
@@ -386,6 +501,138 @@ function CheckoutPage() {
             </div>
           </div>
         </aside>
+      </main>
+    </div>
+  );
+}
+
+function PixScreen({ pix }: { pix: PixState }) {
+  const { session } = useAuth();
+  const nav = useNavigate();
+  const [copied, setCopied] = useState(false);
+  const [status, setStatus] = useState<"pending" | "paid" | "cancelled">("pending");
+  const [secondsLeft, setSecondsLeft] = useState(() => {
+    return Math.max(0, Math.floor((new Date(pix.expiresAt).getTime() - Date.now()) / 1000));
+  });
+  const polling = useRef(true);
+
+  useEffect(() => {
+    polling.current = true;
+    const tick = async () => {
+      if (!polling.current || !session?.access_token) return;
+      try {
+        const r = await checkPixOrderStatus({
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          data: { orderId: pix.orderId },
+        });
+        if (r.status === "paid") {
+          polling.current = false;
+          setStatus("paid");
+          setTimeout(() => nav({ to: "/checkout/return", search: { session_id: pix.orderId } }), 1500);
+        } else if (r.status === "cancelled") {
+          polling.current = false;
+          setStatus("cancelled");
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    tick();
+    const interval = setInterval(tick, 5000);
+    return () => {
+      polling.current = false;
+      clearInterval(interval);
+    };
+  }, [pix.orderId, session, nav]);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setSecondsLeft((s) => Math.max(0, s - 1));
+    }, 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const copy = async () => {
+    await navigator.clipboard.writeText(pix.qrCode);
+    setCopied(true);
+    toast.success("Código Pix copiado!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
+  const total = (pix.totalCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border px-4 py-4">
+        <div className="mx-auto max-w-2xl flex items-center justify-between">
+          <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis</Link>
+        </div>
+      </header>
+      <main className="mx-auto max-w-xl px-4 py-8 space-y-6">
+        <div className="text-center">
+          <QrCode className="h-8 w-8 mx-auto mb-2" />
+          <h1 className="text-2xl font-bold">Pague com Pix</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Total: <span className="font-semibold text-foreground">R$ {total}</span>
+          </p>
+        </div>
+
+        {status === "paid" && (
+          <div className="rounded-lg bg-green-50 border border-green-200 p-4 text-center">
+            <p className="text-sm font-semibold text-green-800">✓ Pagamento confirmado! Redirecionando...</p>
+          </div>
+        )}
+
+        {status === "cancelled" && (
+          <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-center">
+            <p className="text-sm font-semibold text-red-800">Este Pix foi cancelado ou expirou.</p>
+            <Link to="/" className="mt-2 inline-block text-xs underline">Voltar ao catálogo</Link>
+          </div>
+        )}
+
+        {status === "pending" && (
+          <>
+            <div className="rounded-xl border border-border p-6 bg-card flex flex-col items-center">
+              <img
+                src={`data:image/png;base64,${pix.qrCodeBase64}`}
+                alt="QR Code Pix"
+                className="h-64 w-64 rounded-lg bg-white p-2"
+              />
+              <p className="mt-3 text-xs text-muted-foreground">
+                Expira em <span className="font-mono font-semibold text-foreground">{mm}:{ss}</span>
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium uppercase tracking-wide mb-2">
+                Pix Copia e Cola
+              </label>
+              <div className="flex gap-2">
+                <textarea
+                  readOnly
+                  value={pix.qrCode}
+                  rows={3}
+                  className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-xs font-mono resize-none"
+                />
+                <button
+                  onClick={copy}
+                  className="shrink-0 rounded-md bg-foreground text-background px-4 text-xs font-semibold hover:bg-foreground/90 flex items-center gap-1"
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? "Copiado" : "Copiar"}
+                </button>
+              </div>
+            </div>
+
+            <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+              <li>Abra o app do seu banco</li>
+              <li>Escaneie o QR ou cole o código Pix</li>
+              <li>Confirme o pagamento — a confirmação chega aqui automaticamente</li>
+            </ol>
+          </>
+        )}
       </main>
     </div>
   );

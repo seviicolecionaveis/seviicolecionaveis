@@ -273,15 +273,21 @@ export type Database = {
           discount_cents: number
           email: string
           id: string
+          mercadopago_payment_id: string | null
           neighborhood: string
           notes: string | null
           number: string
+          payment_method: string
           phone: string | null
+          pix_expires_at: string | null
+          pix_qr_code: string | null
+          pix_qr_code_base64: string | null
           recipient_name: string
           shipping_cost_cents: number
           shipping_method: string
           state: string
           status: string
+          stock_reservation_expires_at: string | null
           street: string
           stripe_payment_intent: string | null
           stripe_session_id: string | null
@@ -300,15 +306,21 @@ export type Database = {
           discount_cents?: number
           email: string
           id?: string
+          mercadopago_payment_id?: string | null
           neighborhood: string
           notes?: string | null
           number: string
+          payment_method?: string
           phone?: string | null
+          pix_expires_at?: string | null
+          pix_qr_code?: string | null
+          pix_qr_code_base64?: string | null
           recipient_name: string
           shipping_cost_cents?: number
           shipping_method: string
           state: string
           status?: string
+          stock_reservation_expires_at?: string | null
           street: string
           stripe_payment_intent?: string | null
           stripe_session_id?: string | null
@@ -327,15 +339,21 @@ export type Database = {
           discount_cents?: number
           email?: string
           id?: string
+          mercadopago_payment_id?: string | null
           neighborhood?: string
           notes?: string | null
           number?: string
+          payment_method?: string
           phone?: string | null
+          pix_expires_at?: string | null
+          pix_qr_code?: string | null
+          pix_qr_code_base64?: string | null
           recipient_name?: string
           shipping_cost_cents?: number
           shipping_method?: string
           state?: string
           status?: string
+          stock_reservation_expires_at?: string | null
           street?: string
           stripe_payment_intent?: string | null
           stripe_session_id?: string | null
@@ -412,6 +430,51 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_reservations: {
+        Row: {
+          card_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          order_id: string | null
+          quantity: number
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          order_id?: string | null
+          quantity: number
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          order_id?: string | null
+          quantity?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_reservations_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -459,6 +522,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      available_stock: { Args: { _card_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -466,6 +530,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_user_purchased: { Args: { _user_id: string }; Returns: boolean }
       increment_card_view: { Args: { _card_key: string }; Returns: undefined }
     }
     Enums: {
