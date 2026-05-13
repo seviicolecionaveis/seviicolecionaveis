@@ -80,6 +80,34 @@ function AuthPage() {
               />
             </div>
           )}
+          {mode === "signup" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium uppercase tracking-wide mb-1">WhatsApp</label>
+                <input
+                  required
+                  value={whatsapp}
+                  onChange={(e) => {
+                    const d = e.target.value.replace(/\D/g, "").slice(0, 11);
+                    const masked = d.length <= 2 ? d : d.length <= 7 ? `(${d.slice(0,2)}) ${d.slice(2)}` : `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+                    setWhatsapp(masked);
+                  }}
+                  placeholder="(11) 99999-9999"
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-foreground"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium uppercase tracking-wide mb-1">Nascimento</label>
+                <input
+                  type="date"
+                  required
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-foreground"
+                />
+              </div>
+            </div>
+          )}
           <div>
             <label className="block text-xs font-medium uppercase tracking-wide mb-1">E-mail</label>
             <input
