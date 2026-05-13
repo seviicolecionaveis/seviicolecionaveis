@@ -94,7 +94,7 @@ function Index() {
       }
       if (numQ && !c.number.toLowerCase().includes(numQ)) return false;
       if (q) {
-        const hay = `${c.name} ${c.collection}`.toLowerCase();
+        const hay = `${c.name} ${c.collection} ${c.number}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
