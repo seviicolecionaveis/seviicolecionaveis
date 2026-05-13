@@ -9,7 +9,16 @@ import type { Card } from "@/data/cards";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/favoritos")({
-  head: () => ({ meta: [{ title: "Meus Favoritos — Sevii Colecionáveis" }] }),
+  head: () => ({
+    meta: [
+      { title: "Meus Favoritos — Sevii Colecionáveis" },
+      { name: "description", content: "Suas cartas Pokémon favoritas salvas na Sevii Colecionáveis. Acompanhe disponibilidade e preços das cartas que mais te interessam." },
+      { property: "og:title", content: "Meus Favoritos — Sevii Colecionáveis" },
+      { property: "og:description", content: "Cartas Pokémon que você salvou para acompanhar." },
+      { property: "og:url", content: "https://seviicolecionaveis.lovable.app/favoritos" },
+    ],
+    links: [{ rel: "canonical", href: "https://seviicolecionaveis.lovable.app/favoritos" }],
+  }),
   component: FavoritesPage,
 });
 
