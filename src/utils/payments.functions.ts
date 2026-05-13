@@ -181,7 +181,9 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
   return resolved;
 }
 
-async function ensureAvailableStock(items: { cardId: string; quantity: number; name: string; finish: string }[]) {
+async function ensureAvailableStock(
+  items: { cardId: string; quantity: number; name: string; finish: string }[],
+) {
   for (const it of items) {
     if (isVirtualItem(it)) continue;
     const { data, error } = await supabaseAdmin.rpc("available_stock", { _card_id: it.cardId });
@@ -295,7 +297,8 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
 
     await createReservations(userId, order.id, items, reservationExpires);
 
-    const discountMultiplier = discountCents > 0 ? (subtotalCents - discountCents) / subtotalCents : 1;
+    const discountMultiplier =
+      discountCents > 0 ? (subtotalCents - discountCents) / subtotalCents : 1;
     const lineItems = data.items.map((i) => {
       const original = Math.round(i.unitPrice * 100);
       const discounted = Math.round(original * discountMultiplier);
@@ -343,10 +346,7 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     });
 
-    await supabaseAdmin
-      .from("orders")
-      .update({ stripe_session_id: session.id })
-      .eq("id", order.id);
+    await supabaseAdmin.from("orders").update({ stripe_session_id: session.id }).eq("id", order.id);
 
     return { clientSecret: session.client_secret, orderId: order.id };
   });
@@ -433,9 +433,7 @@ export const createPixOrder = createServerFn({ method: "POST" })
     await createReservations(userId, order.id, items, reservationExpires);
 
     // Build notification URL — must be a public absolute URL
-    const baseUrl =
-      process.env.PUBLIC_SITE_URL ??
-      "https://seviicolecionaveis.lovable.app";
+    const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
     const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
 
     const [firstName, ...rest] = data.address.recipientName.trim().split(/\s+/);
@@ -476,9 +474,7 @@ export const createPixOrder = createServerFn({ method: "POST" })
 
 export const checkPixOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) =>
-    z.object({ orderId: z.string().uuid() }).parse(data),
-  )
+  .inputValidator((data: unknown) => z.object({ orderId: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { userId } = context;
 
@@ -506,4 +502,3 @@ export const checkPixOrderStatus = createServerFn({ method: "POST" })
 
     return { status: order.status as "pending" | "cancelled" | "paid" };
   });
-
