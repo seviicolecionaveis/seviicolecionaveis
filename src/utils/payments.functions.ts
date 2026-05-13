@@ -375,7 +375,7 @@ export const createPixOrder = createServerFn({ method: "POST" })
     const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (itemsErr) throw new Error(itemsErr.message);
 
-    await createReservations(userId, order.id, data.items, reservationExpires);
+    await createReservations(userId, order.id, items, reservationExpires);
 
     // Build notification URL — must be a public absolute URL
     const baseUrl =
