@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 export interface CartItem {
   id: string; // unique key: cardId|finish|language|condition
