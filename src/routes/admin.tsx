@@ -32,10 +32,13 @@ function AdminPage() {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const nav = useNavigate();
   const location = useLocation();
+  const search = Route.useSearch();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
   const isOrdersRoute = location.pathname === "/admin";
+  const focusId = search.focus;
+  const focusRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!authLoading) {
