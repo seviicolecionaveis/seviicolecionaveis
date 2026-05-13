@@ -172,7 +172,11 @@ function AdminPage() {
         ) : (
           <div className="space-y-4">
             {filtered.map((o) => (
-              <div key={o.id} className="rounded-xl border border-border p-5 bg-card">
+              <div
+                key={o.id}
+                ref={o.id === focusId ? focusRef : undefined}
+                className={`rounded-xl border p-5 bg-card transition ${o.id === focusId ? "border-orange-500 ring-2 ring-orange-300" : "border-border"}`}
+              >
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                   <div>
                     <p className="text-xs text-muted-foreground font-mono">#{o.id.slice(0, 8)}</p>
