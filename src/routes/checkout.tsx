@@ -8,6 +8,7 @@ import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { createOrderCheckout, createPixOrder, checkPixOrderStatus } from "@/utils/payments.functions";
 import { toast } from "sonner";
 import { Copy, Check, QrCode } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — Sevii Colecionáveis" }] }),
@@ -211,6 +212,18 @@ function CheckoutPage() {
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErr(null);
+    trackEvent("begin_checkout", {
+      currency: "BRL",
+      value: subtotal,
+      items: items.map((i) => ({
+        item_id: i.id,
+        item_name: i.name,
+        item_category: i.collection,
+        item_variant: `${i.finish}/${i.language}/${i.condition}`,
+        price: i.unitPrice,
+        quantity: i.quantity,
+      })),
+    });
     setStep("method");
   };
 

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 export interface CartItem {
   id: string; // unique key: cardId|finish|language|condition
@@ -52,6 +53,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return prev.map((p) => (p.id === item.id ? { ...p, quantity: newQty } : p));
       }
       return [...prev, { ...item, quantity: Math.min(qty, item.maxStock) }];
+    });
+    trackEvent("add_to_cart", {
+      currency: "BRL",
+      value: item.unitPrice * qty,
+      items: [{
+        item_id: item.id,
+        item_name: item.name,
+        item_category: item.collection,
+        item_variant: `${item.finish}/${item.language}/${item.condition}`,
+        price: item.unitPrice,
+        quantity: qty,
+      }],
     });
   };
 

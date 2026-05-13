@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Clock, XCircle, Package, Truck } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
+
+const PURCHASE_TRACKED_KEY = "sevii_ga_purchase_tracked";
 
 export const Route = createFileRoute("/orders/$orderId")({
   head: () => ({ meta: [{ title: "Pedido — Sevii Colecionáveis" }] }),
@@ -68,6 +71,34 @@ function OrderDetailPage() {
       clearTimeout(stop);
     };
   }, [user, orderId]);
+
+  // GA4 purchase — disparado apenas uma vez quando o pedido fica pago
+  useEffect(() => {
+    if (!order || order.status !== "paid") return;
+    try {
+      const tracked = JSON.parse(sessionStorage.getItem(PURCHASE_TRACKED_KEY) ?? "[]") as string[];
+      if (tracked.includes(order.id)) return;
+      trackEvent("purchase", {
+        transaction_id: order.id,
+        currency: "BRL",
+        value: (order.total_cents ?? 0) / 100,
+        shipping: (order.shipping_cost_cents ?? 0) / 100,
+        coupon: order.coupon_code ?? undefined,
+        items: (order.order_items ?? []).map((it: any) => ({
+          item_id: it.card_id,
+          item_name: it.card_name,
+          item_category: it.collection ?? undefined,
+          item_variant: `${it.finish ?? ""}/${it.language ?? ""}/${it.condition ?? ""}`,
+          price: (it.unit_price_cents ?? 0) / 100,
+          quantity: it.quantity,
+        })),
+      });
+      tracked.push(order.id);
+      sessionStorage.setItem(PURCHASE_TRACKED_KEY, JSON.stringify(tracked.slice(-20)));
+    } catch {
+      // ignore storage errors
+    }
+  }, [order]);
 
   if (authLoading || loading) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando pedido...</div>;

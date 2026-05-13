@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { CardModal } from "@/components/catalog/CardModal";
 import { cardSlug } from "@/lib/slug";
+import { trackEvent } from "@/lib/analytics";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/carta/$slug")({
@@ -43,6 +44,25 @@ function CardDetailPage() {
   useEffect(() => {
     if (closed) nav({ to: "/" });
   }, [closed, nav]);
+
+  // GA4 view_item
+  useEffect(() => {
+    if (!card) return;
+    const variants: any[] = (card as any).variants ?? [];
+    const minPrice = variants.length
+      ? Math.min(...variants.map((v: any) => v.price ?? Infinity).filter((n: number) => Number.isFinite(n)))
+      : undefined;
+    trackEvent("view_item", {
+      currency: "BRL",
+      value: minPrice,
+      items: [{
+        item_id: `${card.name}__${card.collection}__${card.number}`,
+        item_name: card.name,
+        item_category: card.collection,
+        price: minPrice,
+      }],
+    });
+  }, [card]);
 
   return (
     <div className="min-h-screen text-foreground">
