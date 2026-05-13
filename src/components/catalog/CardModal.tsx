@@ -52,7 +52,39 @@ const finishDot: Record<Finish, string> = {
 export function CardModal({ card, onClose }: Props) {
   const { add } = useCart();
   const { prices, loading: pricesLoading } = useCardPrices();
+  const { has, toggle } = useWishlist();
   const [added, setAdded] = useState<string | null>(null);
+  const [zoomed, setZoomed] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  useEffect(() => {
+    if (card) {
+      trackCardView(card.id);
+      setZoomed(false);
+      setShareCopied(false);
+    }
+  }, [card]);
+
+  const handleShare = async () => {
+    if (!card) return;
+    const url = `${window.location.origin}/carta/${cardSlug(card.name, card.collection, card.number)}`;
+    const text = `${card.name} (${card.collection} #${card.number}) — Sevii Colecionáveis`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: card.name, text, url });
+        return;
+      } catch {
+        // user cancelled — fall through to copy
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    } catch {
+      window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, "_blank");
+    }
+  };
 
   const resolvePrice = (finish: Finish, language: string): number | null => {
     if (!card) return null;
