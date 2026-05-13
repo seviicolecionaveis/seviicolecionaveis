@@ -68,6 +68,20 @@ function OrderDetailPage() {
     if (!authLoading && !user) nav({ to: "/auth" });
   }, [authLoading, user, nav]);
 
+  // Notifica quando o status muda (ex: admin aprova cancelamento)
+  useEffect(() => {
+    if (!order) return;
+    const prev = (window as any).__lastOrderStatus?.[order.id];
+    if (prev && prev !== order.status) {
+      if (order.status === "cancelled") {
+        toast.success("Seu pedido foi cancelado.");
+      } else if (prev === "cancellation_requested" && order.status !== "cancelled") {
+        toast.info("Sua solicitação de cancelamento foi recusada.");
+      }
+    }
+    (window as any).__lastOrderStatus = { ...((window as any).__lastOrderStatus ?? {}), [order.id]: order.status };
+  }, [order?.status, order?.id]);
+
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -83,13 +97,24 @@ function OrderDetailPage() {
       }
     };
     load();
-    // Poll a few seconds in case webhook ainda não atualizou status
-    const interval = setInterval(load, 4000);
-    const stop = setTimeout(() => clearInterval(interval), 30000);
+
+    // Realtime: refetch quando o pedido for atualizado (admin aprovar cancelamento, etc.)
+    const channel = supabase
+      .channel(`order-${orderId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${orderId}` },
+        () => { load(); },
+      )
+      .subscribe();
+
+    // Polling de segurança (a cada 8s) caso o realtime caia
+    const interval = setInterval(load, 8000);
+
     return () => {
       cancelled = true;
       clearInterval(interval);
-      clearTimeout(stop);
+      supabase.removeChannel(channel);
     };
   }, [user, orderId]);
 
