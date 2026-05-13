@@ -211,6 +211,18 @@ function CheckoutPage() {
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErr(null);
+    trackEvent("begin_checkout", {
+      currency: "BRL",
+      value: subtotal,
+      items: items.map((i) => ({
+        item_id: i.id,
+        item_name: i.name,
+        item_category: i.collection,
+        item_variant: `${i.finish}/${i.language}/${i.condition}`,
+        price: i.unitPrice,
+        quantity: i.quantity,
+      })),
+    });
     setStep("method");
   };
 
