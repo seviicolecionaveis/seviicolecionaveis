@@ -5,7 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/orders/")({
-  head: () => ({ meta: [{ title: "Meus pedidos — Sevii Colecionáveis" }] }),
+  head: () => ({
+    meta: [
+      { title: "Meus pedidos — Sevii Colecionáveis" },
+      { name: "description", content: "Histórico e status dos seus pedidos de cartas Pokémon na Sevii Colecionáveis." },
+      { property: "og:title", content: "Meus pedidos — Sevii Colecionáveis" },
+      { property: "og:description", content: "Acompanhe seus pedidos e o status de envio." },
+      { property: "og:url", content: "https://seviicolecionaveis.lovable.app/orders" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: OrdersPage,
 });
 
