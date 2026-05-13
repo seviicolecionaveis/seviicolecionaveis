@@ -122,6 +122,19 @@ export function CardItem({ card, onClick }: Props) {
           </>
         )}
       </div>
-    </button>
+      </button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          toggle(card.id);
+        }}
+        aria-label={isFav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+        className="absolute top-3 right-3 grid h-8 w-8 place-items-center rounded-full bg-background/90 backdrop-blur shadow-sm hover:bg-background transition"
+      >
+        <Heart
+          className={`h-4 w-4 ${isFav ? "fill-brand-gold text-brand-gold" : "text-foreground"}`}
+        />
+      </button>
+    </div>
   );
 }
