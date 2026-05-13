@@ -597,6 +597,7 @@ export type Database = {
         | "Illustration Rare"
         | "Ultra Rara"
         | "Black Star Promo"
+        | "Double Rare"
       card_language:
         | "Português"
         | "Inglês"
@@ -746,6 +747,7 @@ export const Constants = {
         "Illustration Rare",
         "Ultra Rara",
         "Black Star Promo",
+        "Double Rare",
       ],
       card_language: [
         "Português",
