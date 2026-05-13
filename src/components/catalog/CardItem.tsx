@@ -1,5 +1,8 @@
 import { type Card, type Finish } from "@/data/cards";
 import { priceLookupKey, useCardPrices } from "@/hooks/useCardPrices";
+import { cardCreatedAt } from "@/hooks/useCardsCatalog";
+import { useWishlist } from "@/hooks/useWishlist";
+import { Heart } from "lucide-react";
 
 const finishBadge: Record<Finish, string> = {
   Normal: "bg-background/90 text-foreground",
