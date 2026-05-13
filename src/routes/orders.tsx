@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/orders")({
   head: () => ({ meta: [{ title: "Meus pedidos — Sevii Colecionáveis" }] }),
@@ -38,7 +39,7 @@ function OrdersPage() {
     (async () => {
       const { data } = await supabase
         .from("orders")
-        .select("*, order_items(*)")
+        .select("id, created_at, status, total_cents, order_items(id, card_name, card_image, quantity)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       setOrders(data ?? []);
@@ -63,52 +64,66 @@ function OrdersPage() {
         {orders.length === 0 ? (
           <p className="text-sm text-muted-foreground">Você ainda não fez nenhum pedido.</p>
         ) : (
-          <div className="space-y-4">
-            {orders.map((o) => (
-              <Link
-                key={o.id}
-                to="/orders/$orderId"
-                params={{ orderId: o.id }}
-                className="block rounded-xl border border-border p-5 bg-card hover:border-foreground/40 transition"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                  <div>
-                    <p className="text-xs text-muted-foreground font-mono">#{o.id.slice(0, 8)}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(o.created_at).toLocaleString("pt-BR")}
+          <div className="space-y-3">
+            {orders.map((o) => {
+              const items = o.order_items ?? [];
+              const totalQty = items.reduce((s: number, it: any) => s + (it.quantity ?? 0), 0);
+              const visible = items.slice(0, 5);
+              const extra = items.length - visible.length;
+              return (
+                <Link
+                  key={o.id}
+                  to="/orders/$orderId"
+                  params={{ orderId: o.id }}
+                  className="group flex items-center gap-4 rounded-xl border border-border p-4 bg-card hover:border-foreground/40 hover:shadow-sm transition"
+                >
+                  <div className="flex shrink-0 -space-x-2">
+                    {visible.map((it: any) => (
+                      <div
+                        key={it.id}
+                        className="h-16 w-12 rounded-md overflow-hidden bg-secondary border-2 border-card ring-1 ring-border"
+                      >
+                        {it.card_image ? (
+                          <img
+                            src={it.card_image}
+                            alt={it.card_name}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                            }}
+                          />
+                        ) : null}
+                      </div>
+                    ))}
+                    {extra > 0 && (
+                      <div className="h-16 w-12 rounded-md border-2 border-card ring-1 ring-border bg-secondary grid place-items-center text-xs font-semibold text-muted-foreground">
+                        +{extra}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-xs font-mono text-muted-foreground">#{o.id.slice(0, 8)}</p>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide ${STATUS_COLOR[o.status] ?? "bg-secondary"}`}>
+                        {STATUS_LABEL[o.status] ?? o.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(o.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                      {" · "}
+                      {totalQty} {totalQty === 1 ? "item" : "itens"}
+                    </p>
+                    <p className="text-base font-bold tabular-nums mt-1">
+                      R$ {(o.total_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </p>
                   </div>
-                  <span className={`text-[10px] px-2 py-1 rounded-full font-semibold uppercase tracking-wide ${STATUS_COLOR[o.status] ?? "bg-secondary"}`}>
-                    {STATUS_LABEL[o.status] ?? o.status}
-                  </span>
-                </div>
-                <div className="flex gap-2 mb-3 overflow-x-auto">
-                  {o.order_items?.slice(0, 6).map((it: any) => (
-                    <div key={it.id} className="h-16 w-12 shrink-0 rounded overflow-hidden bg-secondary border border-border">
-                      {it.card_image ? (
-                        <img src={it.card_image} alt={it.card_name} className="h-full w-full object-cover" loading="lazy" />
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-                <ul className="text-sm space-y-1 mb-3">
-                  {o.order_items?.map((it: any) => (
-                    <li key={it.id} className="flex justify-between gap-2">
-                      <span className="truncate">{it.quantity}× {it.card_name} <span className="text-muted-foreground text-xs">({it.finish}, {it.language}{it.condition ? `, ${it.condition}` : ""})</span></span>
-                      <span className="tabular-nums shrink-0">R$ {(it.unit_price_cents * it.quantity / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex justify-between text-sm border-t border-border pt-3">
-                  <span className="text-muted-foreground">
-                    {o.shipping_method === "fixed" ? `Frete: R$ ${(o.shipping_cost_cents / 100).toFixed(2).replace(".", ",")}` : "Envio a combinar"}
-                  </span>
-                  <span className="font-bold tabular-nums">
-                    Total: R$ {(o.total_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-              </Link>
-            ))}
+
+                  <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 group-hover:translate-x-0.5 transition" />
+                </Link>
+              );
+            })}
           </div>
         )}
       </main>
