@@ -2,8 +2,11 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { type Card, type Condition, type Finish, type FinishVariant, type LanguageVariant, CONDITION_LABEL } from "@/data/cards";
 import { useCart } from "@/hooks/useCart";
 import { useCardPrices, priceLookupKey } from "@/hooks/useCardPrices";
-import { Plus, Check } from "lucide-react";
-import { useState } from "react";
+import { useWishlist } from "@/hooks/useWishlist";
+import { trackCardView } from "@/hooks/useCardStats";
+import { cardSlug } from "@/lib/slug";
+import { Plus, Check, Heart, Share2, ZoomIn, ZoomOut } from "lucide-react";
+import { useEffect, useState } from "react";
 
 // Para cartas Pokémon, o acabamento "Ímã" é um produto interno disponível
 // automaticamente: R$10 se a carta possui Foil, senão R$9 se possui Normal.
