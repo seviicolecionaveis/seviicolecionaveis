@@ -186,9 +186,13 @@ async function ensureAvailableStock(
 ) {
   for (const it of items) {
     if (isVirtualItem(it)) continue;
-    const { data, error } = await supabaseAdmin.rpc("available_stock", { _card_id: it.cardId });
+    const { data, error } = await supabaseAdmin
+      .from("cards")
+      .select("stock")
+      .eq("id", it.cardId)
+      .maybeSingle();
     if (error) throw new Error(error.message);
-    const available = Number(data ?? 0);
+    const available = Number(data?.stock ?? 0);
     if (available < it.quantity) {
       throw new Error(
         `Estoque insuficiente para "${it.name}". Disponível: ${available}, solicitado: ${it.quantity}.`,
