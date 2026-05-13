@@ -83,13 +83,24 @@ function OrderDetailPage() {
       }
     };
     load();
-    // Poll a few seconds in case webhook ainda não atualizou status
-    const interval = setInterval(load, 4000);
-    const stop = setTimeout(() => clearInterval(interval), 30000);
+
+    // Realtime: refetch quando o pedido for atualizado (admin aprovar cancelamento, etc.)
+    const channel = supabase
+      .channel(`order-${orderId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${orderId}` },
+        () => { load(); },
+      )
+      .subscribe();
+
+    // Polling de segurança (a cada 8s) caso o realtime caia
+    const interval = setInterval(load, 8000);
+
     return () => {
       cancelled = true;
       clearInterval(interval);
-      clearTimeout(stop);
+      supabase.removeChannel(channel);
     };
   }, [user, orderId]);
 
