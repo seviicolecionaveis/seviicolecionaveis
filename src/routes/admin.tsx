@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -8,9 +8,13 @@ import {
   adminCancelOrder,
 } from "@/utils/orders.functions";
 import { toast } from "sonner";
+import { AdminCancellationBell } from "@/components/AdminCancellationBell";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Sevii Colecionáveis" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    focus: typeof search.focus === "string" ? search.focus : undefined,
+  }),
   component: AdminPage,
 });
 
