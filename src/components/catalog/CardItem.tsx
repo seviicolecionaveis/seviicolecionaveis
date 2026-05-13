@@ -80,7 +80,7 @@ export function CardItem({ card, onClick }: Props) {
       </div>
       <div className="mt-4 flex justify-between gap-2">
         <div className="min-w-0">
-          <h4 className="truncate text-sm font-semibold">{card.name}</h4>
+          <h3 className="truncate text-sm font-semibold">{card.name}</h3>
           <p className="truncate text-xs text-muted-foreground uppercase">
             {card.collection}
           </p>
