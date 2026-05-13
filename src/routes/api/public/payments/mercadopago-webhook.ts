@@ -1,6 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getPixPayment } from "@/lib/mercadopago.server";
-import { markOrderPaid, cancelOrder } from "@/lib/orders.server";
 
 // Mercado Pago notification format:
 // https://www.mercadopago.com.br/developers/pt/docs/your-integrations/notifications/webhooks
@@ -34,6 +32,10 @@ export const Route = createFileRoute("/api/public/payments/mercadopago-webhook")
             return Response.json({ received: true, ignored: "no payment id" });
           }
 
+          const [{ getPixPayment }, { markOrderPaid, cancelOrder }] = await Promise.all([
+            import("@/lib/mercadopago.server"),
+            import("@/lib/orders.server"),
+          ]);
           const remote = await getPixPayment(paymentId);
           const orderId = remote.external_reference;
           if (!orderId) {
