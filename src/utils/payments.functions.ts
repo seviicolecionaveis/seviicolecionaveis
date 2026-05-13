@@ -248,7 +248,7 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
     const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (itemsErr) throw new Error(itemsErr.message);
 
-    await createReservations(userId, order.id, data.items, reservationExpires);
+    await createReservations(userId, order.id, items, reservationExpires);
 
     const discountMultiplier = discountCents > 0 ? (subtotalCents - discountCents) / subtotalCents : 1;
     const lineItems = data.items.map((i) => {
