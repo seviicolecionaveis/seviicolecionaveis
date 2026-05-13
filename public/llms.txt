@@ -1,0 +1,15 @@
+# Sevii Colecionáveis
+
+> Loja online brasileira de cartas Pokémon colecionáveis com catálogo completo, filtros avançados (tipo, coleção, condição, idioma e preço) e estoque em tempo real.
+
+## Páginas
+
+- [Catálogo](/): Catálogo completo de cartas Pokémon com galeria visual e filtros.
+- [Favoritos](/favoritos): Lista de cartas salvas pelo usuário.
+- [Entrar](/auth): Login e cadastro de clientes.
+
+## Conteúdo dinâmico
+
+- /carta/{slug}: Página de detalhes de cada carta com preço, condição e idiomas disponíveis.
+- /colecao/{slug}: Página de cada coleção com todas as cartas em estoque.
+- /sitemap.xml: Lista completa de todas as URLs públicas.

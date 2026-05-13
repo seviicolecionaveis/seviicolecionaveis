@@ -180,6 +180,9 @@ function Index() {
             <img
               src={logoUrl}
               alt="Sevii Colecionáveis"
+              fetchPriority="high"
+              width={224}
+              height={56}
               className="h-12 w-auto sm:h-14"
             />
             <span className="sr-only">Sevii Colecionáveis</span>
@@ -187,8 +190,11 @@ function Index() {
 
           <div className="relative hidden flex-1 max-w-md md:block">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <label htmlFor="catalog-search" className="sr-only">Buscar cartas</label>
             <input
+              id="catalog-search"
               type="search"
+              aria-label="Buscar cartas no catálogo"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar por nome, coleção, numeração..."
@@ -210,8 +216,11 @@ function Index() {
         <div className="md:hidden border-t border-border px-4 py-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <label htmlFor="catalog-search-mobile" className="sr-only">Buscar cartas</label>
             <input
+              id="catalog-search-mobile"
               type="search"
+              aria-label="Buscar cartas no catálogo"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar..."
@@ -222,6 +231,8 @@ function Index() {
       </header>
 
       <BannerCarousel />
+
+      <h1 className="sr-only">Catálogo de Cartas Pokémon — Sevii Colecionáveis</h1>
 
       <main className="mx-auto max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:flex">
         {/* Sidebar desktop */}

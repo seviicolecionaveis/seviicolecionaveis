@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -30,6 +31,11 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicPaymentsMercadopagoWebhookRouteImport } from './routes/api/public/payments/mercadopago-webhook'
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrdersRoute = OrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRouteWithChildren
   '/favoritos': typeof FavoritosRoute
   '/orders': typeof OrdersRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cards': typeof AdminCardsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/favoritos': typeof FavoritosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cards': typeof AdminCardsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -185,6 +193,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRouteWithChildren
   '/favoritos': typeof FavoritosRoute
   '/orders': typeof OrdersRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cards': typeof AdminCardsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/favoritos'
     | '/orders'
+    | '/sitemap.xml'
     | '/admin/banners'
     | '/admin/cards'
     | '/admin/dashboard'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/favoritos'
+    | '/sitemap.xml'
     | '/admin/banners'
     | '/admin/cards'
     | '/admin/dashboard'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/favoritos'
     | '/orders'
+    | '/sitemap.xml'
     | '/admin/banners'
     | '/admin/cards'
     | '/admin/dashboard'
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRouteWithChildren
   FavoritosRoute: typeof FavoritosRoute
   OrdersRoute: typeof OrdersRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CartaSlugRoute: typeof CartaSlugRoute
   ColecaoSlugRoute: typeof ColecaoSlugRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
@@ -285,6 +298,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/orders': {
       id: '/orders'
       path: '/orders'
@@ -478,6 +498,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRouteWithChildren,
   FavoritosRoute: FavoritosRoute,
   OrdersRoute: OrdersRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   CartaSlugRoute: CartaSlugRoute,
   ColecaoSlugRoute: ColecaoSlugRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,

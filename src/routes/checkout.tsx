@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,16 @@ import { Copy, Check, QrCode } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Checkout — Sevii Colecionáveis" }] }),
+  head: () => ({
+    meta: [
+      { title: "Checkout — Sevii Colecionáveis" },
+      { name: "description", content: "Finalize seu pedido de cartas Pokémon na Sevii Colecionáveis. Pagamento seguro via Pix ou cartão de crédito." },
+      { property: "og:title", content: "Checkout — Sevii Colecionáveis" },
+      { property: "og:description", content: "Finalize seu pedido com segurança." },
+      { property: "og:url", content: "https://seviicolecionaveis.lovable.app/checkout" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: CheckoutPage,
 });
 
@@ -671,12 +680,14 @@ function Field({
   label: string; value: string; onChange: (v: string) => void;
   onBlur?: () => void; required?: boolean; placeholder?: string;
 }) {
+  const id = useId();
   return (
     <div>
-      <label className="block text-xs font-medium uppercase tracking-wide mb-1">
+      <label htmlFor={id} className="block text-xs font-medium uppercase tracking-wide mb-1">
         {label}{required && <span className="text-red-600"> *</span>}
       </label>
       <input
+        id={id}
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}

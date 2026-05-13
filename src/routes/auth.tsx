@@ -3,7 +3,17 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Entrar — Sevii Colecionáveis" }] }),
+  head: () => ({
+    meta: [
+      { title: "Entrar — Sevii Colecionáveis" },
+      { name: "description", content: "Entre na sua conta Sevii Colecionáveis para acompanhar pedidos, gerenciar favoritos e finalizar compras de cartas Pokémon." },
+      { property: "og:title", content: "Entrar — Sevii Colecionáveis" },
+      { property: "og:description", content: "Acesse sua conta para gerenciar pedidos e favoritos." },
+      { property: "og:url", content: "https://seviicolecionaveis.lovable.app/auth" },
+      { name: "robots", content: "noindex, follow" },
+    ],
+    links: [{ rel: "canonical", href: "https://seviicolecionaveis.lovable.app/auth" }],
+  }),
   component: AuthPage,
 });
 

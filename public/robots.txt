@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /auth
+Disallow: /checkout
+Disallow: /orders
+Disallow: /api/
+
+Sitemap: https://seviicolecionaveis.lovable.app/sitemap.xml
