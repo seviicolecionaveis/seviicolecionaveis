@@ -550,6 +550,7 @@ export type Database = {
         | "Ímã"
         | "Shattered Holo"
         | "Illustration Rare"
+        | "Ultra Rara"
       card_language:
         | "Português"
         | "Inglês"
@@ -697,6 +698,7 @@ export const Constants = {
         "Ímã",
         "Shattered Holo",
         "Illustration Rare",
+        "Ultra Rara",
       ],
       card_language: [
         "Português",

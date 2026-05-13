@@ -14,6 +14,7 @@ const finishBadge: Record<Finish, string> = {
   "Ímã": "bg-muted text-foreground",
   "Shattered Holo": "bg-type-dragon/15 text-foreground",
   "Illustration Rare": "bg-type-fairy/20 text-foreground",
+  "Ultra Rara": "bg-gradient-to-r from-brand-gold to-type-psychic text-white",
 };
 
 interface Props {
