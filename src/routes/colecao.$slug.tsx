@@ -13,6 +13,7 @@ export const Route = createFileRoute("/colecao/$slug")({
     const title = decodeURIComponent(params.slug ?? "")
       .replace(/-/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
+    const url = `https://seviicolecionaveis.lovable.app/colecao/${params.slug}`;
     return {
       meta: [
         { title: `${title} — Coleção Pokémon | Sevii Colecionáveis` },
@@ -24,6 +25,20 @@ export const Route = createFileRoute("/colecao/$slug")({
         {
           property: "og:description",
           content: `Catálogo da coleção ${title} com cartas em estoque.`,
+        },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: `Coleção ${title}`,
+            url,
+            inLanguage: "pt-BR",
+          }),
         },
       ],
     };
