@@ -50,6 +50,7 @@ const finishDot: Record<Finish, string> = {
   "Illustration Rare": "bg-type-fairy",
   "Ultra Rara": "bg-brand-gold",
   "Black Star Promo": "bg-foreground text-background",
+  "Double Rare": "bg-type-fire",
 };
 
 export function CardModal({ card, onClose }: Props) {

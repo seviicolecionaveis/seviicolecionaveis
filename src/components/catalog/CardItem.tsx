@@ -16,6 +16,7 @@ const finishBadge: Record<Finish, string> = {
   "Illustration Rare": "bg-type-fairy/20 text-foreground",
   "Ultra Rara": "bg-gradient-to-r from-brand-gold to-type-psychic text-white",
   "Black Star Promo": "bg-foreground text-background",
+  "Double Rare": "bg-gradient-to-r from-type-fire to-type-psychic text-white",
 };
 
 interface Props {
