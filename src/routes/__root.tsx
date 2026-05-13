@@ -6,6 +6,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { WishlistProvider } from "@/hooks/useWishlist";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 
 
 function NotFoundComponent() {
