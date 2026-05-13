@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 type StripeEnv = "sandbox" | "live";
+type CheckoutSession = {
+  metadata?: { orderId?: string } | null;
+  payment_intent?: string | null;
+};
 
-async function handleSessionCompleted(session: any) {
+async function handleSessionCompleted(session: CheckoutSession) {
   const orderId = session.metadata?.orderId;
   if (!orderId) {
     console.error("No orderId in session metadata");
@@ -12,7 +16,7 @@ async function handleSessionCompleted(session: any) {
   await markOrderPaid(orderId, { stripePaymentIntent: session.payment_intent ?? undefined });
 }
 
-async function handleSessionExpired(session: any) {
+async function handleSessionExpired(session: CheckoutSession) {
   const orderId = session.metadata?.orderId;
   if (!orderId) return;
   const { cancelOrder } = await import("@/lib/orders.server");
