@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Clock, XCircle, Package, Truck } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
+
+const PURCHASE_TRACKED_KEY = "sevii_ga_purchase_tracked";
 
 export const Route = createFileRoute("/orders/$orderId")({
   head: () => ({ meta: [{ title: "Pedido — Sevii Colecionáveis" }] }),
