@@ -303,7 +303,19 @@ function CheckoutPage() {
         <main className="mx-auto max-w-3xl px-4 py-8">
           <h1 className="text-2xl font-bold mb-6">Pagamento — Cartão</h1>
           <div id="checkout">
-            <EmbeddedCheckoutProvider stripe={getStripe()} options={{ clientSecret }}>
+            <EmbeddedCheckoutProvider
+              stripe={getStripe()}
+              options={{
+                clientSecret,
+                onComplete: () => {
+                  if (stripeOrderId) {
+                    nav({ to: "/orders/$orderId", params: { orderId: stripeOrderId } });
+                  } else {
+                    nav({ to: "/orders" });
+                  }
+                },
+              }}
+            >
               <EmbeddedCheckout />
             </EmbeddedCheckoutProvider>
           </div>
