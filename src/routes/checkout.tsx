@@ -680,12 +680,14 @@ function Field({
   label: string; value: string; onChange: (v: string) => void;
   onBlur?: () => void; required?: boolean; placeholder?: string;
 }) {
+  const id = React.useId();
   return (
     <div>
-      <label className="block text-xs font-medium uppercase tracking-wide mb-1">
+      <label htmlFor={id} className="block text-xs font-medium uppercase tracking-wide mb-1">
         {label}{required && <span className="text-red-600"> *</span>}
       </label>
       <input
+        id={id}
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
