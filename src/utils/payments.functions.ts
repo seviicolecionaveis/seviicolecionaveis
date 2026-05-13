@@ -316,7 +316,8 @@ export const createPixOrder = createServerFn({ method: "POST" })
       subtotalCents,
     );
 
-    await ensureAvailableStock(data.items);
+    const items = await resolveCardIds(data.items);
+    await ensureAvailableStock(items);
 
     const totalCents = subtotalCents - discountCents + shippingCents;
     if (totalCents < 100) throw new Error("Valor mínimo para Pix: R$ 1,00");
