@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -29,6 +30,11 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicPaymentsMercadopagoWebhookRouteImport } from './routes/api/public/payments/mercadopago-webhook'
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
 
+const OrdersRoute = OrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FavoritosRoute = FavoritosRouteImport.update({
   id: '/favoritos',
   path: '/favoritos',
@@ -55,14 +61,14 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrdersIndexRoute = OrdersIndexRouteImport.update({
-  id: '/orders/',
-  path: '/orders/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => OrdersRoute,
 } as any)
 const OrdersOrderIdRoute = OrdersOrderIdRouteImport.update({
-  id: '/orders/$orderId',
-  path: '/orders/$orderId',
-  getParentRoute: () => rootRouteImport,
+  id: '/$orderId',
+  path: '/$orderId',
+  getParentRoute: () => OrdersRoute,
 } as any)
 const ColecaoSlugRoute = ColecaoSlugRouteImport.update({
   id: '/colecao/$slug',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/favoritos': typeof FavoritosRoute
+  '/orders': typeof OrdersRouteWithChildren
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cards': typeof AdminCardsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -177,6 +184,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/favoritos': typeof FavoritosRoute
+  '/orders': typeof OrdersRouteWithChildren
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cards': typeof AdminCardsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -200,6 +208,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/favoritos'
+    | '/orders'
     | '/admin/banners'
     | '/admin/cards'
     | '/admin/dashboard'
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/favoritos'
+    | '/orders'
     | '/admin/banners'
     | '/admin/cards'
     | '/admin/dashboard'
@@ -264,10 +274,9 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   FavoritosRoute: typeof FavoritosRoute
+  OrdersRoute: typeof OrdersRouteWithChildren
   CartaSlugRoute: typeof CartaSlugRoute
   ColecaoSlugRoute: typeof ColecaoSlugRoute
-  OrdersOrderIdRoute: typeof OrdersOrderIdRoute
-  OrdersIndexRoute: typeof OrdersIndexRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
   ApiPublicPaymentsMercadopagoWebhookRoute: typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -276,6 +285,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/orders': {
+      id: '/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/favoritos': {
       id: '/favoritos'
       path: '/favoritos'
@@ -313,17 +329,17 @@ declare module '@tanstack/react-router' {
     }
     '/orders/': {
       id: '/orders/'
-      path: '/orders'
+      path: '/'
       fullPath: '/orders/'
       preLoaderRoute: typeof OrdersIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof OrdersRoute
     }
     '/orders/$orderId': {
       id: '/orders/$orderId'
-      path: '/orders/$orderId'
+      path: '/$orderId'
       fullPath: '/orders/$orderId'
       preLoaderRoute: typeof OrdersOrderIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof OrdersRoute
     }
     '/colecao/$slug': {
       id: '/colecao/$slug'
@@ -442,16 +458,28 @@ const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
   CheckoutRouteChildren,
 )
 
+interface OrdersRouteChildren {
+  OrdersOrderIdRoute: typeof OrdersOrderIdRoute
+  OrdersIndexRoute: typeof OrdersIndexRoute
+}
+
+const OrdersRouteChildren: OrdersRouteChildren = {
+  OrdersOrderIdRoute: OrdersOrderIdRoute,
+  OrdersIndexRoute: OrdersIndexRoute,
+}
+
+const OrdersRouteWithChildren =
+  OrdersRoute._addFileChildren(OrdersRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   FavoritosRoute: FavoritosRoute,
+  OrdersRoute: OrdersRouteWithChildren,
   CartaSlugRoute: CartaSlugRoute,
   ColecaoSlugRoute: ColecaoSlugRoute,
-  OrdersOrderIdRoute: OrdersOrderIdRoute,
-  OrdersIndexRoute: OrdersIndexRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,
   ApiPublicPaymentsMercadopagoWebhookRoute:
