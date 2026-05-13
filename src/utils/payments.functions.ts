@@ -380,7 +380,6 @@ export const createPixOrder = createServerFn({ method: "POST" })
     const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
     const email = userData?.user?.email ?? "";
 
-    const reservationExpires = new Date(Date.now() + STOCK_RESERVATION_MINUTES * 60 * 1000);
     const pixExpires = new Date(Date.now() + PIX_EXPIRES_MINUTES * 60 * 1000);
 
     const { data: order, error: orderErr } = await supabaseAdmin
