@@ -192,7 +192,8 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
       subtotalCents,
     );
 
-    await ensureAvailableStock(data.items);
+    const items = await resolveCardIds(data.items);
+    await ensureAvailableStock(items);
 
     const totalCents = subtotalCents - discountCents + shippingCents;
 
