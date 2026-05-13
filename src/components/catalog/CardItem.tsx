@@ -22,7 +22,13 @@ interface Props {
 
 export function CardItem({ card, onClick }: Props) {
   const { prices, loading } = useCardPrices();
+  const { has, toggle } = useWishlist();
   const out = card.stock === 0;
+  const isFav = has(card.id);
+  const createdAt = cardCreatedAt.get(card.id);
+  const isNew = createdAt
+    ? Date.now() - new Date(createdAt).getTime() < 14 * 24 * 60 * 60 * 1000
+    : false;
   // Per-variant: prefer manual base price (already in card.price as reais), fallback to Liga price
   const variantPrices = card.languages.flatMap((lang) =>
     lang.finishes.map((variant) => {
@@ -33,10 +39,11 @@ export function CardItem({ card, onClick }: Props) {
   const displayPrice = variantPrices.length ? Math.min(...variantPrices) / 100 : null;
 
   return (
-    <button
-      onClick={onClick}
-      className="group text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold rounded-xl"
-    >
+    <div className="group relative">
+      <button
+        onClick={onClick}
+        className="block w-full text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold rounded-xl"
+      >
       <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-secondary">
         <img
           src={card.image}
