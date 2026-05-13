@@ -100,21 +100,23 @@ if (typeof window !== "undefined") {
 function RootComponent() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <div
-          aria-hidden
-          className="pointer-events-none fixed inset-0 -z-10 bg-background"
-          style={{
-            backgroundImage: `url(${pokeballPattern})`,
-            backgroundRepeat: "repeat",
-            backgroundSize: "180px 180px",
-            opacity: 0.08,
-          }}
-        />
-        <PaymentTestModeBanner />
-        <PaymentNoticeDialog />
-        <Outlet />
-      </CartProvider>
+      <WishlistProvider>
+        <CartProvider>
+          <div
+            aria-hidden
+            className="pointer-events-none fixed inset-0 -z-10 bg-background"
+            style={{
+              backgroundImage: `url(${pokeballPattern})`,
+              backgroundRepeat: "repeat",
+              backgroundSize: "180px 180px",
+              opacity: 0.08,
+            }}
+          />
+          <PaymentTestModeBanner />
+          <PaymentNoticeDialog />
+          <Outlet />
+        </CartProvider>
+      </WishlistProvider>
     </AuthProvider>
   );
 }
