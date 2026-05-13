@@ -113,17 +113,48 @@ type ResolvableItem = {
   quantity: number;
 };
 
+function normalizeText(value: string) {
+  return value.normalize("NFC").trim();
+}
+
+function normalizeOptionalText(value: string | null | undefined) {
+  if (value == null) return value;
+  const clean = normalizeText(value);
+  return clean || null;
+}
+
+function finishKey(value: string) {
+  return normalizeText(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, "");
+}
+
+function normalizeCheckoutItem<T extends ResolvableItem>(it: T): T {
+  return {
+    ...it,
+    name: normalizeText(it.name),
+    collection: normalizeOptionalText(it.collection),
+    number: normalizeOptionalText(it.number),
+    finish: finishKey(it.finish) === "ima" ? "Ímã" : normalizeText(it.finish),
+    language: normalizeText(it.language),
+    condition: normalizeOptionalText(it.condition),
+  };
+}
+
 // "Ímã" is a virtual print-on-demand product with no row in `cards`.
 // We keep its synthetic cardId and skip stock checks/reservations for it.
 function isVirtualItem(it: { finish: string }) {
-  return it.finish === "Ímã";
+  return finishKey(it.finish) === "ima";
 }
 
 // The client sends a synthetic cardId (name__collection__number).
 // Resolve it to the real cards.id UUID matching finish/language/condition.
 async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]> {
   const resolved: T[] = [];
-  for (const it of items) {
+  for (const raw of items) {
+    const it = normalizeCheckoutItem(raw);
     if (isVirtualItem(it)) {
       resolved.push(it);
       continue;
