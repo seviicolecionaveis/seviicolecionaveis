@@ -65,7 +65,12 @@ function OrdersPage() {
         ) : (
           <div className="space-y-4">
             {orders.map((o) => (
-              <div key={o.id} className="rounded-xl border border-border p-5 bg-card">
+              <Link
+                key={o.id}
+                to="/orders/$orderId"
+                params={{ orderId: o.id }}
+                className="block rounded-xl border border-border p-5 bg-card hover:border-foreground/40 transition"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                   <div>
                     <p className="text-xs text-muted-foreground font-mono">#{o.id.slice(0, 8)}</p>
@@ -76,6 +81,15 @@ function OrdersPage() {
                   <span className={`text-[10px] px-2 py-1 rounded-full font-semibold uppercase tracking-wide ${STATUS_COLOR[o.status] ?? "bg-secondary"}`}>
                     {STATUS_LABEL[o.status] ?? o.status}
                   </span>
+                </div>
+                <div className="flex gap-2 mb-3 overflow-x-auto">
+                  {o.order_items?.slice(0, 6).map((it: any) => (
+                    <div key={it.id} className="h-16 w-12 shrink-0 rounded overflow-hidden bg-secondary border border-border">
+                      {it.card_image ? (
+                        <img src={it.card_image} alt={it.card_name} className="h-full w-full object-cover" loading="lazy" />
+                      ) : null}
+                    </div>
+                  ))}
                 </div>
                 <ul className="text-sm space-y-1 mb-3">
                   {o.order_items?.map((it: any) => (
@@ -93,7 +107,7 @@ function OrdersPage() {
                     Total: R$ {(o.total_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
