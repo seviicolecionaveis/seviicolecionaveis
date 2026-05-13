@@ -167,7 +167,7 @@ for (const wc of map.values()) {
 
 export const CARDS: Card[] = finalCards.sort((a, b) => a.name.localeCompare(b.name));
 
-export const EXTRA_COLLECTIONS = ["MEP - Mega Evolução Promos", "MEW - 151", "VIV - Voltagem Vívida", "ASR - Estrelas Radiantes", "TEF - Forças Temporais", "SSH - Espada e Escudo", "BUS - Sombras Ardentes", "PHF - Força Fantasma", "RCL - Rixa Rebelde", "NBSP - Nintendo Black Star Promos", "EE9 - Astros Cintilantes", "AOR - Origens Ancestrais", "FFI - Punhos Furiosos", "BRS - Astros Cintilantes", "FL - FireRed & LeafGreen", "FCO - Fusão de Destinos", "STS - Cerco de Vapor", "PRC - Conflito Primitivo"];
+export const EXTRA_COLLECTIONS = ["CEL - Celebrações", "MEP - Mega Evolução Promos", "MEW - 151", "VIV - Voltagem Vívida", "ASR - Estrelas Radiantes", "TEF - Forças Temporais", "SSH - Espada e Escudo", "BUS - Sombras Ardentes", "PHF - Força Fantasma", "RCL - Rixa Rebelde", "NBSP - Nintendo Black Star Promos", "EE9 - Astros Cintilantes", "AOR - Origens Ancestrais", "FFI - Punhos Furiosos", "BRS - Astros Cintilantes", "FL - FireRed & LeafGreen", "FCO - Fusão de Destinos", "STS - Cerco de Vapor", "PRC - Conflito Primitivo"];
 
 export const COLLECTIONS = Array.from(
   new Set([...CARDS.map((c) => c.collection).filter(Boolean), ...EXTRA_COLLECTIONS]),
