@@ -282,6 +282,7 @@ export type Database = {
           pix_expires_at: string | null
           pix_qr_code: string | null
           pix_qr_code_base64: string | null
+          pre_cancel_status: string | null
           recipient_name: string
           shipping_cost_cents: number
           shipping_method: string
@@ -315,6 +316,7 @@ export type Database = {
           pix_expires_at?: string | null
           pix_qr_code?: string | null
           pix_qr_code_base64?: string | null
+          pre_cancel_status?: string | null
           recipient_name: string
           shipping_cost_cents?: number
           shipping_method: string
@@ -348,6 +350,7 @@ export type Database = {
           pix_expires_at?: string | null
           pix_qr_code?: string | null
           pix_qr_code_base64?: string | null
+          pre_cancel_status?: string | null
           recipient_name?: string
           shipping_cost_cents?: number
           shipping_method?: string
