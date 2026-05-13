@@ -186,9 +186,13 @@ async function ensureAvailableStock(
 ) {
   for (const it of items) {
     if (isVirtualItem(it)) continue;
-    const { data, error } = await supabaseAdmin.rpc("available_stock", { _card_id: it.cardId });
+    const { data, error } = await supabaseAdmin
+      .from("cards")
+      .select("stock")
+      .eq("id", it.cardId)
+      .maybeSingle();
     if (error) throw new Error(error.message);
-    const available = Number(data ?? 0);
+    const available = Number(data?.stock ?? 0);
     if (available < it.quantity) {
       throw new Error(
         `Estoque insuficiente para "${it.name}". Disponível: ${available}, solicitado: ${it.quantity}.`,
@@ -247,7 +251,6 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
     const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
     const email = userData?.user?.email ?? "";
 
-    const reservationExpires = new Date(Date.now() + STOCK_RESERVATION_MINUTES * 60 * 1000);
 
     const { data: order, error: orderErr } = await supabaseAdmin
       .from("orders")
@@ -273,7 +276,6 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
         city: data.address.city,
         state: data.address.state,
         notes: data.notes,
-        stock_reservation_expires_at: reservationExpires.toISOString(),
       })
       .select("id")
       .single();
@@ -294,8 +296,6 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
     }));
     const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (itemsErr) throw new Error(itemsErr.message);
-
-    await createReservations(userId, order.id, items, reservationExpires);
 
     const discountMultiplier =
       discountCents > 0 ? (subtotalCents - discountCents) / subtotalCents : 1;
@@ -380,7 +380,6 @@ export const createPixOrder = createServerFn({ method: "POST" })
     const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
     const email = userData?.user?.email ?? "";
 
-    const reservationExpires = new Date(Date.now() + STOCK_RESERVATION_MINUTES * 60 * 1000);
     const pixExpires = new Date(Date.now() + PIX_EXPIRES_MINUTES * 60 * 1000);
 
     const { data: order, error: orderErr } = await supabaseAdmin
@@ -407,7 +406,6 @@ export const createPixOrder = createServerFn({ method: "POST" })
         city: data.address.city,
         state: data.address.state,
         notes: data.notes,
-        stock_reservation_expires_at: reservationExpires.toISOString(),
         pix_expires_at: pixExpires.toISOString(),
       })
       .select("id")
@@ -430,7 +428,6 @@ export const createPixOrder = createServerFn({ method: "POST" })
     const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (itemsErr) throw new Error(itemsErr.message);
 
-    await createReservations(userId, order.id, items, reservationExpires);
 
     // Build notification URL — must be a public absolute URL
     const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
