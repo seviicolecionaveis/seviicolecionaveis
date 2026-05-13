@@ -39,7 +39,7 @@ function AuthPage() {
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
-            data: { full_name: fullName },
+            data: { full_name: fullName, whatsapp, birth_date: birthDate || null },
           },
         });
         if (error) throw error;
