@@ -57,6 +57,7 @@ function Index() {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
 
+  const shuffleSeed = useMemo(() => Math.random(), []);
   const filtered = useMemo(() => {
     const hasMin = filters.priceMin !== "";
     const hasMax = filters.priceMax !== "";
