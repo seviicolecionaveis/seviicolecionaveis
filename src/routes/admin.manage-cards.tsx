@@ -11,7 +11,7 @@ export const Route = createFileRoute("/admin/manage-cards")({
   component: AdminCardsManagePage,
 });
 
-const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo", "Ímã", "Shattered Holo", "Illustration Rare", "Ultra Rara"];
+const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo", "Ímã", "Shattered Holo", "Illustration Rare", "Ultra Rara", "Black Star Promo"];
 
 // Preço automático para o acabamento "Ímã" (em centavos): R$10 se a carta tem Foil,
 // senão R$9 se tem Normal. Retorna null se não houver base.
