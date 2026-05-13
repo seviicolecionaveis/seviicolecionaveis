@@ -57,6 +57,7 @@ function Index() {
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
+  const stats = useCardStats();
 
   const shuffleSeed = useMemo(() => Math.random(), []);
   const filtered = useMemo(() => {
