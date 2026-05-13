@@ -7,6 +7,10 @@ const FINISH_PRIORITY: Finish[] = ["Promo", "Pokebola", "Energia", "Foil", "Reve
 const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo"];
 const LANGUAGE_ORDER: Language[] = ["Português", "Inglês", "Espanhol", "Italiano"];
 
+export interface CardWithMeta extends Card {
+  createdAt: string;
+}
+
 function pickHeadlineFinish(variants: FinishVariant[]): Finish {
   const available = variants.filter((v) => v.stock > 0);
   const pool = available.length ? available : variants;
