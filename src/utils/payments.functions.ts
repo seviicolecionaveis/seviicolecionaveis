@@ -412,12 +412,3 @@ export const checkPixOrderStatus = createServerFn({ method: "POST" })
     return { status: order.status as "pending" | "cancelled" | "paid" };
   });
 
-    }
-  }
-
-  await supabaseAdmin.from("stock_reservations").delete().eq("order_id", orderId);
-  await supabaseAdmin
-    .from("orders")
-    .update({ status: "paid", updated_at: new Date().toISOString() })
-    .eq("id", orderId);
-}
