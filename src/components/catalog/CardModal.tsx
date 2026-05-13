@@ -47,6 +47,7 @@ const finishDot: Record<Finish, string> = {
   Promo: "bg-type-electric",
   "Ímã": "bg-muted-foreground",
   "Shattered Holo": "bg-type-dragon",
+  "Illustration Rare": "bg-type-fairy",
 };
 
 export function CardModal({ card, onClose }: Props) {
