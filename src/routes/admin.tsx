@@ -61,6 +61,31 @@ function AdminPage() {
     if (isAdmin && isOrdersRoute) load();
   }, [isAdmin, isOrdersRoute]);
 
+  useEffect(() => {
+    if (!isAdmin || !isOrdersRoute) return;
+    const channel = supabase
+      .channel("admin-orders-list")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        () => { load(); },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [isAdmin, isOrdersRoute]);
+
+  useEffect(() => {
+    if (focusId) setFilter("cancellation_requested");
+  }, [focusId]);
+
+  useEffect(() => {
+    if (!focusId || loading) return;
+    const t = setTimeout(() => {
+      focusRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 100);
+    return () => clearTimeout(t);
+  }, [focusId, loading, orders]);
+
   const updateStatus = async (id: string, status: string) => {
     await supabase.from("orders").update({ status }).eq("id", id);
     await load();
