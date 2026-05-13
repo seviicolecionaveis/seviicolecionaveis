@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { CardModal } from "@/components/catalog/CardModal";
 import { cardSlug } from "@/lib/slug";
+import { trackEvent } from "@/lib/analytics";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/carta/$slug")({
