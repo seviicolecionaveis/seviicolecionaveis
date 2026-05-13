@@ -680,7 +680,7 @@ function Field({
   label: string; value: string; onChange: (v: string) => void;
   onBlur?: () => void; required?: boolean; placeholder?: string;
 }) {
-  const id = React.useId();
+  const id = useId();
   return (
     <div>
       <label htmlFor={id} className="block text-xs font-medium uppercase tracking-wide mb-1">
