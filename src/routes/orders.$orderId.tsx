@@ -2,8 +2,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2, Clock, XCircle, Package, Truck } from "lucide-react";
+import { CheckCircle2, Clock, XCircle, Package, Truck, AlertTriangle } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { requestOrderCancellation } from "@/utils/orders.functions";
+import { toast } from "sonner";
 
 const PURCHASE_TRACKED_KEY = "sevii_ga_purchase_tracked";
 
@@ -18,6 +20,7 @@ const STATUS_LABEL: Record<string, string> = {
   shipped: "Enviado",
   delivered: "Entregue",
   cancelled: "Cancelado",
+  cancellation_requested: "Cancelamento em análise",
 };
 
 const STATUS_ICON: Record<string, any> = {
@@ -26,6 +29,7 @@ const STATUS_ICON: Record<string, any> = {
   shipped: Truck,
   delivered: Package,
   cancelled: XCircle,
+  cancellation_requested: AlertTriangle,
 };
 
 const STATUS_COLOR: Record<string, string> = {
@@ -34,6 +38,7 @@ const STATUS_COLOR: Record<string, string> = {
   shipped: "text-purple-600",
   delivered: "text-blue-600",
   cancelled: "text-red-600",
+  cancellation_requested: "text-orange-600",
 };
 
 function OrderDetailPage() {
