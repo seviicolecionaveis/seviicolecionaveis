@@ -54,6 +54,13 @@ export function HeaderActions({ onCartOpen }: Props) {
                   {user.email}
                 </div>
                 <Link
+                  to="/conta"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
+                >
+                  <UserCog className="h-4 w-4" /> Minha conta
+                </Link>
+                <Link
                   to="/favoritos"
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
