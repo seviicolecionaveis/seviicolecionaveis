@@ -122,12 +122,12 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
       .from("cards")
       .select("id")
       .eq("name", it.name)
-      .eq("finish", it.finish)
-      .eq("language", it.language)
+      .eq("finish", it.finish as never)
+      .eq("language", it.language as never)
       .limit(1);
     if (it.collection) query = query.eq("collection", it.collection);
     if (it.number) query = query.eq("card_number", it.number);
-    if (it.condition) query = query.eq("condition", it.condition);
+    if (it.condition) query = query.eq("condition", it.condition as never);
     const { data, error } = await query.maybeSingle();
     if (error) throw new Error(error.message);
     if (!data) {
