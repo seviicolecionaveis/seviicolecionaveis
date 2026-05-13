@@ -59,6 +59,39 @@ function AdminPage() {
     await load();
   };
 
+  const handleApproveCancel = async (id: string) => {
+    if (!confirm("Aprovar o cancelamento deste pedido? O estoque será devolvido se o pedido já estava pago.")) return;
+    try {
+      await approveOrderCancellation({ data: { order_id: id } });
+      toast.success("Cancelamento aprovado.");
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao aprovar cancelamento.");
+    }
+  };
+
+  const handleRejectCancel = async (id: string) => {
+    if (!confirm("Recusar o cancelamento? O pedido voltará ao status anterior.")) return;
+    try {
+      await rejectOrderCancellation({ data: { order_id: id } });
+      toast.success("Cancelamento recusado.");
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao recusar cancelamento.");
+    }
+  };
+
+  const handleAdminCancel = async (id: string) => {
+    if (!confirm("Cancelar este pedido? Esta ação não pode ser desfeita.")) return;
+    try {
+      await adminCancelOrder({ data: { order_id: id } });
+      toast.success("Pedido cancelado.");
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao cancelar pedido.");
+    }
+  };
+
   if (authLoading || !isAdmin) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
   }
@@ -155,6 +188,39 @@ function AdminPage() {
                     Total: R$ {(o.total_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                   </span>
                 </div>
+
+                {o.status === "cancellation_requested" && (
+                  <div className="mt-3 pt-3 border-t border-orange-300 bg-orange-50 -mx-5 -mb-5 px-5 py-3 rounded-b-xl flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs text-orange-900">
+                      <strong>Cliente solicitou cancelamento.</strong> Status anterior: {STATUS_LABEL[o.pre_cancel_status] ?? o.pre_cancel_status ?? "—"}
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleRejectCancel(o.id)}
+                        className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold hover:bg-secondary"
+                      >
+                        Recusar
+                      </button>
+                      <button
+                        onClick={() => handleApproveCancel(o.id)}
+                        className="rounded-md bg-red-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-red-700"
+                      >
+                        Aprovar cancelamento
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {o.status !== "cancelled" && o.status !== "cancellation_requested" && (
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      onClick={() => handleAdminCancel(o.id)}
+                      className="text-xs text-destructive hover:underline font-semibold"
+                    >
+                      Cancelar pedido
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
