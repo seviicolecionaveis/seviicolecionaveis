@@ -6,6 +6,7 @@ import { CheckCircle2, Clock, XCircle, Package, Truck, AlertTriangle } from "luc
 import { trackEvent } from "@/lib/analytics";
 import { requestOrderCancellation } from "@/utils/orders.functions";
 import { toast } from "sonner";
+import { PostPurchaseSurvey } from "@/components/PostPurchaseSurvey";
 
 const PURCHASE_TRACKED_KEY = "sevii_ga_purchase_tracked";
 
