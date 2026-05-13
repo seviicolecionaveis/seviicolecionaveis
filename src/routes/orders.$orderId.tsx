@@ -47,6 +47,22 @@ function OrderDetailPage() {
   const nav = useNavigate();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(false);
+
+  const handleRequestCancel = async () => {
+    if (!order) return;
+    if (!confirm("Deseja realmente solicitar o cancelamento deste pedido? A solicitação passará por análise da nossa equipe.")) return;
+    setCancelling(true);
+    try {
+      await requestOrderCancellation({ data: { order_id: order.id } });
+      toast.success("Solicitação de cancelamento enviada. Aguarde a análise.");
+      setOrder({ ...order, status: "cancellation_requested", pre_cancel_status: order.status });
+    } catch (e: any) {
+      toast.error(typeof e?.message === "string" ? e.message : "Não foi possível solicitar o cancelamento.");
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/auth" });
@@ -225,6 +241,32 @@ function OrderDetailPage() {
           <p className="text-muted-foreground">{order.neighborhood} · {order.city}/{order.state} · CEP {order.cep}</p>
           {order.phone && <p className="text-muted-foreground mt-1">Tel: {order.phone}</p>}
         </section>
+
+        {(order.status === "pending" || order.status === "paid") && (
+          <div className="rounded-xl border border-border bg-card p-5 text-sm space-y-2">
+            <p className="font-semibold">Precisa cancelar este pedido?</p>
+            <p className="text-xs text-muted-foreground">
+              Ao solicitar o cancelamento, sua solicitação ficará em análise pela nossa equipe.
+              Você será notificado assim que houver uma resposta.
+            </p>
+            <button
+              onClick={handleRequestCancel}
+              disabled={cancelling}
+              className="rounded-full border border-destructive/40 text-destructive px-4 py-2 text-xs font-semibold hover:bg-destructive/10 disabled:opacity-50"
+            >
+              {cancelling ? "Enviando..." : "Solicitar cancelamento"}
+            </button>
+          </div>
+        )}
+
+        {order.status === "cancellation_requested" && (
+          <div className="rounded-xl border border-orange-300 bg-orange-50 p-5 text-sm text-orange-900">
+            <p className="font-semibold">Cancelamento em análise</p>
+            <p className="text-xs mt-1">
+              Recebemos sua solicitação. Nossa equipe irá analisar e retornar em breve.
+            </p>
+          </div>
+        )}
 
         <div className="flex gap-3 justify-center pt-2">
           <Link to="/" className="rounded-full border border-border px-5 py-2 text-sm font-semibold hover:bg-secondary">
