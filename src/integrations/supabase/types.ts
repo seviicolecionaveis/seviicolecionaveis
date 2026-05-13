@@ -137,6 +137,27 @@ export type Database = {
         }
         Relationships: []
       }
+      card_stats: {
+        Row: {
+          card_key: string
+          created_at: string
+          last_viewed_at: string
+          views: number
+        }
+        Insert: {
+          card_key: string
+          created_at?: string
+          last_viewed_at?: string
+          views?: number
+        }
+        Update: {
+          card_key?: string
+          created_at?: string
+          last_viewed_at?: string
+          views?: number
+        }
+        Relationships: []
+      }
       cards: {
         Row: {
           base_price_cents: number | null
@@ -412,6 +433,27 @@ export type Database = {
         }
         Relationships: []
       }
+      wishlist: {
+        Row: {
+          card_key: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          card_key: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          card_key?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -424,6 +466,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_card_view: { Args: { _card_key: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"
