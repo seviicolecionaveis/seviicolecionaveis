@@ -1,14 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { scrapeLigaPokemon } from "@/utils/cardPrices.server";
 
 const BATCH_SIZE = 40; // ~2 min por lote (margem segura no Worker)
+
+type SupabaseAdmin = typeof import("@/integrations/supabase/client.server")["supabaseAdmin"];
+type ScrapeLigaPokemon = typeof import("@/utils/cardPrices.server")["scrapeLigaPokemon"];
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function processBatch(onlyMissing: boolean) {
+async function processBatch(
+  onlyMissing: boolean,
+  supabaseAdmin: SupabaseAdmin,
+  scrapeLigaPokemon: ScrapeLigaPokemon,
+) {
   // 1. Cartas com estoque
   const { data: variants, error: vErr } = await supabaseAdmin
     .from("cards")
@@ -99,6 +104,10 @@ export const Route = createFileRoute("/api/public/hooks/update-prices")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const [{ supabaseAdmin }, { scrapeLigaPokemon }] = await Promise.all([
+          import("@/integrations/supabase/client.server"),
+          import("@/utils/cardPrices.server"),
+        ]);
         const url = new URL(request.url);
         const onlyMissing = url.searchParams.get("onlyMissing") !== "false";
 
@@ -109,7 +118,7 @@ export const Route = createFileRoute("/api/public/hooks/update-prices")({
           .single();
 
         try {
-          const result = await processBatch(onlyMissing);
+          const result = await processBatch(onlyMissing, supabaseAdmin, scrapeLigaPokemon);
 
           if (run) {
             await supabaseAdmin
