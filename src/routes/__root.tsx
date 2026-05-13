@@ -113,7 +113,7 @@ function RootComponent() {
             }}
           />
           <PaymentTestModeBanner />
-          <PaymentNoticeDialog />
+          
           <Outlet />
         </CartProvider>
       </WishlistProvider>
