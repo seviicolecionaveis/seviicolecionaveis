@@ -25,6 +25,7 @@ import { Route as AdminCardsRouteImport } from './routes/admin.cards'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicPaymentsMercadopagoWebhookRouteImport } from './routes/api/public/payments/mercadopago-webhook'
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
 
 const OrdersRoute = OrdersRouteImport.update({
@@ -108,6 +109,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicPaymentsMercadopagoWebhookRoute =
+  ApiPublicPaymentsMercadopagoWebhookRouteImport.update({
+    id: '/api/public/payments/mercadopago-webhook',
+    path: '/api/public/payments/mercadopago-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksUpdatePricesRoute =
   ApiPublicHooksUpdatePricesRouteImport.update({
     id: '/api/public/hooks/update-prices',
@@ -132,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
+  '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -151,6 +159,7 @@ export interface FileRoutesByTo {
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
+  '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -171,6 +180,7 @@ export interface FileRoutesById {
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
+  '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/colecao/$slug'
     | '/api/public/sitemap.xml'
     | '/api/public/hooks/update-prices'
+    | '/api/public/payments/mercadopago-webhook'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/colecao/$slug'
     | '/api/public/sitemap.xml'
     | '/api/public/hooks/update-prices'
+    | '/api/public/payments/mercadopago-webhook'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -230,6 +242,7 @@ export interface FileRouteTypes {
     | '/colecao/$slug'
     | '/api/public/sitemap.xml'
     | '/api/public/hooks/update-prices'
+    | '/api/public/payments/mercadopago-webhook'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -244,6 +257,7 @@ export interface RootRouteChildren {
   ColecaoSlugRoute: typeof ColecaoSlugRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
+  ApiPublicPaymentsMercadopagoWebhookRoute: typeof ApiPublicPaymentsMercadopagoWebhookRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -361,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments/mercadopago-webhook': {
+      id: '/api/public/payments/mercadopago-webhook'
+      path: '/api/public/payments/mercadopago-webhook'
+      fullPath: '/api/public/payments/mercadopago-webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsMercadopagoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/update-prices': {
       id: '/api/public/hooks/update-prices'
       path: '/api/public/hooks/update-prices'
@@ -412,8 +433,19 @@ const rootRouteChildren: RootRouteChildren = {
   ColecaoSlugRoute: ColecaoSlugRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,
+  ApiPublicPaymentsMercadopagoWebhookRoute:
+    ApiPublicPaymentsMercadopagoWebhookRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
