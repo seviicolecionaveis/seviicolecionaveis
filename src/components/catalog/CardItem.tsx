@@ -13,6 +13,7 @@ const finishBadge: Record<Finish, string> = {
   Promo: "bg-type-electric text-foreground",
   "Ímã": "bg-muted text-foreground",
   "Shattered Holo": "bg-type-dragon/15 text-foreground",
+  "Illustration Rare": "bg-type-fairy/20 text-foreground",
 };
 
 interface Props {
