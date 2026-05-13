@@ -4,6 +4,7 @@ import { type StripeEnv, createStripeClient } from "@/lib/stripe.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createPixPayment, getPixPayment } from "@/lib/mercadopago.server";
+import { markOrderPaid } from "@/lib/orders.server";
 
 const ItemSchema = z.object({
   cardId: z.string().min(1).max(200),
@@ -411,34 +412,6 @@ export const checkPixOrderStatus = createServerFn({ method: "POST" })
     return { status: order.status as "pending" | "cancelled" | "paid" };
   });
 
-// ---------- Order paid helper (used by webhooks) ----------
-
-export async function markOrderPaid(orderId: string) {
-  const { data: order } = await supabaseAdmin
-    .from("orders")
-    .select("id, status")
-    .eq("id", orderId)
-    .maybeSingle();
-  if (!order) return;
-  if (order.status === "paid") return;
-
-  // Decrement stock for each item, then remove reservations
-  const { data: items } = await supabaseAdmin
-    .from("order_items")
-    .select("card_id, quantity")
-    .eq("order_id", orderId);
-
-  if (items) {
-    for (const it of items) {
-      const { data: card } = await supabaseAdmin
-        .from("cards")
-        .select("stock")
-        .eq("id", it.card_id)
-        .maybeSingle();
-      if (card) {
-        const newStock = Math.max(0, (card.stock ?? 0) - it.quantity);
-        await supabaseAdmin.from("cards").update({ stock: newStock }).eq("id", it.card_id);
-      }
     }
   }
 
