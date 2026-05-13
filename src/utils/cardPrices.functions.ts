@@ -1,7 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { scrapeLigaPokemon, type ScrapeInput } from "./cardPrices.server";
+
+type ScrapeInput = {
+  cardName: string;
+  collection: string;
+  cardNumber: string;
+  finish: string;
+  language: string;
+};
 
 export const fetchLigaPrice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -23,14 +29,14 @@ export const fetchLigaPrice = createServerFn({ method: "POST" })
       throw new Error("Apenas administradores podem atualizar preços.");
     }
 
-    const supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
+    const [{ scrapeLigaPokemon }, { supabaseAdmin }] = await Promise.all([
+      import("./cardPrices.server"),
+      import("@/integrations/supabase/client.server"),
+    ]);
 
     const result = await scrapeLigaPokemon(data);
 
-    const { error } = await supabase.from("card_prices").upsert(
+    const { error } = await supabaseAdmin.from("card_prices").upsert(
       {
         card_name: data.cardName,
         collection: data.collection,

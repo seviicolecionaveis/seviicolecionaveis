@@ -1,19 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { type StripeEnv, verifyWebhook } from "@/lib/stripe.server";
-import { markOrderPaid, cancelOrder } from "@/lib/orders.server";
 
-async function handleSessionCompleted(session: any) {
+type StripeEnv = "sandbox" | "live";
+type CheckoutSession = {
+  metadata?: { orderId?: string } | null;
+  payment_intent?: string | null;
+};
+
+async function handleSessionCompleted(session: CheckoutSession) {
   const orderId = session.metadata?.orderId;
   if (!orderId) {
     console.error("No orderId in session metadata");
     return;
   }
+  const { markOrderPaid } = await import("@/lib/orders.server");
   await markOrderPaid(orderId, { stripePaymentIntent: session.payment_intent ?? undefined });
 }
 
-async function handleSessionExpired(session: any) {
+async function handleSessionExpired(session: CheckoutSession) {
   const orderId = session.metadata?.orderId;
   if (!orderId) return;
+  const { cancelOrder } = await import("@/lib/orders.server");
   await cancelOrder(orderId);
 }
 
@@ -28,6 +34,7 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
         }
         const env: StripeEnv = rawEnv;
         try {
+          const { verifyWebhook } = await import("@/lib/stripe.server");
           const event = await verifyWebhook(request, env);
           switch (event.type) {
             case "checkout.session.completed":
