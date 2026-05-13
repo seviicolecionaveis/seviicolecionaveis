@@ -149,6 +149,7 @@ function AdminPage() {
             <Link to="/admin/users" className="font-semibold text-foreground hover:underline">Administradores</Link>
             <Link to="/" className="text-muted-foreground hover:text-foreground">← Catálogo</Link>
           </div>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8">
