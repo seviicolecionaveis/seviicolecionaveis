@@ -45,6 +45,25 @@ function CardDetailPage() {
     if (closed) nav({ to: "/" });
   }, [closed, nav]);
 
+  // GA4 view_item
+  useEffect(() => {
+    if (!card) return;
+    const variants: any[] = (card as any).variants ?? [];
+    const minPrice = variants.length
+      ? Math.min(...variants.map((v: any) => v.price ?? Infinity).filter((n: number) => Number.isFinite(n)))
+      : undefined;
+    trackEvent("view_item", {
+      currency: "BRL",
+      value: minPrice,
+      items: [{
+        item_id: `${card.name}__${card.collection}__${card.number}`,
+        item_name: card.name,
+        item_category: card.collection,
+        price: minPrice,
+      }],
+    });
+  }, [card]);
+
   return (
     <div className="min-h-screen text-foreground">
       <header className="border-b border-border">
