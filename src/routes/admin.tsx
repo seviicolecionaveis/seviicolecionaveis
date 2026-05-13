@@ -2,19 +2,26 @@ import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tansta
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  approveOrderCancellation,
+  rejectOrderCancellation,
+  adminCancelOrder,
+} from "@/utils/orders.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Sevii Colecionáveis" }] }),
   component: AdminPage,
 });
 
-const STATUSES = ["pending", "paid", "shipped", "delivered", "cancelled"] as const;
+const STATUSES = ["pending", "paid", "shipped", "delivered", "cancellation_requested", "cancelled"] as const;
 const STATUS_LABEL: Record<string, string> = {
   pending: "Aguardando",
   paid: "Pago",
   shipped: "Enviado",
   delivered: "Entregue",
   cancelled: "Cancelado",
+  cancellation_requested: "Cancelamento solicitado",
 };
 
 function AdminPage() {
