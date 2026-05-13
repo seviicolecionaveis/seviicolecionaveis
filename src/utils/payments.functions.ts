@@ -303,7 +303,7 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
     const session = await stripe.checkout.sessions.create({
       line_items: lineItems,
       mode: "payment",
-      ui_mode: "embedded",
+      ui_mode: "embedded_page",
       redirect_on_completion: "always",
       return_url: returnUrl,
       customer_email: email,
