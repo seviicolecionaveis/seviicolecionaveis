@@ -20,6 +20,7 @@ import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as CartaSlugRouteImport } from './routes/carta.$slug'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-cards'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCardsRouteImport } from './routes/admin.cards'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -80,6 +81,11 @@ const AdminManageCardsRoute = AdminManageCardsRouteImport.update({
   path: '/manage-cards',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCardsRoute = AdminCardsRouteImport.update({
   id: '/cards',
   path: '/cards',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/orders': typeof OrdersRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cards': typeof AdminCardsRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/users': typeof AdminUsersRoute
   '/carta/$slug': typeof CartaSlugRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/orders': typeof OrdersRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cards': typeof AdminCardsRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/users': typeof AdminUsersRoute
   '/carta/$slug': typeof CartaSlugRoute
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/orders': typeof OrdersRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cards': typeof AdminCardsRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/users': typeof AdminUsersRoute
   '/carta/$slug': typeof CartaSlugRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/admin/banners'
     | '/admin/cards'
+    | '/admin/dashboard'
     | '/admin/manage-cards'
     | '/admin/users'
     | '/carta/$slug'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/admin/banners'
     | '/admin/cards'
+    | '/admin/dashboard'
     | '/admin/manage-cards'
     | '/admin/users'
     | '/carta/$slug'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/admin/banners'
     | '/admin/cards'
+    | '/admin/dashboard'
     | '/admin/manage-cards'
     | '/admin/users'
     | '/carta/$slug'
@@ -301,6 +313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminManageCardsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/cards': {
       id: '/admin/cards'
       path: '/cards'
@@ -335,6 +354,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
   AdminCardsRoute: typeof AdminCardsRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
   AdminManageCardsRoute: typeof AdminManageCardsRoute
   AdminUsersRoute: typeof AdminUsersRoute
 }
@@ -342,6 +362,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
   AdminCardsRoute: AdminCardsRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
   AdminManageCardsRoute: AdminManageCardsRoute,
   AdminUsersRoute: AdminUsersRoute,
 }
