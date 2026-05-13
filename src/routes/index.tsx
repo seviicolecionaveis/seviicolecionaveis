@@ -106,10 +106,17 @@ function Index() {
         return [...list].sort((a, b) => priceVal(b.price) - priceVal(a.price));
       case "name":
         return [...list].sort((a, b) => a.name.localeCompare(b.name));
-      default:
-        return list;
+      default: {
+        // Pseudo-random shuffle (seeded per page load) so the catalog feels fresh
+        const seeded = list.map((c, i) => {
+          const h = Math.sin((i + 1) * 9999 * shuffleSeed) * 10000;
+          return { c, k: h - Math.floor(h) };
+        });
+        seeded.sort((a, b) => a.k - b.k);
+        return seeded.map((s) => s.c);
+      }
     }
-  }, [filters, query, sort, CARDS]);
+  }, [filters, query, sort, CARDS, shuffleSeed]);
 
   const reset = () => {
     setFilters(DEFAULT_FILTERS);
