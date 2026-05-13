@@ -542,7 +542,7 @@ function PixScreen({ pix }: { pix: PixState }) {
         if (r.status === "paid") {
           polling.current = false;
           setStatus("paid");
-          setTimeout(() => nav({ to: "/checkout/return", search: { session_id: pix.orderId } }), 1500);
+          setTimeout(() => nav({ to: "/orders/$orderId", params: { orderId: pix.orderId } }), 1500);
         } else if (r.status === "cancelled") {
           polling.current = false;
           setStatus("cancelled");
