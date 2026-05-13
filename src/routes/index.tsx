@@ -114,9 +114,23 @@ function Index() {
     };
     switch (sort) {
       case "price-asc":
-        return [...list].sort((a, b) => priceVal(minRealPrice(a)) - priceVal(minRealPrice(b)));
+        return [...list].sort((a, b) => {
+          const pa = minRealPrice(a);
+          const pb = minRealPrice(b);
+          if (pa == null && pb == null) return 0;
+          if (pa == null) return 1; // sem preço real vai pro fim
+          if (pb == null) return -1;
+          return pa - pb;
+        });
       case "price-desc":
-        return [...list].sort((a, b) => priceVal(maxRealPrice(b)) - priceVal(maxRealPrice(a)));
+        return [...list].sort((a, b) => {
+          const pa = maxRealPrice(a);
+          const pb = maxRealPrice(b);
+          if (pa == null && pb == null) return 0;
+          if (pa == null) return 1; // sem preço real vai pro fim
+          if (pb == null) return -1;
+          return pb - pa;
+        });
       case "name":
         return [...list].sort((a, b) => a.name.localeCompare(b.name));
       default: {
