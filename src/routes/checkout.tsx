@@ -11,7 +11,16 @@ import { Copy, Check, QrCode } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Checkout — Sevii Colecionáveis" }] }),
+  head: () => ({
+    meta: [
+      { title: "Checkout — Sevii Colecionáveis" },
+      { name: "description", content: "Finalize seu pedido de cartas Pokémon na Sevii Colecionáveis. Pagamento seguro via Pix ou cartão de crédito." },
+      { property: "og:title", content: "Checkout — Sevii Colecionáveis" },
+      { property: "og:description", content: "Finalize seu pedido com segurança." },
+      { property: "og:url", content: "https://seviicolecionaveis.lovable.app/checkout" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: CheckoutPage,
 });
 
