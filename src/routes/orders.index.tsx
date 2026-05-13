@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronRight } from "lucide-react";
 
-export const Route = createFileRoute("/orders")({
+export const Route = createFileRoute("/orders/")({
   head: () => ({ meta: [{ title: "Meus pedidos — Sevii Colecionáveis" }] }),
   component: OrdersPage,
 });
