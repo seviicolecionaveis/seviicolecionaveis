@@ -72,6 +72,7 @@ function CheckoutPage() {
   const [method, setMethod] = useState<PaymentMethod>("pix");
   const [step, setStep] = useState<Step>("address");
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [stripeOrderId, setStripeOrderId] = useState<string | null>(null);
   const [pix, setPix] = useState<PixState | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
