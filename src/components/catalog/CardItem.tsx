@@ -1,5 +1,8 @@
 import { type Card, type Finish } from "@/data/cards";
 import { priceLookupKey, useCardPrices } from "@/hooks/useCardPrices";
+import { cardCreatedAt } from "@/hooks/useCardsCatalog";
+import { useWishlist } from "@/hooks/useWishlist";
+import { Heart } from "lucide-react";
 
 const finishBadge: Record<Finish, string> = {
   Normal: "bg-background/90 text-foreground",
@@ -19,7 +22,13 @@ interface Props {
 
 export function CardItem({ card, onClick }: Props) {
   const { prices, loading } = useCardPrices();
+  const { has, toggle } = useWishlist();
   const out = card.stock === 0;
+  const isFav = has(card.id);
+  const createdAt = cardCreatedAt.get(card.id);
+  const isNew = createdAt
+    ? Date.now() - new Date(createdAt).getTime() < 14 * 24 * 60 * 60 * 1000
+    : false;
   // Per-variant: prefer manual base price (already in card.price as reais), fallback to Liga price
   const variantPrices = card.languages.flatMap((lang) =>
     lang.finishes.map((variant) => {
@@ -30,10 +39,11 @@ export function CardItem({ card, onClick }: Props) {
   const displayPrice = variantPrices.length ? Math.min(...variantPrices) / 100 : null;
 
   return (
-    <button
-      onClick={onClick}
-      className="group text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold rounded-xl"
-    >
+    <div className="group relative">
+      <button
+        onClick={onClick}
+        className="block w-full text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold rounded-xl"
+      >
       <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-secondary">
         <img
           src={card.image}
@@ -45,10 +55,15 @@ export function CardItem({ card, onClick }: Props) {
               `https://placehold.co/400x560/eeeeee/999999?text=${encodeURIComponent(card.name)}`;
           }}
         />
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-3 left-3 flex items-center gap-1.5">
           <span className="rounded-full bg-background/90 backdrop-blur px-2 py-1 text-[10px] font-bold tracking-tight shadow-sm">
             #{card.number}
           </span>
+          {isNew && (
+            <span className="rounded-full bg-brand-gold text-brand-gold-foreground px-2 py-1 text-[10px] font-bold tracking-tight shadow-sm">
+              NOVO
+            </span>
+          )}
         </div>
         <div className="absolute bottom-3 right-3">
           <span className={`rounded-full px-2 py-1 text-[10px] font-bold shadow-sm ${finishBadge[card.finish]}`}>
@@ -107,6 +122,19 @@ export function CardItem({ card, onClick }: Props) {
           </>
         )}
       </div>
-    </button>
+      </button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          toggle(card.id);
+        }}
+        aria-label={isFav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+        className="absolute top-3 right-3 grid h-8 w-8 place-items-center rounded-full bg-background/90 backdrop-blur shadow-sm hover:bg-background transition"
+      >
+        <Heart
+          className={`h-4 w-4 ${isFav ? "fill-brand-gold text-brand-gold" : "text-foreground"}`}
+        />
+      </button>
+    </div>
   );
 }

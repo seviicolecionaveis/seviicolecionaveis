@@ -2,8 +2,11 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { type Card, type Condition, type Finish, type FinishVariant, type LanguageVariant, CONDITION_LABEL } from "@/data/cards";
 import { useCart } from "@/hooks/useCart";
 import { useCardPrices, priceLookupKey } from "@/hooks/useCardPrices";
-import { Plus, Check } from "lucide-react";
-import { useState } from "react";
+import { useWishlist } from "@/hooks/useWishlist";
+import { trackCardView } from "@/hooks/useCardStats";
+import { cardSlug } from "@/lib/slug";
+import { Plus, Check, Heart, Share2, ZoomIn, ZoomOut } from "lucide-react";
+import { useEffect, useState } from "react";
 
 // Para cartas Pokémon, o acabamento "Ímã" é um produto interno disponível
 // automaticamente: R$10 se a carta possui Foil, senão R$9 se possui Normal.
@@ -49,7 +52,39 @@ const finishDot: Record<Finish, string> = {
 export function CardModal({ card, onClose }: Props) {
   const { add } = useCart();
   const { prices, loading: pricesLoading } = useCardPrices();
+  const { has, toggle } = useWishlist();
   const [added, setAdded] = useState<string | null>(null);
+  const [zoomed, setZoomed] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  useEffect(() => {
+    if (card) {
+      trackCardView(card.id);
+      setZoomed(false);
+      setShareCopied(false);
+    }
+  }, [card]);
+
+  const handleShare = async () => {
+    if (!card) return;
+    const url = `${window.location.origin}/carta/${cardSlug(card.name, card.collection, card.number)}`;
+    const text = `${card.name} (${card.collection} #${card.number}) — Sevii Colecionáveis`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: card.name, text, url });
+        return;
+      } catch {
+        // user cancelled — fall through to copy
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    } catch {
+      window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, "_blank");
+    }
+  };
 
   const resolvePrice = (finish: Finish, language: string): number | null => {
     if (!card) return null;
@@ -81,24 +116,68 @@ export function CardModal({ card, onClose }: Props) {
       <DialogContent className="max-w-3xl p-0 overflow-hidden bg-background max-h-[90vh] overflow-y-auto">
         {card && (
           <div className="grid md:grid-cols-[1.1fr_1fr]">
-            <div className="bg-secondary p-6 grid place-items-center">
-              <img
-                src={card.image}
-                alt={card.name}
-                className="max-h-[70vh] w-auto object-contain rounded-lg shadow-2xl"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src =
-                    `https://placehold.co/600x840/eeeeee/999999?text=${encodeURIComponent(card.name)}`;
-                }}
-              />
+            <div className="relative bg-secondary p-6 grid place-items-center">
+              <button
+                type="button"
+                onClick={() => setZoomed((z) => !z)}
+                className="cursor-zoom-in"
+                aria-label={zoomed ? "Reduzir imagem" : "Ampliar imagem"}
+              >
+                <img
+                  src={card.image}
+                  alt={card.name}
+                  className={`w-auto object-contain rounded-lg shadow-2xl transition-transform duration-300 ${
+                    zoomed ? "max-h-[140vh] scale-[1.6] cursor-zoom-out" : "max-h-[70vh]"
+                  }`}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      `https://placehold.co/600x840/eeeeee/999999?text=${encodeURIComponent(card.name)}`;
+                  }}
+                />
+              </button>
+              <div className="absolute top-3 left-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setZoomed((z) => !z)}
+                  className="grid h-8 w-8 place-items-center rounded-full bg-background/90 backdrop-blur shadow-sm hover:bg-background"
+                  aria-label={zoomed ? "Reduzir" : "Ampliar"}
+                >
+                  {zoomed ? <ZoomOut className="h-4 w-4" /> : <ZoomIn className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="p-8 flex flex-col">
-              <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-                {card.collection} • #{card.number}
-              </p>
-              <DialogTitle className="mt-2 text-3xl font-bold tracking-tight">
-                {card.name}
-              </DialogTitle>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
+                    {card.collection} • #{card.number}
+                  </p>
+                  <DialogTitle className="mt-2 text-3xl font-bold tracking-tight">
+                    {card.name}
+                  </DialogTitle>
+                </div>
+                <div className="flex shrink-0 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => toggle(card.id)}
+                    className="grid h-9 w-9 place-items-center rounded-full border border-border hover:bg-secondary transition"
+                    aria-label={has(card.id) ? "Remover dos favoritos" : "Favoritar"}
+                  >
+                    <Heart
+                      className={`h-4 w-4 ${has(card.id) ? "fill-brand-gold text-brand-gold" : ""}`}
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="grid h-9 w-9 place-items-center rounded-full border border-border hover:bg-secondary transition"
+                    aria-label="Compartilhar"
+                    title={shareCopied ? "Link copiado!" : "Compartilhar"}
+                  >
+                    {shareCopied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
 
               <p className="mt-2 text-xs text-muted-foreground">
                 {card.languages.length}{" "}

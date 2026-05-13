@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { type Card } from "@/data/cards";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
+import { useCardStats } from "@/hooks/useCardStats";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
 import { Filters, type FilterState } from "@/components/catalog/Filters";
@@ -56,6 +57,7 @@ function Index() {
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
+  const stats = useCardStats();
 
   const shuffleSeed = useMemo(() => Math.random(), []);
   const filtered = useMemo(() => {
@@ -107,16 +109,24 @@ function Index() {
       case "name":
         return [...list].sort((a, b) => a.name.localeCompare(b.name));
       default: {
-        // Pseudo-random shuffle (seeded per page load) so the catalog feels fresh
-        const seeded = list.map((c, i) => {
+        // Smart blend: top viewed, top sold, and random — interleaved for freshness.
+        // Each card gets a score combining its rank in views, sales, and a random factor.
+        const maxViews = Math.max(1, ...Array.from(stats.views.values()));
+        const maxSales = Math.max(1, ...Array.from(stats.sales.values()));
+        const scored = list.map((c, i) => {
+          const v = (stats.views.get(c.id) ?? 0) / maxViews;
+          const s = (stats.sales.get(c.id) ?? 0) / maxSales;
           const h = Math.sin((i + 1) * 9999 * shuffleSeed) * 10000;
-          return { c, k: h - Math.floor(h) };
+          const rand = h - Math.floor(h);
+          // 40% sales · 30% views · 30% random — out-of-stock pushed down
+          const score = s * 0.4 + v * 0.3 + rand * 0.3 - (c.stock === 0 ? 0.5 : 0);
+          return { c, score };
         });
-        seeded.sort((a, b) => a.k - b.k);
-        return seeded.map((s) => s.c);
+        scored.sort((a, b) => b.score - a.score);
+        return scored.map((x) => x.c);
       }
     }
-  }, [filters, query, sort, CARDS, shuffleSeed]);
+  }, [filters, query, sort, CARDS, shuffleSeed, stats]);
 
   const reset = () => {
     setFilters(DEFAULT_FILTERS);

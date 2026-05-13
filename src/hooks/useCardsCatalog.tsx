@@ -7,6 +7,10 @@ const FINISH_PRIORITY: Finish[] = ["Promo", "Pokebola", "Energia", "Foil", "Reve
 const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo"];
 const LANGUAGE_ORDER: Language[] = ["Português", "Inglês", "Espanhol", "Italiano"];
 
+export interface CardWithMeta extends Card {
+  createdAt: string;
+}
+
 function pickHeadlineFinish(variants: FinishVariant[]): Finish {
   const available = variants.filter((v) => v.stock > 0);
   const pool = available.length ? available : variants;
@@ -69,6 +73,8 @@ let cache: Card[] | null = null;
 let inFlight: Promise<Card[]> | null = null;
 const listeners = new Set<(c: Card[]) => void>();
 
+export const cardCreatedAt = new Map<string, string>();
+
 async function loadCards(): Promise<Card[]> {
   const all: any[] = [];
   const CHUNK = 1000;
@@ -76,13 +82,22 @@ async function loadCards(): Promise<Card[]> {
   while (true) {
     const { data, error } = await supabase
       .from("cards")
-      .select("name, card_number, collection, language, finish, condition, stock, base_price_cents, image, category")
+      .select("name, card_number, collection, language, finish, condition, stock, base_price_cents, image, category, created_at")
       .range(from, from + CHUNK - 1);
     if (error) { console.error("loadCards", error); break; }
     const batch = data ?? [];
     all.push(...batch);
     if (batch.length < CHUNK) break;
     from += CHUNK;
+  }
+  cardCreatedAt.clear();
+  for (const r of all) {
+    const key = `${r.name}__${r.collection}__${r.card_number}`;
+    const existing = cardCreatedAt.get(key);
+    const created = r.created_at as string | undefined;
+    if (created && (!existing || created > existing)) {
+      cardCreatedAt.set(key, created);
+    }
   }
   const raw: RawCard[] = all.map((r, i) => ({
     id: i,

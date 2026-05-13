@@ -10,21 +10,31 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ColecaoSlugRouteImport } from './routes/colecao.$slug'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as CartaSlugRouteImport } from './routes/carta.$slug'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-cards'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCardsRouteImport } from './routes/admin.cards'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
 
 const OrdersRoute = OrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritosRoute = FavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -47,10 +57,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ColecaoSlugRoute = ColecaoSlugRouteImport.update({
+  id: '/colecao/$slug',
+  path: '/colecao/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/return',
   path: '/return',
   getParentRoute: () => CheckoutRoute,
+} as any)
+const CartaSlugRoute = CartaSlugRouteImport.update({
+  id: '/carta/$slug',
+  path: '/carta/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
@@ -62,6 +82,11 @@ const AdminManageCardsRoute = AdminManageCardsRouteImport.update({
   path: '/manage-cards',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCardsRoute = AdminCardsRouteImport.update({
   id: '/cards',
   path: '/cards',
@@ -71,6 +96,11 @@ const AdminBannersRoute = AdminBannersRouteImport.update({
   id: '/banners',
   path: '/banners',
   getParentRoute: () => AdminRoute,
+} as any)
+const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
+  id: '/api/public/sitemap.xml',
+  path: '/api/public/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
@@ -90,12 +120,17 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
+  '/favoritos': typeof FavoritosRoute
   '/orders': typeof OrdersRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cards': typeof AdminCardsRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/colecao/$slug': typeof ColecaoSlugRoute
+  '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -104,12 +139,17 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
+  '/favoritos': typeof FavoritosRoute
   '/orders': typeof OrdersRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cards': typeof AdminCardsRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/colecao/$slug': typeof ColecaoSlugRoute
+  '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -119,12 +159,17 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
+  '/favoritos': typeof FavoritosRoute
   '/orders': typeof OrdersRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cards': typeof AdminCardsRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/colecao/$slug': typeof ColecaoSlugRoute
+  '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -135,12 +180,17 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/checkout'
+    | '/favoritos'
     | '/orders'
     | '/admin/banners'
     | '/admin/cards'
+    | '/admin/dashboard'
     | '/admin/manage-cards'
     | '/admin/users'
+    | '/carta/$slug'
     | '/checkout/return'
+    | '/colecao/$slug'
+    | '/api/public/sitemap.xml'
     | '/api/public/hooks/update-prices'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -149,12 +199,17 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/checkout'
+    | '/favoritos'
     | '/orders'
     | '/admin/banners'
     | '/admin/cards'
+    | '/admin/dashboard'
     | '/admin/manage-cards'
     | '/admin/users'
+    | '/carta/$slug'
     | '/checkout/return'
+    | '/colecao/$slug'
+    | '/api/public/sitemap.xml'
     | '/api/public/hooks/update-prices'
     | '/api/public/payments/webhook'
   id:
@@ -163,12 +218,17 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/checkout'
+    | '/favoritos'
     | '/orders'
     | '/admin/banners'
     | '/admin/cards'
+    | '/admin/dashboard'
     | '/admin/manage-cards'
     | '/admin/users'
+    | '/carta/$slug'
     | '/checkout/return'
+    | '/colecao/$slug'
+    | '/api/public/sitemap.xml'
     | '/api/public/hooks/update-prices'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -178,7 +238,11 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
+  FavoritosRoute: typeof FavoritosRoute
   OrdersRoute: typeof OrdersRoute
+  CartaSlugRoute: typeof CartaSlugRoute
+  ColecaoSlugRoute: typeof ColecaoSlugRoute
+  ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -190,6 +254,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/orders'
       preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favoritos': {
+      id: '/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof FavoritosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -220,12 +291,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/colecao/$slug': {
+      id: '/colecao/$slug'
+      path: '/colecao/$slug'
+      fullPath: '/colecao/$slug'
+      preLoaderRoute: typeof ColecaoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/checkout/return': {
       id: '/checkout/return'
       path: '/return'
       fullPath: '/checkout/return'
       preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof CheckoutRoute
+    }
+    '/carta/$slug': {
+      id: '/carta/$slug'
+      path: '/carta/$slug'
+      fullPath: '/carta/$slug'
+      preLoaderRoute: typeof CartaSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
       id: '/admin/users'
@@ -241,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminManageCardsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/cards': {
       id: '/admin/cards'
       path: '/cards'
@@ -254,6 +346,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/banners'
       preLoaderRoute: typeof AdminBannersRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/api/public/sitemap.xml': {
+      id: '/api/public/sitemap.xml'
+      path: '/api/public/sitemap.xml'
+      fullPath: '/api/public/sitemap.xml'
+      preLoaderRoute: typeof ApiPublicSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
@@ -275,6 +374,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
   AdminCardsRoute: typeof AdminCardsRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
   AdminManageCardsRoute: typeof AdminManageCardsRoute
   AdminUsersRoute: typeof AdminUsersRoute
 }
@@ -282,6 +382,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
   AdminCardsRoute: AdminCardsRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
   AdminManageCardsRoute: AdminManageCardsRoute,
   AdminUsersRoute: AdminUsersRoute,
 }
@@ -305,7 +406,11 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
+  FavoritosRoute: FavoritosRoute,
   OrdersRoute: OrdersRoute,
+  CartaSlugRoute: CartaSlugRoute,
+  ColecaoSlugRoute: ColecaoSlugRoute,
+  ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
