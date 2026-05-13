@@ -15,6 +15,7 @@ const STATUS_LABEL: Record<string, string> = {
   shipped: "Enviado",
   delivered: "Entregue",
   cancelled: "Cancelado",
+  cancellation_requested: "Cancelamento em análise",
 };
 const STATUS_COLOR: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -22,6 +23,7 @@ const STATUS_COLOR: Record<string, string> = {
   shipped: "bg-purple-100 text-purple-800",
   delivered: "bg-green-100 text-green-800",
   cancelled: "bg-red-100 text-red-800",
+  cancellation_requested: "bg-orange-100 text-orange-800",
 };
 
 function OrdersPage() {
