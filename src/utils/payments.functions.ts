@@ -276,7 +276,6 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
         city: data.address.city,
         state: data.address.state,
         notes: data.notes,
-        stock_reservation_expires_at: reservationExpires.toISOString(),
       })
       .select("id")
       .single();
