@@ -1,18 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import {
-  isAdmin,
-  restoreStockIfPaid,
-  getOrderById,
-  updateOrder,
-  deleteStockReservations,
-} from "@/lib/order-cancellation.server";
 
 export const requestOrderCancellation = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
+    const { getOrderById, updateOrder } = await import("@/lib/order-cancellation.server");
     const order = await getOrderById(data.order_id, "id, user_id, status");
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
     if (order.user_id !== context.userId) {
@@ -32,6 +26,13 @@ export const approveOrderCancellation = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
+    const {
+      isAdmin,
+      restoreStockIfPaid,
+      getOrderById,
+      updateOrder,
+      deleteStockReservations,
+    } = await import("@/lib/order-cancellation.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
     const order = await getOrderById(data.order_id, "id, status, pre_cancel_status");
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
@@ -45,6 +46,7 @@ export const rejectOrderCancellation = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
+    const { isAdmin, getOrderById, updateOrder } = await import("@/lib/order-cancellation.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
     const order = await getOrderById(data.order_id, "id, pre_cancel_status");
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
@@ -59,6 +61,13 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
+    const {
+      isAdmin,
+      restoreStockIfPaid,
+      getOrderById,
+      updateOrder,
+      deleteStockReservations,
+    } = await import("@/lib/order-cancellation.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
     const order = await getOrderById(data.order_id, "id, status");
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
