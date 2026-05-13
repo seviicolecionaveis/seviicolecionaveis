@@ -10,6 +10,7 @@ import { Filters, type FilterState } from "@/components/catalog/Filters";
 import { HeaderActions } from "@/components/HeaderActions";
 import { CartDrawer } from "@/components/CartDrawer";
 import { BannerCarousel } from "@/components/BannerCarousel";
+import { WelcomeDialog } from "@/components/WelcomeDialog";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
