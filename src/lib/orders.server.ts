@@ -15,7 +15,9 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
     .eq("order_id", orderId);
 
   if (items) {
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     for (const it of items) {
+      if (!it.card_id || !UUID_RE.test(it.card_id)) continue; // virtual product (e.g. Ímã)
       const { data: card } = await supabaseAdmin
         .from("cards")
         .select("stock")

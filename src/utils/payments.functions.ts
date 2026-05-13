@@ -113,11 +113,21 @@ type ResolvableItem = {
   quantity: number;
 };
 
+// "Ímã" is a virtual print-on-demand product with no row in `cards`.
+// We keep its synthetic cardId and skip stock checks/reservations for it.
+function isVirtualItem(it: { finish: string }) {
+  return it.finish === "Ímã";
+}
+
 // The client sends a synthetic cardId (name__collection__number).
 // Resolve it to the real cards.id UUID matching finish/language/condition.
 async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]> {
   const resolved: T[] = [];
   for (const it of items) {
+    if (isVirtualItem(it)) {
+      resolved.push(it);
+      continue;
+    }
     let query = supabaseAdmin
       .from("cards")
       .select("id")
@@ -140,8 +150,9 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
   return resolved;
 }
 
-async function ensureAvailableStock(items: { cardId: string; quantity: number; name: string }[]) {
+async function ensureAvailableStock(items: { cardId: string; quantity: number; name: string; finish: string }[]) {
   for (const it of items) {
+    if (isVirtualItem(it)) continue;
     const { data, error } = await supabaseAdmin.rpc("available_stock", { _card_id: it.cardId });
     if (error) throw new Error(error.message);
     const available = Number(data ?? 0);
@@ -156,16 +167,19 @@ async function ensureAvailableStock(items: { cardId: string; quantity: number; n
 async function createReservations(
   userId: string,
   orderId: string,
-  items: { cardId: string; quantity: number }[],
+  items: { cardId: string; quantity: number; finish: string }[],
   expiresAt: Date,
 ) {
-  const rows = items.map((i) => ({
-    user_id: userId,
-    card_id: i.cardId,
-    quantity: i.quantity,
-    order_id: orderId,
-    expires_at: expiresAt.toISOString(),
-  }));
+  const rows = items
+    .filter((i) => !isVirtualItem(i))
+    .map((i) => ({
+      user_id: userId,
+      card_id: i.cardId,
+      quantity: i.quantity,
+      order_id: orderId,
+      expires_at: expiresAt.toISOString(),
+    }));
+  if (rows.length === 0) return;
   const { error } = await supabaseAdmin.from("stock_reservations").insert(rows);
   if (error) throw new Error(error.message);
 }
