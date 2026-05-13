@@ -30,14 +30,19 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
 
   await supabaseAdmin.from("stock_reservations").delete().eq("order_id", orderId);
 
-  const update: Record<string, unknown> = {
-    status: "paid",
-    updated_at: new Date().toISOString(),
-  };
-  if (paymentRef?.stripePaymentIntent) update.stripe_payment_intent = paymentRef.stripePaymentIntent;
-  if (paymentRef?.mercadopagoPaymentId) update.mercadopago_payment_id = paymentRef.mercadopagoPaymentId;
-
-  await supabaseAdmin.from("orders").update(update).eq("id", orderId);
+  await supabaseAdmin
+    .from("orders")
+    .update({
+      status: "paid",
+      updated_at: new Date().toISOString(),
+      ...(paymentRef?.stripePaymentIntent
+        ? { stripe_payment_intent: paymentRef.stripePaymentIntent }
+        : {}),
+      ...(paymentRef?.mercadopagoPaymentId
+        ? { mercadopago_payment_id: paymentRef.mercadopagoPaymentId }
+        : {}),
+    })
+    .eq("id", orderId);
 }
 
 export async function cancelOrder(orderId: string) {
