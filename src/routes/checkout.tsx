@@ -72,6 +72,7 @@ function CheckoutPage() {
   const [method, setMethod] = useState<PaymentMethod>("pix");
   const [step, setStep] = useState<Step>("address");
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [stripeOrderId, setStripeOrderId] = useState<string | null>(null);
   const [pix, setPix] = useState<PixState | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -221,7 +222,7 @@ function CheckoutPage() {
       await persistAddressAndProfile();
       const token = session?.access_token;
       if (!token) throw new Error("Sessão expirada. Faça login novamente.");
-      const secret = await createOrderCheckout({
+      const result = await createOrderCheckout({
         headers: { Authorization: `Bearer ${token}` },
         data: {
           items: buildItemsPayload(),
@@ -229,11 +230,12 @@ function CheckoutPage() {
           address: buildAddressPayload(),
           notes: buildNotes(),
           couponCode: couponNormalized || null,
-          returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+          returnUrl: `${window.location.origin}/orders/__ORDER__?session_id={CHECKOUT_SESSION_ID}`,
           environment: getStripeEnvironment(),
         },
       });
-      setClientSecret(secret);
+      setClientSecret(result.clientSecret);
+      setStripeOrderId(result.orderId);
       setStep("card");
       clear();
     } catch (e: any) {
@@ -301,7 +303,19 @@ function CheckoutPage() {
         <main className="mx-auto max-w-3xl px-4 py-8">
           <h1 className="text-2xl font-bold mb-6">Pagamento — Cartão</h1>
           <div id="checkout">
-            <EmbeddedCheckoutProvider stripe={getStripe()} options={{ clientSecret }}>
+            <EmbeddedCheckoutProvider
+              stripe={getStripe()}
+              options={{
+                clientSecret,
+                onComplete: () => {
+                  if (stripeOrderId) {
+                    nav({ to: "/orders/$orderId", params: { orderId: stripeOrderId } });
+                  } else {
+                    nav({ to: "/orders" });
+                  }
+                },
+              }}
+            >
               <EmbeddedCheckout />
             </EmbeddedCheckoutProvider>
           </div>
@@ -528,7 +542,7 @@ function PixScreen({ pix }: { pix: PixState }) {
         if (r.status === "paid") {
           polling.current = false;
           setStatus("paid");
-          setTimeout(() => nav({ to: "/checkout/return", search: { session_id: pix.orderId } }), 1500);
+          setTimeout(() => nav({ to: "/orders/$orderId", params: { orderId: pix.orderId } }), 1500);
         } else if (r.status === "cancelled") {
           polling.current = false;
           setStatus("cancelled");

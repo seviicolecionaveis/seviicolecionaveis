@@ -291,11 +291,21 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
       });
     }
 
+    // Reescreve o return_url para apontar direto para a página do pedido
+    let returnUrl = data.returnUrl;
+    try {
+      const u = new URL(data.returnUrl);
+      returnUrl = `${u.origin}/orders/${order.id}?session_id={CHECKOUT_SESSION_ID}`;
+    } catch {
+      // mantém o original se não for URL válida
+    }
+
     const session = await stripe.checkout.sessions.create({
       line_items: lineItems,
       mode: "payment",
       ui_mode: "embedded_page",
-      return_url: data.returnUrl,
+      redirect_on_completion: "always",
+      return_url: returnUrl,
       customer_email: email,
       metadata: { orderId: order.id, userId },
       payment_intent_data: { metadata: { orderId: order.id, userId } },
@@ -307,7 +317,7 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
       .update({ stripe_session_id: session.id })
       .eq("id", order.id);
 
-    return session.client_secret;
+    return { clientSecret: session.client_secret, orderId: order.id };
   });
 
 // ---------- PIX (Mercado Pago) ----------
