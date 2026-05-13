@@ -151,6 +151,10 @@ function OrderDetailPage() {
                       alt={it.card_name}
                       className="h-full w-full object-cover"
                       loading="lazy"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = "none";
+                      }}
                     />
                   ) : (
                     <div className="h-full w-full grid place-items-center text-[10px] text-muted-foreground">
