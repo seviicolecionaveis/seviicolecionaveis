@@ -11,6 +11,7 @@ export const Route = createFileRoute("/carta/$slug")({
     const pretty = decodeURIComponent(params.slug ?? "")
       .replace(/-/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
+    const url = `https://seviicolecionaveis.lovable.app/carta/${params.slug}`;
     return {
       meta: [
         { title: `${pretty} — Sevii Colecionáveis` },
@@ -22,6 +23,22 @@ export const Route = createFileRoute("/carta/$slug")({
         {
           property: "og:description",
           content: `Veja preço, condição e idiomas disponíveis para ${pretty}.`,
+        },
+        { property: "og:type", content: "product" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: pretty,
+            description: `Carta Pokémon ${pretty} — Sevii Colecionáveis.`,
+            url,
+            brand: { "@type": "Brand", name: "Pokémon" },
+          }),
         },
       ],
     };
