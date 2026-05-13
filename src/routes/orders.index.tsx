@@ -47,15 +47,33 @@ function OrdersPage() {
 
   useEffect(() => {
     if (!user) return;
-    (async () => {
+    let cancelled = false;
+    const load = async () => {
       const { data } = await supabase
         .from("orders")
         .select("id, created_at, status, total_cents, order_items(id, card_name, card_image, quantity)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
-      setOrders(data ?? []);
-      setLoading(false);
-    })();
+      if (!cancelled) {
+        setOrders(data ?? []);
+        setLoading(false);
+      }
+    };
+    load();
+
+    const channel = supabase
+      .channel(`orders-list-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` },
+        () => { load(); },
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   if (authLoading || loading) {
