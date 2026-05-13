@@ -317,7 +317,7 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
       .update({ stripe_session_id: session.id })
       .eq("id", order.id);
 
-    return session.client_secret;
+    return { clientSecret: session.client_secret, orderId: order.id };
   });
 
 // ---------- PIX (Mercado Pago) ----------
