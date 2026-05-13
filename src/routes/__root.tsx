@@ -124,7 +124,7 @@ function RootComponent() {
             }}
           />
           <PaymentTestModeBanner />
-          
+          <AnalyticsTracker />
           <Outlet />
         </CartProvider>
       </WishlistProvider>
