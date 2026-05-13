@@ -238,10 +238,6 @@ function CheckoutPage() {
 
   const startStripe = async () => {
     if (!user || items.length === 0) return;
-    if (total < 5) {
-      setErr("Valor mínimo para pagamento com cartão: R$ 5,00. Adicione mais itens ao carrinho.");
-      return;
-    }
     setLoading(true);
     setErr(null);
     try {
@@ -273,10 +269,6 @@ function CheckoutPage() {
 
   const startPix = async () => {
     if (!user || items.length === 0) return;
-    if (total < 1) {
-      setErr("Valor mínimo para Pix: R$ 1,00. Adicione mais itens ao carrinho.");
-      return;
-    }
     setLoading(true);
     setErr(null);
     try {
