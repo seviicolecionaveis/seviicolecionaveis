@@ -1,27 +1,80 @@
-## Pop-up de Boas-vindas — Trainer
+## Área Pessoal do Trainer
 
-Vou criar um novo componente `WelcomeDialog` (separado do `PaymentNoticeDialog` existente) que aparece ao entrar na página inicial (`/`), com visual profissional e temático Pokémon.
+Criar uma área completa do cliente com dados pessoais, pedidos, favoritos e pesquisa pós-compra.
 
-### Comportamento
-- Abre automaticamente ~400ms após carregar a home
-- Aparece **uma vez por sessão** (usa `sessionStorage` com a chave `welcome-dialog-dismissed`) — não incomoda a cada navegação
-- Fecha pelo botão "Vamos lá!" ou pelo X padrão do dialog
+### 1. Banco de dados (migration)
 
-### Conteúdo
-- **Ícone:** Pokébola/Sparkles em destaque no topo, dentro de um círculo com gradiente da marca (brand-gold)
-- **Título:** *Bem-vindo, Trainer!*
-- **Mensagem:** "Nosso site está em fase de implementação e podem ocorrer alguns erros, mas não desanime!"
-- **Bloco de contato destacado:** caixa suave com ícone de e-mail + link clicável para `seviicolecionaveis@gmail.com` (abre o cliente de e-mail)
-- **CTA primário:** botão "Vamos lá!" com a cor da marca
+**Estender `profiles`** com campos novos:
+- `whatsapp` (text)
+- `birth_date` (date)
+- `favorite_pokemons` (text[])
+- `favorite_categories` (text[])
 
-### Estilo
-- Componente baseado no `Dialog` do shadcn (mesmo padrão do `PaymentNoticeDialog`)
-- Usa apenas tokens semânticos do design system (`bg-primary`, `text-foreground`, `brand-gold`, etc.) — nada hardcoded
-- Largura `sm:max-w-md`, cantos arredondados, espaçamento generoso
-- Texto centralizado, tipografia já definida no projeto
+**Nova tabela `post_purchase_surveys`**:
+- `order_id` (uuid, único, ref orders)
+- `user_id` (uuid)
+- `how_found_us` (text) — Instagram, indicação, Google, etc.
+- `satisfaction` (int 1–5)
+- `comment` (text, opcional)
+- RLS: usuário insere/lê próprio; admin lê tudo
 
-### Arquivos
-1. **Criar** `src/components/WelcomeDialog.tsx` — novo componente
-2. **Editar** `src/routes/index.tsx` — importar e renderizar `<WelcomeDialog />` dentro de `Index` (perto do `CardModal`/`CartDrawer`)
+**Atualizar `handle_new_user`** para gravar `whatsapp` e `birth_date` vindos de `raw_user_meta_data`.
 
-Sem mudanças de backend, banco ou rotas.
+### 2. Cadastro (`/auth`)
+
+Adicionar ao formulário de signup:
+- WhatsApp (com máscara `(99) 99999-9999`)
+- Data de nascimento (input `date`)
+
+Enviar via `options.data` no `signUp` para o trigger persistir no profile.
+
+### 3. Nova rota `/conta` (Área Pessoal)
+
+Layout com **abas/tabs** (shadcn `Tabs`):
+
+```
+/conta
+ ├─ Visão geral   → resumo + atalhos para pedidos/favoritos
+ ├─ Dados pessoais → nome, e-mail (readonly), WhatsApp, nascimento, CPF, senha
+ ├─ Preferências   → pokémons favoritos (chips/tags), categorias favoritas (multi-select)
+ ├─ Endereços      → CRUD usando tabela `addresses` existente
+ ├─ Pedidos        → reaproveita lista de `/orders`
+ └─ Favoritos      → reaproveita lista de `/favoritos`
+```
+
+Acessível pelo menu do usuário no header (`HeaderActions`), substituindo/complementando os links atuais "Meus pedidos" e "Meus favoritos" por **"Minha conta"** que cai em `/conta`.
+
+### 4. Pesquisa pós-compra
+
+- Componente `PostPurchaseSurvey` exibido em `/orders/$orderId` quando:
+  - status = `paid`
+  - ainda não há survey para o pedido
+- Modal/card com:
+  - "Como nos encontrou?" (select: Instagram, TikTok, Google, Indicação, Outro)
+  - Satisfação (5 estrelas)
+  - Comentário (textarea opcional)
+- Botão "Pular" também marca como respondido (insere com valores nulos exceto how_found_us=`skipped`) para não reaparecer.
+
+### 5. Componentes/arquivos
+
+**Criar:**
+- `src/routes/conta.tsx` (layout com Tabs)
+- `src/components/account/PersonalDataForm.tsx`
+- `src/components/account/PreferencesForm.tsx`
+- `src/components/account/AddressesManager.tsx`
+- `src/components/PostPurchaseSurvey.tsx`
+
+**Editar:**
+- `src/components/HeaderActions.tsx` — adicionar link "Minha conta"
+- `src/routes/auth.tsx` — campos WhatsApp + nascimento
+- `src/routes/orders.$orderId.tsx` — montar `<PostPurchaseSurvey />`
+
+### Observações técnicas
+
+- Tudo client-side com `supabase` (RLS já garante isolamento).
+- Lista fixa de categorias = mesma usada nos filtros (Pokémon, Treinador, Energia…).
+- Pokémons favoritos: input de tags livre (sem catálogo externo) — simples e rápido.
+- E-mail é readonly (mudança de e-mail exige fluxo Supabase separado, fora do escopo).
+- Senha: botão "Alterar senha" abre mini-form usando `supabase.auth.updateUser({ password })`.
+
+Posso seguir?

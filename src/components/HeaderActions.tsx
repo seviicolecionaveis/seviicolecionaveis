@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, User as UserIcon, LogOut, LayoutDashboard, Tag, Heart } from "lucide-react";
+import { ShoppingBag, User as UserIcon, LogOut, LayoutDashboard, Tag, Heart, UserCog } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
@@ -53,6 +53,13 @@ export function HeaderActions({ onCartOpen }: Props) {
                 <div className="px-3 py-2 border-b border-border text-xs text-muted-foreground truncate">
                   {user.email}
                 </div>
+                <Link
+                  to="/conta"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
+                >
+                  <UserCog className="h-4 w-4" /> Minha conta
+                </Link>
                 <Link
                   to="/favoritos"
                   onClick={() => setMenuOpen(false)}

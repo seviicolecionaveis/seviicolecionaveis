@@ -367,6 +367,39 @@ export type Database = {
         }
         Relationships: []
       }
+      post_purchase_surveys: {
+        Row: {
+          comment: string | null
+          created_at: string
+          how_found_us: string | null
+          id: string
+          order_id: string
+          satisfaction: number | null
+          skipped: boolean
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          how_found_us?: string | null
+          id?: string
+          order_id: string
+          satisfaction?: number | null
+          skipped?: boolean
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          how_found_us?: string | null
+          id?: string
+          order_id?: string
+          satisfaction?: number | null
+          skipped?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       price_update_runs: {
         Row: {
           error_count: number
@@ -405,31 +438,43 @@ export type Database = {
       }
       profiles: {
         Row: {
+          birth_date: string | null
           cpf: string | null
           created_at: string
+          favorite_categories: string[]
+          favorite_pokemons: string[]
           full_name: string | null
           id: string
           phone: string | null
           updated_at: string
           user_id: string
+          whatsapp: string | null
         }
         Insert: {
+          birth_date?: string | null
           cpf?: string | null
           created_at?: string
+          favorite_categories?: string[]
+          favorite_pokemons?: string[]
           full_name?: string | null
           id?: string
           phone?: string | null
           updated_at?: string
           user_id: string
+          whatsapp?: string | null
         }
         Update: {
+          birth_date?: string | null
           cpf?: string | null
           created_at?: string
+          favorite_categories?: string[]
+          favorite_pokemons?: string[]
           full_name?: string | null
           id?: string
           phone?: string | null
           updated_at?: string
           user_id?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }

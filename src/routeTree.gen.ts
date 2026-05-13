@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
+import { Route as ContaRouteImport } from './routes/conta'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -44,6 +45,11 @@ const OrdersRoute = OrdersRouteImport.update({
 const FavoritosRoute = FavoritosRouteImport.update({
   id: '/favoritos',
   path: '/favoritos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContaRoute = ContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
+  '/conta': typeof ContaRoute
   '/favoritos': typeof FavoritosRoute
   '/orders': typeof OrdersRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
+  '/conta': typeof ContaRoute
   '/favoritos': typeof FavoritosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
+  '/conta': typeof ContaRoute
   '/favoritos': typeof FavoritosRoute
   '/orders': typeof OrdersRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/checkout'
+    | '/conta'
     | '/favoritos'
     | '/orders'
     | '/sitemap.xml'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/checkout'
+    | '/conta'
     | '/favoritos'
     | '/sitemap.xml'
     | '/admin/banners'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/checkout'
+    | '/conta'
     | '/favoritos'
     | '/orders'
     | '/sitemap.xml'
@@ -285,6 +297,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
+  ContaRoute: typeof ContaRoute
   FavoritosRoute: typeof FavoritosRoute
   OrdersRoute: typeof OrdersRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -317,6 +330,13 @@ declare module '@tanstack/react-router' {
       path: '/favoritos'
       fullPath: '/favoritos'
       preLoaderRoute: typeof FavoritosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conta': {
+      id: '/conta'
+      path: '/conta'
+      fullPath: '/conta'
+      preLoaderRoute: typeof ContaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -496,6 +516,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
+  ContaRoute: ContaRoute,
   FavoritosRoute: FavoritosRoute,
   OrdersRoute: OrdersRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

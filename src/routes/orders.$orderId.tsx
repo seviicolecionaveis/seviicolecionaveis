@@ -6,6 +6,7 @@ import { CheckCircle2, Clock, XCircle, Package, Truck, AlertTriangle } from "luc
 import { trackEvent } from "@/lib/analytics";
 import { requestOrderCancellation } from "@/utils/orders.functions";
 import { toast } from "sonner";
+import { PostPurchaseSurvey } from "@/components/PostPurchaseSurvey";
 
 const PURCHASE_TRACKED_KEY = "sevii_ga_purchase_tracked";
 
@@ -266,6 +267,10 @@ function OrderDetailPage() {
           <p className="text-muted-foreground">{order.neighborhood} · {order.city}/{order.state} · CEP {order.cep}</p>
           {order.phone && <p className="text-muted-foreground mt-1">Tel: {order.phone}</p>}
         </section>
+
+        {(order.status === "paid" || order.status === "shipped" || order.status === "delivered") && (
+          <PostPurchaseSurvey orderId={order.id} />
+        )}
 
         {(order.status === "pending" || order.status === "paid") && (
           <div className="rounded-xl border border-border bg-card p-5 text-sm space-y-2">
