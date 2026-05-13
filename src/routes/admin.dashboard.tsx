@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { useCardStats } from "@/hooks/useCardStats";
 import { TrendingUp, Eye, ShoppingBag, AlertTriangle, Download } from "lucide-react";
+import { AdminCancellationBell } from "@/components/AdminCancellationBell";
 
 export const Route = createFileRoute("/admin/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Sevii Admin" }] }),
@@ -141,11 +142,14 @@ function DashboardPage() {
       <header className="border-b border-border px-4 py-4">
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-4 flex-wrap">
           <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii · Dashboard</Link>
-          <div className="flex gap-3 text-xs">
-            <Link to="/admin" className="font-semibold hover:underline">Pedidos</Link>
-            <Link to="/admin/manage-cards" className="font-semibold hover:underline">Cartas</Link>
-            <Link to="/admin/banners" className="font-semibold hover:underline">Banners</Link>
-            <Link to="/" className="text-muted-foreground hover:text-foreground">← Catálogo</Link>
+          <div className="flex items-center gap-3">
+            <AdminCancellationBell />
+            <div className="flex gap-3 text-xs">
+              <Link to="/admin" className="font-semibold hover:underline">Pedidos</Link>
+              <Link to="/admin/manage-cards" className="font-semibold hover:underline">Cartas</Link>
+              <Link to="/admin/banners" className="font-semibold hover:underline">Banners</Link>
+              <Link to="/" className="text-muted-foreground hover:text-foreground">← Catálogo</Link>
+            </div>
           </div>
         </div>
       </header>

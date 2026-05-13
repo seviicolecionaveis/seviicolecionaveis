@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -8,9 +8,13 @@ import {
   adminCancelOrder,
 } from "@/utils/orders.functions";
 import { toast } from "sonner";
+import { AdminCancellationBell } from "@/components/AdminCancellationBell";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Sevii Colecionáveis" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    focus: typeof search.focus === "string" ? search.focus : undefined,
+  }),
   component: AdminPage,
 });
 
@@ -28,10 +32,13 @@ function AdminPage() {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const nav = useNavigate();
   const location = useLocation();
+  const search = Route.useSearch();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
   const isOrdersRoute = location.pathname === "/admin";
+  const focusId = search.focus;
+  const focusRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -53,6 +60,31 @@ function AdminPage() {
   useEffect(() => {
     if (isAdmin && isOrdersRoute) load();
   }, [isAdmin, isOrdersRoute]);
+
+  useEffect(() => {
+    if (!isAdmin || !isOrdersRoute) return;
+    const channel = supabase
+      .channel("admin-orders-list")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        () => { load(); },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [isAdmin, isOrdersRoute]);
+
+  useEffect(() => {
+    if (focusId) setFilter("cancellation_requested");
+  }, [focusId]);
+
+  useEffect(() => {
+    if (!focusId || loading) return;
+    const t = setTimeout(() => {
+      focusRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 100);
+    return () => clearTimeout(t);
+  }, [focusId, loading, orders]);
 
   const updateStatus = async (id: string, status: string) => {
     await supabase.from("orders").update({ status }).eq("id", id);
@@ -107,6 +139,8 @@ function AdminPage() {
       <header className="border-b border-border px-4 py-4">
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
           <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis · Admin</Link>
+          <div className="flex items-center gap-3">
+            <AdminCancellationBell />
           <div className="flex gap-3 text-xs flex-wrap">
             <Link to="/admin/dashboard" className="font-semibold text-foreground hover:underline">Dashboard</Link>
             <Link to="/admin/manage-cards" className="font-semibold text-foreground hover:underline">Gerenciar cartas</Link>
@@ -114,6 +148,7 @@ function AdminPage() {
             <Link to="/admin/cards" className="font-semibold text-foreground hover:underline">Preços (Liga Pokémon)</Link>
             <Link to="/admin/users" className="font-semibold text-foreground hover:underline">Administradores</Link>
             <Link to="/" className="text-muted-foreground hover:text-foreground">← Catálogo</Link>
+          </div>
           </div>
         </div>
       </header>
@@ -137,7 +172,11 @@ function AdminPage() {
         ) : (
           <div className="space-y-4">
             {filtered.map((o) => (
-              <div key={o.id} className="rounded-xl border border-border p-5 bg-card">
+              <div
+                key={o.id}
+                ref={o.id === focusId ? focusRef : undefined}
+                className={`rounded-xl border p-5 bg-card transition ${o.id === focusId ? "border-orange-500 ring-2 ring-orange-300" : "border-border"}`}
+              >
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                   <div>
                     <p className="text-xs text-muted-foreground font-mono">#{o.id.slice(0, 8)}</p>
