@@ -63,6 +63,16 @@ export const Route = createRootRoute({
       { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
       { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
     ],
+    scripts: [
+      { src: "https://www.googletagmanager.com/gtag/js?id=G-2Y61Z4FGFL", async: true },
+      {
+        children: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+window.gtag = gtag;
+gtag('js', new Date());
+gtag('config', 'G-2Y61Z4FGFL', { send_page_view: false });`,
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
