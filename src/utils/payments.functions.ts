@@ -102,6 +102,44 @@ async function validateCoupon(
   throw new Error("Cupom inválido");
 }
 
+type ResolvableItem = {
+  cardId: string;
+  name: string;
+  collection?: string | null;
+  number?: string | null;
+  finish: string;
+  language: string;
+  condition?: string | null;
+  quantity: number;
+};
+
+// The client sends a synthetic cardId (name__collection__number).
+// Resolve it to the real cards.id UUID matching finish/language/condition.
+async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]> {
+  const resolved: T[] = [];
+  for (const it of items) {
+    let query = supabaseAdmin
+      .from("cards")
+      .select("id")
+      .eq("name", it.name)
+      .eq("finish", it.finish as never)
+      .eq("language", it.language as never)
+      .limit(1);
+    if (it.collection) query = query.eq("collection", it.collection);
+    if (it.number) query = query.eq("card_number", it.number);
+    if (it.condition) query = query.eq("condition", it.condition as never);
+    const { data, error } = await query.maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) {
+      throw new Error(
+        `Carta não encontrada no estoque: "${it.name}" (${it.finish}/${it.language}${it.condition ? "/" + it.condition : ""}).`,
+      );
+    }
+    resolved.push({ ...it, cardId: data.id });
+  }
+  return resolved;
+}
+
 async function ensureAvailableStock(items: { cardId: string; quantity: number; name: string }[]) {
   for (const it of items) {
     const { data, error } = await supabaseAdmin.rpc("available_stock", { _card_id: it.cardId });
@@ -154,7 +192,8 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
       subtotalCents,
     );
 
-    await ensureAvailableStock(data.items);
+    const items = await resolveCardIds(data.items);
+    await ensureAvailableStock(items);
 
     const totalCents = subtotalCents - discountCents + shippingCents;
 
@@ -193,7 +232,7 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
       .single();
     if (orderErr || !order) throw new Error(orderErr?.message ?? "Falha ao criar pedido");
 
-    const orderItems = data.items.map((i) => ({
+    const orderItems = items.map((i) => ({
       order_id: order.id,
       card_id: i.cardId,
       card_name: i.name,
@@ -209,7 +248,7 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
     const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (itemsErr) throw new Error(itemsErr.message);
 
-    await createReservations(userId, order.id, data.items, reservationExpires);
+    await createReservations(userId, order.id, items, reservationExpires);
 
     const discountMultiplier = discountCents > 0 ? (subtotalCents - discountCents) / subtotalCents : 1;
     const lineItems = data.items.map((i) => {
@@ -277,7 +316,8 @@ export const createPixOrder = createServerFn({ method: "POST" })
       subtotalCents,
     );
 
-    await ensureAvailableStock(data.items);
+    const items = await resolveCardIds(data.items);
+    await ensureAvailableStock(items);
 
     const totalCents = subtotalCents - discountCents + shippingCents;
     if (totalCents < 100) throw new Error("Valor mínimo para Pix: R$ 1,00");
@@ -319,7 +359,7 @@ export const createPixOrder = createServerFn({ method: "POST" })
       .single();
     if (orderErr || !order) throw new Error(orderErr?.message ?? "Falha ao criar pedido");
 
-    const orderItems = data.items.map((i) => ({
+    const orderItems = items.map((i) => ({
       order_id: order.id,
       card_id: i.cardId,
       card_name: i.name,
@@ -335,7 +375,7 @@ export const createPixOrder = createServerFn({ method: "POST" })
     const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (itemsErr) throw new Error(itemsErr.message);
 
-    await createReservations(userId, order.id, data.items, reservationExpires);
+    await createReservations(userId, order.id, items, reservationExpires);
 
     // Build notification URL — must be a public absolute URL
     const baseUrl =
