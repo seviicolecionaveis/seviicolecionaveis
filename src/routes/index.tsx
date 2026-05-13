@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { type Card } from "@/data/cards";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
+import { useCardStats } from "@/hooks/useCardStats";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
 import { Filters, type FilterState } from "@/components/catalog/Filters";
