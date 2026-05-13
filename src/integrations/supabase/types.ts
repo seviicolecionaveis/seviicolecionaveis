@@ -549,6 +549,7 @@ export type Database = {
         | "Promo"
         | "Ímã"
         | "Shattered Holo"
+        | "Illustration Rare"
       card_language: "Português" | "Inglês" | "Italiano" | "Espanhol"
     }
     CompositeTypes: {
@@ -689,6 +690,7 @@ export const Constants = {
         "Promo",
         "Ímã",
         "Shattered Holo",
+        "Illustration Rare",
       ],
       card_language: ["Português", "Inglês", "Italiano", "Espanhol"],
     },
