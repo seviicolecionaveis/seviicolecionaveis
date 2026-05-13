@@ -8,6 +8,7 @@ import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { createOrderCheckout, createPixOrder, checkPixOrderStatus } from "@/utils/payments.functions";
 import { toast } from "sonner";
 import { Copy, Check, QrCode } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — Sevii Colecionáveis" }] }),
