@@ -68,6 +68,20 @@ function OrderDetailPage() {
     if (!authLoading && !user) nav({ to: "/auth" });
   }, [authLoading, user, nav]);
 
+  // Notifica quando o status muda (ex: admin aprova cancelamento)
+  useEffect(() => {
+    if (!order) return;
+    const prev = (window as any).__lastOrderStatus?.[order.id];
+    if (prev && prev !== order.status) {
+      if (order.status === "cancelled") {
+        toast.success("Seu pedido foi cancelado.");
+      } else if (prev === "cancellation_requested" && order.status !== "cancelled") {
+        toast.info("Sua solicitação de cancelamento foi recusada.");
+      }
+    }
+    (window as any).__lastOrderStatus = { ...((window as any).__lastOrderStatus ?? {}), [order.id]: order.status };
+  }, [order?.status, order?.id]);
+
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
