@@ -232,7 +232,7 @@ export const createOrderCheckout = createServerFn({ method: "POST" })
       .single();
     if (orderErr || !order) throw new Error(orderErr?.message ?? "Falha ao criar pedido");
 
-    const orderItems = data.items.map((i) => ({
+    const orderItems = items.map((i) => ({
       order_id: order.id,
       card_id: i.cardId,
       card_name: i.name,
