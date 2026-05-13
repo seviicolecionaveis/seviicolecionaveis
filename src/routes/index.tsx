@@ -94,7 +94,7 @@ function Index() {
       }
       if (numQ && !c.number.toLowerCase().includes(numQ)) return false;
       if (q) {
-        const hay = `${c.name} ${c.collection}`.toLowerCase();
+        const hay = `${c.name} ${c.collection} ${c.number}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -191,7 +191,7 @@ function Index() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar por nome, coleção, raridade..."
+              placeholder="Buscar por nome, coleção, numeração..."
               className="w-full rounded-full bg-secondary pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold"
             />
           </div>
