@@ -268,6 +268,10 @@ function OrderDetailPage() {
           {order.phone && <p className="text-muted-foreground mt-1">Tel: {order.phone}</p>}
         </section>
 
+        {(order.status === "paid" || order.status === "shipped" || order.status === "delivered") && (
+          <PostPurchaseSurvey orderId={order.id} />
+        )}
+
         {(order.status === "pending" || order.status === "paid") && (
           <div className="rounded-xl border border-border bg-card p-5 text-sm space-y-2">
             <p className="font-semibold">Precisa cancelar este pedido?</p>
