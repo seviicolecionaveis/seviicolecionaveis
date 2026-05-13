@@ -406,7 +406,6 @@ export const createPixOrder = createServerFn({ method: "POST" })
         city: data.address.city,
         state: data.address.state,
         notes: data.notes,
-        stock_reservation_expires_at: reservationExpires.toISOString(),
         pix_expires_at: pixExpires.toISOString(),
       })
       .select("id")
