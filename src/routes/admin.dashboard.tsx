@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { useCardStats } from "@/hooks/useCardStats";
 import { TrendingUp, Eye, ShoppingBag, AlertTriangle, Download } from "lucide-react";
+import { AdminCancellationBell } from "@/components/AdminCancellationBell";
 
 export const Route = createFileRoute("/admin/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Sevii Admin" }] }),
