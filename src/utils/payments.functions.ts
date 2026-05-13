@@ -102,6 +102,44 @@ async function validateCoupon(
   throw new Error("Cupom inválido");
 }
 
+type ResolvableItem = {
+  cardId: string;
+  name: string;
+  collection?: string | null;
+  number?: string | null;
+  finish: string;
+  language: string;
+  condition?: string | null;
+  quantity: number;
+};
+
+// The client sends a synthetic cardId (name__collection__number).
+// Resolve it to the real cards.id UUID matching finish/language/condition.
+async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]> {
+  const resolved: T[] = [];
+  for (const it of items) {
+    let query = supabaseAdmin
+      .from("cards")
+      .select("id")
+      .eq("name", it.name)
+      .eq("finish", it.finish)
+      .eq("language", it.language)
+      .limit(1);
+    if (it.collection) query = query.eq("collection", it.collection);
+    if (it.number) query = query.eq("card_number", it.number);
+    if (it.condition) query = query.eq("condition", it.condition);
+    const { data, error } = await query.maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) {
+      throw new Error(
+        `Carta não encontrada no estoque: "${it.name}" (${it.finish}/${it.language}${it.condition ? "/" + it.condition : ""}).`,
+      );
+    }
+    resolved.push({ ...it, cardId: data.id });
+  }
+  return resolved;
+}
+
 async function ensureAvailableStock(items: { cardId: string; quantity: number; name: string }[]) {
   for (const it of items) {
     const { data, error } = await supabaseAdmin.rpc("available_stock", { _card_id: it.cardId });
