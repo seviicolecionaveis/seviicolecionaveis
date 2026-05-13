@@ -54,6 +54,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, { ...item, quantity: Math.min(qty, item.maxStock) }];
     });
+    trackEvent("add_to_cart", {
+      currency: "BRL",
+      value: item.unitPrice * qty,
+      items: [{
+        item_id: item.id,
+        item_name: item.name,
+        item_category: item.collection,
+        item_variant: `${item.finish}/${item.language}/${item.condition}`,
+        price: item.unitPrice,
+        quantity: qty,
+      }],
+    });
   };
 
   const remove = (id: string) => setItems((p) => p.filter((i) => i.id !== id));
