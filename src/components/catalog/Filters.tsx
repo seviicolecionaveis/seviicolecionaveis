@@ -29,6 +29,7 @@ const finishClass: Record<Finish, string> = {
   "Shattered Holo": "bg-type-dragon/15 text-foreground border-type-dragon/40",
   "Illustration Rare": "bg-type-fairy/20 text-foreground border-type-fairy/40",
   "Ultra Rara": "bg-brand-gold/15 text-foreground border-brand-gold/40",
+  "Black Star Promo": "bg-foreground text-background border-foreground",
 };
 
 export function Filters({ filters, onChange, onReset }: Props) {
