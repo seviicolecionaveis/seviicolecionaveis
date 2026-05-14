@@ -208,7 +208,7 @@ function AdminPage() {
                     <ul className="space-y-0.5">
                       {o.order_items?.map((it: any) => (
                         <li key={it.id} className="text-xs">
-                          {it.quantity}× {it.card_name} <span className="text-muted-foreground">({it.finish}, {it.language})</span>
+                          {it.quantity}× {it.card_name}{it.card_number ? ` ${it.card_number}` : ""} <span className="text-muted-foreground">({it.finish}, {it.language})</span>
                         </li>
                       ))}
                     </ul>
