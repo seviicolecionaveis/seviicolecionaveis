@@ -252,7 +252,7 @@ function Index() {
       <main className="mx-auto max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:flex">
         {/* Sidebar desktop */}
         <aside className="hidden lg:block w-64 shrink-0">
-          <div className="sticky top-28">
+          <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2">
             <Filters filters={filters} onChange={setFilters} onReset={reset} />
           </div>
         </aside>
