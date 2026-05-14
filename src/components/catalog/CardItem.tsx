@@ -59,7 +59,7 @@ export function CardItem({ card, onClick }: Props) {
               `https://placehold.co/400x560/eeeeee/999999?text=${encodeURIComponent(card.name)}`;
           }}
         />
-        <div className="absolute top-3 left-3 flex items-center gap-1.5">
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
           <span className="rounded-full bg-background/90 backdrop-blur px-2 py-1 text-[10px] font-bold tracking-tight shadow-sm">
             #{card.number}
           </span>
