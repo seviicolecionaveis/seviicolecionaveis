@@ -1,0 +1,1 @@
+ALTER TYPE public.card_finish ADD VALUE IF NOT EXISTS 'Masterball';
