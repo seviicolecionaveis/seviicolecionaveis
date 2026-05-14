@@ -12,9 +12,11 @@ export interface TemplateEntry {
 import { template as orderReceived } from './order-received'
 import { template as paymentConfirmed } from './payment-confirmed'
 import { template as orderStatusUpdated } from './order-status-updated'
+import { template as adminCancellationRequested } from './admin-cancellation-requested'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'order-received': orderReceived,
   'payment-confirmed': paymentConfirmed,
   'order-status-updated': orderStatusUpdated,
+  'admin-cancellation-requested': adminCancellationRequested,
 }
