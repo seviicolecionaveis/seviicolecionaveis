@@ -6,6 +6,7 @@ import {
   approveOrderCancellation,
   rejectOrderCancellation,
   adminCancelOrder,
+  adminUpdateOrderStatus,
 } from "@/utils/orders.functions";
 import { toast } from "sonner";
 import { AdminCancellationBell } from "@/components/AdminCancellationBell";
@@ -87,8 +88,12 @@ function AdminPage() {
   }, [focusId, loading, orders]);
 
   const updateStatus = async (id: string, status: string) => {
-    await supabase.from("orders").update({ status }).eq("id", id);
-    await load();
+    try {
+      await adminUpdateOrderStatus({ data: { order_id: id, status: status as any } });
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao atualizar status.");
+    }
   };
 
   const handleApproveCancel = async (id: string) => {

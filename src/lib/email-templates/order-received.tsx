@@ -1,0 +1,100 @@
+import * as React from 'react'
+import { Section, Text, Heading } from '@react-email/components'
+import type { TemplateEntry } from './registry'
+import { EmailLayout, styles, formatBRL, SITE_URL } from './_shared'
+
+interface OrderItem {
+  card_name: string
+  quantity: number
+  unit_price_cents: number
+  finish?: string
+  language?: string
+}
+
+interface OrderReceivedProps {
+  recipientName?: string
+  orderId?: string
+  items?: OrderItem[]
+  totalCents?: number
+  paymentMethod?: string
+}
+
+const labelForPayment = (m?: string) => {
+  switch (m) {
+    case 'pix':
+      return 'Pix'
+    case 'stripe':
+      return 'Cartão (Stripe)'
+    case 'mercadopago_card':
+      return 'Cartão (Mercado Pago)'
+    default:
+      return 'A definir'
+  }
+}
+
+const OrderReceivedEmail: React.FC<OrderReceivedProps> = ({
+  recipientName,
+  orderId,
+  items = [],
+  totalCents,
+  paymentMethod,
+}) => {
+  const shortId = orderId ? `#${orderId.slice(0, 8).toUpperCase()}` : ''
+  return (
+    <EmailLayout preview={`Recebemos seu pedido ${shortId}`}>
+      <Heading style={styles.h1}>
+        {recipientName ? `Obrigado, ${recipientName}!` : 'Obrigado pelo seu pedido!'}
+      </Heading>
+      <Text style={styles.text}>
+        Recebemos seu pedido <strong>{shortId}</strong> e ele já está sendo
+        processado. Assim que confirmarmos o pagamento, te avisamos por aqui.
+      </Text>
+
+      {items.length > 0 && (
+        <Section style={styles.card}>
+          <Text style={{ ...styles.muted, fontWeight: 700, color: '#111', margin: '0 0 8px' }}>
+            ITENS DO PEDIDO
+          </Text>
+          {items.map((it, idx) => (
+            <Text key={idx} style={{ ...styles.muted, margin: '4px 0' }}>
+              {it.quantity}× {it.card_name}
+              {it.finish || it.language ? ` (${[it.finish, it.language].filter(Boolean).join(', ')})` : ''}
+              {' — '}
+              <strong>{formatBRL(it.unit_price_cents * it.quantity)}</strong>
+            </Text>
+          ))}
+          <Text style={styles.total}>Total: {formatBRL(totalCents)}</Text>
+          <Text style={{ ...styles.muted, margin: '4px 0 0' }}>
+            Forma de pagamento: {labelForPayment(paymentMethod)}
+          </Text>
+        </Section>
+      )}
+
+      <Text style={styles.text}>
+        Você pode acompanhar o status do pedido a qualquer momento em{' '}
+        <a href={`${SITE_URL}/orders/${orderId ?? ''}`} style={{ color: '#111', fontWeight: 600 }}>
+          minha conta → pedidos
+        </a>.
+      </Text>
+    </EmailLayout>
+  )
+}
+
+export const template = {
+  component: OrderReceivedEmail,
+  subject: (data: Record<string, any>) => {
+    const id = typeof data.orderId === 'string' ? `#${data.orderId.slice(0, 8).toUpperCase()}` : ''
+    return `Recebemos seu pedido ${id}`.trim()
+  },
+  displayName: 'Pedido recebido',
+  previewData: {
+    recipientName: 'Ash',
+    orderId: '7f3e8c12-aaaa-bbbb-cccc-ddddeeeeffff',
+    items: [
+      { card_name: 'Charizard ex', quantity: 1, unit_price_cents: 12990, finish: 'Holo', language: 'PT' },
+      { card_name: 'Pikachu V', quantity: 2, unit_price_cents: 4500, finish: 'Normal', language: 'PT' },
+    ],
+    totalCents: 21990,
+    paymentMethod: 'pix',
+  },
+} satisfies TemplateEntry

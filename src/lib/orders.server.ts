@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
 
 export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymentIntent?: string; mercadopagoPaymentId?: string }) {
   const { data: order } = await supabaseAdmin
@@ -45,6 +46,25 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
         : {}),
     })
     .eq("id", orderId);
+
+  // Send "payment confirmed" email (fire-and-forget)
+  const { data: full } = await supabaseAdmin
+    .from("orders")
+    .select("id, email, recipient_name, total_cents")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (full?.email) {
+    await sendTransactionalEmailSafe({
+      templateName: "payment-confirmed",
+      recipientEmail: full.email,
+      idempotencyKey: `payment-confirmed-${full.id}`,
+      templateData: {
+        recipientName: full.recipient_name?.split(/\s+/)[0],
+        orderId: full.id,
+        totalCents: full.total_cents,
+      },
+    });
+  }
 }
 
 export async function cancelOrder(orderId: string) {
