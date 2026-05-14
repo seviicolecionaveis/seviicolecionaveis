@@ -210,7 +210,10 @@ function OrderDetailPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold truncate">{it.card_name}</p>
+                  <p className="font-semibold truncate">
+                    {it.card_name}
+                    {it.card_number ? <span className="text-muted-foreground font-normal"> {it.card_number}</span> : null}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {it.finish} · {it.language}
                     {it.condition ? ` · ${it.condition}` : ""}
@@ -218,7 +221,6 @@ function OrderDetailPage() {
                   {it.collection && (
                     <p className="text-xs text-muted-foreground truncate">
                       {it.collection}
-                      {it.card_number ? ` · ${it.card_number}` : ""}
                     </p>
                   )}
                   <p className="text-sm mt-1">
