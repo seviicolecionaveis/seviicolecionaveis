@@ -60,8 +60,7 @@ const empty: Form = {
   couponCode: "",
 };
 
-type PaymentMethod = "pix" | "card";
-type Step = "address" | "method" | "card" | "pix";
+type Step = "address" | "pix";
 
 interface PixState {
   orderId: string;
@@ -77,10 +76,7 @@ function CheckoutPage() {
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
   const [shipping, setShipping] = useState<"fixed" | "arrange">("fixed");
-  const [method, setMethod] = useState<PaymentMethod>("pix");
   const [step, setStep] = useState<Step>("address");
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [stripeOrderId, setStripeOrderId] = useState<string | null>(null);
   const [pix, setPix] = useState<PixState | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
