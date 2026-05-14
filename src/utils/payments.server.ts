@@ -3,6 +3,32 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { createPixPayment, getPixPayment, createCardPaymentMP } from "@/lib/mercadopago.server";
 import { markOrderPaid, cancelOrder } from "@/lib/orders.server";
 import type { CardInput, PixInput, StripeInput } from "./payments.schemas";
+import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
+
+async function sendOrderReceivedEmail(orderId: string) {
+  const { data: order } = await supabaseAdmin
+    .from("orders")
+    .select("id, email, recipient_name, total_cents, payment_method")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (!order?.email) return;
+  const { data: items } = await supabaseAdmin
+    .from("order_items")
+    .select("card_name, quantity, unit_price_cents, finish, language")
+    .eq("order_id", orderId);
+  await sendTransactionalEmailSafe({
+    templateName: "order-received",
+    recipientEmail: order.email,
+    idempotencyKey: `order-received-${order.id}`,
+    templateData: {
+      recipientName: order.recipient_name?.split(/\s+/)[0],
+      orderId: order.id,
+      items: items ?? [],
+      totalCents: order.total_cents,
+      paymentMethod: order.payment_method,
+    },
+  });
+}
 
 const SHIPPING_FIXED_CENTS = 2500;
 const ADMIN_COUPON_CODE = "POKEAGIOTAGEM";
