@@ -76,29 +76,27 @@ interface PixState {
   totalCents: number;
 }
 
+interface ItemPayload {
+  cardId: string; name: string; image?: string | null;
+  collection?: string | null; number?: string | null;
+  finish: string; language: string; condition?: string | null;
+  unitPrice: number; quantity: number;
+}
+interface AddressPayload {
+  recipientName: string; cpf: string | null; phone: string;
+  cep: string; street: string; number: string; complement: string | null;
+  neighborhood: string; city: string; state: string;
+}
+
 interface CardState {
   totalCents: number;
   payerEmail: string;
   payerCpf: string | null;
-  itemsPayload: ReturnType<CheckoutPageHelpers["buildItemsPayload"]>;
+  itemsPayload: ItemPayload[];
   shipping: "fixed" | "arrange";
-  address: ReturnType<CheckoutPageHelpers["buildAddressPayload"]>;
+  address: AddressPayload;
   notes: string | null;
   couponCode: string | null;
-}
-
-interface CheckoutPageHelpers {
-  buildItemsPayload: () => Array<{
-    cardId: string; name: string; image?: string | null;
-    collection?: string | null; number?: string | null;
-    finish: string; language: string; condition?: string | null;
-    unitPrice: number; quantity: number;
-  }>;
-  buildAddressPayload: () => {
-    recipientName: string; cpf: string | null; phone: string;
-    cep: string; street: string; number: string; complement: string | null;
-    neighborhood: string; city: string; state: string;
-  };
 }
 
 function CheckoutPage() {
