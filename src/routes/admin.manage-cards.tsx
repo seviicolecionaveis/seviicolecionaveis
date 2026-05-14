@@ -35,7 +35,7 @@ function autoMagnetPriceCents(
   if (hasNormal) return 900;
   return null;
 }
-const LANGUAGES: Language[] = ["Português", "Inglês", "Espanhol", "Italiano"];
+const LANGUAGES: Language[] = ["Português", "Inglês", "Espanhol", "Italiano", "Japonês", "Chinês"];
 
 type CardCategory = "Pokémon" | "Treinador" | "Energia";
 const CATEGORIES: CardCategory[] = ["Pokémon", "Treinador", "Energia"];
