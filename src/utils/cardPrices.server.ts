@@ -28,7 +28,8 @@ const FINISH_LABELS: Record<string, string[]> = {
   Foil: ["Foil", "F", "Holo Foil"],
   "Reverse Foil": ["Reverse Foil", "RF"],
   Pokebola: ["Pokeball Foil", "Pokebola Foil", "Poke Ball", "Pokeball", "PB"],
-  Energia: ["Master Ball", "Masterball Foil", "Master Ball Foil", "MB"],
+  Masterball: ["Master Ball", "Masterball Foil", "Master Ball Foil", "MB"],
+  Energia: ["Energy", "Energia", "E"],
   Promo: ["Promo", "P"],
 };
 
