@@ -11,8 +11,17 @@ import { useEffect, useState } from "react";
 // Para cartas Pokémon, o acabamento "Ímã" é um produto interno disponível
 // automaticamente: R$10 se a carta possui Foil, senão R$9 se possui Normal.
 const MAGNET_VIRTUAL_STOCK = 99;
+// Cartas que NÃO devem oferecer o acabamento "Ímã" (key: name__collection__number)
+const MAGNET_EXCLUDED_KEYS = new Set<string>([
+  "Psyduck__TRR - Team Rocket Returns__70/109",
+  "Hitmonlee__SSH - Espada e Escudo__94/202",
+  "Suicune__NBSP - Nintendo Black Star Promos__30/40",
+  "Kabutops__MEW - 151__141/165",
+  "Totodile__ASC - Heróis Excelsos__041/217",
+]);
 function buildLanguagesWithMagnet(card: Card): LanguageVariant[] {
   if (card.category !== "Pokémon") return card.languages;
+  if (MAGNET_EXCLUDED_KEYS.has(`${card.name}__${card.collection}__${card.number}`)) return card.languages;
   return card.languages.map((lang) => {
     if (lang.finishes.some((f) => f.finish === "Ímã")) return lang;
     const hasFoil = lang.finishes.some((f) => f.finish === "Foil");
