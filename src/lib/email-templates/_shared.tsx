@@ -5,6 +5,7 @@ import {
   Head,
   Heading,
   Html,
+  Img,
   Preview,
   Section,
   Text,
@@ -13,6 +14,7 @@ import {
 
 export const SITE_NAME = 'Sevii Colecionáveis'
 export const SITE_URL = 'https://seviicolecionaveis.com.br'
+export const LOGO_URL = 'https://seviicolecionaveis.com.br/icon-192.png'
 
 export function formatBRL(cents: number | undefined | null): string {
   const v = ((cents ?? 0) / 100).toLocaleString('pt-BR', {
@@ -34,7 +36,24 @@ export const EmailLayout: React.FC<LayoutProps> = ({ preview, children }) => (
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Heading style={brand}>SEVII COLECIONÁVEIS</Heading>
+          <table role="presentation" cellPadding={0} cellSpacing={0} border={0} style={{ borderCollapse: 'collapse' }}>
+            <tbody>
+              <tr>
+                <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+                  <Img
+                    src={LOGO_URL}
+                    alt={SITE_NAME}
+                    width="40"
+                    height="40"
+                    style={{ display: 'block', borderRadius: '8px' }}
+                  />
+                </td>
+                <td style={{ verticalAlign: 'middle' }}>
+                  <Heading style={brand}>SEVII COLECIONÁVEIS</Heading>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </Section>
         {children}
         <Hr style={hr} />
