@@ -40,7 +40,7 @@ export function Filters({ filters, onChange, onReset }: Props) {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold uppercase tracking-widest">Filtros</h3>
+        <h3 className="inline-block rounded bg-foreground px-2 py-1 text-sm font-bold uppercase tracking-widest text-background">Filtros</h3>
         <button
           onClick={onReset}
           className="text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
@@ -50,7 +50,7 @@ export function Filters({ filters, onChange, onReset }: Props) {
       </div>
 
       <section>
-        <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <h4 className="mb-3 inline-block rounded bg-foreground px-2 py-1 text-xs font-bold uppercase tracking-widest text-background">
           Tipo de carta
         </h4>
         <div className="flex flex-wrap gap-1.5">
@@ -74,7 +74,7 @@ export function Filters({ filters, onChange, onReset }: Props) {
       </section>
 
       <section>
-        <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <h4 className="mb-3 inline-block rounded bg-foreground px-2 py-1 text-xs font-bold uppercase tracking-widest text-background">
           Extras
         </h4>
         <div className="flex flex-wrap gap-1.5">
@@ -98,7 +98,7 @@ export function Filters({ filters, onChange, onReset }: Props) {
       </section>
 
       <section>
-        <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <h4 className="mb-3 inline-block rounded bg-foreground px-2 py-1 text-xs font-bold uppercase tracking-widest text-background">
           Coleção
         </h4>
         <select
@@ -116,7 +116,7 @@ export function Filters({ filters, onChange, onReset }: Props) {
       </section>
 
       <section>
-        <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <h4 className="mb-3 inline-block rounded bg-foreground px-2 py-1 text-xs font-bold uppercase tracking-widest text-background">
           Numeração
         </h4>
         <input
@@ -129,7 +129,7 @@ export function Filters({ filters, onChange, onReset }: Props) {
       </section>
 
       <section>
-        <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <h4 className="mb-3 inline-block rounded bg-foreground px-2 py-1 text-xs font-bold uppercase tracking-widest text-background">
           Idioma
         </h4>
         <div className="space-y-2">
@@ -150,7 +150,7 @@ export function Filters({ filters, onChange, onReset }: Props) {
       </section>
 
       <section>
-        <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <h4 className="mb-3 inline-block rounded bg-foreground px-2 py-1 text-xs font-bold uppercase tracking-widest text-background">
           Faixa de preço (R$)
         </h4>
         <div className="flex items-center gap-2">
