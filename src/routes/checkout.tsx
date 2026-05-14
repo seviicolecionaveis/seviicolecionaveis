@@ -668,3 +668,198 @@ function Field({
     </div>
   );
 }
+
+declare global {
+  interface Window {
+    MercadoPago?: any;
+  }
+}
+
+let mpSdkPromise: Promise<void> | null = null;
+function loadMercadoPagoSdk(): Promise<void> {
+  if (typeof window === "undefined") return Promise.reject(new Error("SSR"));
+  if (window.MercadoPago) return Promise.resolve();
+  if (mpSdkPromise) return mpSdkPromise;
+  mpSdkPromise = new Promise<void>((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://sdk.mercadopago.com/js/v2";
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => {
+      mpSdkPromise = null;
+      reject(new Error("Falha ao carregar SDK do Mercado Pago"));
+    };
+    document.head.appendChild(s);
+  });
+  return mpSdkPromise;
+}
+
+function CardScreen({
+  card,
+  onBack,
+  onSuccess,
+}: {
+  card: CardState;
+  onBack: () => void;
+  onSuccess: (orderId: string) => void;
+}) {
+  const { session } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [status, setStatus] = useState<"idle" | "in_process" | "approved" | "rejected">("idle");
+  const [statusDetail, setStatusDetail] = useState<string | null>(null);
+  const brickControllerRef = useRef<any>(null);
+  const containerId = "mp-card-brick-container";
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { publicKey } = await getMercadoPagoPublicKey({});
+        if (cancelled) return;
+        await loadMercadoPagoSdk();
+        if (cancelled) return;
+
+        const mp = new window.MercadoPago(publicKey, { locale: "pt-BR" });
+        const bricksBuilder = mp.bricks();
+
+        const settings = {
+          initialization: {
+            amount: card.totalCents / 100,
+            payer: { email: card.payerEmail },
+          },
+          customization: {
+            paymentMethods: { maxInstallments: 12 },
+            visual: { style: { theme: "default" } },
+          },
+          callbacks: {
+            onReady: () => {
+              if (!cancelled) setLoading(false);
+            },
+            onError: (error: any) => {
+              console.error("Brick error", error);
+              if (!cancelled) setErr(error?.message ?? "Erro no formulário de cartão");
+            },
+            onSubmit: async (cardFormData: any) => {
+              if (!session?.access_token) {
+                setErr("Sessão expirada. Faça login novamente.");
+                return;
+              }
+              setSubmitting(true);
+              setErr(null);
+              try {
+                const result = await createCardOrder({
+                  headers: { Authorization: `Bearer ${session.access_token}` },
+                  data: {
+                    items: card.itemsPayload,
+                    shippingMethod: card.shipping,
+                    address: card.address,
+                    notes: card.notes,
+                    couponCode: card.couponCode,
+                    card: {
+                      token: cardFormData.token,
+                      paymentMethodId: cardFormData.payment_method_id,
+                      issuerId: cardFormData.issuer_id ? String(cardFormData.issuer_id) : null,
+                      installments: Number(cardFormData.installments) || 1,
+                      payerEmail: cardFormData.payer?.email ?? card.payerEmail,
+                      payerCpf:
+                        cardFormData.payer?.identification?.number ?? card.payerCpf,
+                    },
+                  },
+                });
+                if (result.status === "approved") {
+                  setStatus("approved");
+                  toast.success("Pagamento aprovado!");
+                  setTimeout(() => onSuccess(result.orderId), 1200);
+                } else if (result.status === "in_process") {
+                  setStatus("in_process");
+                  setStatusDetail(result.statusDetail ?? null);
+                  setTimeout(() => onSuccess(result.orderId), 1500);
+                } else {
+                  setStatus("rejected");
+                  setStatusDetail(result.statusDetail ?? "Pagamento recusado");
+                  setErr(result.statusDetail ?? "Pagamento recusado pelo emissor.");
+                }
+              } catch (e: any) {
+                setErr(e?.message ?? "Erro ao processar pagamento");
+              } finally {
+                setSubmitting(false);
+              }
+            },
+          },
+        };
+
+        const controller = await bricksBuilder.create(
+          "cardPayment",
+          containerId,
+          settings,
+        );
+        if (cancelled) {
+          controller?.unmount?.();
+          return;
+        }
+        brickControllerRef.current = controller;
+      } catch (e: any) {
+        if (!cancelled) setErr(e?.message ?? "Erro ao iniciar pagamento");
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      try {
+        brickControllerRef.current?.unmount?.();
+      } catch {}
+    };
+  }, [card, session, onSuccess]);
+
+  const total = (card.totalCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border px-4 py-4">
+        <div className="mx-auto max-w-2xl flex items-center justify-between">
+          <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis</Link>
+          <button onClick={onBack} className="text-xs text-muted-foreground hover:text-foreground">← Voltar</button>
+        </div>
+      </header>
+      <main className="mx-auto max-w-xl px-4 py-8 space-y-6">
+        <div className="text-center">
+          <CreditCard className="h-8 w-8 mx-auto mb-2" />
+          <h1 className="text-2xl font-bold">Pagamento com cartão</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Total: <span className="font-semibold text-foreground">R$ {total}</span>
+          </p>
+        </div>
+
+        {status === "approved" && (
+          <div className="rounded-lg bg-green-50 border border-green-200 p-4 text-center">
+            <p className="text-sm font-semibold text-green-800">✓ Pagamento aprovado! Redirecionando...</p>
+          </div>
+        )}
+        {status === "in_process" && (
+          <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 text-center">
+            <p className="text-sm font-semibold text-amber-800">Pagamento em análise — você receberá uma confirmação em breve.</p>
+            {statusDetail && <p className="text-xs text-amber-700 mt-1">{statusDetail}</p>}
+          </div>
+        )}
+
+        {loading && (
+          <p className="text-center text-sm text-muted-foreground">Carregando formulário seguro do Mercado Pago...</p>
+        )}
+
+        <div id={containerId} />
+
+        {submitting && (
+          <p className="text-center text-sm text-muted-foreground">Processando pagamento...</p>
+        )}
+
+        {err && status !== "approved" && (
+          <div className="rounded-lg bg-red-50 border border-red-200 p-3">
+            <p className="text-sm text-red-800">{err}</p>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
