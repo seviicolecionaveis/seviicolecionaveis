@@ -14,7 +14,7 @@ async function sendOrderReceivedEmail(orderId: string) {
   if (!order?.email) return;
   const { data: items } = await supabaseAdmin
     .from("order_items")
-    .select("card_name, quantity, unit_price_cents, finish, language")
+    .select("card_name, quantity, unit_price_cents, finish, language, card_image")
     .eq("order_id", orderId);
   await sendTransactionalEmailSafe({
     templateName: "order-received",
