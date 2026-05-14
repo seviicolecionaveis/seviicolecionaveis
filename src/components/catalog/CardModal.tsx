@@ -233,9 +233,9 @@ export function CardModal({ card, onClose }: Props) {
                                 out ? "opacity-50" : ""
                               }`}
                             >
-                              <div className="flex items-center gap-2 min-w-0">
-                                <span className={`h-2 w-2 rounded-full ${finishDot[v.finish]}`} />
-                                <span className="font-medium truncate">{v.finish}</span>
+                              <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                                <span className={`h-2 w-2 shrink-0 rounded-full ${finishDot[v.finish]}`} />
+                                <span className="font-medium whitespace-nowrap">{v.finish}</span>
                                 <span
                                   className="rounded border border-border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground"
                                   title={CONDITION_LABEL[v.condition]}
