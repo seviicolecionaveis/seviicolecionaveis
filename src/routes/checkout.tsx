@@ -291,6 +291,7 @@ function CheckoutPage() {
     } finally {
       setLoading(false);
     }
+  };
 
   const startPix = async () => {
     if (!user || items.length === 0) return;
