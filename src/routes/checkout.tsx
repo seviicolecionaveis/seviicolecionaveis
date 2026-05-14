@@ -3,9 +3,14 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
-import { createPixOrder, checkPixOrderStatus } from "@/utils/payments.functions";
+import {
+  createPixOrder,
+  checkPixOrderStatus,
+  createCardOrder,
+  getMercadoPagoPublicKey,
+} from "@/utils/payments.functions";
 import { toast } from "sonner";
-import { Copy, Check, QrCode } from "lucide-react";
+import { Copy, Check, QrCode, CreditCard } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/checkout")({
