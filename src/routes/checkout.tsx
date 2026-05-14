@@ -370,9 +370,10 @@ function CheckoutPage() {
 
           <button
             type="submit"
-            className="w-full rounded-full bg-foreground py-3 text-sm font-semibold uppercase tracking-wide text-background hover:bg-foreground/90"
+            disabled={loading}
+            className="w-full rounded-full bg-foreground py-3 text-sm font-semibold uppercase tracking-wide text-background hover:bg-foreground/90 disabled:opacity-50"
           >
-            Continuar — R$ {total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+            {loading ? "Gerando Pix..." : `Pagar com Pix — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
           </button>
         </form>
 
