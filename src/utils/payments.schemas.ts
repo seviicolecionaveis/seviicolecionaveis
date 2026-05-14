@@ -44,5 +44,22 @@ export const PixInputSchema = z.object({
   couponCode: z.string().max(50).optional().nullable(),
 });
 
+export const CardInputSchema = z.object({
+  items: z.array(ItemSchema).min(1).max(50),
+  shippingMethod: z.enum(["fixed", "arrange"]),
+  address: AddressSchema,
+  notes: z.string().max(500).optional().nullable(),
+  couponCode: z.string().max(50).optional().nullable(),
+  card: z.object({
+    token: z.string().min(5).max(200),
+    paymentMethodId: z.string().min(1).max(50),
+    issuerId: z.string().max(50).optional().nullable(),
+    installments: z.number().int().min(1).max(12),
+    payerEmail: z.string().email().max(200).optional().nullable(),
+    payerCpf: z.string().max(20).optional().nullable(),
+  }),
+});
+
 export type StripeInput = z.infer<typeof StripeInputSchema>;
 export type PixInput = z.infer<typeof PixInputSchema>;
+export type CardInput = z.infer<typeof CardInputSchema>;

@@ -3,9 +3,14 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
-import { createPixOrder, checkPixOrderStatus } from "@/utils/payments.functions";
+import {
+  createPixOrder,
+  checkPixOrderStatus,
+  createCardOrder,
+  getMercadoPagoPublicKey,
+} from "@/utils/payments.functions";
 import { toast } from "sonner";
-import { Copy, Check, QrCode } from "lucide-react";
+import { Copy, Check, QrCode, CreditCard } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/checkout")({
@@ -60,7 +65,8 @@ const empty: Form = {
   couponCode: "",
 };
 
-type Step = "address" | "pix";
+type Step = "address" | "pix" | "card";
+type PaymentMethod = "pix" | "card";
 
 interface PixState {
   orderId: string;
@@ -70,14 +76,39 @@ interface PixState {
   totalCents: number;
 }
 
+interface ItemPayload {
+  cardId: string; name: string; image?: string | null;
+  collection?: string | null; number?: string | null;
+  finish: string; language: string; condition?: string | null;
+  unitPrice: number; quantity: number;
+}
+interface AddressPayload {
+  recipientName: string; cpf: string | null; phone: string;
+  cep: string; street: string; number: string; complement: string | null;
+  neighborhood: string; city: string; state: string;
+}
+
+interface CardState {
+  totalCents: number;
+  payerEmail: string;
+  payerCpf: string | null;
+  itemsPayload: ItemPayload[];
+  shipping: "fixed" | "arrange";
+  address: AddressPayload;
+  notes: string | null;
+  couponCode: string | null;
+}
+
 function CheckoutPage() {
   const { user, session, loading: authLoading } = useAuth();
   const { items, subtotal, clear } = useCart();
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
   const [shipping, setShipping] = useState<"fixed" | "arrange">("fixed");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [step, setStep] = useState<Step>("address");
   const [pix, setPix] = useState<PixState | null>(null);
+  const [card, setCard] = useState<CardState | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -227,7 +258,39 @@ function CheckoutPage() {
         quantity: i.quantity,
       })),
     });
-    await startPix();
+    if (paymentMethod === "card") {
+      await startCard();
+    } else {
+      await startPix();
+    }
+  };
+
+  const startCard = async () => {
+    if (!user || items.length === 0) return;
+    setLoading(true);
+    setErr(null);
+    try {
+      await persistAddressAndProfile();
+      const shippingCents = shipping === "fixed" ? Math.round(SHIPPING_FIXED * 100) : 0;
+      const subtotalCents = Math.round(subtotal * 100);
+      const discountCents = couponInfo.valid ? Math.round((subtotalCents * couponInfo.percent) / 100) : 0;
+      const totalCents = subtotalCents - discountCents + shippingCents;
+      setCard({
+        totalCents,
+        payerEmail: user.email ?? "",
+        payerCpf: form.cpf || null,
+        itemsPayload: buildItemsPayload(),
+        shipping,
+        address: buildAddressPayload(),
+        notes: buildNotes(),
+        couponCode: couponNormalized || null,
+      });
+      setStep("card");
+    } catch (e: any) {
+      setErr(e?.message ?? "Erro ao iniciar pagamento com cartão");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const startPix = async () => {
@@ -276,6 +339,10 @@ function CheckoutPage() {
 
   if (step === "pix" && pix) {
     return <PixScreen pix={pix} />;
+  }
+
+  if (step === "card" && card) {
+    return <CardScreen card={card} onBack={() => setStep("address")} onSuccess={(orderId) => { clear(); nav({ to: "/orders/$orderId", params: { orderId } }); }} />;
   }
 
   // step === "address"
@@ -366,6 +433,26 @@ function CheckoutPage() {
             />
           </div>
 
+          <div>
+            <h2 className="text-lg font-bold mb-3">Forma de pagamento</h2>
+            <div className="space-y-2">
+              <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
+                <input type="radio" name="pm" checked={paymentMethod === "pix"} onChange={() => setPaymentMethod("pix")} className="mt-1" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold flex items-center gap-2"><QrCode className="h-4 w-4" /> Pix</p>
+                  <p className="text-xs text-muted-foreground">Aprovação instantânea — gera QR Code e código copia e cola.</p>
+                </div>
+              </label>
+              <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
+                <input type="radio" name="pm" checked={paymentMethod === "card"} onChange={() => setPaymentMethod("card")} className="mt-1" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold flex items-center gap-2"><CreditCard className="h-4 w-4" /> Cartão de crédito</p>
+                  <p className="text-xs text-muted-foreground">Visa, Master, Elo, Hipercard, Amex — em até 12x (via Mercado Pago).</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
           {err && <p className="text-sm text-red-600">{err}</p>}
 
           <button
@@ -373,7 +460,11 @@ function CheckoutPage() {
             disabled={loading}
             className="w-full rounded-full bg-foreground py-3 text-sm font-semibold uppercase tracking-wide text-background hover:bg-foreground/90 disabled:opacity-50"
           >
-            {loading ? "Gerando Pix..." : `Pagar com Pix — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+            {loading
+              ? "Carregando..."
+              : paymentMethod === "pix"
+                ? `Pagar com Pix — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                : `Pagar com cartão — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
           </button>
         </form>
 
@@ -574,6 +665,201 @@ function Field({
         placeholder={placeholder}
         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-foreground"
       />
+    </div>
+  );
+}
+
+declare global {
+  interface Window {
+    MercadoPago?: any;
+  }
+}
+
+let mpSdkPromise: Promise<void> | null = null;
+function loadMercadoPagoSdk(): Promise<void> {
+  if (typeof window === "undefined") return Promise.reject(new Error("SSR"));
+  if (window.MercadoPago) return Promise.resolve();
+  if (mpSdkPromise) return mpSdkPromise;
+  mpSdkPromise = new Promise<void>((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://sdk.mercadopago.com/js/v2";
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => {
+      mpSdkPromise = null;
+      reject(new Error("Falha ao carregar SDK do Mercado Pago"));
+    };
+    document.head.appendChild(s);
+  });
+  return mpSdkPromise;
+}
+
+function CardScreen({
+  card,
+  onBack,
+  onSuccess,
+}: {
+  card: CardState;
+  onBack: () => void;
+  onSuccess: (orderId: string) => void;
+}) {
+  const { session } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [status, setStatus] = useState<"idle" | "in_process" | "approved" | "rejected">("idle");
+  const [statusDetail, setStatusDetail] = useState<string | null>(null);
+  const brickControllerRef = useRef<any>(null);
+  const containerId = "mp-card-brick-container";
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { publicKey } = await getMercadoPagoPublicKey({});
+        if (cancelled) return;
+        await loadMercadoPagoSdk();
+        if (cancelled) return;
+
+        const mp = new window.MercadoPago(publicKey, { locale: "pt-BR" });
+        const bricksBuilder = mp.bricks();
+
+        const settings = {
+          initialization: {
+            amount: card.totalCents / 100,
+            payer: { email: card.payerEmail },
+          },
+          customization: {
+            paymentMethods: { maxInstallments: 12 },
+            visual: { style: { theme: "default" } },
+          },
+          callbacks: {
+            onReady: () => {
+              if (!cancelled) setLoading(false);
+            },
+            onError: (error: any) => {
+              console.error("Brick error", error);
+              if (!cancelled) setErr(error?.message ?? "Erro no formulário de cartão");
+            },
+            onSubmit: async (cardFormData: any) => {
+              if (!session?.access_token) {
+                setErr("Sessão expirada. Faça login novamente.");
+                return;
+              }
+              setSubmitting(true);
+              setErr(null);
+              try {
+                const result = await createCardOrder({
+                  headers: { Authorization: `Bearer ${session.access_token}` },
+                  data: {
+                    items: card.itemsPayload,
+                    shippingMethod: card.shipping,
+                    address: card.address,
+                    notes: card.notes,
+                    couponCode: card.couponCode,
+                    card: {
+                      token: cardFormData.token,
+                      paymentMethodId: cardFormData.payment_method_id,
+                      issuerId: cardFormData.issuer_id ? String(cardFormData.issuer_id) : null,
+                      installments: Number(cardFormData.installments) || 1,
+                      payerEmail: cardFormData.payer?.email ?? card.payerEmail,
+                      payerCpf:
+                        cardFormData.payer?.identification?.number ?? card.payerCpf,
+                    },
+                  },
+                });
+                if (result.status === "approved") {
+                  setStatus("approved");
+                  toast.success("Pagamento aprovado!");
+                  setTimeout(() => onSuccess(result.orderId), 1200);
+                } else if (result.status === "in_process") {
+                  setStatus("in_process");
+                  setStatusDetail(result.statusDetail ?? null);
+                  setTimeout(() => onSuccess(result.orderId), 1500);
+                } else {
+                  setStatus("rejected");
+                  setStatusDetail(result.statusDetail ?? "Pagamento recusado");
+                  setErr(result.statusDetail ?? "Pagamento recusado pelo emissor.");
+                }
+              } catch (e: any) {
+                setErr(e?.message ?? "Erro ao processar pagamento");
+              } finally {
+                setSubmitting(false);
+              }
+            },
+          },
+        };
+
+        const controller = await bricksBuilder.create(
+          "cardPayment",
+          containerId,
+          settings,
+        );
+        if (cancelled) {
+          controller?.unmount?.();
+          return;
+        }
+        brickControllerRef.current = controller;
+      } catch (e: any) {
+        if (!cancelled) setErr(e?.message ?? "Erro ao iniciar pagamento");
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      try {
+        brickControllerRef.current?.unmount?.();
+      } catch {}
+    };
+  }, [card, session, onSuccess]);
+
+  const total = (card.totalCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border px-4 py-4">
+        <div className="mx-auto max-w-2xl flex items-center justify-between">
+          <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis</Link>
+          <button onClick={onBack} className="text-xs text-muted-foreground hover:text-foreground">← Voltar</button>
+        </div>
+      </header>
+      <main className="mx-auto max-w-xl px-4 py-8 space-y-6">
+        <div className="text-center">
+          <CreditCard className="h-8 w-8 mx-auto mb-2" />
+          <h1 className="text-2xl font-bold">Pagamento com cartão</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Total: <span className="font-semibold text-foreground">R$ {total}</span>
+          </p>
+        </div>
+
+        {status === "approved" && (
+          <div className="rounded-lg bg-green-50 border border-green-200 p-4 text-center">
+            <p className="text-sm font-semibold text-green-800">✓ Pagamento aprovado! Redirecionando...</p>
+          </div>
+        )}
+        {status === "in_process" && (
+          <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 text-center">
+            <p className="text-sm font-semibold text-amber-800">Pagamento em análise — você receberá uma confirmação em breve.</p>
+            {statusDetail && <p className="text-xs text-amber-700 mt-1">{statusDetail}</p>}
+          </div>
+        )}
+
+        {loading && (
+          <p className="text-center text-sm text-muted-foreground">Carregando formulário seguro do Mercado Pago...</p>
+        )}
+
+        <div id={containerId} />
+
+        {submitting && (
+          <p className="text-center text-sm text-muted-foreground">Processando pagamento...</p>
+        )}
+
+        {err && status !== "approved" && (
+          <div className="rounded-lg bg-red-50 border border-red-200 p-3">
+            <p className="text-sm text-red-800">{err}</p>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

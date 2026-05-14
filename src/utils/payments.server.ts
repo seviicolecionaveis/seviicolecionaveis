@@ -1,8 +1,8 @@
 import { type StripeEnv, createStripeClient } from "@/lib/stripe.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { createPixPayment, getPixPayment } from "@/lib/mercadopago.server";
-import { markOrderPaid } from "@/lib/orders.server";
-import type { PixInput, StripeInput } from "./payments.schemas";
+import { createPixPayment, getPixPayment, createCardPaymentMP } from "@/lib/mercadopago.server";
+import { markOrderPaid, cancelOrder } from "@/lib/orders.server";
+import type { CardInput, PixInput, StripeInput } from "./payments.schemas";
 
 const SHIPPING_FIXED_CENTS = 2500;
 const ADMIN_COUPON_CODE = "POKEAGIOTAGEM";
@@ -403,4 +403,118 @@ export async function checkPixOrderStatusServer(orderId: string, userId: string)
   }
 
   return { status: order.status as "pending" | "cancelled" | "paid" };
+}
+
+export async function createCardOrderServer(data: CardInput, userId: string) {
+  const subtotalCents = data.items.reduce(
+    (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
+    0,
+  );
+  const shippingCents = data.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
+
+  const { discountCents, code: appliedCoupon } = await validateCoupon(
+    userId,
+    data.couponCode,
+    subtotalCents,
+  );
+
+  const items = await resolveCardIds(data.items);
+  await ensureAvailableStock(items);
+
+  const totalCents = subtotalCents - discountCents + shippingCents;
+  if (totalCents < 100) throw new Error("Valor mínimo: R$ 1,00");
+
+  const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
+  const email = userData?.user?.email ?? data.card.payerEmail ?? "";
+
+  const { data: order, error: orderErr } = await supabaseAdmin
+    .from("orders")
+    .insert({
+      user_id: userId,
+      status: "pending",
+      payment_method: "mercadopago_card",
+      shipping_method: data.shippingMethod,
+      shipping_cost_cents: shippingCents,
+      subtotal_cents: subtotalCents,
+      discount_cents: discountCents,
+      coupon_code: appliedCoupon,
+      total_cents: totalCents,
+      recipient_name: data.address.recipientName,
+      cpf: data.address.cpf,
+      phone: data.address.phone,
+      email,
+      cep: data.address.cep,
+      street: data.address.street,
+      number: data.address.number,
+      complement: data.address.complement,
+      neighborhood: data.address.neighborhood,
+      city: data.address.city,
+      state: data.address.state,
+      notes: data.notes,
+    })
+    .select("id")
+    .single();
+  if (orderErr || !order) throw new Error(orderErr?.message ?? "Falha ao criar pedido");
+
+  const orderItems = items.map((i) => ({
+    order_id: order.id,
+    card_id: i.cardId,
+    card_name: i.name,
+    card_image: i.image ?? null,
+    collection: i.collection ?? null,
+    card_number: i.number ?? null,
+    finish: i.finish,
+    language: i.language,
+    condition: i.condition ?? null,
+    quantity: i.quantity,
+    unit_price_cents: Math.round(i.unitPrice * 100),
+  }));
+  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
+  if (itemsErr) throw new Error(itemsErr.message);
+
+  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
+  const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
+
+  const [firstName, ...rest] = data.address.recipientName.trim().split(/\s+/);
+  const lastName = rest.join(" ") || "Sevii";
+
+  try {
+    const result = await createCardPaymentMP({
+      amountCents: totalCents,
+      description: `Pedido Sevii Colecionáveis #${order.id.slice(0, 8)}`,
+      token: data.card.token,
+      paymentMethodId: data.card.paymentMethodId,
+      issuerId: data.card.issuerId ?? null,
+      installments: data.card.installments,
+      payerEmail: data.card.payerEmail || email,
+      payerFirstName: firstName,
+      payerLastName: lastName,
+      payerCpf: data.card.payerCpf ?? data.address.cpf ?? null,
+      externalReference: order.id,
+      notificationUrl,
+    });
+
+    await supabaseAdmin
+      .from("orders")
+      .update({ mercadopago_payment_id: String(result.id) })
+      .eq("id", order.id);
+
+    if (result.status === "approved") {
+      await markOrderPaid(order.id, { mercadopagoPaymentId: String(result.id) });
+      return { orderId: order.id, status: "approved" as const };
+    }
+    if (result.status === "in_process" || result.status === "pending" || result.status === "authorized") {
+      return { orderId: order.id, status: "in_process" as const, statusDetail: result.status_detail };
+    }
+    // rejected / cancelled
+    await cancelOrder(order.id);
+    return {
+      orderId: order.id,
+      status: "rejected" as const,
+      statusDetail: result.status_detail ?? "Pagamento recusado",
+    };
+  } catch (e) {
+    await cancelOrder(order.id);
+    throw e;
+  }
 }

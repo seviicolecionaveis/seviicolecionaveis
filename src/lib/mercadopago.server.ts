@@ -1,4 +1,4 @@
-// Mercado Pago server helper — Pix only.
+// Mercado Pago server helper — Pix + Cartão (Card Brick).
 // Docs: https://www.mercadopago.com.br/developers/pt/reference/payments/_payments/post
 
 const MP_API = "https://api.mercadopago.com";
@@ -7,6 +7,82 @@ function getAccessToken(): string {
   const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
   if (!token) throw new Error("MERCADOPAGO_ACCESS_TOKEN não configurado");
   return token;
+}
+
+export function getMercadoPagoPublicKeyServer(): string {
+  const key = process.env.MERCADOPAGO_PUBLIC_KEY;
+  if (!key) throw new Error("MERCADOPAGO_PUBLIC_KEY não configurado");
+  return key;
+}
+
+export interface CreateCardInput {
+  amountCents: number;
+  description: string;
+  token: string; // card token from Brick
+  paymentMethodId: string; // visa, master, etc
+  issuerId?: string | null;
+  installments: number;
+  payerEmail: string;
+  payerFirstName?: string;
+  payerLastName?: string;
+  payerCpf?: string | null;
+  externalReference: string;
+  notificationUrl: string;
+}
+
+export interface CardPaymentResult {
+  id: number;
+  status: string; // approved, in_process, rejected, ...
+  status_detail?: string;
+}
+
+export async function createCardPaymentMP(input: CreateCardInput): Promise<CardPaymentResult> {
+  const token = getAccessToken();
+  const cleanCpf = input.payerCpf?.replace(/\D/g, "") || undefined;
+
+  const body: Record<string, unknown> = {
+    transaction_amount: Number((input.amountCents / 100).toFixed(2)),
+    token: input.token,
+    description: input.description.slice(0, 250),
+    installments: input.installments,
+    payment_method_id: input.paymentMethodId,
+    ...(input.issuerId ? { issuer_id: input.issuerId } : {}),
+    external_reference: input.externalReference,
+    notification_url: input.notificationUrl,
+    payer: {
+      email: input.payerEmail,
+      first_name: input.payerFirstName?.slice(0, 50) ?? "Cliente",
+      last_name: input.payerLastName?.slice(0, 50) ?? "Sevii",
+      ...(cleanCpf && cleanCpf.length === 11
+        ? { identification: { type: "CPF", number: cleanCpf } }
+        : {}),
+    },
+  };
+
+  const idempotencyKey = `${input.externalReference}-card-${Date.now()}`;
+
+  const res = await fetch(`${MP_API}/v1/payments`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "X-Idempotency-Key": idempotencyKey,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const json: any = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    console.error("MP create card payment failed", res.status, json);
+    const msg = json?.message || json?.error || `erro ${res.status}`;
+    throw new Error(`Mercado Pago: ${String(msg).slice(0, 300)}`);
+  }
+
+  return {
+    id: json.id,
+    status: json.status,
+    status_detail: json.status_detail,
+  };
 }
 
 export interface CreatePixInput {
