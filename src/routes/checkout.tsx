@@ -258,8 +258,39 @@ function CheckoutPage() {
         quantity: i.quantity,
       })),
     });
-    await startPix();
+    if (paymentMethod === "card") {
+      await startCard();
+    } else {
+      await startPix();
+    }
   };
+
+  const startCard = async () => {
+    if (!user || items.length === 0) return;
+    setLoading(true);
+    setErr(null);
+    try {
+      await persistAddressAndProfile();
+      const shippingCents = shipping === "fixed" ? Math.round(SHIPPING_FIXED * 100) : 0;
+      const subtotalCents = Math.round(subtotal * 100);
+      const discountCents = couponInfo.valid ? Math.round((subtotalCents * couponInfo.percent) / 100) : 0;
+      const totalCents = subtotalCents - discountCents + shippingCents;
+      setCard({
+        totalCents,
+        payerEmail: user.email ?? "",
+        payerCpf: form.cpf || null,
+        itemsPayload: buildItemsPayload(),
+        shipping,
+        address: buildAddressPayload(),
+        notes: buildNotes(),
+        couponCode: couponNormalized || null,
+      });
+      setStep("card");
+    } catch (e: any) {
+      setErr(e?.message ?? "Erro ao iniciar pagamento com cartão");
+    } finally {
+      setLoading(false);
+    }
 
   const startPix = async () => {
     if (!user || items.length === 0) return;
