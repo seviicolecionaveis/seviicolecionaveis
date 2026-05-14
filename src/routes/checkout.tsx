@@ -433,6 +433,26 @@ function CheckoutPage() {
             />
           </div>
 
+          <div>
+            <h2 className="text-lg font-bold mb-3">Forma de pagamento</h2>
+            <div className="space-y-2">
+              <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
+                <input type="radio" name="pm" checked={paymentMethod === "pix"} onChange={() => setPaymentMethod("pix")} className="mt-1" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold flex items-center gap-2"><QrCode className="h-4 w-4" /> Pix</p>
+                  <p className="text-xs text-muted-foreground">Aprovação instantânea — gera QR Code e código copia e cola.</p>
+                </div>
+              </label>
+              <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
+                <input type="radio" name="pm" checked={paymentMethod === "card"} onChange={() => setPaymentMethod("card")} className="mt-1" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold flex items-center gap-2"><CreditCard className="h-4 w-4" /> Cartão de crédito</p>
+                  <p className="text-xs text-muted-foreground">Visa, Master, Elo, Hipercard, Amex — em até 12x (via Mercado Pago).</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
           {err && <p className="text-sm text-red-600">{err}</p>}
 
           <button
@@ -440,7 +460,11 @@ function CheckoutPage() {
             disabled={loading}
             className="w-full rounded-full bg-foreground py-3 text-sm font-semibold uppercase tracking-wide text-background hover:bg-foreground/90 disabled:opacity-50"
           >
-            {loading ? "Gerando Pix..." : `Pagar com Pix — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+            {loading
+              ? "Carregando..."
+              : paymentMethod === "pix"
+                ? `Pagar com Pix — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                : `Pagar com cartão — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
           </button>
         </form>
 
