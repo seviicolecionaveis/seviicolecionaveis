@@ -341,6 +341,10 @@ function CheckoutPage() {
     return <PixScreen pix={pix} />;
   }
 
+  if (step === "card" && card) {
+    return <CardScreen card={card} onBack={() => setStep("address")} onSuccess={(orderId) => { clear(); nav({ to: "/orders/$orderId", params: { orderId } }); }} />;
+  }
+
   // step === "address"
   return (
     <div className="min-h-screen bg-background">
