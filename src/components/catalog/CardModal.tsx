@@ -54,6 +54,7 @@ const finishDot: Record<Finish, string> = {
   Foil: "bg-brand-gold",
   "Reverse Foil": "bg-type-psychic",
   Pokebola: "bg-type-fire",
+  Masterball: "bg-type-psychic",
   Energia: "bg-type-grass",
   Promo: "bg-type-electric",
   "Ímã": "bg-muted-foreground",

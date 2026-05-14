@@ -3,8 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Card, CardCategory, Condition, Finish, FinishVariant, Language, LanguageVariant, RawCard } from "@/data/cards";
 import { CONDITIONS } from "@/data/cards";
 
-const FINISH_PRIORITY: Finish[] = ["Promo", "Pokebola", "Energia", "Foil", "Reverse Foil", "Normal"];
-const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Energia", "Promo"];
+const FINISH_PRIORITY: Finish[] = ["Promo", "Masterball", "Pokebola", "Energia", "Foil", "Reverse Foil", "Normal"];
+const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Masterball", "Energia", "Promo"];
 const LANGUAGE_ORDER: Language[] = ["Português", "Inglês", "Espanhol", "Italiano"];
 
 export interface CardWithMeta extends Card {
