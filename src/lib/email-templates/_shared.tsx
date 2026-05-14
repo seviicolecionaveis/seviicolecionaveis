@@ -14,7 +14,7 @@ import {
 
 export const SITE_NAME = 'Sevii Colecionáveis'
 export const SITE_URL = 'https://seviicolecionaveis.com.br'
-export const LOGO_URL = 'https://seviicolecionaveis.lovable.app/icon-192.png'
+export const LOGO_URL = 'https://seviicolecionaveis.lovable.app/sevii-logo.png'
 
 export function formatBRL(cents: number | undefined | null): string {
   const v = ((cents ?? 0) / 100).toLocaleString('pt-BR', {
