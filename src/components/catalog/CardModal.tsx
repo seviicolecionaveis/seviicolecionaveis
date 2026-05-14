@@ -24,20 +24,22 @@ function buildLanguagesWithMagnet(card: Card): LanguageVariant[] {
   if (MAGNET_EXCLUDED_KEYS.has(`${card.name}__${card.collection}__${card.number}`)) return card.languages;
   return card.languages.map((lang) => {
     if (lang.finishes.some((f) => f.finish === "Ímã")) return lang;
-    const hasFoil = lang.finishes.some((f) => f.finish === "Foil");
-    const hasNormal = lang.finishes.some((f) => f.finish === "Normal");
-    const price = hasFoil ? 10 : hasNormal ? 9 : null;
-    if (price == null) return lang;
+    const foilStock = lang.finishes.filter((f) => f.finish === "Foil").reduce((s, f) => s + f.stock, 0);
+    const normalStock = lang.finishes.filter((f) => f.finish === "Normal").reduce((s, f) => s + f.stock, 0);
+    const baseStock = foilStock + normalStock;
+    if (baseStock <= 0) return lang;
+    const price = foilStock > 0 ? 10 : 9;
+    const magnetStock = Math.min(MAGNET_VIRTUAL_STOCK, baseStock);
     const magnet: FinishVariant = {
       finish: "Ímã",
       condition: "NM",
-      stock: MAGNET_VIRTUAL_STOCK,
+      stock: magnetStock,
       price,
     };
     return {
       ...lang,
       finishes: [...lang.finishes, magnet],
-      stock: lang.stock + MAGNET_VIRTUAL_STOCK,
+      stock: lang.stock + magnetStock,
     };
   });
 }
