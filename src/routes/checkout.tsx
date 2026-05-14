@@ -12,7 +12,7 @@ export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
       { title: "Checkout — Sevii Colecionáveis" },
-      { name: "description", content: "Finalize seu pedido de cartas Pokémon na Sevii Colecionáveis. Pagamento seguro via Pix ou cartão de crédito." },
+      { name: "description", content: "Finalize seu pedido de cartas Pokémon na Sevii Colecionáveis. Pagamento seguro via Pix." },
       { property: "og:title", content: "Checkout — Sevii Colecionáveis" },
       { property: "og:description", content: "Finalize seu pedido com segurança." },
       { property: "og:url", content: "https://seviicolecionaveis.lovable.app/checkout" },
