@@ -244,6 +244,7 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
   }));
   const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
   if (itemsErr) throw new Error(itemsErr.message);
+  await sendOrderReceivedEmail(order.id);
 
   const discountMultiplier =
     discountCents > 0 ? (subtotalCents - discountCents) / subtotalCents : 1;
@@ -367,6 +368,7 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
   }));
   const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
   if (itemsErr) throw new Error(itemsErr.message);
+  await sendOrderReceivedEmail(order.id);
 
   const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
   const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
@@ -497,6 +499,7 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
   }));
   const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
   if (itemsErr) throw new Error(itemsErr.message);
+  await sendOrderReceivedEmail(order.id);
 
   const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
   const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
