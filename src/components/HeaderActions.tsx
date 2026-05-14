@@ -3,6 +3,7 @@ import { ShoppingBag, User as UserIcon, LogOut, LayoutDashboard, Tag, Heart, Use
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
+import { AdminCancellationBell } from "@/components/AdminCancellationBell";
 
 interface Props {
   onCartOpen: () => void;
@@ -15,6 +16,7 @@ export function HeaderActions({ onCartOpen }: Props) {
 
   return (
     <div className="flex items-center gap-2">
+      {user && isAdmin && <AdminCancellationBell />}
       {user && isAdmin && (
         <Link
           to="/admin/cards"
