@@ -65,7 +65,8 @@ const empty: Form = {
   couponCode: "",
 };
 
-type Step = "address" | "pix";
+type Step = "address" | "pix" | "card";
+type PaymentMethod = "pix" | "card";
 
 interface PixState {
   orderId: string;
@@ -75,14 +76,41 @@ interface PixState {
   totalCents: number;
 }
 
+interface CardState {
+  totalCents: number;
+  payerEmail: string;
+  payerCpf: string | null;
+  itemsPayload: ReturnType<CheckoutPageHelpers["buildItemsPayload"]>;
+  shipping: "fixed" | "arrange";
+  address: ReturnType<CheckoutPageHelpers["buildAddressPayload"]>;
+  notes: string | null;
+  couponCode: string | null;
+}
+
+interface CheckoutPageHelpers {
+  buildItemsPayload: () => Array<{
+    cardId: string; name: string; image?: string | null;
+    collection?: string | null; number?: string | null;
+    finish: string; language: string; condition?: string | null;
+    unitPrice: number; quantity: number;
+  }>;
+  buildAddressPayload: () => {
+    recipientName: string; cpf: string | null; phone: string;
+    cep: string; street: string; number: string; complement: string | null;
+    neighborhood: string; city: string; state: string;
+  };
+}
+
 function CheckoutPage() {
   const { user, session, loading: authLoading } = useAuth();
   const { items, subtotal, clear } = useCart();
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
   const [shipping, setShipping] = useState<"fixed" | "arrange">("fixed");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [step, setStep] = useState<Step>("address");
   const [pix, setPix] = useState<PixState | null>(null);
+  const [card, setCard] = useState<CardState | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
