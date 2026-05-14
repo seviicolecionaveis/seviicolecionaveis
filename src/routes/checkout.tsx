@@ -212,7 +212,7 @@ function CheckoutPage() {
     return combined || null;
   };
 
-  const handleAddressSubmit = (e: React.FormEvent) => {
+  const handleAddressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr(null);
     trackEvent("begin_checkout", {
@@ -227,38 +227,7 @@ function CheckoutPage() {
         quantity: i.quantity,
       })),
     });
-    setStep("method");
-  };
-
-  const startStripe = async () => {
-    if (!user || items.length === 0) return;
-    setLoading(true);
-    setErr(null);
-    try {
-      await persistAddressAndProfile();
-      const token = session?.access_token;
-      if (!token) throw new Error("Sessão expirada. Faça login novamente.");
-      const result = await createOrderCheckout({
-        headers: { Authorization: `Bearer ${token}` },
-        data: {
-          items: buildItemsPayload(),
-          shippingMethod: shipping,
-          address: buildAddressPayload(),
-          notes: buildNotes(),
-          couponCode: couponNormalized || null,
-          returnUrl: `${window.location.origin}/orders/__ORDER__?session_id={CHECKOUT_SESSION_ID}`,
-          environment: getStripeEnvironment(),
-        },
-      });
-      setClientSecret(result.clientSecret);
-      setStripeOrderId(result.orderId);
-      setStep("card");
-      clear();
-    } catch (e: any) {
-      setErr(e?.message ?? "Erro ao iniciar pagamento");
-    } finally {
-      setLoading(false);
-    }
+    await startPix();
   };
 
   const startPix = async () => {
@@ -305,93 +274,8 @@ function CheckoutPage() {
     );
   }
 
-  if (step === "card" && clientSecret) {
-    return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b border-border px-4 py-4">
-          <div className="mx-auto max-w-3xl flex items-center justify-between">
-            <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis</Link>
-            <button onClick={() => setStep("method")} className="text-xs text-muted-foreground hover:text-foreground">
-              ← Voltar
-            </button>
-          </div>
-        </header>
-        <main className="mx-auto max-w-3xl px-4 py-8">
-          <h1 className="text-2xl font-bold mb-6">Pagamento — Cartão</h1>
-          <div id="checkout">
-            <EmbeddedCheckoutProvider
-              stripe={getStripe()}
-              options={{
-                clientSecret,
-                onComplete: () => {
-                  if (stripeOrderId) {
-                    nav({ to: "/orders/$orderId", params: { orderId: stripeOrderId } });
-                  } else {
-                    nav({ to: "/orders" });
-                  }
-                },
-              }}
-            >
-              <EmbeddedCheckout />
-            </EmbeddedCheckoutProvider>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   if (step === "pix" && pix) {
     return <PixScreen pix={pix} />;
-  }
-
-  if (step === "method") {
-    return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b border-border px-4 py-4">
-          <div className="mx-auto max-w-3xl flex items-center justify-between">
-            <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis</Link>
-            <button onClick={() => setStep("address")} className="text-xs text-muted-foreground hover:text-foreground">
-              ← Voltar
-            </button>
-          </div>
-        </header>
-        <main className="mx-auto max-w-2xl px-4 py-8 space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold">Forma de pagamento</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Total: <span className="font-semibold text-foreground">R$ {total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
-              <input type="radio" checked={method === "pix"} onChange={() => setMethod("pix")} className="mt-1" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold">⚡ Pix — aprovação imediata</p>
-                <p className="text-xs text-muted-foreground">QR Code via Mercado Pago. Estoque reservado por 5 min.</p>
-              </div>
-            </label>
-            <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
-              <input type="radio" checked={method === "card"} onChange={() => setMethod("card")} className="mt-1" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold">💳 Cartão de crédito</p>
-                <p className="text-xs text-muted-foreground">Pagamento seguro via Stripe.</p>
-              </div>
-            </label>
-          </div>
-
-          {err && <p className="text-sm text-red-600">{err}</p>}
-
-          <button
-            onClick={method === "pix" ? startPix : startStripe}
-            disabled={loading}
-            className="w-full rounded-full bg-foreground py-3 text-sm font-semibold uppercase tracking-wide text-background hover:bg-foreground/90 disabled:opacity-50"
-          >
-            {loading ? "Processando..." : method === "pix" ? "Gerar QR Code Pix" : "Pagar com cartão"}
-          </button>
-        </main>
-      </div>
-    );
   }
 
   // step === "address"
