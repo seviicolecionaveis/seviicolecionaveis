@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { render as renderAsync } from '@react-email/components'
+import { render } from '@react-email/components'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { TEMPLATES } from '@/lib/email-templates/registry'
 
@@ -105,8 +105,8 @@ export async function sendTransactionalEmailServer(
 
   // 3. Render
   const element = React.createElement(template.component, templateData)
-  const html = await renderAsync(element)
-  const plainText = await renderAsync(element, { plainText: true })
+  const html = await render(element)
+  const plainText = await render(element, { plainText: true })
 
   const resolvedSubject =
     typeof template.subject === 'function'
