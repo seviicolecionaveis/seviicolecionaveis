@@ -422,7 +422,7 @@ export async function checkPixOrderStatusServer(orderId: string, userId: string)
     try {
       const remote = await getPixPayment(order.mercadopago_payment_id);
       if (remote.status === "approved" && order.status !== "paid") {
-        await markOrderPaid(order.id);
+        await markOrderPaid(order.id, { mercadopagoPaymentId: order.mercadopago_payment_id });
         return { status: "paid" as const };
       }
     } catch (e) {
