@@ -288,7 +288,7 @@ function AdminCardsManagePage() {
           <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii · Admin · Cartas</Link>
           <div className="flex gap-3 text-xs">
             <Link to="/admin" className="text-muted-foreground hover:text-foreground">Pedidos</Link>
-            <Link to="/admin/cards" className="text-muted-foreground hover:text-foreground">Preços</Link>
+            
             <Link to="/" className="text-muted-foreground hover:text-foreground">← Catálogo</Link>
           </div>
         </div>
