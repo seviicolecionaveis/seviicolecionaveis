@@ -155,16 +155,16 @@ export function AdminCancellationBell() {
             <section>
               <div className="px-4 py-2 bg-muted/40 border-y border-border">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Novos pedidos ({newCount})
+                  Pedidos recentes ({visibleOrders.length}{unseenCount > 0 ? ` · ${unseenCount} novos` : ""})
                 </p>
               </div>
-              {newCount === 0 ? (
+              {visibleOrders.length === 0 ? (
                 <p className="px-4 py-3 text-xs text-muted-foreground italic">
-                  Nenhum pedido novo desde a última visita.
+                  Nenhum pedido recente.
                 </p>
               ) : (
                 <ul className="divide-y divide-border">
-                  {newOrders.map((o) => (
+                  {visibleOrders.map((o) => (
                     <li key={o.id}>
                       <button
                         onClick={() => goTo(o.id)}
