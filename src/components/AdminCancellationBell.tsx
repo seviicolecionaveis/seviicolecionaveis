@@ -13,31 +13,34 @@ type OrderRow = {
 };
 
 const LAST_SEEN_KEY = "admin:notifications:lastSeenAt";
+const WINDOW_MS = 48 * 3600 * 1000;
 
 export function AdminCancellationBell() {
   const [recent, setRecent] = useState<OrderRow[]>([]);
   const [cancellations, setCancellations] = useState<OrderRow[]>([]);
   const [open, setOpen] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
   const [lastSeen, setLastSeen] = useState<string>(() => {
     if (typeof window === "undefined") return new Date(0).toISOString();
-    return localStorage.getItem(LAST_SEEN_KEY) ?? new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+    return localStorage.getItem(LAST_SEEN_KEY) ?? new Date(Date.now() - WINDOW_MS).toISOString();
   });
   const ref = useRef<HTMLDivElement>(null);
   const nav = useNavigate();
 
   const load = async () => {
-    const sinceIso = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+    const sinceIso = new Date(Date.now() - WINDOW_MS).toISOString();
     const [{ data: recentData }, { data: cancelData }] = await Promise.all([
       supabase
         .from("orders")
         .select("id, recipient_name, total_cents, status, created_at, updated_at")
         .gte("created_at", sinceIso)
         .order("created_at", { ascending: false })
-        .limit(20),
+        .limit(50),
       supabase
         .from("orders")
         .select("id, recipient_name, total_cents, status, created_at, updated_at")
         .eq("status", "cancellation_requested")
+        .gte("updated_at", sinceIso)
         .order("updated_at", { ascending: false }),
     ]);
     setRecent((recentData ?? []) as OrderRow[]);
@@ -54,7 +57,8 @@ export function AdminCancellationBell() {
         () => { load(); },
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    const tick = setInterval(() => setNow(Date.now()), 60_000);
+    return () => { supabase.removeChannel(channel); clearInterval(tick); };
   }, []);
 
   useEffect(() => {
@@ -65,25 +69,42 @@ export function AdminCancellationBell() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  const cutoffIso = useMemo(() => new Date(now - WINDOW_MS).toISOString(), [now]);
+
   const visibleOrders = useMemo(
-    () => recent.filter((o) => o.status !== "cancelled" && o.status !== "cancellation_requested"),
-    [recent],
+    () =>
+      recent.filter(
+        (o) =>
+          o.status !== "cancelled" &&
+          o.status !== "cancellation_requested" &&
+          o.created_at > cutoffIso,
+      ),
+    [recent, cutoffIso],
   );
-  const unseenCount = useMemo(
+
+  const visibleCancellations = useMemo(
+    () => cancellations.filter((o) => o.updated_at > cutoffIso),
+    [cancellations, cutoffIso],
+  );
+
+  const unseenOrders = useMemo(
     () => visibleOrders.filter((o) => o.created_at > lastSeen).length,
     [visibleOrders, lastSeen],
   );
+  const unseenCancellations = useMemo(
+    () => visibleCancellations.filter((o) => o.updated_at > lastSeen).length,
+    [visibleCancellations, lastSeen],
+  );
 
-  const cancelCount = cancellations.length;
-  const totalBadge = cancelCount + unseenCount;
+  const totalBadge = unseenOrders + unseenCancellations;
 
   const handleOpen = () => {
     const next = !open;
     setOpen(next);
     if (next) {
-      const now = new Date().toISOString();
-      localStorage.setItem(LAST_SEEN_KEY, now);
-      setLastSeen(now);
+      const nowIso = new Date().toISOString();
+      localStorage.setItem(LAST_SEEN_KEY, nowIso);
+      setLastSeen(nowIso);
     }
   };
 
@@ -115,22 +136,24 @@ export function AdminCancellationBell() {
         <div className="absolute right-0 mt-2 w-80 rounded-xl border border-border bg-card shadow-lg z-50 overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
             <p className="text-xs font-bold uppercase tracking-wider">Notificações</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Últimas 48h</p>
           </div>
 
           <div className="max-h-96 overflow-auto">
             <section>
               <div className="px-4 py-2 bg-muted/40 border-b border-border">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Cancelamentos pendentes ({cancelCount})
+                  Cancelamentos pendentes ({visibleCancellations.length}
+                  {unseenCancellations > 0 ? ` · ${unseenCancellations} novos` : ""})
                 </p>
               </div>
-              {cancelCount === 0 ? (
+              {visibleCancellations.length === 0 ? (
                 <p className="px-4 py-3 text-xs text-muted-foreground italic">
-                  Nenhuma solicitação pendente.
+                  Nenhuma solicitação nas últimas 48h.
                 </p>
               ) : (
                 <ul className="divide-y divide-border">
-                  {cancellations.map((o) => (
+                  {visibleCancellations.map((o) => (
                     <li key={o.id}>
                       <button
                         onClick={() => goTo(o.id)}
@@ -155,12 +178,13 @@ export function AdminCancellationBell() {
             <section>
               <div className="px-4 py-2 bg-muted/40 border-y border-border">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Pedidos recentes ({visibleOrders.length}{unseenCount > 0 ? ` · ${unseenCount} novos` : ""})
+                  Pedidos recentes ({visibleOrders.length}
+                  {unseenOrders > 0 ? ` · ${unseenOrders} novos` : ""})
                 </p>
               </div>
               {visibleOrders.length === 0 ? (
                 <p className="px-4 py-3 text-xs text-muted-foreground italic">
-                  Nenhum pedido recente.
+                  Nenhum pedido nas últimas 48h.
                 </p>
               ) : (
                 <ul className="divide-y divide-border">
