@@ -28,7 +28,6 @@ import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-cards'
 import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
-import { Route as AdminCardsRouteImport } from './routes/admin.cards'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
@@ -134,11 +133,6 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminCardsRoute = AdminCardsRouteImport.update({
-  id: '/cards',
-  path: '/cards',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminBannersRoute = AdminBannersRouteImport.update({
   id: '/banners',
   path: '/banners',
@@ -202,7 +196,6 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/banners': typeof AdminBannersRoute
-  '/admin/cards': typeof AdminCardsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
@@ -232,7 +225,6 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/banners': typeof AdminBannersRoute
-  '/admin/cards': typeof AdminCardsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
@@ -264,7 +256,6 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/banners': typeof AdminBannersRoute
-  '/admin/cards': typeof AdminCardsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
@@ -297,7 +288,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/unsubscribe'
     | '/admin/banners'
-    | '/admin/cards'
     | '/admin/dashboard'
     | '/admin/emails'
     | '/admin/manage-cards'
@@ -327,7 +317,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/unsubscribe'
     | '/admin/banners'
-    | '/admin/cards'
     | '/admin/dashboard'
     | '/admin/emails'
     | '/admin/manage-cards'
@@ -358,7 +347,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/unsubscribe'
     | '/admin/banners'
-    | '/admin/cards'
     | '/admin/dashboard'
     | '/admin/emails'
     | '/admin/manage-cards'
@@ -537,13 +525,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/cards': {
-      id: '/admin/cards'
-      path: '/cards'
-      fullPath: '/admin/cards'
-      preLoaderRoute: typeof AdminCardsRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/banners': {
       id: '/admin/banners'
       path: '/banners'
@@ -612,7 +593,6 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
-  AdminCardsRoute: typeof AdminCardsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEmailsRoute: typeof AdminEmailsRoute
   AdminManageCardsRoute: typeof AdminManageCardsRoute
@@ -621,7 +601,6 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
-  AdminCardsRoute: AdminCardsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEmailsRoute: AdminEmailsRoute,
   AdminManageCardsRoute: AdminManageCardsRoute,
@@ -681,3 +660,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
