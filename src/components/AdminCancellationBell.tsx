@@ -65,14 +65,17 @@ export function AdminCancellationBell() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  const newOrders = useMemo(
-    () => recent.filter((o) => o.created_at > lastSeen && o.status !== "cancelled"),
-    [recent, lastSeen],
+  const visibleOrders = useMemo(
+    () => recent.filter((o) => o.status !== "cancelled" && o.status !== "cancellation_requested"),
+    [recent],
+  );
+  const unseenCount = useMemo(
+    () => visibleOrders.filter((o) => o.created_at > lastSeen).length,
+    [visibleOrders, lastSeen],
   );
 
   const cancelCount = cancellations.length;
-  const newCount = newOrders.length;
-  const totalBadge = cancelCount + newCount;
+  const totalBadge = cancelCount + unseenCount;
 
   const handleOpen = () => {
     const next = !open;
