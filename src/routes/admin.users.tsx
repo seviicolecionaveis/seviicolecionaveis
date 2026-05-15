@@ -109,7 +109,7 @@ function AdminUsersPage() {
           <div className="flex gap-3 text-xs">
             <Link to="/admin" className="text-muted-foreground hover:text-foreground">Pedidos</Link>
             <Link to="/admin/manage-cards" className="text-muted-foreground hover:text-foreground">Gerenciar cartas</Link>
-            <Link to="/admin/cards" className="text-muted-foreground hover:text-foreground">Preços</Link>
+            
           </div>
         </div>
       </header>
