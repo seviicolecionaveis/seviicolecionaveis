@@ -17,15 +17,6 @@ export function HeaderActions({ onCartOpen }: Props) {
   return (
     <div className="flex items-center gap-2">
       {user && isAdmin && <AdminCancellationBell />}
-      {user && isAdmin && (
-        <Link
-          to="/admin/cards"
-          className="hidden sm:inline-flex items-center gap-2 rounded-full border border-border px-3 py-2 text-xs font-semibold uppercase tracking-wide hover:bg-secondary"
-        >
-          <Tag className="h-4 w-4" /> Atualizar preços Liga
-        </Link>
-      )}
-
       <button
         onClick={onCartOpen}
         className="relative grid h-9 w-9 place-items-center rounded-full hover:bg-secondary transition"
