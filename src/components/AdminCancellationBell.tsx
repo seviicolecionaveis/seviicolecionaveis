@@ -65,14 +65,17 @@ export function AdminCancellationBell() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  const newOrders = useMemo(
-    () => recent.filter((o) => o.created_at > lastSeen && o.status !== "cancelled"),
-    [recent, lastSeen],
+  const visibleOrders = useMemo(
+    () => recent.filter((o) => o.status !== "cancelled" && o.status !== "cancellation_requested"),
+    [recent],
+  );
+  const unseenCount = useMemo(
+    () => visibleOrders.filter((o) => o.created_at > lastSeen).length,
+    [visibleOrders, lastSeen],
   );
 
   const cancelCount = cancellations.length;
-  const newCount = newOrders.length;
-  const totalBadge = cancelCount + newCount;
+  const totalBadge = cancelCount + unseenCount;
 
   const handleOpen = () => {
     const next = !open;
@@ -152,16 +155,16 @@ export function AdminCancellationBell() {
             <section>
               <div className="px-4 py-2 bg-muted/40 border-y border-border">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Novos pedidos ({newCount})
+                  Pedidos recentes ({visibleOrders.length}{unseenCount > 0 ? ` · ${unseenCount} novos` : ""})
                 </p>
               </div>
-              {newCount === 0 ? (
+              {visibleOrders.length === 0 ? (
                 <p className="px-4 py-3 text-xs text-muted-foreground italic">
-                  Nenhum pedido novo desde a última visita.
+                  Nenhum pedido recente.
                 </p>
               ) : (
                 <ul className="divide-y divide-border">
-                  {newOrders.map((o) => (
+                  {visibleOrders.map((o) => (
                     <li key={o.id}>
                       <button
                         onClick={() => goTo(o.id)}
