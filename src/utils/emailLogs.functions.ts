@@ -45,7 +45,9 @@ export const getEmailLogs = createServerFn({ method: "POST" })
       suppressed: latest.filter((r) => r.status === "suppressed").length,
     };
 
-    const templates = Array.from(new Set((rows ?? []).map((r) => r.template_name))).sort();
+    const templates = Array.from(
+      new Set((rows ?? []).map((r: any) => r.template_name as string)),
+    ).sort() as string[];
 
     return {
       logs: latest.slice(0, data.limit),
