@@ -150,7 +150,7 @@ function AdminPage() {
             <Link to="/admin/dashboard" className="font-semibold text-foreground hover:underline">Dashboard</Link>
             <Link to="/admin/manage-cards" className="font-semibold text-foreground hover:underline">Gerenciar cartas</Link>
             <Link to="/admin/banners" className="font-semibold text-foreground hover:underline">Banners</Link>
-            <Link to="/admin/cards" className="font-semibold text-foreground hover:underline">Preços (Liga Pokémon)</Link>
+            
             <Link to="/admin/users" className="font-semibold text-foreground hover:underline">Administradores</Link>
             <Link to="/admin/emails" className="font-semibold text-foreground hover:underline">E-mails</Link>
             <Link to="/" className="text-muted-foreground hover:text-foreground">← Catálogo</Link>

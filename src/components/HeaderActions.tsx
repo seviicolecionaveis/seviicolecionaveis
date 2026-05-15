@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, User as UserIcon, LogOut, LayoutDashboard, Tag, Heart, UserCog } from "lucide-react";
+import { ShoppingBag, User as UserIcon, LogOut, LayoutDashboard, Heart, UserCog } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
@@ -17,15 +17,6 @@ export function HeaderActions({ onCartOpen }: Props) {
   return (
     <div className="flex items-center gap-2">
       {user && isAdmin && <AdminCancellationBell />}
-      {user && isAdmin && (
-        <Link
-          to="/admin/cards"
-          className="hidden sm:inline-flex items-center gap-2 rounded-full border border-border px-3 py-2 text-xs font-semibold uppercase tracking-wide hover:bg-secondary"
-        >
-          <Tag className="h-4 w-4" /> Atualizar preços Liga
-        </Link>
-      )}
-
       <button
         onClick={onCartOpen}
         className="relative grid h-9 w-9 place-items-center rounded-full hover:bg-secondary transition"
@@ -84,13 +75,6 @@ export function HeaderActions({ onCartOpen }: Props) {
                       className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
                     >
                       <LayoutDashboard className="h-4 w-4" /> Admin · Pedidos
-                    </Link>
-                    <Link
-                      to="/admin/cards"
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
-                    >
-                      <Tag className="h-4 w-4" /> Atualizar preços Liga Pokémon
                     </Link>
                   </>
                 )}
