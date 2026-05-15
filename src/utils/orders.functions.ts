@@ -18,12 +18,28 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
   )
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
-    const { isAdmin, getOrderById, updateOrder } = await import("@/lib/order-cancellation.server");
+    const { isAdmin, getOrderById, updateOrder, restoreStockIfPaid, deleteStockReservations } =
+      await import("@/lib/order-cancellation.server");
     const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
     const order = await getOrderById(data.order_id, "id, status, email, recipient_name");
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
     if (order.status === data.status) return { ok: true };
+
+    // Special case: transição para "paid" usa markOrderPaid (decrementa estoque
+    // e dispara o e-mail de confirmação de pagamento).
+    if (data.status === "paid") {
+      const { markOrderPaid } = await import("@/lib/orders.server");
+      await markOrderPaid(order.id);
+      return { ok: true };
+    }
+
+    // Special case: cancelamento manual restaura estoque se o pedido estava pago.
+    if (data.status === "cancelled") {
+      await restoreStockIfPaid(order.id, order.status);
+      await deleteStockReservations(order.id);
+    }
+
     await updateOrder(order.id, { status: data.status });
     if (order.email) {
       await sendTransactionalEmailSafe({
