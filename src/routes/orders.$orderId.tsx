@@ -184,10 +184,26 @@ function OrderDetailPage() {
           <p className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleString("pt-BR")}</p>
         </div>
 
-        <section className="rounded-xl border border-border bg-card p-5">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
-            Itens do pedido
-          </h2>
+        {(order.status === "shipped" || order.status === "delivered") && order.tracking_code && (
+          <section className="rounded-xl border border-border bg-card p-5 text-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+              Rastreio do envio
+            </h2>
+            <p className="font-mono font-semibold text-base">{order.tracking_code}</p>
+            <a
+              href="https://rastreamento.correios.com.br/app/index.php"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-block rounded-full bg-foreground text-background px-4 py-2 text-xs font-semibold hover:opacity-90"
+            >
+              Rastrear nos Correios
+            </a>
+            <p className="text-xs text-muted-foreground mt-2">
+              Cole o código na página dos Correios para ver o histórico de movimentações.
+            </p>
+          </section>
+        )}
+
           <ul className="space-y-4">
             {order.order_items?.map((it: any) => (
               <li key={it.id} className="flex gap-4">
