@@ -5,6 +5,8 @@ import { useCardStats } from "@/hooks/useCardStats";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
 import { collectionSlug } from "@/lib/slug";
+import { getCollectionDescription } from "@/data/collectionDescriptions";
+import { SiteFooter } from "@/components/SiteFooter";
 import type { Card } from "@/data/cards";
 import logoUrl from "@/assets/logo.png";
 
@@ -108,6 +110,11 @@ function CollectionPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             {list.length} {list.length === 1 ? "carta" : "cartas"} disponíveis
           </p>
+          {collectionName && getCollectionDescription(collectionName) && (
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-foreground/80">
+              {getCollectionDescription(collectionName)}
+            </p>
+          )}
         </div>
 
         {loading ? (
@@ -122,6 +129,7 @@ function CollectionPage() {
       </main>
 
       <CardModal card={active} onClose={() => setActive(null)} />
+      <SiteFooter />
     </div>
   );
 }

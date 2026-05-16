@@ -11,6 +11,8 @@ import { HeaderActions } from "@/components/HeaderActions";
 import { CartDrawer } from "@/components/CartDrawer";
 import { BannerCarousel } from "@/components/BannerCarousel";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
+import { TrustBadges } from "@/components/TrustBadges";
+import { SiteFooter } from "@/components/SiteFooter";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
@@ -246,6 +248,7 @@ function Index() {
       </header>
 
       <BannerCarousel />
+      <TrustBadges />
 
       <h1 className="sr-only">Catálogo de Cartas Pokémon — Sevii Colecionáveis</h1>
 
@@ -349,11 +352,7 @@ function Index() {
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
       <WelcomeDialog />
 
-      <footer className="border-t border-border mt-16 py-8">
-        <p className="text-center text-xs text-muted-foreground">
-          © Sevii Colecionáveis — Catálogo de cartas colecionáveis
-        </p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

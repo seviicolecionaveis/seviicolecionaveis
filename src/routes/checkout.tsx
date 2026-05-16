@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 import { Copy, Check, QrCode, CreditCard } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { TrustBadges } from "@/components/TrustBadges";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -515,6 +516,9 @@ function CheckoutPage() {
               <span>Total</span>
               <span className="tabular-nums">R$ {total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
             </div>
+          </div>
+          <div className="mt-5 pt-5 border-t border-border">
+            <TrustBadges variant="compact" />
           </div>
         </aside>
       </main>

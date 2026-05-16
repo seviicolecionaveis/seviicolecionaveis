@@ -10,9 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
+import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -46,6 +48,11 @@ const UnsubscribeRoute = UnsubscribeRouteImport.update({
   path: '/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -59,6 +66,11 @@ const OrdersRoute = OrdersRouteImport.update({
 const FavoritosRoute = FavoritosRouteImport.update({
   id: '/favoritos',
   path: '/favoritos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContaRoute = ContaRouteImport.update({
@@ -209,9 +221,11 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/conta': typeof ContaRoute
+  '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/orders': typeof OrdersRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sobre': typeof SobreRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -242,8 +256,10 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/conta': typeof ContaRoute
+  '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sobre': typeof SobreRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -275,9 +291,11 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/conta': typeof ContaRoute
+  '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/orders': typeof OrdersRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sobre': typeof SobreRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -310,9 +328,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/conta'
+    | '/faq'
     | '/favoritos'
     | '/orders'
     | '/sitemap.xml'
+    | '/sobre'
     | '/unsubscribe'
     | '/admin/banners'
     | '/admin/dashboard'
@@ -343,8 +363,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/conta'
+    | '/faq'
     | '/favoritos'
     | '/sitemap.xml'
+    | '/sobre'
     | '/unsubscribe'
     | '/admin/banners'
     | '/admin/dashboard'
@@ -375,9 +397,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/conta'
+    | '/faq'
     | '/favoritos'
     | '/orders'
     | '/sitemap.xml'
+    | '/sobre'
     | '/unsubscribe'
     | '/admin/banners'
     | '/admin/dashboard'
@@ -409,9 +433,11 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ContaRoute: typeof ContaRoute
+  FaqRoute: typeof FaqRoute
   FavoritosRoute: typeof FavoritosRoute
   OrdersRoute: typeof OrdersRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SobreRoute: typeof SobreRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   CartaSlugRoute: typeof CartaSlugRoute
   ColecaoSlugRoute: typeof ColecaoSlugRoute
@@ -438,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -457,6 +490,13 @@ declare module '@tanstack/react-router' {
       path: '/favoritos'
       fullPath: '/favoritos'
       preLoaderRoute: typeof FavoritosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/conta': {
@@ -700,9 +740,11 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   ContaRoute: ContaRoute,
+  FaqRoute: FaqRoute,
   FavoritosRoute: FavoritosRoute,
   OrdersRoute: OrdersRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SobreRoute: SobreRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   CartaSlugRoute: CartaSlugRoute,
   ColecaoSlugRoute: ColecaoSlugRoute,
