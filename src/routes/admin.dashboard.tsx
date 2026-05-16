@@ -297,3 +297,28 @@ function Row({ name, sub, value }: { name: string; sub: string; value: string })
 function Empty({ children }: { children: React.ReactNode }) {
   return <p className="px-4 py-6 text-xs text-muted-foreground italic">{children}</p>;
 }
+
+function ResendPendingEmailsButton() {
+  const [busy, setBusy] = useState(false);
+  const handle = async () => {
+    if (!confirm("Reenviar o e-mail de cobrança para TODOS os pedidos com pagamento pendente?")) return;
+    setBusy(true);
+    try {
+      const r = await resendPendingOrderEmails({ data: undefined as any });
+      toast.success(`E-mails reenviados: ${r.sent} de ${r.total}`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao reenviar e-mails");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <button
+      onClick={handle}
+      disabled={busy}
+      className="flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-secondary disabled:opacity-50"
+    >
+      <Mail className="h-3.5 w-3.5" /> {busy ? "Enviando..." : "Reenviar e-mails pendentes"}
+    </button>
+  );
+}
