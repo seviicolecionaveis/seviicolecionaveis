@@ -19,6 +19,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
+import { Route as PayOrderIdRouteImport } from './routes/pay.$orderId'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ColecaoSlugRouteImport } from './routes/colecao.$slug'
@@ -89,6 +90,11 @@ const OrdersIndexRoute = OrdersIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => OrdersRoute,
+} as any)
+const PayOrderIdRoute = PayOrderIdRouteImport.update({
+  id: '/pay/$orderId',
+  path: '/pay/$orderId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const OrdersOrderIdRoute = OrdersOrderIdRouteImport.update({
   id: '/$orderId',
@@ -217,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
+  '/pay/$orderId': typeof PayOrderIdRoute
   '/orders/': typeof OrdersIndexRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
+  '/pay/$orderId': typeof PayOrderIdRoute
   '/orders': typeof OrdersIndexRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
+  '/pay/$orderId': typeof PayOrderIdRoute
   '/orders/': typeof OrdersIndexRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -315,6 +324,7 @@ export interface FileRouteTypes {
     | '/colecao/$slug'
     | '/email/unsubscribe'
     | '/orders/$orderId'
+    | '/pay/$orderId'
     | '/orders/'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
@@ -346,6 +356,7 @@ export interface FileRouteTypes {
     | '/colecao/$slug'
     | '/email/unsubscribe'
     | '/orders/$orderId'
+    | '/pay/$orderId'
     | '/orders'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
@@ -378,6 +389,7 @@ export interface FileRouteTypes {
     | '/colecao/$slug'
     | '/email/unsubscribe'
     | '/orders/$orderId'
+    | '/pay/$orderId'
     | '/orders/'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
@@ -404,6 +416,7 @@ export interface RootRouteChildren {
   CartaSlugRoute: typeof CartaSlugRoute
   ColecaoSlugRoute: typeof ColecaoSlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  PayOrderIdRoute: typeof PayOrderIdRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
@@ -487,6 +500,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/orders/'
       preLoaderRoute: typeof OrdersIndexRouteImport
       parentRoute: typeof OrdersRoute
+    }
+    '/pay/$orderId': {
+      id: '/pay/$orderId'
+      path: '/pay/$orderId'
+      fullPath: '/pay/$orderId'
+      preLoaderRoute: typeof PayOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/orders/$orderId': {
       id: '/orders/$orderId'
@@ -687,6 +707,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartaSlugRoute: CartaSlugRoute,
   ColecaoSlugRoute: ColecaoSlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  PayOrderIdRoute: PayOrderIdRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,

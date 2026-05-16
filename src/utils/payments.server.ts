@@ -547,3 +547,161 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
     throw e;
   }
 }
+
+// =========================================================================
+// Resume / change payment for an existing pending order
+// =========================================================================
+
+export async function regeneratePixForExistingOrderServer(orderId: string, userId: string) {
+  const { data: order, error } = await supabaseAdmin
+    .from("orders")
+    .select(
+      "id, user_id, status, total_cents, email, recipient_name, cpf",
+    )
+    .eq("id", orderId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!order || order.user_id !== userId) throw new Error("Pedido não encontrado");
+  if (order.status !== "pending") throw new Error("Este pedido não está mais pendente.");
+
+  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
+  const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
+
+  const [firstName, ...rest] = (order.recipient_name ?? "Cliente").trim().split(/\s+/);
+  const lastName = rest.join(" ") || "Sevii";
+
+  const pix = await createPixPayment({
+    amountCents: order.total_cents,
+    description: `Pedido Sevii Colecionáveis #${order.id.slice(0, 8)}`,
+    payerEmail: order.email ?? "",
+    payerFirstName: firstName,
+    payerLastName: lastName,
+    payerCpf: order.cpf ?? null,
+    externalReference: order.id,
+    notificationUrl,
+    expiresInMinutes: PIX_EXPIRES_MINUTES,
+  });
+
+  await supabaseAdmin
+    .from("orders")
+    .update({
+      payment_method: "pix",
+      mercadopago_payment_id: String(pix.id),
+      pix_qr_code: pix.qr_code,
+      pix_qr_code_base64: pix.qr_code_base64,
+      pix_expires_at: pix.date_of_expiration,
+    })
+    .eq("id", order.id);
+
+  return {
+    orderId: order.id,
+    qrCode: pix.qr_code,
+    qrCodeBase64: pix.qr_code_base64,
+    expiresAt: pix.date_of_expiration,
+    totalCents: order.total_cents,
+  };
+}
+
+export async function payExistingOrderWithCardServer(
+  orderId: string,
+  userId: string,
+  card: {
+    token: string;
+    paymentMethodId: string;
+    issuerId?: string | null;
+    installments: number;
+    payerEmail?: string | null;
+    payerCpf?: string | null;
+  },
+) {
+  const { data: order, error } = await supabaseAdmin
+    .from("orders")
+    .select("id, user_id, status, total_cents, email, recipient_name, cpf")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!order || order.user_id !== userId) throw new Error("Pedido não encontrado");
+  if (order.status !== "pending") throw new Error("Este pedido não está mais pendente.");
+
+  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
+  const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
+
+  const [firstName, ...rest] = (order.recipient_name ?? "Cliente").trim().split(/\s+/);
+  const lastName = rest.join(" ") || "Sevii";
+
+  const result = await createCardPaymentMP({
+    amountCents: order.total_cents,
+    description: `Pedido Sevii Colecionáveis #${order.id.slice(0, 8)}`,
+    token: card.token,
+    paymentMethodId: card.paymentMethodId,
+    issuerId: card.issuerId ?? null,
+    installments: card.installments,
+    payerEmail: card.payerEmail || order.email || "",
+    payerFirstName: firstName,
+    payerLastName: lastName,
+    payerCpf: card.payerCpf ?? order.cpf ?? null,
+    externalReference: order.id,
+    notificationUrl,
+  });
+
+  await supabaseAdmin
+    .from("orders")
+    .update({
+      payment_method: "mercadopago_card",
+      mercadopago_payment_id: String(result.id),
+    })
+    .eq("id", order.id);
+
+  if (result.status === "approved") {
+    await markOrderPaid(order.id, { mercadopagoPaymentId: String(result.id) });
+    return { orderId: order.id, status: "approved" as const };
+  }
+  if (
+    result.status === "in_process" ||
+    result.status === "pending" ||
+    result.status === "authorized"
+  ) {
+    return {
+      orderId: order.id,
+      status: "in_process" as const,
+      statusDetail: result.status_detail,
+    };
+  }
+  return {
+    orderId: order.id,
+    status: "rejected" as const,
+    statusDetail: result.status_detail ?? "Pagamento recusado",
+  };
+}
+
+export async function resendPendingOrderEmailsServer() {
+  const { data: orders, error } = await supabaseAdmin
+    .from("orders")
+    .select("id, email, recipient_name, total_cents, payment_method")
+    .eq("status", "pending");
+  if (error) throw new Error(error.message);
+
+  const stamp = Date.now();
+  let sent = 0;
+  for (const order of orders ?? []) {
+    if (!order.email) continue;
+    const { data: items } = await supabaseAdmin
+      .from("order_items")
+      .select("card_name, quantity, unit_price_cents, finish, language, card_image")
+      .eq("order_id", order.id);
+    await sendTransactionalEmailSafe({
+      templateName: "order-received",
+      recipientEmail: order.email,
+      idempotencyKey: `order-received-${order.id}-resend-${stamp}`,
+      templateData: {
+        recipientName: order.recipient_name?.split(/\s+/)[0],
+        orderId: order.id,
+        items: items ?? [],
+        totalCents: order.total_cents,
+        paymentMethod: order.payment_method,
+      },
+    });
+    sent++;
+  }
+  return { sent, total: orders?.length ?? 0 };
+}

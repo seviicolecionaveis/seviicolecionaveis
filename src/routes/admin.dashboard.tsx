@@ -4,8 +4,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { useCardStats } from "@/hooks/useCardStats";
-import { TrendingUp, Eye, ShoppingBag, AlertTriangle, Download } from "lucide-react";
+import { TrendingUp, Eye, ShoppingBag, AlertTriangle, Download, Mail } from "lucide-react";
 import { AdminCancellationBell } from "@/components/AdminCancellationBell";
+import { resendPendingOrderEmails } from "@/utils/payments.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Sevii Admin" }] }),
@@ -157,12 +159,15 @@ function DashboardPage() {
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <h1 className="text-2xl font-bold">Visão geral</h1>
-          <button
-            onClick={exportCSV}
-            className="flex items-center gap-2 rounded-md bg-foreground text-background px-4 py-2 text-xs font-bold uppercase tracking-wider hover:opacity-90"
-          >
-            <Download className="h-3.5 w-3.5" /> Exportar pedidos (CSV)
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <ResendPendingEmailsButton />
+            <button
+              onClick={exportCSV}
+              className="flex items-center gap-2 rounded-md bg-foreground text-background px-4 py-2 text-xs font-bold uppercase tracking-wider hover:opacity-90"
+            >
+              <Download className="h-3.5 w-3.5" /> Exportar pedidos (CSV)
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -291,4 +296,29 @@ function Row({ name, sub, value }: { name: string; sub: string; value: string })
 
 function Empty({ children }: { children: React.ReactNode }) {
   return <p className="px-4 py-6 text-xs text-muted-foreground italic">{children}</p>;
+}
+
+function ResendPendingEmailsButton() {
+  const [busy, setBusy] = useState(false);
+  const handle = async () => {
+    if (!confirm("Reenviar o e-mail de cobrança para TODOS os pedidos com pagamento pendente?")) return;
+    setBusy(true);
+    try {
+      const r = await resendPendingOrderEmails({});
+      toast.success(`E-mails reenviados: ${r.sent} de ${r.total}`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao reenviar e-mails");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <button
+      onClick={handle}
+      disabled={busy}
+      className="flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-secondary disabled:opacity-50"
+    >
+      <Mail className="h-3.5 w-3.5" /> {busy ? "Enviando..." : "Reenviar e-mails pendentes"}
+    </button>
+  );
 }
