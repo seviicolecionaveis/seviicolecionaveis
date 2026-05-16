@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ShieldCheck, Truck, RefreshCw, Heart } from "lucide-react";
+import { ShieldCheck, Truck, Heart } from "lucide-react";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/sobre")({
@@ -81,13 +81,6 @@ function SobrePage() {
             <p className="font-semibold">Envio rastreado</p>
             <p className="text-sm text-muted-foreground mt-1">
               Despachamos em até 2 dias úteis com código dos Correios.
-            </p>
-          </div>
-          <div className="rounded-xl border border-border p-5 bg-card">
-            <RefreshCw className="h-6 w-6 mb-3 text-foreground" />
-            <p className="font-semibold">Troca em 7 dias</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Recebeu e não gostou? Direito de arrependimento garantido por lei.
             </p>
           </div>
           <div className="rounded-xl border border-border p-5 bg-card">

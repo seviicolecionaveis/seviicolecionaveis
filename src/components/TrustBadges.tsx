@@ -1,4 +1,4 @@
-import { ShieldCheck, Truck, RefreshCw, Lock } from "lucide-react";
+import { ShieldCheck, Truck, Lock } from "lucide-react";
 
 interface TrustBadgesProps {
   variant?: "row" | "compact";
@@ -8,7 +8,6 @@ export function TrustBadges({ variant = "row" }: TrustBadgesProps) {
   const items = [
     { icon: ShieldCheck, label: "Cartas 100% originais", sub: "Garantia de autenticidade" },
     { icon: Truck, label: "Envio rastreado", sub: "Postagem em até 2 dias úteis" },
-    { icon: RefreshCw, label: "Troca em 7 dias", sub: "Direito de arrependimento" },
     { icon: Lock, label: "Pagamento seguro", sub: "Pix e cartão via Mercado Pago" },
   ];
 

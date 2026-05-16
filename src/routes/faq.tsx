@@ -10,13 +10,13 @@ export const Route = createFileRoute("/faq")({
       {
         name: "description",
         content:
-          "Tire suas dúvidas sobre prazos de envio, condição das cartas (NM, LP, MP), formas de pagamento, troca, autenticidade e mais.",
+          "Tire suas dúvidas sobre prazos de envio, condição das cartas (NM, LP, MP), formas de pagamento, autenticidade e mais.",
       },
-      { property: "og:title", content: "Perguntas frequentes — Sevii Colecionáveis" },
+      { property: "og:title", content: "FAQ — Sevii Colecionáveis" },
       {
         property: "og:description",
         content:
-          "Dúvidas sobre envio, condição das cartas, pagamento e trocas na Sevii Colecionáveis.",
+          "Dúvidas sobre envio, condição das cartas e pagamento na Sevii Colecionáveis.",
       },
       {
         property: "og:url",
@@ -66,10 +66,6 @@ const FAQS: { q: string; a: string }[] = [
   {
     q: "Posso rastrear meu pedido?",
     a: "Sim. Assim que postamos, você recebe o código de rastreio dos Correios por e-mail.",
-  },
-  {
-    q: "E se eu quiser trocar ou devolver?",
-    a: "Você tem direito de arrependimento de 7 dias corridos a partir do recebimento (Código de Defesa do Consumidor). A carta precisa voltar nas mesmas condições em que foi enviada.",
   },
   {
     q: "Tenho 30 minutos para pagar — por quê?",
