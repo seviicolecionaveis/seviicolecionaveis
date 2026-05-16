@@ -204,6 +204,10 @@ function OrderDetailPage() {
           </section>
         )}
 
+        <section className="rounded-xl border border-border bg-card p-5">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
+            Itens do pedido
+          </h2>
           <ul className="space-y-4">
             {order.order_items?.map((it: any) => (
               <li key={it.id} className="flex gap-4">
