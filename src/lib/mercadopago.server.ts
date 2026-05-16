@@ -77,7 +77,7 @@ export async function createCardPaymentMP(input: CreateCardInput): Promise<CardP
 
   const idempotencyKey = `${input.externalReference}-card-${Date.now()}`;
 
-  const res = await fetch(`${MP_API}/v1/payments`, {
+  const res = await fetchMpWithTimeout(`${MP_API}/v1/payments`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -148,7 +148,7 @@ export async function createPixPayment(input: CreatePixInput): Promise<PixPaymen
 
   const idempotencyKey = `${input.externalReference}-${Date.now()}`;
 
-  const res = await fetch(`${MP_API}/v1/payments`, {
+  const res = await fetchMpWithTimeout(`${MP_API}/v1/payments`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -183,7 +183,7 @@ export async function createPixPayment(input: CreatePixInput): Promise<PixPaymen
 
 export async function getPixPayment(paymentId: string | number): Promise<{ status: string; external_reference?: string }> {
   const token = getAccessToken();
-  const res = await fetch(`${MP_API}/v1/payments/${paymentId}`, {
+  const res = await fetchMpWithTimeout(`${MP_API}/v1/payments/${paymentId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) {
