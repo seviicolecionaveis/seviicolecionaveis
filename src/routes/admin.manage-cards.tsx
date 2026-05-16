@@ -1,10 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateCardsCache } from "@/hooks/useCardsCatalog";
 import type { Condition, Finish, Language } from "@/data/cards";
 import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS } from "@/data/cards";
+import { notifyStockBack } from "@/lib/stock-alerts.functions";
+import { cardSlug } from "@/lib/slug";
 
 export const Route = createFileRoute("/admin/manage-cards")({
   head: () => ({ meta: [{ title: "Gerenciar cartas — Admin" }] }),
