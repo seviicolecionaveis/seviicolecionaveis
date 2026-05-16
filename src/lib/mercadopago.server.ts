@@ -2,6 +2,22 @@
 // Docs: https://www.mercadopago.com.br/developers/pt/reference/payments/_payments/post
 
 const MP_API = "https://api.mercadopago.com";
+const MP_TIMEOUT_MS = 20000;
+
+async function fetchMpWithTimeout(url: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), MP_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } catch (e: any) {
+    if (e?.name === "AbortError") {
+      throw new Error("Mercado Pago demorou demais para responder. Tente novamente em alguns segundos.");
+    }
+    throw new Error(`Falha de conexão com Mercado Pago: ${e?.message ?? "erro de rede"}`);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 function getAccessToken(): string {
   const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
@@ -61,7 +77,7 @@ export async function createCardPaymentMP(input: CreateCardInput): Promise<CardP
 
   const idempotencyKey = `${input.externalReference}-card-${Date.now()}`;
 
-  const res = await fetch(`${MP_API}/v1/payments`, {
+  const res = await fetchMpWithTimeout(`${MP_API}/v1/payments`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -132,7 +148,7 @@ export async function createPixPayment(input: CreatePixInput): Promise<PixPaymen
 
   const idempotencyKey = `${input.externalReference}-${Date.now()}`;
 
-  const res = await fetch(`${MP_API}/v1/payments`, {
+  const res = await fetchMpWithTimeout(`${MP_API}/v1/payments`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -167,7 +183,7 @@ export async function createPixPayment(input: CreatePixInput): Promise<PixPaymen
 
 export async function getPixPayment(paymentId: string | number): Promise<{ status: string; external_reference?: string }> {
   const token = getAccessToken();
-  const res = await fetch(`${MP_API}/v1/payments/${paymentId}`, {
+  const res = await fetchMpWithTimeout(`${MP_API}/v1/payments/${paymentId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) {
