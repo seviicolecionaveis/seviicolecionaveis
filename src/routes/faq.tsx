@@ -11,7 +11,11 @@ export const Route = createFileRoute("/faq")({
         name: "description",
         content:
           "Tire suas dúvidas sobre prazos de envio, condição das cartas (NM, LP, MP), formas de pagamento, autenticidade e mais.",
-...
+      },
+      { property: "og:title", content: "FAQ — Sevii Colecionáveis" },
+      {
+        property: "og:description",
+        content:
           "Dúvidas sobre envio, condição das cartas e pagamento na Sevii Colecionáveis.",
       },
       {
