@@ -74,7 +74,7 @@ export function HeaderActions({ onCartOpen }: Props) {
                       onClick={() => setMenuOpen(false)}
                       className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
                     >
-                      <LayoutDashboard className="h-4 w-4" /> Admin · Pedidos
+                      <LayoutDashboard className="h-4 w-4" /> Admin
                     </Link>
                   </>
                 )}
