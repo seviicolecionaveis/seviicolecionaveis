@@ -304,7 +304,7 @@ function ResendPendingEmailsButton() {
     if (!confirm("Reenviar o e-mail de cobrança para TODOS os pedidos com pagamento pendente?")) return;
     setBusy(true);
     try {
-      const r = await resendPendingOrderEmails({ data: undefined as any });
+      const r = await resendPendingOrderEmails({});
       toast.success(`E-mails reenviados: ${r.sent} de ${r.total}`);
     } catch (e: any) {
       toast.error(e?.message ?? "Falha ao reenviar e-mails");
