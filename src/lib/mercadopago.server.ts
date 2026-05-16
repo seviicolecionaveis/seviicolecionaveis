@@ -2,6 +2,22 @@
 // Docs: https://www.mercadopago.com.br/developers/pt/reference/payments/_payments/post
 
 const MP_API = "https://api.mercadopago.com";
+const MP_TIMEOUT_MS = 20000;
+
+async function fetchMpWithTimeout(url: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), MP_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } catch (e: any) {
+    if (e?.name === "AbortError") {
+      throw new Error("Mercado Pago demorou demais para responder. Tente novamente em alguns segundos.");
+    }
+    throw new Error(`Falha de conexão com Mercado Pago: ${e?.message ?? "erro de rede"}`);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 function getAccessToken(): string {
   const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
