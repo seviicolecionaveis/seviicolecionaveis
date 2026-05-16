@@ -225,6 +225,29 @@ function ShippingPage() {
                         )}
                       </div>
                     </div>
+
+                    <div className="no-print mt-4 border-t border-border pt-3 flex flex-wrap items-center gap-2">
+                      <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                        Rastreio Correios
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ex.: AA123456789BR"
+                        value={tracking[o.id] ?? ""}
+                        onChange={(e) =>
+                          setTracking((t) => ({ ...t, [o.id]: e.target.value.toUpperCase() }))
+                        }
+                        disabled={shipping.has(o.id)}
+                        className="flex-1 min-w-[180px] rounded-md border border-border bg-background px-3 py-1.5 text-sm font-mono tracking-wider focus:outline-none focus:ring-1 focus:ring-foreground"
+                      />
+                      <button
+                        onClick={() => markShipped(o.id)}
+                        disabled={shipping.has(o.id) || !(tracking[o.id] ?? "").trim()}
+                        className="rounded-md bg-foreground text-background px-4 py-1.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 disabled:opacity-40"
+                      >
+                        {shipping.has(o.id) ? "Enviando..." : "Marcar como enviado + e-mail"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
