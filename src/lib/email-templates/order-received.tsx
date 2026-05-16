@@ -47,9 +47,35 @@ const OrderReceivedEmail: React.FC<OrderReceivedProps> = ({
         {recipientName ? `Obrigado, ${recipientName}!` : 'Obrigado pelo seu pedido!'}
       </Heading>
       <Text style={styles.text}>
-        Recebemos seu pedido <strong>{shortId}</strong> e ele já está sendo
-        processado. Assim que confirmarmos o pagamento, te avisamos por aqui.
+        Recebemos seu pedido <strong>{shortId}</strong>. Assim que confirmarmos
+        o pagamento, te avisamos por aqui. Caso ainda não tenha pago, conclua
+        ou troque a forma de pagamento pelo botão abaixo.
       </Text>
+
+      {orderId && (
+        <Section style={{ textAlign: 'center', margin: '24px 0' }}>
+          <a
+            href={`${SITE_URL}/pay/${orderId}`}
+            style={{
+              display: 'inline-block',
+              backgroundColor: '#111',
+              color: '#fff',
+              textDecoration: 'none',
+              fontWeight: 700,
+              fontSize: '14px',
+              letterSpacing: '0.04em',
+              padding: '14px 28px',
+              borderRadius: '8px',
+              textTransform: 'uppercase',
+            }}
+          >
+            Pagar agora / Alterar forma de pagamento
+          </a>
+          <Text style={{ ...styles.muted, margin: '10px 0 0', fontSize: '11px' }}>
+            Você pode escolher entre Pix e Cartão de crédito.
+          </Text>
+        </Section>
+      )}
 
       {items.length > 0 && (
         <Section style={styles.card}>
