@@ -517,6 +517,9 @@ function CheckoutPage() {
               <span className="tabular-nums">R$ {total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
             </div>
           </div>
+          <div className="mt-5 pt-5 border-t border-border">
+            <TrustBadges variant="compact" />
+          </div>
         </aside>
       </main>
     </div>
