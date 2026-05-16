@@ -68,7 +68,7 @@ function SobrePage() {
           </p>
         </div>
 
-        <div className="mt-12 grid sm:grid-cols-2 gap-4">
+        <div className="mt-12 grid sm:grid-cols-3 gap-4">
           <div className="rounded-xl border border-border p-5 bg-card">
             <ShieldCheck className="h-6 w-6 mb-3 text-foreground" />
             <p className="font-semibold">Garantia de autenticidade</p>
