@@ -16,6 +16,36 @@ function ShippingPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [tracking, setTracking] = useState<Record<string, string>>({});
+  const [shipping, setShipping] = useState<Set<string>>(new Set());
+  const updateStatus = useServerFn(adminUpdateOrderStatus);
+
+  async function markShipped(orderId: string) {
+    const code = (tracking[orderId] ?? "").trim();
+    if (!code) {
+      toast.error("Informe o código de rastreio dos Correios.");
+      return;
+    }
+    setShipping((s) => new Set(s).add(orderId));
+    try {
+      await updateStatus({ data: { order_id: orderId, status: "shipped", tracking_code: code } });
+      toast.success("Pedido marcado como enviado. E-mail enviado ao cliente.");
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      setSelected((prev) => {
+        const n = new Set(prev);
+        n.delete(orderId);
+        return n;
+      });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao atualizar pedido.");
+    } finally {
+      setShipping((s) => {
+        const n = new Set(s);
+        n.delete(orderId);
+        return n;
+      });
+    }
+  }
 
   useEffect(() => {
     if (!isAdmin) return;
