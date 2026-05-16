@@ -261,19 +261,47 @@ function AdminCardsManagePage() {
     });
   };
 
+  const triggerStockBack = useServerFn(notifyStockBack);
+
+  const maybeNotifyStockBack = async (row: CardRow, newStock: number) => {
+    const key = `${row.name}__${row.collection}__${row.card_number}`;
+    const prevAggregate = rows
+      .filter((r) => `${r.name}__${r.collection}__${r.card_number}` === key)
+      .reduce((s, r) => s + (r.id === row.id ? 0 : r.stock), 0);
+    if (prevAggregate === 0 && newStock > 0) {
+      try {
+        await triggerStockBack({
+          data: {
+            cardKey: key,
+            cardName: row.name,
+            cardCollection: row.collection,
+            cardNumber: row.card_number,
+            cardImage: row.image || null,
+            cardSlug: cardSlug(row.name, row.collection, row.card_number),
+          },
+        });
+      } catch (err) {
+        console.error("notifyStockBack failed", err);
+      }
+    }
+  };
+
   const handleQuickSave = async (id: string) => {
     setQuickSaving(true);
     setQuickMsg(null);
+    const newStock = Math.max(0, parseInt(quickForm.stock) || 0);
     const payload = {
       condition: quickForm.condition,
       category: quickForm.category,
-      stock: Math.max(0, parseInt(quickForm.stock) || 0),
+      stock: newStock,
       base_price_cents: quickForm.price.trim() === "" ? null : Math.round(parseFloat(quickForm.price.replace(",", ".")) * 100),
       image: quickForm.image.trim(),
     };
     const { error } = await supabase.from("cards").update(payload).eq("id", id);
     setQuickSaving(false);
     if (error) { setQuickMsg({ type: "err", text: error.message }); return; }
+    const row = rows.find((r) => r.id === id);
+    if (row) void maybeNotifyStockBack(row, newStock);
     setQuickMsg({ type: "ok", text: "Salvo!" });
     invalidateCardsCache();
     setRows((prev) => prev.map((row) => row.id === id ? { ...row, ...payload } as CardRow : row));
