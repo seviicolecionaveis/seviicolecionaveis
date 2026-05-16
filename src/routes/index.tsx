@@ -13,6 +13,7 @@ import { BannerCarousel } from "@/components/BannerCarousel";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { TrustBadges } from "@/components/TrustBadges";
 import { SiteFooter } from "@/components/SiteFooter";
+import { RecentlyViewed } from "@/components/catalog/RecentlyViewed";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
@@ -352,6 +353,7 @@ function Index() {
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
       <WelcomeDialog />
 
+      <RecentlyViewed />
       <SiteFooter />
     </div>
   );

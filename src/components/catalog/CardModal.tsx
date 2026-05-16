@@ -4,9 +4,11 @@ import { useCart } from "@/hooks/useCart";
 import { useCardPrices, priceLookupKey } from "@/hooks/useCardPrices";
 import { useWishlist } from "@/hooks/useWishlist";
 import { trackCardView } from "@/hooks/useCardStats";
+import { trackRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { cardSlug } from "@/lib/slug";
-import { Plus, Check, Heart, Share2, ZoomIn, ZoomOut } from "lucide-react";
+import { Plus, Check, Heart, Share2, ZoomIn, ZoomOut, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
+import { StockAlertDialog } from "@/components/StockAlertDialog";
 
 // Para cartas Pokémon, o acabamento "Ímã" é um produto interno disponível
 // automaticamente: R$10 se a carta possui Foil, senão R$9 se possui Normal.
@@ -72,10 +74,12 @@ export function CardModal({ card, onClose }: Props) {
   const [added, setAdded] = useState<string | null>(null);
   const [zoomed, setZoomed] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
 
   useEffect(() => {
     if (card) {
       trackCardView(card.id);
+      trackRecentlyViewed(card.id);
       setZoomed(false);
       setShareCopied(false);
     }
@@ -283,10 +287,31 @@ export function CardModal({ card, onClose }: Props) {
                   );
                 })}
               </div>
+
+              {card.stock === 0 && (
+                <button
+                  type="button"
+                  onClick={() => setAlertOpen(true)}
+                  className="mt-6 inline-flex items-center justify-center gap-2 rounded-full border-2 border-brand-gold bg-brand-gold/10 px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-brand-gold/20"
+                >
+                  <Bell className="h-4 w-4" />
+                  Avise-me quando voltar
+                </button>
+              )}
             </div>
           </div>
         )}
       </DialogContent>
+      {card && (
+        <StockAlertDialog
+          open={alertOpen}
+          onClose={() => setAlertOpen(false)}
+          cardKey={card.id}
+          cardName={card.name}
+          cardCollection={card.collection}
+          cardNumber={card.number}
+        />
+      )}
     </Dialog>
   );
 }

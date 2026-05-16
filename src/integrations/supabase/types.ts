@@ -565,6 +565,42 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_alerts: {
+        Row: {
+          card_collection: string
+          card_key: string
+          card_name: string
+          card_number: string
+          created_at: string
+          email: string
+          id: string
+          notified_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          card_collection: string
+          card_key: string
+          card_name: string
+          card_number: string
+          created_at?: string
+          email: string
+          id?: string
+          notified_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          card_collection?: string
+          card_key?: string
+          card_name?: string
+          card_number?: string
+          created_at?: string
+          email?: string
+          id?: string
+          notified_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       stock_reservations: {
         Row: {
           card_id: string
