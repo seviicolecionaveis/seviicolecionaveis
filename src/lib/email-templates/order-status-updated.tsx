@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Heading, Section, Text } from '@react-email/components'
+import { Heading, Section, Text, Button } from '@react-email/components'
 import type { TemplateEntry } from './registry'
 import { EmailLayout, styles, SITE_URL } from './_shared'
 
@@ -7,6 +7,7 @@ interface OrderStatusUpdatedProps {
   recipientName?: string
   orderId?: string
   status?: string
+  trackingCode?: string | null
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -27,16 +28,20 @@ const STATUS_MESSAGE: Record<string, string> = {
   cancellation_requested: 'Recebemos sua solicitação de cancelamento e vamos analisar em breve.',
 }
 
+const CORREIOS_URL = 'https://rastreamento.correios.com.br/app/index.php'
+
 const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
   recipientName,
   orderId,
   status,
+  trackingCode,
 }) => {
   const shortId = orderId ? `#${orderId.slice(0, 8).toUpperCase()}` : ''
   const label = (status && STATUS_LABEL[status]) || status || 'Atualizado'
   const msg =
     (status && STATUS_MESSAGE[status]) ||
     'Houve uma atualização no status do seu pedido.'
+  const showTracking = status === 'shipped' && trackingCode
 
   return (
     <EmailLayout preview={`Pedido ${shortId}: ${label}`}>
@@ -53,6 +58,18 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
           <span style={styles.badge}>{label}</span>
         </Text>
         <Text style={{ ...styles.text, margin: 0 }}>{msg}</Text>
+
+        {showTracking && (
+          <>
+            <Text style={{ ...styles.muted, margin: '16px 0 4px' }}>Código de rastreio</Text>
+            <Text style={{ ...styles.text, margin: '0 0 12px', fontFamily: 'monospace', fontWeight: 600 }}>
+              {trackingCode}
+            </Text>
+            <Button href={CORREIOS_URL} style={{ background: '#111', color: '#fff', padding: '10px 18px', borderRadius: 6, fontWeight: 600, fontSize: 13 }}>
+              Rastrear nos Correios
+            </Button>
+          </>
+        )}
       </Section>
 
       <Text style={styles.muted}>
@@ -77,5 +94,6 @@ export const template = {
     recipientName: 'Ash',
     orderId: '7f3e8c12-aaaa-bbbb-cccc-ddddeeeeffff',
     status: 'shipped',
+    trackingCode: 'AA123456789BR',
   },
 } satisfies TemplateEntry

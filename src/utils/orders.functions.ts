@@ -14,6 +14,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
         "cancelled",
         "cancellation_requested",
       ]),
+      tracking_code: z.string().trim().max(60).optional().nullable(),
     }).parse(d),
   )
   .middleware([requireSupabaseAuth])
@@ -22,26 +23,36 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
       await import("@/lib/order-cancellation.server");
     const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
-    const order = await getOrderById(data.order_id, "id, status, email, recipient_name");
+    const order = await getOrderById(data.order_id, "id, status, email, recipient_name, tracking_code");
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
-    if (order.status === data.status) return { ok: true };
+
+    const trackingProvided = typeof data.tracking_code === "string";
+    const newTracking = trackingProvided ? (data.tracking_code?.trim() || null) : undefined;
+    const statusChanged = order.status !== data.status;
+    const trackingChanged = trackingProvided && newTracking !== (order.tracking_code ?? null);
+
+    if (!statusChanged && !trackingChanged) return { ok: true };
 
     // Special case: transição para "paid" usa markOrderPaid (decrementa estoque
     // e dispara o e-mail de confirmação de pagamento).
-    if (data.status === "paid") {
+    if (statusChanged && data.status === "paid") {
       const { markOrderPaid } = await import("@/lib/orders.server");
       await markOrderPaid(order.id);
       return { ok: true };
     }
 
     // Special case: cancelamento manual restaura estoque se o pedido estava pago.
-    if (data.status === "cancelled") {
+    if (statusChanged && data.status === "cancelled") {
       await restoreStockIfPaid(order.id, order.status);
       await deleteStockReservations(order.id);
     }
 
-    await updateOrder(order.id, { status: data.status });
-    if (order.email) {
+    const patch: Record<string, any> = {};
+    if (statusChanged) patch.status = data.status;
+    if (trackingChanged) patch.tracking_code = newTracking;
+    await updateOrder(order.id, patch);
+
+    if (order.email && statusChanged) {
       await sendTransactionalEmailSafe({
         templateName: "order-status-updated",
         recipientEmail: order.email,
@@ -50,6 +61,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
           recipientName: order.recipient_name?.split(/\s+/)[0],
           orderId: order.id,
           status: data.status,
+          trackingCode: data.status === "shipped" ? (newTracking ?? order.tracking_code ?? null) : null,
         },
       });
     }

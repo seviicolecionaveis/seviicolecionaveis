@@ -381,6 +381,7 @@ export type Database = {
           stripe_session_id: string | null
           subtotal_cents: number
           total_cents: number
+          tracking_code: string | null
           updated_at: string
           user_id: string
         }
@@ -415,6 +416,7 @@ export type Database = {
           stripe_session_id?: string | null
           subtotal_cents: number
           total_cents: number
+          tracking_code?: string | null
           updated_at?: string
           user_id: string
         }
@@ -449,6 +451,7 @@ export type Database = {
           stripe_session_id?: string | null
           subtotal_cents?: number
           total_cents?: number
+          tracking_code?: string | null
           updated_at?: string
           user_id?: string
         }
