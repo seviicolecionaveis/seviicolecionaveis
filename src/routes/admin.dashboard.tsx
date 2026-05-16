@@ -4,8 +4,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { useCardStats } from "@/hooks/useCardStats";
-import { TrendingUp, Eye, ShoppingBag, AlertTriangle, Download } from "lucide-react";
+import { TrendingUp, Eye, ShoppingBag, AlertTriangle, Download, Mail } from "lucide-react";
 import { AdminCancellationBell } from "@/components/AdminCancellationBell";
+import { resendPendingOrderEmails } from "@/utils/payments.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Sevii Admin" }] }),
