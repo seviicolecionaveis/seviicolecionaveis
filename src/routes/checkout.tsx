@@ -298,7 +298,11 @@ function CheckoutPage() {
     setLoading(true);
     setErr(null);
     try {
-      await persistAddressAndProfile();
+      try {
+        await persistAddressAndProfile();
+      } catch (e) {
+        console.warn("persistAddressAndProfile falhou (seguindo mesmo assim):", e);
+      }
       const token = session?.access_token;
       if (!token) throw new Error("Sessão expirada. Faça login novamente.");
       const result = await createPixOrder({
@@ -315,7 +319,8 @@ function CheckoutPage() {
       setStep("pix");
       clear();
     } catch (e: any) {
-      setErr(e?.message ?? "Erro ao gerar Pix");
+      console.error("startPix error:", e);
+      setErr(e?.message ?? "Erro ao gerar Pix. Tente novamente em alguns segundos.");
     } finally {
       setLoading(false);
     }
