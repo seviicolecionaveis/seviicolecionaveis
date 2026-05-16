@@ -21,7 +21,7 @@ export const Route = createFileRoute("/admin")({
 
 const STATUSES = ["pending", "paid", "shipped", "delivered", "cancelled"] as const;
 const STATUS_LABEL: Record<string, string> = {
-  pending: "Em preparação",
+  pending: "Pedido recebido",
   paid: "Pago",
   shipped: "Enviado",
   delivered: "Entregue",
