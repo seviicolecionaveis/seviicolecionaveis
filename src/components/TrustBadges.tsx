@@ -13,7 +13,7 @@ export function TrustBadges({ variant = "row" }: TrustBadgesProps) {
 
   if (variant === "compact") {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center max-w-2xl mx-auto">
         {items.map(({ icon: Icon, label }) => (
           <div key={label} className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-secondary/60">
             <Icon className="h-5 w-5 text-foreground" />
@@ -26,7 +26,7 @@ export function TrustBadges({ variant = "row" }: TrustBadgesProps) {
 
   return (
     <section className="border-y border-border bg-secondary/40">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 grid grid-cols-1 sm:grid-cols-3 gap-4 justify-items-center sm:justify-items-stretch">
         {items.map(({ icon: Icon, label, sub }) => (
           <div key={label} className="flex items-center gap-3">
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-background border border-border">
