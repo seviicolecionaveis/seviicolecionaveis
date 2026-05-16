@@ -287,10 +287,31 @@ export function CardModal({ card, onClose }: Props) {
                   );
                 })}
               </div>
+
+              {card.stock === 0 && (
+                <button
+                  type="button"
+                  onClick={() => setAlertOpen(true)}
+                  className="mt-6 inline-flex items-center justify-center gap-2 rounded-full border-2 border-brand-gold bg-brand-gold/10 px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-brand-gold/20"
+                >
+                  <Bell className="h-4 w-4" />
+                  Avise-me quando voltar
+                </button>
+              )}
             </div>
           </div>
         )}
       </DialogContent>
+      {card && (
+        <StockAlertDialog
+          open={alertOpen}
+          onClose={() => setAlertOpen(false)}
+          cardKey={card.id}
+          cardName={card.name}
+          cardCollection={card.collection}
+          cardNumber={card.number}
+        />
+      )}
     </Dialog>
   );
 }
