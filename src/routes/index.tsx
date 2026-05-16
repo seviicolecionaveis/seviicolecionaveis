@@ -11,6 +11,8 @@ import { HeaderActions } from "@/components/HeaderActions";
 import { CartDrawer } from "@/components/CartDrawer";
 import { BannerCarousel } from "@/components/BannerCarousel";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
+import { TrustBadges } from "@/components/TrustBadges";
+import { SiteFooter } from "@/components/SiteFooter";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
