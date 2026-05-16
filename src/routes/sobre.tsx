@@ -84,13 +84,6 @@ function SobrePage() {
             </p>
           </div>
           <div className="rounded-xl border border-border p-5 bg-card">
-            <RefreshCw className="h-6 w-6 mb-3 text-foreground" />
-            <p className="font-semibold">Troca em 7 dias</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Recebeu e não gostou? Direito de arrependimento garantido por lei.
-            </p>
-          </div>
-          <div className="rounded-xl border border-border p-5 bg-card">
             <Heart className="h-6 w-6 mb-3 text-foreground" />
             <p className="font-semibold">Feito por quem coleciona</p>
             <p className="text-sm text-muted-foreground mt-1">

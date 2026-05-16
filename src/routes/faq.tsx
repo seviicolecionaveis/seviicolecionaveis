@@ -68,10 +68,6 @@ const FAQS: { q: string; a: string }[] = [
     a: "Sim. Assim que postamos, você recebe o código de rastreio dos Correios por e-mail.",
   },
   {
-    q: "E se eu quiser trocar ou devolver?",
-    a: "Você tem direito de arrependimento de 7 dias corridos a partir do recebimento (Código de Defesa do Consumidor). A carta precisa voltar nas mesmas condições em que foi enviada.",
-  },
-  {
     q: "Tenho 30 minutos para pagar — por quê?",
     a: "Reservamos o estoque das suas cartas durante 30 minutos enquanto você finaliza o pagamento. Se não confirmar nesse prazo, o pedido é cancelado automaticamente e as cartas voltam ao catálogo.",
   },

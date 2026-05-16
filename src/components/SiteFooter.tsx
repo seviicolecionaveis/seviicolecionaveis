@@ -44,9 +44,6 @@ export function SiteFooter() {
               <li className="flex items-center gap-2">
                 <Truck className="h-3.5 w-3.5" /> Envio rastreado
               </li>
-              <li className="flex items-center gap-2">
-                <RefreshCw className="h-3.5 w-3.5" /> Troca em 7 dias
-              </li>
               <li className="flex items-center gap-2 pt-1">
                 <Mail className="h-3.5 w-3.5" />
                 <a
