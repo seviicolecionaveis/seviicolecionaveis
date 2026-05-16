@@ -16,7 +16,7 @@ export const Route = createFileRoute("/orders/$orderId")({
 });
 
 const STATUS_LABEL: Record<string, string> = {
-  pending: "Aguardando pagamento",
+  pending: "Pedido recebido — aguardando pagamento",
   paid: "Pago",
   shipped: "Enviado",
   delivered: "Entregue",
