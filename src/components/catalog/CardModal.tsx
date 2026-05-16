@@ -74,10 +74,12 @@ export function CardModal({ card, onClose }: Props) {
   const [added, setAdded] = useState<string | null>(null);
   const [zoomed, setZoomed] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
 
   useEffect(() => {
     if (card) {
       trackCardView(card.id);
+      trackRecentlyViewed(card.id);
       setZoomed(false);
       setShareCopied(false);
     }
