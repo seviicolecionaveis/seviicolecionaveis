@@ -64,7 +64,7 @@ function PayOrderPage() {
             orderId: data.id,
             qrCode: data.pix_qr_code,
             qrCodeBase64: data.pix_qr_code_base64,
-            expiresAt: data.pix_expires_at,
+            expiresAt: data.pix_expires_at as string,
             totalCents: data.total_cents,
           });
           setMethod("pix");
