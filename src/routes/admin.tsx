@@ -76,8 +76,11 @@ function AdminPage() {
   }, [isAdmin, isOrdersRoute]);
 
   useEffect(() => {
-    if (focusId) setFilter("cancellation_requested");
-  }, [focusId]);
+    if (!focusId || orders.length === 0) return;
+    const target = orders.find((o) => o.id === focusId);
+    if (!target) return;
+    setFilter((curr) => (curr === "all" || curr === target.status ? curr : "all"));
+  }, [focusId, orders]);
 
   useEffect(() => {
     if (!focusId || loading) return;
