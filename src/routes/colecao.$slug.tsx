@@ -5,6 +5,8 @@ import { useCardStats } from "@/hooks/useCardStats";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
 import { collectionSlug } from "@/lib/slug";
+import { getCollectionDescription } from "@/data/collectionDescriptions";
+import { SiteFooter } from "@/components/SiteFooter";
 import type { Card } from "@/data/cards";
 import logoUrl from "@/assets/logo.png";
 
