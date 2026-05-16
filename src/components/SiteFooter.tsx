@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Mail, ShieldCheck, Truck, RefreshCw } from "lucide-react";
+import { Mail, ShieldCheck, Truck } from "lucide-react";
 
 export function SiteFooter() {
   return (
