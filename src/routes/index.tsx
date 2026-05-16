@@ -248,6 +248,7 @@ function Index() {
       </header>
 
       <BannerCarousel />
+      <TrustBadges />
 
       <h1 className="sr-only">Catálogo de Cartas Pokémon — Sevii Colecionáveis</h1>
 
