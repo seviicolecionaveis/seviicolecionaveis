@@ -1,7 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { adminUpdateOrderStatus } from "@/utils/orders.functions";
 
 export const Route = createFileRoute("/admin/shipping")({
   head: () => ({ meta: [{ title: "Expedição — Sevii Admin" }] }),
@@ -13,6 +16,36 @@ function ShippingPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [tracking, setTracking] = useState<Record<string, string>>({});
+  const [shipping, setShipping] = useState<Set<string>>(new Set());
+  const updateStatus = useServerFn(adminUpdateOrderStatus);
+
+  async function markShipped(orderId: string) {
+    const code = (tracking[orderId] ?? "").trim();
+    if (!code) {
+      toast.error("Informe o código de rastreio dos Correios.");
+      return;
+    }
+    setShipping((s) => new Set(s).add(orderId));
+    try {
+      await updateStatus({ data: { order_id: orderId, status: "shipped", tracking_code: code } });
+      toast.success("Pedido marcado como enviado. E-mail enviado ao cliente.");
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      setSelected((prev) => {
+        const n = new Set(prev);
+        n.delete(orderId);
+        return n;
+      });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao atualizar pedido.");
+    } finally {
+      setShipping((s) => {
+        const n = new Set(s);
+        n.delete(orderId);
+        return n;
+      });
+    }
+  }
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -191,6 +224,29 @@ function ShippingPage() {
                           </p>
                         )}
                       </div>
+                    </div>
+
+                    <div className="no-print mt-4 border-t border-border pt-3 flex flex-wrap items-center gap-2">
+                      <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                        Rastreio Correios
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ex.: AA123456789BR"
+                        value={tracking[o.id] ?? ""}
+                        onChange={(e) =>
+                          setTracking((t) => ({ ...t, [o.id]: e.target.value.toUpperCase() }))
+                        }
+                        disabled={shipping.has(o.id)}
+                        className="flex-1 min-w-[180px] rounded-md border border-border bg-background px-3 py-1.5 text-sm font-mono tracking-wider focus:outline-none focus:ring-1 focus:ring-foreground"
+                      />
+                      <button
+                        onClick={() => markShipped(o.id)}
+                        disabled={shipping.has(o.id) || !(tracking[o.id] ?? "").trim()}
+                        className="rounded-md bg-foreground text-background px-4 py-1.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 disabled:opacity-40"
+                      >
+                        {shipping.has(o.id) ? "Enviando..." : "Marcar como enviado + e-mail"}
+                      </button>
                     </div>
                   </div>
                 </div>
