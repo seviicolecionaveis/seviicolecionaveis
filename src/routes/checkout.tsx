@@ -270,7 +270,11 @@ function CheckoutPage() {
     setLoading(true);
     setErr(null);
     try {
-      await persistAddressAndProfile();
+      try {
+        await persistAddressAndProfile();
+      } catch (e) {
+        console.warn("persistAddressAndProfile falhou (seguindo mesmo assim):", e);
+      }
       const shippingCents = shipping === "fixed" ? Math.round(SHIPPING_FIXED * 100) : 0;
       const subtotalCents = Math.round(subtotal * 100);
       const discountCents = couponInfo.valid ? Math.round((subtotalCents * couponInfo.percent) / 100) : 0;
@@ -287,6 +291,7 @@ function CheckoutPage() {
       });
       setStep("card");
     } catch (e: any) {
+      console.error("startCard error:", e);
       setErr(e?.message ?? "Erro ao iniciar pagamento com cartão");
     } finally {
       setLoading(false);
