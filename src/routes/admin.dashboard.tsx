@@ -157,12 +157,15 @@ function DashboardPage() {
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <h1 className="text-2xl font-bold">Visão geral</h1>
-          <button
-            onClick={exportCSV}
-            className="flex items-center gap-2 rounded-md bg-foreground text-background px-4 py-2 text-xs font-bold uppercase tracking-wider hover:opacity-90"
-          >
-            <Download className="h-3.5 w-3.5" /> Exportar pedidos (CSV)
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <ResendPendingEmailsButton />
+            <button
+              onClick={exportCSV}
+              className="flex items-center gap-2 rounded-md bg-foreground text-background px-4 py-2 text-xs font-bold uppercase tracking-wider hover:opacity-90"
+            >
+              <Download className="h-3.5 w-3.5" /> Exportar pedidos (CSV)
+            </button>
+          </div>
         </div>
 
         {loading ? (
