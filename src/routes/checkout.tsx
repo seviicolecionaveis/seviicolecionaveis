@@ -117,12 +117,18 @@ function CheckoutPage() {
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
   const [shipping, setShipping] = useState<"fixed" | "arrange">("fixed");
+  const [quotes, setQuotes] = useState<ShippingQuote[]>([]);
+  const [quotesLoading, setQuotesLoading] = useState(false);
+  const [quotesError, setQuotesError] = useState<string | null>(null);
+  const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [step, setStep] = useState<Step>("address");
   const [pix, setPix] = useState<PixState | null>(null);
   const [card, setCard] = useState<CardState | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  const selectedQuote = quotes.find((q) => q.id === selectedQuoteId) ?? null;
 
   // Detect cart expired notice (?expired=1)
   useEffect(() => {
