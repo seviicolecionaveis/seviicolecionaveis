@@ -9,8 +9,9 @@ import {
   createCardOrder,
   getMercadoPagoPublicKey,
 } from "@/utils/payments.functions";
+import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
-import { Copy, Check, QrCode, CreditCard } from "lucide-react";
+import { Copy, Check, QrCode, CreditCard, Loader2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
 });
 
-const SHIPPING_FIXED = 25;
+
 
 interface Form {
   recipientName: string;
@@ -89,12 +90,22 @@ interface AddressPayload {
   neighborhood: string; city: string; state: string;
 }
 
+interface ShippingQuote {
+  id: string;
+  serviceId: number;
+  serviceName: string;
+  company: string;
+  priceCents: number;
+  deliveryDays: number | null;
+}
+
 interface CardState {
   totalCents: number;
   payerEmail: string;
   payerCpf: string | null;
   itemsPayload: ItemPayload[];
   shipping: "fixed" | "arrange";
+  shippingQuote: ShippingQuote | null;
   address: AddressPayload;
   notes: string | null;
   couponCode: string | null;
@@ -106,12 +117,18 @@ function CheckoutPage() {
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
   const [shipping, setShipping] = useState<"fixed" | "arrange">("fixed");
+  const [quotes, setQuotes] = useState<ShippingQuote[]>([]);
+  const [quotesLoading, setQuotesLoading] = useState(false);
+  const [quotesError, setQuotesError] = useState<string | null>(null);
+  const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [step, setStep] = useState<Step>("address");
   const [pix, setPix] = useState<PixState | null>(null);
   const [card, setCard] = useState<CardState | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  const selectedQuote = quotes.find((q) => q.id === selectedQuoteId) ?? null;
 
   // Detect cart expired notice (?expired=1)
   useEffect(() => {
@@ -160,6 +177,34 @@ function CheckoutPage() {
     })();
   }, [user]);
 
+  const itemsCount = items.reduce((s, i) => s + i.quantity, 0);
+
+  const fetchQuotes = async (cep: string) => {
+    const clean = cep.replace(/\D/g, "");
+    if (clean.length !== 8 || itemsCount === 0) return;
+    setQuotesLoading(true);
+    setQuotesError(null);
+    try {
+      const r = await getShippingQuotes({ data: { destinationCep: clean, itemsCount } });
+      if (r.error) {
+        setQuotesError(r.error);
+        setQuotes([]);
+        setSelectedQuoteId(null);
+      } else {
+        setQuotes(r.quotes);
+        setSelectedQuoteId((prev) =>
+          prev && r.quotes.some((q) => q.id === prev) ? prev : (r.quotes[0]?.id ?? null),
+        );
+      }
+    } catch (e: any) {
+      setQuotesError(e?.message ?? "Falha ao consultar frete.");
+      setQuotes([]);
+      setSelectedQuoteId(null);
+    } finally {
+      setQuotesLoading(false);
+    }
+  };
+
   const lookupCep = async (cep: string) => {
     const clean = cep.replace(/\D/g, "");
     if (clean.length !== 8) return;
@@ -176,9 +221,11 @@ function CheckoutPage() {
         }));
       }
     } catch {}
+    fetchQuotes(clean);
   };
 
-  const shippingCost = shipping === "fixed" ? SHIPPING_FIXED : 0;
+  const shippingCost =
+    shipping === "fixed" ? (selectedQuote ? selectedQuote.priceCents / 100 : 0) : 0;
   const couponNormalized = form.couponCode.trim().toUpperCase();
   const couponInfo = (() => {
     if (couponNormalized === "POKEAGIOTAGEM") return { valid: true, percent: 30, label: "POKEAGIOTAGEM −30% (admin)" };
@@ -266,8 +313,31 @@ function CheckoutPage() {
     }
   };
 
+  const shippingQuotePayload = (): ShippingQuote | null =>
+    shipping === "fixed" && selectedQuote ? selectedQuote : null;
+
+  const shippingQuoteForApi = () => {
+    const q = shippingQuotePayload();
+    if (!q) return null;
+    return {
+      serviceId: String(q.serviceId),
+      serviceName: q.serviceName,
+      company: q.company,
+      priceCents: q.priceCents,
+    };
+  };
+
+  const validateShippingChoice = (): string | null => {
+    if (shipping === "fixed" && !selectedQuote) {
+      return "Selecione uma opção de frete (informe o CEP para carregar).";
+    }
+    return null;
+  };
+
   const startCard = async () => {
     if (!user || items.length === 0) return;
+    const shipErr = validateShippingChoice();
+    if (shipErr) { setErr(shipErr); return; }
     setLoading(true);
     setErr(null);
     try {
@@ -276,7 +346,7 @@ function CheckoutPage() {
       } catch (e) {
         console.warn("persistAddressAndProfile falhou (seguindo mesmo assim):", e);
       }
-      const shippingCents = shipping === "fixed" ? Math.round(SHIPPING_FIXED * 100) : 0;
+      const shippingCents = shipping === "fixed" && selectedQuote ? selectedQuote.priceCents : 0;
       const subtotalCents = Math.round(subtotal * 100);
       const discountCents = couponInfo.valid ? Math.round((subtotalCents * couponInfo.percent) / 100) : 0;
       const totalCents = subtotalCents - discountCents + shippingCents;
@@ -286,6 +356,7 @@ function CheckoutPage() {
         payerCpf: form.cpf || null,
         itemsPayload: buildItemsPayload(),
         shipping,
+        shippingQuote: shippingQuotePayload(),
         address: buildAddressPayload(),
         notes: buildNotes(),
         couponCode: couponNormalized || null,
@@ -301,6 +372,8 @@ function CheckoutPage() {
 
   const startPix = async () => {
     if (!user || items.length === 0) return;
+    const shipErr = validateShippingChoice();
+    if (shipErr) { setErr(shipErr); return; }
     setLoading(true);
     setErr(null);
     try {
@@ -316,6 +389,7 @@ function CheckoutPage() {
         data: {
           items: buildItemsPayload(),
           shippingMethod: shipping,
+          shippingQuote: shippingQuoteForApi(),
           address: buildAddressPayload(),
           notes: buildNotes(),
           couponCode: couponNormalized || null,
@@ -394,13 +468,74 @@ function CheckoutPage() {
           <div>
             <h2 className="text-lg font-bold mb-3">Envio</h2>
             <div className="space-y-2">
-              <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
-                <input type="radio" name="ship" checked={shipping === "fixed"} onChange={() => setShipping("fixed")} className="mt-1" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">🚚 Mini Envios — R$ 25,00</p>
-                  <p className="text-xs text-muted-foreground">Envio rastreado pelos Correios — frete fixo Brasil todo.</p>
+              <div className="rounded-lg border border-border p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-semibold">🚚 Frete rastreado (Superfrete)</p>
+                  {quotesLoading && (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Cotando...
+                    </span>
+                  )}
                 </div>
-              </label>
+                {!form.cep && (
+                  <p className="text-xs text-muted-foreground">Informe o CEP acima para ver as opções de frete.</p>
+                )}
+                {form.cep && !quotesLoading && quotes.length === 0 && !quotesError && (
+                  <p className="text-xs text-muted-foreground">Aguardando cotação...</p>
+                )}
+                {quotesError && (
+                  <div className="text-xs text-amber-700">
+                    {quotesError}{" "}
+                    <button
+                      type="button"
+                      onClick={() => fetchQuotes(form.cep)}
+                      className="underline font-semibold"
+                    >
+                      Tentar novamente
+                    </button>
+                  </div>
+                )}
+                {quotes.length > 0 && (
+                  <div className="space-y-2 mt-2">
+                    {quotes.map((q) => {
+                      const checked = shipping === "fixed" && selectedQuoteId === q.id;
+                      return (
+                        <label
+                          key={q.id}
+                          className={`flex items-start gap-3 rounded-md border p-3 cursor-pointer transition ${
+                            checked ? "border-foreground bg-secondary/50" : "border-border hover:bg-secondary/30"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="ship"
+                            checked={checked}
+                            onChange={() => {
+                              setShipping("fixed");
+                              setSelectedQuoteId(q.id);
+                            }}
+                            className="mt-1"
+                          />
+                          <div className="flex-1 flex items-center justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-semibold">
+                                {q.serviceName}{" "}
+                                <span className="text-xs text-muted-foreground font-normal">— {q.company}</span>
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {q.deliveryDays ? `Entrega em até ${q.deliveryDays} dia(s) úteis` : "Prazo a definir"}
+                              </p>
+                            </div>
+                            <span className="text-sm font-bold tabular-nums">
+                              R$ {(q.priceCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
               <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
                 <input type="radio" name="ship" checked={shipping === "arrange"} onChange={() => setShipping("arrange")} className="mt-1" />
                 <div className="flex-1">
@@ -509,7 +644,11 @@ function CheckoutPage() {
             <div className="flex justify-between">
               <span className="text-muted-foreground">Frete</span>
               <span className="tabular-nums">
-                {shipping === "fixed" ? `R$ ${SHIPPING_FIXED.toFixed(2).replace(".", ",")}` : "A combinar"}
+                {shipping === "fixed"
+                  ? selectedQuote
+                    ? `R$ ${(selectedQuote.priceCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                    : "—"
+                  : "A combinar"}
               </span>
             </div>
             <div className="flex justify-between text-base font-bold pt-2 border-t border-border">
@@ -768,6 +907,14 @@ function CardScreen({
                   data: {
                     items: card.itemsPayload,
                     shippingMethod: card.shipping,
+                    shippingQuote: card.shippingQuote
+                      ? {
+                          serviceId: String(card.shippingQuote.serviceId),
+                          serviceName: card.shippingQuote.serviceName,
+                          company: card.shippingQuote.company,
+                          priceCents: card.shippingQuote.priceCents,
+                        }
+                      : null,
                     address: card.address,
                     notes: card.notes,
                     couponCode: card.couponCode,

@@ -37,6 +37,16 @@ const FIRST_PURCHASE_COUPON = "PRIMEIRACOMPRA10";
 const FIRST_PURCHASE_PERCENT = 10;
 const PIX_EXPIRES_MINUTES = 30;
 
+function computeShippingCents(input: {
+  shippingMethod: "fixed" | "arrange";
+  shippingQuote?: { priceCents: number } | null;
+}): number {
+  if (input.shippingQuote && input.shippingQuote.priceCents >= 0) {
+    return input.shippingQuote.priceCents;
+  }
+  return input.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
+}
+
 async function validateCoupon(
   userId: string,
   rawCode: string | null | undefined,
@@ -184,7 +194,7 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
-  const shippingCents = data.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
+  const shippingCents = computeShippingCents(data);
 
   const { discountCents, code: appliedCoupon } = await validateCoupon(
     userId,
@@ -304,7 +314,7 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
-  const shippingCents = data.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
+  const shippingCents = computeShippingCents(data);
 
   const { discountCents, code: appliedCoupon } = await validateCoupon(
     userId,
@@ -438,7 +448,7 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
-  const shippingCents = data.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
+  const shippingCents = computeShippingCents(data);
 
   const { discountCents, code: appliedCoupon } = await validateCoupon(
     userId,

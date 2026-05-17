@@ -13,6 +13,13 @@ const ItemSchema = z.object({
   quantity: z.number().int().positive().max(100),
 });
 
+const ShippingQuoteSchema = z.object({
+  serviceId: z.string().min(1).max(100),
+  serviceName: z.string().min(1).max(100),
+  company: z.string().min(1).max(100),
+  priceCents: z.number().int().min(0).max(1_000_000),
+});
+
 const AddressSchema = z.object({
   recipientName: z.string().min(2).max(150),
   cpf: z.string().max(20).optional().nullable(),
@@ -29,6 +36,7 @@ const AddressSchema = z.object({
 export const StripeInputSchema = z.object({
   items: z.array(ItemSchema).min(1).max(50),
   shippingMethod: z.enum(["fixed", "arrange"]),
+  shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
   couponCode: z.string().max(50).optional().nullable(),
@@ -39,6 +47,7 @@ export const StripeInputSchema = z.object({
 export const PixInputSchema = z.object({
   items: z.array(ItemSchema).min(1).max(50),
   shippingMethod: z.enum(["fixed", "arrange"]),
+  shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
   couponCode: z.string().max(50).optional().nullable(),
@@ -47,6 +56,7 @@ export const PixInputSchema = z.object({
 export const CardInputSchema = z.object({
   items: z.array(ItemSchema).min(1).max(50),
   shippingMethod: z.enum(["fixed", "arrange"]),
+  shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
   couponCode: z.string().max(50).optional().nullable(),
