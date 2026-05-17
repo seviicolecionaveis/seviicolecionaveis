@@ -644,7 +644,11 @@ function CheckoutPage() {
             <div className="flex justify-between">
               <span className="text-muted-foreground">Frete</span>
               <span className="tabular-nums">
-                {shipping === "fixed" ? `R$ ${SHIPPING_FIXED.toFixed(2).replace(".", ",")}` : "A combinar"}
+                {shipping === "fixed"
+                  ? selectedQuote
+                    ? `R$ ${(selectedQuote.priceCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                    : "—"
+                  : "A combinar"}
               </span>
             </div>
             <div className="flex justify-between text-base font-bold pt-2 border-t border-border">
@@ -903,6 +907,14 @@ function CardScreen({
                   data: {
                     items: card.itemsPayload,
                     shippingMethod: card.shipping,
+                    shippingQuote: card.shippingQuote
+                      ? {
+                          serviceId: String(card.shippingQuote.serviceId),
+                          serviceName: card.shippingQuote.serviceName,
+                          company: card.shippingQuote.company,
+                          priceCents: card.shippingQuote.priceCents,
+                        }
+                      : null,
                     address: card.address,
                     notes: card.notes,
                     couponCode: card.couponCode,
