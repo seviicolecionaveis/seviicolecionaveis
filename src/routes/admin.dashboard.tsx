@@ -42,7 +42,7 @@ function DashboardPage() {
     const now = Date.now();
     const monthAgo = now - 30 * 24 * 60 * 60 * 1000;
     const recent = orders.filter((o) => new Date(o.created_at).getTime() >= monthAgo);
-    const revenueMonth = recent
+    const revenueTotal = orders
       .filter((o) => ["paid", "shipped", "delivered"].includes(o.status))
       .reduce((s, o) => s + (o.total_cents ?? 0), 0);
     const pending = orders.filter((o) => o.status === "pending").length;
