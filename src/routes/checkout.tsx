@@ -9,8 +9,9 @@ import {
   createCardOrder,
   getMercadoPagoPublicKey,
 } from "@/utils/payments.functions";
+import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
-import { Copy, Check, QrCode, CreditCard } from "lucide-react";
+import { Copy, Check, QrCode, CreditCard, Loader2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 
@@ -89,12 +90,22 @@ interface AddressPayload {
   neighborhood: string; city: string; state: string;
 }
 
+interface ShippingQuote {
+  id: string;
+  serviceId: number;
+  serviceName: string;
+  company: string;
+  priceCents: number;
+  deliveryDays: number | null;
+}
+
 interface CardState {
   totalCents: number;
   payerEmail: string;
   payerCpf: string | null;
   itemsPayload: ItemPayload[];
   shipping: "fixed" | "arrange";
+  shippingQuote: ShippingQuote | null;
   address: AddressPayload;
   notes: string | null;
   couponCode: string | null;
