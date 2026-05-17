@@ -7,7 +7,7 @@ import { CartProvider } from "@/hooks/useCart";
 import { WishlistProvider } from "@/hooks/useWishlist";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
-
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 function NotFoundComponent() {
   return (
