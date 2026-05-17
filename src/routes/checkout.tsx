@@ -29,7 +29,7 @@ export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
 });
 
-const SHIPPING_FIXED = 25;
+
 
 interface Form {
   recipientName: string;
