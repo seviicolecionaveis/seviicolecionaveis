@@ -177,8 +177,8 @@ function DashboardPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
               <MetricCard
                 icon={<TrendingUp className="h-4 w-4" />}
-                label="Receita (30d)"
-                value={fmtBRL(metrics.revenueMonth)}
+                label="Receita total"
+                value={fmtBRL(metrics.revenueTotal)}
               />
               <MetricCard
                 icon={<ShoppingBag className="h-4 w-4" />}
