@@ -50,7 +50,7 @@ function DashboardPage() {
     const totalSales = Array.from(stats.sales.values()).reduce((a, b) => a + b, 0);
     const lowStock = cards.filter((c) => c.stock > 0 && c.stock <= 2).length;
     return {
-      revenueMonth,
+      revenueTotal,
       ordersMonth: recent.length,
       pending,
       totalViews,
