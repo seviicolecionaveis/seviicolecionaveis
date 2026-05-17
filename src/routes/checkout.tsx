@@ -313,8 +313,31 @@ function CheckoutPage() {
     }
   };
 
+  const shippingQuotePayload = (): ShippingQuote | null =>
+    shipping === "fixed" && selectedQuote ? selectedQuote : null;
+
+  const shippingQuoteForApi = () => {
+    const q = shippingQuotePayload();
+    if (!q) return null;
+    return {
+      serviceId: String(q.serviceId),
+      serviceName: q.serviceName,
+      company: q.company,
+      priceCents: q.priceCents,
+    };
+  };
+
+  const validateShippingChoice = (): string | null => {
+    if (shipping === "fixed" && !selectedQuote) {
+      return "Selecione uma opção de frete (informe o CEP para carregar).";
+    }
+    return null;
+  };
+
   const startCard = async () => {
     if (!user || items.length === 0) return;
+    const shipErr = validateShippingChoice();
+    if (shipErr) { setErr(shipErr); return; }
     setLoading(true);
     setErr(null);
     try {
@@ -323,7 +346,7 @@ function CheckoutPage() {
       } catch (e) {
         console.warn("persistAddressAndProfile falhou (seguindo mesmo assim):", e);
       }
-      const shippingCents = shipping === "fixed" ? Math.round(SHIPPING_FIXED * 100) : 0;
+      const shippingCents = shipping === "fixed" && selectedQuote ? selectedQuote.priceCents : 0;
       const subtotalCents = Math.round(subtotal * 100);
       const discountCents = couponInfo.valid ? Math.round((subtotalCents * couponInfo.percent) / 100) : 0;
       const totalCents = subtotalCents - discountCents + shippingCents;
@@ -333,6 +356,7 @@ function CheckoutPage() {
         payerCpf: form.cpf || null,
         itemsPayload: buildItemsPayload(),
         shipping,
+        shippingQuote: shippingQuotePayload(),
         address: buildAddressPayload(),
         notes: buildNotes(),
         couponCode: couponNormalized || null,
@@ -348,6 +372,8 @@ function CheckoutPage() {
 
   const startPix = async () => {
     if (!user || items.length === 0) return;
+    const shipErr = validateShippingChoice();
+    if (shipErr) { setErr(shipErr); return; }
     setLoading(true);
     setErr(null);
     try {
@@ -363,6 +389,7 @@ function CheckoutPage() {
         data: {
           items: buildItemsPayload(),
           shippingMethod: shipping,
+          shippingQuote: shippingQuoteForApi(),
           address: buildAddressPayload(),
           notes: buildNotes(),
           couponCode: couponNormalized || null,
