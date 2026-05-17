@@ -101,7 +101,7 @@ function AdminPage() {
     if (!focusId || orders.length === 0) return;
     const target = orders.find((o) => o.id === focusId);
     if (!target) return;
-    setFilter((curr) => (curr === "all" || curr === target.status ? curr : "all"));
+    setSelectedStatuses((curr: string[]) => (curr.includes(target.status) ? curr : [...curr, target.status]));
   }, [focusId, orders]);
 
   useEffect(() => {
