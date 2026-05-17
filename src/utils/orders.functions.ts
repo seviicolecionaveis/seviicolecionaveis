@@ -9,6 +9,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
       status: z.enum([
         "pending",
         "paid",
+        "preparing",
         "shipped",
         "delivered",
         "cancelled",
