@@ -42,7 +42,7 @@ function DashboardPage() {
     const now = Date.now();
     const monthAgo = now - 30 * 24 * 60 * 60 * 1000;
     const recent = orders.filter((o) => new Date(o.created_at).getTime() >= monthAgo);
-    const revenueMonth = recent
+    const revenueTotal = orders
       .filter((o) => ["paid", "shipped", "delivered"].includes(o.status))
       .reduce((s, o) => s + (o.total_cents ?? 0), 0);
     const pending = orders.filter((o) => o.status === "pending").length;
@@ -50,7 +50,7 @@ function DashboardPage() {
     const totalSales = Array.from(stats.sales.values()).reduce((a, b) => a + b, 0);
     const lowStock = cards.filter((c) => c.stock > 0 && c.stock <= 2).length;
     return {
-      revenueMonth,
+      revenueTotal,
       ordersMonth: recent.length,
       pending,
       totalViews,
@@ -177,8 +177,8 @@ function DashboardPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
               <MetricCard
                 icon={<TrendingUp className="h-4 w-4" />}
-                label="Receita (30d)"
-                value={fmtBRL(metrics.revenueMonth)}
+                label="Receita total"
+                value={fmtBRL(metrics.revenueTotal)}
               />
               <MetricCard
                 icon={<ShoppingBag className="h-4 w-4" />}
