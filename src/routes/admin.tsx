@@ -36,16 +36,29 @@ function AdminPage() {
   const search = Route.useSearch();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>(() => {
-    if (typeof window === "undefined") return "all";
-    return localStorage.getItem("admin-orders-filter") ?? "all";
+  const ALL_STATUSES = [...STATUSES, "cancellation_requested"] as const;
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [...ALL_STATUSES];
+    const raw = localStorage.getItem("admin-orders-filter-v2");
+    if (!raw) return [...ALL_STATUSES];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    return [...ALL_STATUSES];
   });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("admin-orders-filter", filter);
+      localStorage.setItem("admin-orders-filter-v2", JSON.stringify(selectedStatuses));
     }
-  }, [filter]);
+  }, [selectedStatuses]);
+
+  const toggleStatus = (s: string) => {
+    setSelectedStatuses((curr) =>
+      curr.includes(s) ? curr.filter((x) => x !== s) : [...curr, s],
+    );
+  };
   const isOrdersRoute = location.pathname === "/admin";
   const focusId = search.focus;
   const focusRef = useRef<HTMLDivElement>(null);
@@ -88,7 +101,7 @@ function AdminPage() {
     if (!focusId || orders.length === 0) return;
     const target = orders.find((o) => o.id === focusId);
     if (!target) return;
-    setFilter((curr) => (curr === "all" || curr === target.status ? curr : "all"));
+    setSelectedStatuses((curr: string[]) => (curr.includes(target.status) ? curr : [...curr, target.status]));
   }, [focusId, orders]);
 
   useEffect(() => {
@@ -174,7 +187,7 @@ function AdminPage() {
     return <Outlet />;
   }
 
-  const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
+  const filtered = orders.filter((o) => selectedStatuses.includes(o.status));
 
   return (
     <div className="min-h-screen bg-background">
@@ -197,16 +210,41 @@ function AdminPage() {
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
           <h1 className="text-2xl font-bold">Pedidos ({filtered.length})</h1>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="rounded-md border border-border bg-background px-3 py-1.5 text-xs"
-          >
-            <option value="all">Todos</option>
-            {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
-          </select>
+          <div className="rounded-lg border border-border bg-card p-3">
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Filtrar por status</p>
+              <div className="flex gap-2 text-[10px]">
+                <button
+                  onClick={() => setSelectedStatuses([...ALL_STATUSES])}
+                  className="text-foreground hover:underline font-semibold"
+                >
+                  Todos
+                </button>
+                <span className="text-muted-foreground">·</span>
+                <button
+                  onClick={() => setSelectedStatuses([])}
+                  className="text-foreground hover:underline font-semibold"
+                >
+                  Nenhum
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+              {ALL_STATUSES.map((s) => (
+                <label key={s} className="flex items-center gap-2 text-xs cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={selectedStatuses.includes(s)}
+                    onChange={() => toggleStatus(s)}
+                    className="h-4 w-4 rounded border-border accent-foreground"
+                  />
+                  {STATUS_LABEL[s]}
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
 
         {loading ? (
