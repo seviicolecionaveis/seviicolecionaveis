@@ -226,6 +226,28 @@ function ShippingPage() {
                       </div>
                     </div>
 
+                    {o.superfrete_status === "failed" && (
+                      <div className="no-print mt-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/20 p-2 text-xs text-amber-800 dark:text-amber-200">
+                        ⚠️ Etiqueta Superfrete falhou: {o.superfrete_error ?? "erro desconhecido"}. Compre manualmente no painel Superfrete.
+                      </div>
+                    )}
+                    {o.superfrete_label_url && (
+                      <div className="no-print mt-3 flex flex-wrap items-center gap-2 rounded-md border border-emerald-300 bg-emerald-50 dark:bg-emerald-950/20 p-2 text-xs">
+                        <span className="font-semibold text-emerald-800 dark:text-emerald-200">
+                          🏷️ Etiqueta Superfrete pronta
+                          {o.superfrete_service_name ? ` (${o.superfrete_service_name})` : ""}
+                        </span>
+                        <a
+                          href={o.superfrete_label_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="ml-auto rounded-md bg-emerald-700 text-white px-3 py-1 font-bold uppercase tracking-wider hover:bg-emerald-800"
+                        >
+                          Abrir etiqueta
+                        </a>
+                      </div>
+                    )}
+
                     <div className="no-print mt-4 border-t border-border pt-3 flex flex-wrap items-center gap-2">
                       <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
                         Rastreio Correios
@@ -233,7 +255,7 @@ function ShippingPage() {
                       <input
                         type="text"
                         placeholder="Ex.: AA123456789BR"
-                        value={tracking[o.id] ?? ""}
+                        value={tracking[o.id] ?? o.tracking_code ?? ""}
                         onChange={(e) =>
                           setTracking((t) => ({ ...t, [o.id]: e.target.value.toUpperCase() }))
                         }
@@ -242,7 +264,7 @@ function ShippingPage() {
                       />
                       <button
                         onClick={() => markShipped(o.id)}
-                        disabled={shipping.has(o.id) || !(tracking[o.id] ?? "").trim()}
+                        disabled={shipping.has(o.id) || !((tracking[o.id] ?? o.tracking_code ?? "").trim())}
                         className="rounded-md bg-foreground text-background px-4 py-1.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 disabled:opacity-40"
                       >
                         {shipping.has(o.id) ? "Enviando..." : "Marcar como enviado + e-mail"}
