@@ -36,16 +36,29 @@ function AdminPage() {
   const search = Route.useSearch();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>(() => {
-    if (typeof window === "undefined") return "all";
-    return localStorage.getItem("admin-orders-filter") ?? "all";
+  const ALL_STATUSES = [...STATUSES, "cancellation_requested"] as const;
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [...ALL_STATUSES];
+    const raw = localStorage.getItem("admin-orders-filter-v2");
+    if (!raw) return [...ALL_STATUSES];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    return [...ALL_STATUSES];
   });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("admin-orders-filter", filter);
+      localStorage.setItem("admin-orders-filter-v2", JSON.stringify(selectedStatuses));
     }
-  }, [filter]);
+  }, [selectedStatuses]);
+
+  const toggleStatus = (s: string) => {
+    setSelectedStatuses((curr) =>
+      curr.includes(s) ? curr.filter((x) => x !== s) : [...curr, s],
+    );
+  };
   const isOrdersRoute = location.pathname === "/admin";
   const focusId = search.focus;
   const focusRef = useRef<HTMLDivElement>(null);
