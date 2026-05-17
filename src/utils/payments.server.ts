@@ -37,6 +37,16 @@ const FIRST_PURCHASE_COUPON = "PRIMEIRACOMPRA10";
 const FIRST_PURCHASE_PERCENT = 10;
 const PIX_EXPIRES_MINUTES = 30;
 
+function computeShippingCents(input: {
+  shippingMethod: "fixed" | "arrange";
+  shippingQuote?: { priceCents: number } | null;
+}): number {
+  if (input.shippingQuote && input.shippingQuote.priceCents >= 0) {
+    return input.shippingQuote.priceCents;
+  }
+  return input.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
+}
+
 async function validateCoupon(
   userId: string,
   rawCode: string | null | undefined,
