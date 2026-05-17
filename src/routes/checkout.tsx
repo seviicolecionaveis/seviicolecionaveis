@@ -177,6 +177,34 @@ function CheckoutPage() {
     })();
   }, [user]);
 
+  const itemsCount = items.reduce((s, i) => s + i.quantity, 0);
+
+  const fetchQuotes = async (cep: string) => {
+    const clean = cep.replace(/\D/g, "");
+    if (clean.length !== 8 || itemsCount === 0) return;
+    setQuotesLoading(true);
+    setQuotesError(null);
+    try {
+      const r = await getShippingQuotes({ data: { destinationCep: clean, itemsCount } });
+      if (r.error) {
+        setQuotesError(r.error);
+        setQuotes([]);
+        setSelectedQuoteId(null);
+      } else {
+        setQuotes(r.quotes);
+        setSelectedQuoteId((prev) =>
+          prev && r.quotes.some((q) => q.id === prev) ? prev : (r.quotes[0]?.id ?? null),
+        );
+      }
+    } catch (e: any) {
+      setQuotesError(e?.message ?? "Falha ao consultar frete.");
+      setQuotes([]);
+      setSelectedQuoteId(null);
+    } finally {
+      setQuotesLoading(false);
+    }
+  };
+
   const lookupCep = async (cep: string) => {
     const clean = cep.replace(/\D/g, "");
     if (clean.length !== 8) return;
@@ -193,9 +221,11 @@ function CheckoutPage() {
         }));
       }
     } catch {}
+    fetchQuotes(clean);
   };
 
-  const shippingCost = shipping === "fixed" ? SHIPPING_FIXED : 0;
+  const shippingCost =
+    shipping === "fixed" ? (selectedQuote ? selectedQuote.priceCents / 100 : 0) : 0;
   const couponNormalized = form.couponCode.trim().toUpperCase();
   const couponInfo = (() => {
     if (couponNormalized === "POKEAGIOTAGEM") return { valid: true, percent: 30, label: "POKEAGIOTAGEM −30% (admin)" };
