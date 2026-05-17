@@ -47,6 +47,14 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
     })
     .eq("id", orderId);
 
+  // Compra etiqueta Superfrete automaticamente (best-effort)
+  try {
+    const { purchaseShippingLabel } = await import("@/lib/superfrete-label.server");
+    await purchaseShippingLabel(orderId);
+  } catch (e) {
+    console.error("[markOrderPaid] purchaseShippingLabel falhou:", e);
+  }
+
   // Send "payment confirmed" email (fire-and-forget)
   const { data: full } = await supabaseAdmin
     .from("orders")

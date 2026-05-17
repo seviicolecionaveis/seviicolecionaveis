@@ -234,6 +234,8 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
       city: data.address.city,
       state: data.address.state,
       notes: data.notes,
+      superfrete_service_id: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceId ?? null : null,
+      superfrete_service_name: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceName ?? null : null,
     })
     .select("id")
     .single();
@@ -358,6 +360,8 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
       state: data.address.state,
       notes: data.notes,
       pix_expires_at: pixExpires.toISOString(),
+      superfrete_service_id: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceId ?? null : null,
+      superfrete_service_name: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceName ?? null : null,
     })
     .select("id")
     .single();
@@ -489,6 +493,8 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
       city: data.address.city,
       state: data.address.state,
       notes: data.notes,
+      superfrete_service_id: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceId ?? null : null,
+      superfrete_service_name: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceName ?? null : null,
     })
     .select("id")
     .single();
