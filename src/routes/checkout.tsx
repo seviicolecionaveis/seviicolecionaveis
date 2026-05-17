@@ -468,13 +468,74 @@ function CheckoutPage() {
           <div>
             <h2 className="text-lg font-bold mb-3">Envio</h2>
             <div className="space-y-2">
-              <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
-                <input type="radio" name="ship" checked={shipping === "fixed"} onChange={() => setShipping("fixed")} className="mt-1" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">🚚 Mini Envios — R$ 25,00</p>
-                  <p className="text-xs text-muted-foreground">Envio rastreado pelos Correios — frete fixo Brasil todo.</p>
+              <div className="rounded-lg border border-border p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-semibold">🚚 Frete rastreado (Superfrete)</p>
+                  {quotesLoading && (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Cotando...
+                    </span>
+                  )}
                 </div>
-              </label>
+                {!form.cep && (
+                  <p className="text-xs text-muted-foreground">Informe o CEP acima para ver as opções de frete.</p>
+                )}
+                {form.cep && !quotesLoading && quotes.length === 0 && !quotesError && (
+                  <p className="text-xs text-muted-foreground">Aguardando cotação...</p>
+                )}
+                {quotesError && (
+                  <div className="text-xs text-amber-700">
+                    {quotesError}{" "}
+                    <button
+                      type="button"
+                      onClick={() => fetchQuotes(form.cep)}
+                      className="underline font-semibold"
+                    >
+                      Tentar novamente
+                    </button>
+                  </div>
+                )}
+                {quotes.length > 0 && (
+                  <div className="space-y-2 mt-2">
+                    {quotes.map((q) => {
+                      const checked = shipping === "fixed" && selectedQuoteId === q.id;
+                      return (
+                        <label
+                          key={q.id}
+                          className={`flex items-start gap-3 rounded-md border p-3 cursor-pointer transition ${
+                            checked ? "border-foreground bg-secondary/50" : "border-border hover:bg-secondary/30"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="ship"
+                            checked={checked}
+                            onChange={() => {
+                              setShipping("fixed");
+                              setSelectedQuoteId(q.id);
+                            }}
+                            className="mt-1"
+                          />
+                          <div className="flex-1 flex items-center justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-semibold">
+                                {q.serviceName}{" "}
+                                <span className="text-xs text-muted-foreground font-normal">— {q.company}</span>
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {q.deliveryDays ? `Entrega em até ${q.deliveryDays} dia(s) úteis` : "Prazo a definir"}
+                              </p>
+                            </div>
+                            <span className="text-sm font-bold tabular-nums">
+                              R$ {(q.priceCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
               <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
                 <input type="radio" name="ship" checked={shipping === "arrange"} onChange={() => setShipping("arrange")} className="mt-1" />
                 <div className="flex-1">
