@@ -380,6 +380,12 @@ export type Database = {
           stripe_payment_intent: string | null
           stripe_session_id: string | null
           subtotal_cents: number
+          superfrete_error: string | null
+          superfrete_label_url: string | null
+          superfrete_order_id: string | null
+          superfrete_service_id: string | null
+          superfrete_service_name: string | null
+          superfrete_status: string | null
           total_cents: number
           tracking_code: string | null
           updated_at: string
@@ -415,6 +421,12 @@ export type Database = {
           stripe_payment_intent?: string | null
           stripe_session_id?: string | null
           subtotal_cents: number
+          superfrete_error?: string | null
+          superfrete_label_url?: string | null
+          superfrete_order_id?: string | null
+          superfrete_service_id?: string | null
+          superfrete_service_name?: string | null
+          superfrete_status?: string | null
           total_cents: number
           tracking_code?: string | null
           updated_at?: string
@@ -450,6 +462,12 @@ export type Database = {
           stripe_payment_intent?: string | null
           stripe_session_id?: string | null
           subtotal_cents?: number
+          superfrete_error?: string | null
+          superfrete_label_url?: string | null
+          superfrete_order_id?: string | null
+          superfrete_service_id?: string | null
+          superfrete_service_name?: string | null
+          superfrete_status?: string | null
           total_cents?: number
           tracking_code?: string | null
           updated_at?: string
