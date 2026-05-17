@@ -13,6 +13,13 @@ const ItemSchema = z.object({
   quantity: z.number().int().positive().max(100),
 });
 
+const ShippingQuoteSchema = z.object({
+  serviceId: z.string().min(1).max(100),
+  serviceName: z.string().min(1).max(100),
+  company: z.string().min(1).max(100),
+  priceCents: z.number().int().min(0).max(1_000_000),
+});
+
 const AddressSchema = z.object({
   recipientName: z.string().min(2).max(150),
   cpf: z.string().max(20).optional().nullable(),
