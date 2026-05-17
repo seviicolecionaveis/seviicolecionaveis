@@ -179,6 +179,15 @@ function CheckoutPage() {
 
   const itemsCount = items.reduce((s, i) => s + i.quantity, 0);
 
+  // Dispara cotação automaticamente quando CEP fica válido (ex: pré-preenchido do perfil)
+  useEffect(() => {
+    const clean = form.cep.replace(/\D/g, "");
+    if (clean.length === 8 && itemsCount > 0 && quotes.length === 0 && !quotesLoading && !quotesError) {
+      fetchQuotes(clean);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.cep, itemsCount]);
+
   const fetchQuotes = async (cep: string) => {
     const clean = cep.replace(/\D/g, "");
     if (clean.length !== 8 || itemsCount === 0) return;
