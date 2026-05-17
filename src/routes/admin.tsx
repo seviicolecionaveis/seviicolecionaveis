@@ -36,7 +36,16 @@ function AdminPage() {
   const search = Route.useSearch();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>("all");
+  const [filter, setFilter] = useState<string>(() => {
+    if (typeof window === "undefined") return "all";
+    return localStorage.getItem("admin-orders-filter") ?? "all";
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("admin-orders-filter", filter);
+    }
+  }, [filter]);
   const isOrdersRoute = location.pathname === "/admin";
   const focusId = search.focus;
   const focusRef = useRef<HTMLDivElement>(null);
