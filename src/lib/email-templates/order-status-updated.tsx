@@ -13,6 +13,7 @@ interface OrderStatusUpdatedProps {
 const STATUS_LABEL: Record<string, string> = {
   pending: 'Aguardando pagamento',
   paid: 'Pago',
+  preparing: 'Em preparação',
   shipped: 'Enviado',
   delivered: 'Entregue',
   cancelled: 'Cancelado',
@@ -22,6 +23,7 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_MESSAGE: Record<string, string> = {
   pending: 'Seu pedido está aguardando a confirmação do pagamento.',
   paid: 'O pagamento do seu pedido foi confirmado e ele já está em preparação.',
+  preparing: 'Seu pedido está sendo preparado para envio.',
   shipped: 'Seu pedido foi enviado! Em breve chega aí.',
   delivered: 'Seu pedido foi entregue. Esperamos que goste! 🎉',
   cancelled: 'Seu pedido foi cancelado. Se tiver dúvidas, fala com a gente.',
