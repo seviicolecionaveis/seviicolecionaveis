@@ -147,6 +147,7 @@ function RootComponent() {
           <PaymentTestModeBanner />
           <AnalyticsTracker />
           <Outlet />
+          <WhatsAppButton />
         </CartProvider>
       </WishlistProvider>
     </AuthProvider>
