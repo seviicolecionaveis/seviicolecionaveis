@@ -194,7 +194,7 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
-  const shippingCents = data.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
+  const shippingCents = computeShippingCents(data);
 
   const { discountCents, code: appliedCoupon } = await validateCoupon(
     userId,
@@ -314,7 +314,7 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
-  const shippingCents = data.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
+  const shippingCents = computeShippingCents(data);
 
   const { discountCents, code: appliedCoupon } = await validateCoupon(
     userId,
@@ -448,7 +448,7 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
-  const shippingCents = data.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
+  const shippingCents = computeShippingCents(data);
 
   const { discountCents, code: appliedCoupon } = await validateCoupon(
     userId,
