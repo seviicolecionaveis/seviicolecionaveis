@@ -522,6 +522,18 @@ function CheckoutPage() {
                             onChange={() => {
                               setShipping("fixed");
                               setSelectedQuoteId(q.id);
+                              trackEvent("add_shipping_info", {
+                                currency: "BRL",
+                                value: subtotal + q.priceCents / 100,
+                                shipping_tier: `${q.company} — ${q.serviceName}`,
+                                items: items.map((i) => ({
+                                  item_id: i.id,
+                                  item_name: i.name,
+                                  item_category: i.collection,
+                                  price: i.unitPrice,
+                                  quantity: i.quantity,
+                                })),
+                              });
                             }}
                             className="mt-1"
                           />
@@ -592,14 +604,28 @@ function CheckoutPage() {
             <h2 className="text-lg font-bold mb-3">Forma de pagamento</h2>
             <div className="space-y-2">
               <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
-                <input type="radio" name="pm" checked={paymentMethod === "pix"} onChange={() => setPaymentMethod("pix")} className="mt-1" />
+                <input type="radio" name="pm" checked={paymentMethod === "pix"} onChange={() => {
+                  setPaymentMethod("pix");
+                  trackEvent("add_payment_info", {
+                    currency: "BRL",
+                    value: subtotal,
+                    payment_type: "pix",
+                  });
+                }} className="mt-1" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold flex items-center gap-2"><QrCode className="h-4 w-4" /> Pix</p>
                   <p className="text-xs text-muted-foreground">Aprovação instantânea — gera QR Code e código copia e cola.</p>
                 </div>
               </label>
               <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
-                <input type="radio" name="pm" checked={paymentMethod === "card"} onChange={() => setPaymentMethod("card")} className="mt-1" />
+                <input type="radio" name="pm" checked={paymentMethod === "card"} onChange={() => {
+                  setPaymentMethod("card");
+                  trackEvent("add_payment_info", {
+                    currency: "BRL",
+                    value: subtotal,
+                    payment_type: "credit_card",
+                  });
+                }} className="mt-1" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold flex items-center gap-2"><CreditCard className="h-4 w-4" /> Cartão de crédito</p>
                   <p className="text-xs text-muted-foreground">Visa, Master, Elo, Hipercard, Amex — em até 12x (via Mercado Pago).</p>
