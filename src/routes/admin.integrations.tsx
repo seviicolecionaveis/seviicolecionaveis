@@ -32,7 +32,7 @@ function IntegrationsPage() {
 
   const reload = async () => {
     try {
-      const s = await fetchStatus({ data: undefined as any });
+      const s = await fetchStatus();
       setStatus(s);
     } catch (e: any) {
       toast.error(e?.message ?? "Falha ao carregar status.");
@@ -59,7 +59,7 @@ function IntegrationsPage() {
   async function connect() {
     setBusy(true);
     try {
-      const { url } = await fetchAuthUrl({ data: undefined as any });
+      const { url } = await fetchAuthUrl();
       window.location.href = url;
     } catch (e: any) {
       toast.error(e?.message ?? "Falha ao iniciar conexão.");
@@ -71,7 +71,7 @@ function IntegrationsPage() {
     if (!confirm("Desconectar Melhor Envio? Cotações deixarão de incluí-lo.")) return;
     setBusy(true);
     try {
-      await doDisconnect({ data: undefined as any });
+      await doDisconnect();
       toast.success("Desconectado.");
       await reload();
     } catch (e: any) {
