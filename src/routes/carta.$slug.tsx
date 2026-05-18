@@ -11,7 +11,7 @@ export const Route = createFileRoute("/carta/$slug")({
     const pretty = decodeURIComponent(params.slug ?? "")
       .replace(/-/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
-    const url = `https://seviicolecionaveis.lovable.app/carta/${params.slug}`;
+    const url = `https://seviicolecionaveis.com.br/carta/${params.slug}`;
     return {
       meta: [
         { title: `${pretty} — Sevii Colecionáveis` },
