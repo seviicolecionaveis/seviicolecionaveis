@@ -15,7 +15,7 @@ export const Route = createFileRoute("/colecao/$slug")({
     const title = decodeURIComponent(params.slug ?? "")
       .replace(/-/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
-    const url = `https://seviicolecionaveis.lovable.app/colecao/${params.slug}`;
+    const url = `https://seviicolecionaveis.com.br/colecao/${params.slug}`;
     return {
       meta: [
         { title: `${title} — Coleção Pokémon | Sevii Colecionáveis` },

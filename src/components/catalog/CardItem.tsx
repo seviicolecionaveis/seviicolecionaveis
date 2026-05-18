@@ -54,6 +54,9 @@ export function CardItem({ card, onClick }: Props) {
           src={card.image}
           alt={`${card.name} — ${card.collection} ${card.number}`}
           loading="lazy"
+          decoding="async"
+          width={400}
+          height={560}
           className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).src =
