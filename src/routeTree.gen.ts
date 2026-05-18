@@ -30,6 +30,7 @@ import { Route as CartaSlugRouteImport } from './routes/carta.$slug'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
 import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-cards'
+import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
 import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
@@ -42,6 +43,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicPaymentsMercadopagoWebhookRouteImport } from './routes/api/public/payments/mercadopago-webhook'
+import { Route as ApiPublicMelhorenvioCallbackRouteImport } from './routes/api/public/melhorenvio/callback'
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -149,6 +151,11 @@ const AdminManageCardsRoute = AdminManageCardsRouteImport.update({
   path: '/manage-cards',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminIntegrationsRoute = AdminIntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminEmailsRoute = AdminEmailsRouteImport.update({
   id: '/emails',
   path: '/emails',
@@ -214,6 +221,12 @@ const ApiPublicPaymentsMercadopagoWebhookRoute =
     path: '/api/public/payments/mercadopago-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicMelhorenvioCallbackRoute =
+  ApiPublicMelhorenvioCallbackRouteImport.update({
+    id: '/api/public/melhorenvio/callback',
+    path: '/api/public/melhorenvio/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksUpdatePricesRoute =
   ApiPublicHooksUpdatePricesRouteImport.update({
     id: '/api/public/hooks/update-prices',
@@ -236,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
@@ -249,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
+  '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -271,6 +286,7 @@ export interface FileRoutesByTo {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
@@ -284,6 +300,7 @@ export interface FileRoutesByTo {
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
+  '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -308,6 +325,7 @@ export interface FileRoutesById {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
@@ -321,6 +339,7 @@ export interface FileRoutesById {
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
+  '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -346,6 +365,7 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/dashboard'
     | '/admin/emails'
+    | '/admin/integrations'
     | '/admin/manage-cards'
     | '/admin/shipping'
     | '/admin/users'
@@ -359,6 +379,7 @@ export interface FileRouteTypes {
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
     | '/api/public/hooks/update-prices'
+    | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -381,6 +402,7 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/dashboard'
     | '/admin/emails'
+    | '/admin/integrations'
     | '/admin/manage-cards'
     | '/admin/shipping'
     | '/admin/users'
@@ -394,6 +416,7 @@ export interface FileRouteTypes {
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
     | '/api/public/hooks/update-prices'
+    | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -417,6 +440,7 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/dashboard'
     | '/admin/emails'
+    | '/admin/integrations'
     | '/admin/manage-cards'
     | '/admin/shipping'
     | '/admin/users'
@@ -430,6 +454,7 @@ export interface FileRouteTypes {
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
     | '/api/public/hooks/update-prices'
+    | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -458,6 +483,7 @@ export interface RootRouteChildren {
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
+  ApiPublicMelhorenvioCallbackRoute: typeof ApiPublicMelhorenvioCallbackRoute
   ApiPublicPaymentsMercadopagoWebhookRoute: typeof ApiPublicPaymentsMercadopagoWebhookRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -616,6 +642,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminManageCardsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/integrations': {
+      id: '/admin/integrations'
+      path: '/integrations'
+      fullPath: '/admin/integrations'
+      preLoaderRoute: typeof AdminIntegrationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/emails': {
       id: '/admin/emails'
       path: '/emails'
@@ -700,6 +733,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsMercadopagoWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/melhorenvio/callback': {
+      id: '/api/public/melhorenvio/callback'
+      path: '/api/public/melhorenvio/callback'
+      fullPath: '/api/public/melhorenvio/callback'
+      preLoaderRoute: typeof ApiPublicMelhorenvioCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/update-prices': {
       id: '/api/public/hooks/update-prices'
       path: '/api/public/hooks/update-prices'
@@ -714,6 +754,7 @@ interface AdminRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEmailsRoute: typeof AdminEmailsRoute
+  AdminIntegrationsRoute: typeof AdminIntegrationsRoute
   AdminManageCardsRoute: typeof AdminManageCardsRoute
   AdminShippingRoute: typeof AdminShippingRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -723,6 +764,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEmailsRoute: AdminEmailsRoute,
+  AdminIntegrationsRoute: AdminIntegrationsRoute,
   AdminManageCardsRoute: AdminManageCardsRoute,
   AdminShippingRoute: AdminShippingRoute,
   AdminUsersRoute: AdminUsersRoute,
@@ -774,6 +816,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,
+  ApiPublicMelhorenvioCallbackRoute: ApiPublicMelhorenvioCallbackRoute,
   ApiPublicPaymentsMercadopagoWebhookRoute:
     ApiPublicPaymentsMercadopagoWebhookRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
@@ -786,13 +829,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

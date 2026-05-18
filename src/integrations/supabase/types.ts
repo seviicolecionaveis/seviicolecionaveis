@@ -293,6 +293,42 @@ export type Database = {
         }
         Relationships: []
       }
+      melhorenvio_tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          environment: string
+          expires_at: string
+          id: number
+          refresh_token: string
+          scope: string | null
+          updated_at: string
+          user_email: string | null
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          environment?: string
+          expires_at: string
+          id?: number
+          refresh_token: string
+          scope?: string | null
+          updated_at?: string
+          user_email?: string | null
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          environment?: string
+          expires_at?: string
+          id?: number
+          refresh_token?: string
+          scope?: string | null
+          updated_at?: string
+          user_email?: string | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           card_id: string

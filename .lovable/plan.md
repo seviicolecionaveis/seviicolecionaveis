@@ -1,80 +1,76 @@
-## Área Pessoal do Trainer
 
-Criar uma área completa do cliente com dados pessoais, pedidos, favoritos e pesquisa pós-compra.
+# Integração Melhor Envio (sandbox, OAuth2, em paralelo ao Superfrete)
 
-### 1. Banco de dados (migration)
+## Pré-requisitos (você precisa fazer)
 
-**Estender `profiles`** com campos novos:
-- `whatsapp` (text)
-- `birth_date` (date)
-- `favorite_pokemons` (text[])
-- `favorite_categories` (text[])
+1. Criar conta no sandbox: https://sandbox.melhorenvio.com.br
+2. Em **Configurações → Tokens e Aplicativos → Meus Aplicativos**, criar um app com:
+   - **Redirect URI**: `https://seviicolecionaveis.com.br/api/public/melhorenvio/callback`
+   - **Scopes**: `shipping-calculate`, `shipping-cart`, `shipping-checkout`, `shipping-generate`, `shipping-print`, `shipping-tracking`, `cart-read`, `cart-write`
+3. Anotar `client_id` e `client_secret` — vou pedir como secrets quando estiver pronto.
 
-**Nova tabela `post_purchase_surveys`**:
-- `order_id` (uuid, único, ref orders)
-- `user_id` (uuid)
-- `how_found_us` (text) — Instagram, indicação, Google, etc.
-- `satisfaction` (int 1–5)
-- `comment` (text, opcional)
-- RLS: usuário insere/lê próprio; admin lê tudo
+## Arquitetura
 
-**Atualizar `handle_new_user`** para gravar `whatsapp` e `birth_date` vindos de `raw_user_meta_data`.
-
-### 2. Cadastro (`/auth`)
-
-Adicionar ao formulário de signup:
-- WhatsApp (com máscara `(99) 99999-9999`)
-- Data de nascimento (input `date`)
-
-Enviar via `options.data` no `signUp` para o trigger persistir no profile.
-
-### 3. Nova rota `/conta` (Área Pessoal)
-
-Layout com **abas/tabs** (shadcn `Tabs`):
-
-```
-/conta
- ├─ Visão geral   → resumo + atalhos para pedidos/favoritos
- ├─ Dados pessoais → nome, e-mail (readonly), WhatsApp, nascimento, CPF, senha
- ├─ Preferências   → pokémons favoritos (chips/tags), categorias favoritas (multi-select)
- ├─ Endereços      → CRUD usando tabela `addresses` existente
- ├─ Pedidos        → reaproveita lista de `/orders`
- └─ Favoritos      → reaproveita lista de `/favoritos`
+```text
+Admin                         Sevii server                Melhor Envio
+  │  clica "Conectar"            │                             │
+  │ ───────────────────────────► │                             │
+  │  redirect p/ ME authorize    │                             │
+  │ ◄─────────────────────────── │                             │
+  │  login + autoriza            │                             │
+  │ ──────────────────────────────────────────────────────────►│
+  │  redirect c/ ?code           │                             │
+  │ ◄──────────────────────────────────────────────────────────│
+  │     /api/public/melhorenvio/callback?code=...              │
+  │ ───────────────────────────► │  troca code → tokens        │
+  │                              │ ──────────────────────────► │
+  │                              │  salva em melhorenvio_tokens│
+  │  ◄──────redirect /admin ──── │                             │
 ```
 
-Acessível pelo menu do usuário no header (`HeaderActions`), substituindo/complementando os links atuais "Meus pedidos" e "Meus favoritos" por **"Minha conta"** que cai em `/conta`.
+Depois disso, cotação no checkout chama Melhor Envio com `access_token` armazenado (refresh automático quando expira).
 
-### 4. Pesquisa pós-compra
+## O que vai mudar no código
 
-- Componente `PostPurchaseSurvey` exibido em `/orders/$orderId` quando:
-  - status = `paid`
-  - ainda não há survey para o pedido
-- Modal/card com:
-  - "Como nos encontrou?" (select: Instagram, TikTok, Google, Indicação, Outro)
-  - Satisfação (5 estrelas)
-  - Comentário (textarea opcional)
-- Botão "Pular" também marca como respondido (insere com valores nulos exceto how_found_us=`skipped`) para não reaparecer.
+### 1. Banco
+Nova tabela `melhorenvio_tokens` (singleton, só admin acessa):
+- `access_token`, `refresh_token`, `expires_at`, `environment` (`sandbox`/`production`), `scope`
+- RLS: só admin lê/escreve
 
-### 5. Componentes/arquivos
+### 2. Secrets
+- `MELHORENVIO_CLIENT_ID`
+- `MELHORENVIO_CLIENT_SECRET`
+- `MELHORENVIO_ENVIRONMENT` = `sandbox`
 
-**Criar:**
-- `src/routes/conta.tsx` (layout com Tabs)
-- `src/components/account/PersonalDataForm.tsx`
-- `src/components/account/PreferencesForm.tsx`
-- `src/components/account/AddressesManager.tsx`
-- `src/components/PostPurchaseSurvey.tsx`
+### 3. Arquivos novos
+- `src/lib/melhorenvio.server.ts` — cliente da API (token refresh, cotação, compra, etiqueta)
+- `src/utils/melhorenvio.functions.ts` — server fns:
+  - `getMelhorEnvioAuthUrl` (admin) → retorna URL de autorização
+  - `getMelhorEnvioStatus` (admin) → conectado? expira quando?
+  - `disconnectMelhorEnvio` (admin)
+- `src/routes/api/public/melhorenvio/callback.ts` — recebe `?code=`, troca por tokens, salva, redireciona para `/admin`
 
-**Editar:**
-- `src/components/HeaderActions.tsx` — adicionar link "Minha conta"
-- `src/routes/auth.tsx` — campos WhatsApp + nascimento
-- `src/routes/orders.$orderId.tsx` — montar `<PostPurchaseSurvey />`
+### 4. Arquivos editados
+- `src/utils/shipping.functions.ts` — `getShippingQuotes` chama Superfrete **e** Melhor Envio em paralelo, mescla e ordena por preço. IDs ficam `melhorenvio:<service-id>` para diferenciar.
+- `src/routes/admin.tsx` (ou nova seção) — botão "Conectar Melhor Envio (sandbox)" + status
+- `src/components/checkout/...` — nada muda (já lista quotes por `id`/`serviceName`)
+- `src/lib/superfrete-label.server.ts` — **não muda agora**. Compra de etiqueta continua só pelo Superfrete. Se quiser comprar etiqueta no ME quando o cliente escolher uma cotação ME, fazemos numa segunda etapa.
 
-### Observações técnicas
+## Escopo desta entrega
 
-- Tudo client-side com `supabase` (RLS já garante isolamento).
-- Lista fixa de categorias = mesma usada nos filtros (Pokémon, Treinador, Energia…).
-- Pokémons favoritos: input de tags livre (sem catálogo externo) — simples e rápido.
-- E-mail é readonly (mudança de e-mail exige fluxo Supabase separado, fora do escopo).
-- Senha: botão "Alterar senha" abre mini-form usando `supabase.auth.updateUser({ password })`.
+✅ OAuth2 completo (connect/refresh/disconnect)
+✅ Cotação Melhor Envio no checkout, em paralelo ao Superfrete
+✅ UI admin para conectar/desconectar e ver status
+✅ Sandbox por padrão (controlado por `MELHORENVIO_ENVIRONMENT`)
 
-Posso seguir?
+❌ Compra automática de etiqueta no ME (fica para próxima — exige fluxo cart→checkout→generate→print, bem maior)
+❌ Tracking ME (fica para depois)
+
+## Próximo passo
+
+Você cria o app no sandbox do Melhor Envio com o redirect URI acima e me confirma. Quando confirmar, eu:
+1. Crio a migration da tabela
+2. Peço os 2 secrets via formulário
+3. Implemento tudo
+
+OK assim?
