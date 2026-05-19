@@ -4,12 +4,12 @@ import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { CardModal } from "@/components/catalog/CardModal";
 import { cardSlug } from "@/lib/slug";
 import { trackEvent } from "@/lib/analytics";
-import { getCardMetaBySlug } from "@/utils/cardMeta.functions";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/carta/$slug")({
   loader: async ({ params }) => {
     try {
+      const { getCardMetaBySlug } = await import("@/utils/cardMeta.functions");
       return await getCardMetaBySlug({ data: { slug: params.slug } });
     } catch {
       return null;
