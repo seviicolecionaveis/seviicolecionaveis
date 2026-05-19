@@ -7,26 +7,45 @@ import { trackEvent } from "@/lib/analytics";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/carta/$slug")({
-  head: ({ params }) => {
-    const pretty = decodeURIComponent(params.slug ?? "")
-      .replace(/-/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+  loader: async ({ params }) => {
+    try {
+      const { getCardMetaBySlug } = await import("@/utils/cardMeta.functions");
+      return await getCardMetaBySlug({ data: { slug: params.slug } });
+    } catch {
+      return null;
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const pretty = loaderData
+      ? loaderData.name
+      : decodeURIComponent(params.slug ?? "")
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase());
     const url = `https://seviicolecionaveis.com.br/carta/${params.slug}`;
+    const title = loaderData
+      ? `${loaderData.name} — ${loaderData.collection} #${loaderData.number} | Sevii Colecionáveis`
+      : `${pretty} — Sevii Colecionáveis`;
+    const description = loaderData
+      ? `Carta Pokémon ${loaderData.name} da coleção ${loaderData.collection} (#${loaderData.number}). Veja preço, condição e idiomas disponíveis na Sevii Colecionáveis.`
+      : `Carta Pokémon ${pretty} — disponível na Sevii Colecionáveis com estoque em tempo real.`;
+    const image = loaderData?.image ?? null;
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "product" },
+      { property: "og:url", content: url },
+    ];
+    if (image) {
+      meta.push(
+        { property: "og:image", content: image },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: image },
+      );
+    }
     return {
-      meta: [
-        { title: `${pretty} — Sevii Colecionáveis` },
-        {
-          name: "description",
-          content: `Carta Pokémon ${pretty} — disponível na Sevii Colecionáveis com estoque em tempo real.`,
-        },
-        { property: "og:title", content: `${pretty} — Sevii Colecionáveis` },
-        {
-          property: "og:description",
-          content: `Veja preço, condição e idiomas disponíveis para ${pretty}.`,
-        },
-        { property: "og:type", content: "product" },
-        { property: "og:url", content: url },
-      ],
+      meta,
       links: [{ rel: "canonical", href: url }],
       scripts: [
         {
@@ -34,10 +53,17 @@ export const Route = createFileRoute("/carta/$slug")({
           children: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Product",
-            name: pretty,
-            description: `Carta Pokémon ${pretty} — Sevii Colecionáveis.`,
+            name: loaderData?.name ?? pretty,
+            description,
             url,
+            ...(image ? { image } : {}),
             brand: { "@type": "Brand", name: "Pokémon" },
+            ...(loaderData
+              ? {
+                  category: loaderData.collection,
+                  sku: `${loaderData.collection}-${loaderData.number}`,
+                }
+              : {}),
           }),
         },
       ],

@@ -11,25 +11,43 @@ import type { Card } from "@/data/cards";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/colecao/$slug")({
-  head: ({ params }) => {
-    const title = decodeURIComponent(params.slug ?? "")
-      .replace(/-/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+  loader: async ({ params }) => {
+    try {
+      const { getCollectionMetaBySlug } = await import("@/utils/cardMeta.functions");
+      return await getCollectionMetaBySlug({ data: { slug: params.slug } });
+    } catch {
+      return null;
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const title = loaderData?.collection
+      ? loaderData.collection
+      : decodeURIComponent(params.slug ?? "")
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase());
     const url = `https://seviicolecionaveis.com.br/colecao/${params.slug}`;
+    const pageTitle = `${title} — Coleção Pokémon | Sevii Colecionáveis`;
+    const description = loaderData?.count
+      ? `Coleção ${title} com ${loaderData.count} ${loaderData.count === 1 ? "carta disponível" : "cartas disponíveis"}. Veja estoque, preços e idiomas na Sevii Colecionáveis.`
+      : `Cartas Pokémon da coleção ${title}. Veja estoque, preços e idiomas disponíveis.`;
+    const image = loaderData?.image ?? null;
+    const meta: Array<Record<string, string>> = [
+      { title: pageTitle },
+      { name: "description", content: description },
+      { property: "og:title", content: pageTitle },
+      { property: "og:description", content: description },
+      { property: "og:url", content: url },
+      { property: "og:type", content: "website" },
+    ];
+    if (image) {
+      meta.push(
+        { property: "og:image", content: image },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: image },
+      );
+    }
     return {
-      meta: [
-        { title: `${title} — Coleção Pokémon | Sevii Colecionáveis` },
-        {
-          name: "description",
-          content: `Cartas Pokémon da coleção ${title}. Veja estoque, preços e idiomas disponíveis.`,
-        },
-        { property: "og:title", content: `${title} — Sevii Colecionáveis` },
-        {
-          property: "og:description",
-          content: `Catálogo da coleção ${title} com cartas em estoque.`,
-        },
-        { property: "og:url", content: url },
-      ],
+      meta,
       links: [{ rel: "canonical", href: url }],
       scripts: [
         {
@@ -40,6 +58,7 @@ export const Route = createFileRoute("/colecao/$slug")({
             name: `Coleção ${title}`,
             url,
             inLanguage: "pt-BR",
+            ...(image ? { image } : {}),
           }),
         },
       ],
