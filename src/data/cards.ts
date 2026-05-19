@@ -176,6 +176,7 @@ export const EXTRA_COLLECTIONS = [
   "SSH - Espada e Escudo",
   "CRI - Caos Ascendente",
   "EVO - Evolutions",
+  "FLF - Flash de Fogo",
 ];
 
 export const COLLECTIONS = Array.from(
