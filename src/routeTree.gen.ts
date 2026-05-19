@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SeladosRouteImport } from './routes/selados'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as ImasRouteImport } from './routes/imas'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
@@ -61,6 +62,11 @@ const SobreRoute = SobreRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeladosRoute = SeladosRouteImport.update({
+  id: '/selados',
+  path: '/selados',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrdersRoute = OrdersRouteImport.update({
@@ -257,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
   '/orders': typeof OrdersRouteWithChildren
+  '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -296,6 +303,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
+  '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -337,6 +345,7 @@ export interface FileRoutesById {
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
   '/orders': typeof OrdersRouteWithChildren
+  '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -379,6 +388,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/imas'
     | '/orders'
+    | '/selados'
     | '/sitemap.xml'
     | '/sobre'
     | '/unsubscribe'
@@ -418,6 +428,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/favoritos'
     | '/imas'
+    | '/selados'
     | '/sitemap.xml'
     | '/sobre'
     | '/unsubscribe'
@@ -458,6 +469,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/imas'
     | '/orders'
+    | '/selados'
     | '/sitemap.xml'
     | '/sobre'
     | '/unsubscribe'
@@ -499,6 +511,7 @@ export interface RootRouteChildren {
   FavoritosRoute: typeof FavoritosRoute
   ImasRoute: typeof ImasRoute
   OrdersRoute: typeof OrdersRouteWithChildren
+  SeladosRoute: typeof SeladosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
@@ -540,6 +553,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/selados': {
+      id: '/selados'
+      path: '/selados'
+      fullPath: '/selados'
+      preLoaderRoute: typeof SeladosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/orders': {
@@ -848,6 +868,7 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritosRoute: FavoritosRoute,
   ImasRoute: ImasRoute,
   OrdersRoute: OrdersRouteWithChildren,
+  SeladosRoute: SeladosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
   UnsubscribeRoute: UnsubscribeRoute,
