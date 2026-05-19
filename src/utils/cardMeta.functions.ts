@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { cardSlug, collectionSlug } from "@/lib/slug";
+
 
 const SlugInput = z.object({ slug: z.string().min(1).max(200) });
 
