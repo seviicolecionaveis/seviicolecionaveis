@@ -81,8 +81,9 @@ async function validateCoupon(
     if ((count ?? 0) > 0) {
       throw new Error("Cupom PRIMEIRACOMPRA10 válido apenas para a primeira compra");
     }
+    const raw = Math.round((subtotalCents * FIRST_PURCHASE_PERCENT) / 100);
     return {
-      discountCents: Math.round((subtotalCents * FIRST_PURCHASE_PERCENT) / 100),
+      discountCents: Math.min(raw, FIRST_PURCHASE_MAX_DISCOUNT_CENTS),
       code: FIRST_PURCHASE_COUPON,
     };
   }
