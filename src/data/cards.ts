@@ -177,6 +177,7 @@ export const EXTRA_COLLECTIONS = [
   "CRI - Caos Ascendente",
   "EVO - Evolutions",
   "FLF - Flash de Fogo",
+  "UPR - Ultraprisma",
 ];
 
 export const COLLECTIONS = Array.from(
