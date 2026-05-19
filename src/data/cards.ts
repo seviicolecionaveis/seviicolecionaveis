@@ -174,6 +174,7 @@ export const EXTRA_COLLECTIONS = [
   "ASR - Estrelas Radiantes",
   "TEF - Forças Temporais",
   "SSH - Espada e Escudo",
+  "CRI - Caos Ascendente",
 ];
 
 export const COLLECTIONS = Array.from(
