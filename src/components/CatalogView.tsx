@@ -14,6 +14,7 @@ import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { TrustBadges } from "@/components/TrustBadges";
 import { SiteFooter } from "@/components/SiteFooter";
 import { RecentlyViewed } from "@/components/catalog/RecentlyViewed";
+import { NewArrivals } from "@/components/catalog/NewArrivals";
 import { SiteNav } from "@/components/SiteNav";
 import logoUrl from "@/assets/logo.png";
 
@@ -212,6 +213,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
 
       {showBanners && <BannerCarousel />}
       <TrustBadges />
+      {showBanners && <NewArrivals />}
 
       <h1 className="sr-only">{heading}</h1>
 
