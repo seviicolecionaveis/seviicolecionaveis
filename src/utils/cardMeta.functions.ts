@@ -8,6 +8,7 @@ const SlugInput = z.object({ slug: z.string().min(1).max(200) });
 export const getCardMetaBySlug = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => SlugInput.parse(d))
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows } = await supabaseAdmin
       .from("cards")
       .select("name, collection, card_number, image");
