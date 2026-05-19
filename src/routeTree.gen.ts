@@ -17,6 +17,7 @@ import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CartasRouteImport } from './routes/cartas'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -84,6 +85,11 @@ const ContaRoute = ContaRouteImport.update({
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartasRoute = CartasRouteImport.update({
+  id: '/cartas',
+  path: '/cartas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -238,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/conta': typeof ContaRoute
   '/faq': typeof FaqRoute
@@ -276,6 +283,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/conta': typeof ContaRoute
   '/faq': typeof FaqRoute
@@ -314,6 +322,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/conta': typeof ContaRoute
   '/faq': typeof FaqRoute
@@ -354,6 +363,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/cartas'
     | '/checkout'
     | '/conta'
     | '/faq'
@@ -392,6 +402,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/cartas'
     | '/checkout'
     | '/conta'
     | '/faq'
@@ -429,6 +440,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/cartas'
     | '/checkout'
     | '/conta'
     | '/faq'
@@ -468,6 +480,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
+  CartasRoute: typeof CartasRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ContaRoute: typeof ContaRoute
   FaqRoute: typeof FaqRoute
@@ -549,6 +562,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cartas': {
+      id: '/cartas'
+      path: '/cartas'
+      fullPath: '/cartas'
+      preLoaderRoute: typeof CartasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -801,6 +821,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
+  CartasRoute: CartasRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   ContaRoute: ContaRoute,
   FaqRoute: FaqRoute,
