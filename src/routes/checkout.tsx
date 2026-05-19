@@ -357,7 +357,9 @@ function CheckoutPage() {
       }
       const shippingCents = shipping === "fixed" && selectedQuote ? selectedQuote.priceCents : 0;
       const subtotalCents = Math.round(subtotal * 100);
-      const discountCents = couponInfo.valid ? Math.round((subtotalCents * couponInfo.percent) / 100) : 0;
+      const discountCents = couponInfo.valid
+        ? Math.min(Math.round((subtotalCents * couponInfo.percent) / 100), couponInfo.maxDiscount * 100)
+        : 0;
       const totalCents = subtotalCents - discountCents + shippingCents;
       setCard({
         totalCents,
