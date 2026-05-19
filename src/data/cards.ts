@@ -178,6 +178,7 @@ export const EXTRA_COLLECTIONS = [
   "EVO - Evolutions",
   "FLF - Flash de Fogo",
   "UPR - Ultraprisma",
+  "FST - Golpe Fusão",
 ];
 
 export const COLLECTIONS = Array.from(
