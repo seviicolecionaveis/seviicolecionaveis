@@ -179,6 +179,7 @@ export const EXTRA_COLLECTIONS = [
   "FLF - Flash de Fogo",
   "UPR - Ultraprisma",
   "FST - Golpe Fusão",
+  "TK6B - XY Trainer Kit - Sylveon",
 ];
 
 export const COLLECTIONS = Array.from(
