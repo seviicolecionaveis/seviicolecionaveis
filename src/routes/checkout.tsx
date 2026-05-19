@@ -562,8 +562,8 @@ function CheckoutPage() {
               <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
                 <input type="radio" name="ship" checked={shipping === "arrange"} onChange={() => setShipping("arrange")} className="mt-1" />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold">🤝 Combinar envio com vendedor</p>
-                  <p className="text-xs text-muted-foreground">Sem cobrança de frete agora — combinamos via WhatsApp depois.</p>
+                  <p className="text-sm font-semibold">Retirada em mãos (somente em Aracaju)</p>
+                  <p className="text-xs text-muted-foreground">Entraremos em contato por e-mail ou whatsapp</p>
                 </div>
               </label>
             </div>
