@@ -28,9 +28,10 @@ export const getCardMetaBySlug = createServerFn({ method: "POST" })
 export const getCollectionMetaBySlug = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => SlugInput.parse(d))
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows } = await supabaseAdmin
       .from("cards")
-      .select("collection, image")
+      .select("collection, image, updated_at")
       .order("updated_at", { ascending: false });
     if (!rows) return null;
     const match = rows.find((r) => collectionSlug(r.collection) === data.slug);
