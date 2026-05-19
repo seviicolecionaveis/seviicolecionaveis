@@ -35,6 +35,7 @@ const ADMIN_COUPON_CODE = "POKEAGIOTAGEM";
 const ADMIN_COUPON_PERCENT = 30;
 const FIRST_PURCHASE_COUPON = "PRIMEIRACOMPRA10";
 const FIRST_PURCHASE_PERCENT = 10;
+const FIRST_PURCHASE_MAX_DISCOUNT_CENTS = 2000; // teto de R$ 20,00
 const PIX_EXPIRES_MINUTES = 30;
 
 function computeShippingCents(input: {
@@ -80,8 +81,9 @@ async function validateCoupon(
     if ((count ?? 0) > 0) {
       throw new Error("Cupom PRIMEIRACOMPRA10 válido apenas para a primeira compra");
     }
+    const raw = Math.round((subtotalCents * FIRST_PURCHASE_PERCENT) / 100);
     return {
-      discountCents: Math.round((subtotalCents * FIRST_PURCHASE_PERCENT) / 100),
+      discountCents: Math.min(raw, FIRST_PURCHASE_MAX_DISCOUNT_CENTS),
       code: FIRST_PURCHASE_COUPON,
     };
   }
