@@ -13,6 +13,7 @@ import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as ImasRouteImport } from './routes/imas'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContaRouteImport } from './routes/conta'
@@ -65,6 +66,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const OrdersRoute = OrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImasRoute = ImasRouteImport.update({
+  id: '/imas',
+  path: '/imas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FavoritosRoute = FavoritosRouteImport.update({
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/conta': typeof ContaRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
+  '/imas': typeof ImasRoute
   '/orders': typeof OrdersRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByTo {
   '/conta': typeof ContaRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
+  '/imas': typeof ImasRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -327,6 +335,7 @@ export interface FileRoutesById {
   '/conta': typeof ContaRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
+  '/imas': typeof ImasRoute
   '/orders': typeof OrdersRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
@@ -368,6 +377,7 @@ export interface FileRouteTypes {
     | '/conta'
     | '/faq'
     | '/favoritos'
+    | '/imas'
     | '/orders'
     | '/sitemap.xml'
     | '/sobre'
@@ -407,6 +417,7 @@ export interface FileRouteTypes {
     | '/conta'
     | '/faq'
     | '/favoritos'
+    | '/imas'
     | '/sitemap.xml'
     | '/sobre'
     | '/unsubscribe'
@@ -445,6 +456,7 @@ export interface FileRouteTypes {
     | '/conta'
     | '/faq'
     | '/favoritos'
+    | '/imas'
     | '/orders'
     | '/sitemap.xml'
     | '/sobre'
@@ -485,6 +497,7 @@ export interface RootRouteChildren {
   ContaRoute: typeof ContaRoute
   FaqRoute: typeof FaqRoute
   FavoritosRoute: typeof FavoritosRoute
+  ImasRoute: typeof ImasRoute
   OrdersRoute: typeof OrdersRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
@@ -534,6 +547,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/orders'
       preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/imas': {
+      id: '/imas'
+      path: '/imas'
+      fullPath: '/imas'
+      preLoaderRoute: typeof ImasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/favoritos': {
@@ -826,6 +846,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContaRoute: ContaRoute,
   FaqRoute: FaqRoute,
   FavoritosRoute: FavoritosRoute,
+  ImasRoute: ImasRoute,
   OrdersRoute: OrdersRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
