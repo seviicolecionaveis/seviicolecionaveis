@@ -237,11 +237,11 @@ function CheckoutPage() {
     shipping === "fixed" ? (selectedQuote ? selectedQuote.priceCents / 100 : 0) : 0;
   const couponNormalized = form.couponCode.trim().toUpperCase();
   const couponInfo = (() => {
-    if (couponNormalized === "POKEAGIOTAGEM") return { valid: true, percent: 30, label: "POKEAGIOTAGEM −30% (admin)" };
-    if (couponNormalized === "PRIMEIRACOMPRA10") return { valid: true, percent: 10, label: "PRIMEIRACOMPRA10 −10% (1ª compra)" };
-    return { valid: false, percent: 0, label: "" };
+    if (couponNormalized === "POKEAGIOTAGEM") return { valid: true, percent: 30, label: "POKEAGIOTAGEM −30% (admin)", maxDiscount: Infinity };
+    if (couponNormalized === "PRIMEIRACOMPRA10") return { valid: true, percent: 10, label: "PRIMEIRACOMPRA10 −10% (1ª compra, até R$ 20)", maxDiscount: 20 };
+    return { valid: false, percent: 0, label: "", maxDiscount: 0 };
   })();
-  const discount = couponInfo.valid ? subtotal * (couponInfo.percent / 100) : 0;
+  const discount = couponInfo.valid ? Math.min(subtotal * (couponInfo.percent / 100), couponInfo.maxDiscount) : 0;
   const total = subtotal - discount + shippingCost;
 
   const persistAddressAndProfile = async () => {
