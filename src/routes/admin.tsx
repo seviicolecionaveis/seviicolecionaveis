@@ -307,7 +307,7 @@ function AdminPage() {
                   </div>
                   <select
                     value={o.status}
-                    onChange={(e) => updateStatus(o.id, e.target.value, o.tracking_code)}
+                    onChange={(e) => updateStatus(o.id, e.target.value, o)}
                     className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold"
                   >
                     {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
@@ -315,25 +315,30 @@ function AdminPage() {
                 </div>
 
                 {(o.status === "shipped" || o.status === "delivered") && (
-                  <div className="mb-3 flex items-center gap-2 text-xs">
+                  <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
                     <span className="text-muted-foreground">Rastreio:</span>
                     {o.tracking_code ? (
                       <>
                         <span className="font-mono font-semibold">{o.tracking_code}</span>
+                        {o.carrier && (
+                          <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-bold uppercase">
+                            {o.carrier === "latam" ? "Latam" : "Correios"}
+                          </span>
+                        )}
                         <a
-                          href="https://rastreamento.correios.com.br/app/index.php"
+                          href={o.tracking_url || CORREIOS_URL}
                           target="_blank"
                           rel="noreferrer"
                           className="text-foreground underline"
                         >
-                          abrir Correios
+                          abrir {o.carrier === "latam" ? "Latam" : "Correios"}
                         </a>
                       </>
                     ) : (
                       <span className="text-muted-foreground italic">não informado</span>
                     )}
                     <button
-                      onClick={() => updateTracking(o.id, o.tracking_code)}
+                      onClick={() => updateTracking(o.id, o)}
                       className="ml-auto text-foreground hover:underline font-semibold"
                     >
                       {o.tracking_code ? "editar" : "adicionar"}
