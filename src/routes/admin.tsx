@@ -113,19 +113,54 @@ function AdminPage() {
     return () => clearTimeout(t);
   }, [focusId, loading, orders]);
 
-  const updateStatus = async (id: string, status: string, currentTracking?: string | null) => {
+  const CORREIOS_URL = "https://rastreamento.correios.com.br/app/index.php";
+
+  const promptShippingInfo = (order: any) => {
+    const carrierAns = prompt(
+      "Transportadora: digite 1 para Correios ou 2 para Latam. Deixe em branco para não enviar a info ainda.",
+      order?.carrier === "latam" ? "2" : order?.carrier === "correios" ? "1" : "1",
+    );
+    if (carrierAns === null) return null;
+    const trimmed = carrierAns.trim();
+    let carrier: "correios" | "latam" | null = null;
+    if (trimmed === "1" || /correios/i.test(trimmed)) carrier = "correios";
+    else if (trimmed === "2" || /latam/i.test(trimmed)) carrier = "latam";
+
+    const codeAns = prompt(
+      "Código de rastreio (deixe em branco para enviar sem código).",
+      order?.tracking_code ?? "",
+    );
+    if (codeAns === null) return null;
+    const tracking_code = codeAns.trim() || null;
+
+    let tracking_url: string | null = null;
+    if (carrier === "correios") {
+      tracking_url = CORREIOS_URL;
+    } else if (carrier === "latam") {
+      const urlAns = prompt(
+        "Cole o link de rastreio da Latam (URL completa começando com https://).",
+        order?.tracking_url ?? "",
+      );
+      if (urlAns === null) return null;
+      tracking_url = urlAns.trim() || null;
+      if (tracking_url && !/^https?:\/\//i.test(tracking_url)) {
+        toast.error("Link inválido. A URL precisa começar com http:// ou https://");
+        return null;
+      }
+    }
+    return { carrier, tracking_code, tracking_url };
+  };
+
+  const updateStatus = async (id: string, status: string, order: any) => {
     try {
-      let trackingCode: string | undefined | null = undefined;
+      let extra: any = {};
       if (status === "shipped") {
-        const input = prompt(
-          "Código de rastreio dos Correios (ex: AA123456789BR). Deixe em branco para enviar sem rastreio.",
-          currentTracking ?? "",
-        );
-        if (input === null) return;
-        trackingCode = input.trim() || null;
+        const info = promptShippingInfo(order);
+        if (info === null) return;
+        extra = info;
       }
       await adminUpdateOrderStatus({
-        data: { order_id: id, status: status as any, ...(trackingCode !== undefined ? { tracking_code: trackingCode } : {}) },
+        data: { order_id: id, status: status as any, ...extra },
       });
       await load();
     } catch (e: any) {
@@ -133,12 +168,12 @@ function AdminPage() {
     }
   };
 
-  const updateTracking = async (id: string, current: string | null) => {
-    const input = prompt("Atualizar código de rastreio:", current ?? "");
-    if (input === null) return;
+  const updateTracking = async (id: string, order: any) => {
+    const info = promptShippingInfo(order);
+    if (info === null) return;
     try {
       await adminUpdateOrderStatus({
-        data: { order_id: id, status: "shipped", tracking_code: input.trim() || null },
+        data: { order_id: id, status: "shipped", ...info },
       });
       toast.success("Rastreio atualizado.");
       await load();
