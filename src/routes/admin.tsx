@@ -317,11 +317,22 @@ function AdminPage() {
                   <div>
                     <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">Itens</p>
                     <ul className="space-y-0.5">
-                      {o.order_items?.map((it: any) => (
-                        <li key={it.id} className="text-xs">
-                          {it.quantity}× {it.card_name}{it.card_number ? ` ${it.card_number}` : ""} <span className="text-muted-foreground">({it.finish}, {it.language})</span>
-                        </li>
-                      ))}
+                      {o.order_items?.map((it: any) => {
+                        const lineTotal = (it.unit_price_cents ?? 0) * (it.quantity ?? 0);
+                        return (
+                          <li key={it.id} className="text-xs flex justify-between gap-2">
+                            <span>
+                              {it.quantity}× {it.card_name}{it.card_number ? ` ${it.card_number}` : ""} <span className="text-muted-foreground">({it.finish}, {it.language})</span>
+                            </span>
+                            <span className="tabular-nums text-muted-foreground shrink-0">
+                              R$ {(it.unit_price_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                              {it.quantity > 1 && (
+                                <> · <span className="font-semibold text-foreground">R$ {(lineTotal / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span></>
+                              )}
+                            </span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 </div>
