@@ -211,9 +211,9 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
         </div>
       </header>
 
-      {showBanners && <BannerCarousel />}
+      {showBanners && query.trim() === "" && <BannerCarousel />}
       <TrustBadges />
-      {showBanners && <NewArrivals />}
+      {showBanners && query.trim() === "" && <NewArrivals />}
 
       <h1 className="sr-only">{heading}</h1>
 
