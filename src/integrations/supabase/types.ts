@@ -405,6 +405,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          carrier: string | null
           cep: string
           city: string
           complement: string | null
@@ -442,10 +443,12 @@ export type Database = {
           superfrete_status: string | null
           total_cents: number
           tracking_code: string | null
+          tracking_url: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          carrier?: string | null
           cep: string
           city: string
           complement?: string | null
@@ -483,10 +486,12 @@ export type Database = {
           superfrete_status?: string | null
           total_cents: number
           tracking_code?: string | null
+          tracking_url?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          carrier?: string | null
           cep?: string
           city?: string
           complement?: string | null
@@ -524,6 +529,7 @@ export type Database = {
           superfrete_status?: string | null
           total_cents?: number
           tracking_code?: string | null
+          tracking_url?: string | null
           updated_at?: string
           user_id?: string
         }
