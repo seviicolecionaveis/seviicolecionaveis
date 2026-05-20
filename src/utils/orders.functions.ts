@@ -16,6 +16,11 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
         "cancellation_requested",
       ]),
       tracking_code: z.string().trim().max(60).optional().nullable(),
+      carrier: z.enum(["correios", "latam"]).optional().nullable(),
+      tracking_url: z.preprocess(
+        (v) => (typeof v === "string" && v.trim() === "" ? null : v),
+        z.string().trim().max(500).url().optional().nullable(),
+      ),
     }).parse(d),
   )
   .middleware([requireSupabaseAuth])
@@ -24,25 +29,29 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
       await import("@/lib/order-cancellation.server");
     const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
-    const order = await getOrderById(data.order_id, "id, status, email, recipient_name, tracking_code");
+    const order = await getOrderById(data.order_id, "id, status, email, recipient_name, tracking_code, carrier, tracking_url");
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
 
     const trackingProvided = typeof data.tracking_code === "string";
     const newTracking = trackingProvided ? (data.tracking_code?.trim() || null) : undefined;
+    const carrierProvided = data.carrier !== undefined;
+    const newCarrier = carrierProvided ? (data.carrier ?? null) : undefined;
+    const trackingUrlProvided = data.tracking_url !== undefined;
+    const newTrackingUrl = trackingUrlProvided ? (data.tracking_url || null) : undefined;
+
     const statusChanged = order.status !== data.status;
     const trackingChanged = trackingProvided && newTracking !== (order.tracking_code ?? null);
+    const carrierChanged = carrierProvided && newCarrier !== ((order as any).carrier ?? null);
+    const trackingUrlChanged = trackingUrlProvided && newTrackingUrl !== ((order as any).tracking_url ?? null);
 
-    if (!statusChanged && !trackingChanged) return { ok: true };
+    if (!statusChanged && !trackingChanged && !carrierChanged && !trackingUrlChanged) return { ok: true };
 
-    // Special case: transição para "paid" usa markOrderPaid (decrementa estoque
-    // e dispara o e-mail de confirmação de pagamento).
     if (statusChanged && data.status === "paid") {
       const { markOrderPaid } = await import("@/lib/orders.server");
       await markOrderPaid(order.id);
       return { ok: true };
     }
 
-    // Special case: cancelamento manual restaura estoque se o pedido estava pago.
     if (statusChanged && data.status === "cancelled") {
       await restoreStockIfPaid(order.id, order.status);
       await deleteStockReservations(order.id);
@@ -51,9 +60,14 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
     const patch: Record<string, any> = {};
     if (statusChanged) patch.status = data.status;
     if (trackingChanged) patch.tracking_code = newTracking;
+    if (carrierChanged) patch.carrier = newCarrier;
+    if (trackingUrlChanged) patch.tracking_url = newTrackingUrl;
     await updateOrder(order.id, patch);
 
     if (order.email && statusChanged) {
+      const effectiveCarrier = carrierProvided ? newCarrier : ((order as any).carrier ?? null);
+      const effectiveTracking = trackingProvided ? newTracking : (order.tracking_code ?? null);
+      const effectiveTrackingUrl = trackingUrlProvided ? newTrackingUrl : ((order as any).tracking_url ?? null);
       await sendTransactionalEmailSafe({
         templateName: "order-status-updated",
         recipientEmail: order.email,
@@ -62,7 +76,9 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
           recipientName: order.recipient_name?.split(/\s+/)[0],
           orderId: order.id,
           status: data.status,
-          trackingCode: data.status === "shipped" ? (newTracking ?? order.tracking_code ?? null) : null,
+          trackingCode: data.status === "shipped" ? effectiveTracking : null,
+          carrier: data.status === "shipped" ? effectiveCarrier : null,
+          trackingUrl: data.status === "shipped" ? effectiveTrackingUrl : null,
         },
       });
     }

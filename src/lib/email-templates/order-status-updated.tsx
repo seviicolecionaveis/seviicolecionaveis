@@ -8,6 +8,8 @@ interface OrderStatusUpdatedProps {
   orderId?: string
   status?: string
   trackingCode?: string | null
+  carrier?: 'correios' | 'latam' | null
+  trackingUrl?: string | null
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -37,6 +39,8 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
   orderId,
   status,
   trackingCode,
+  carrier,
+  trackingUrl,
 }) => {
   const shortId = orderId ? `#${orderId.slice(0, 8).toUpperCase()}` : ''
   const label = (status && STATUS_LABEL[status]) || status || 'Atualizado'
@@ -44,6 +48,8 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
     (status && STATUS_MESSAGE[status]) ||
     'Houve uma atualização no status do seu pedido.'
   const showTracking = status === 'shipped' && trackingCode
+  const carrierLabel = carrier === 'latam' ? 'Latam Cargo' : 'Correios'
+  const trackUrl = trackingUrl || CORREIOS_URL
 
   return (
     <EmailLayout preview={`Pedido ${shortId}: ${label}`}>
@@ -63,12 +69,15 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
 
         {showTracking && (
           <>
-            <Text style={{ ...styles.muted, margin: '16px 0 4px' }}>Código de rastreio</Text>
+            <Text style={{ ...styles.muted, margin: '16px 0 4px' }}>
+              Transportadora: <strong>{carrierLabel}</strong>
+            </Text>
+            <Text style={{ ...styles.muted, margin: '8px 0 4px' }}>Código de rastreio</Text>
             <Text style={{ ...styles.text, margin: '0 0 12px', fontFamily: 'monospace', fontWeight: 600 }}>
               {trackingCode}
             </Text>
-            <Button href={CORREIOS_URL} style={{ background: '#111', color: '#fff', padding: '10px 18px', borderRadius: 6, fontWeight: 600, fontSize: 13 }}>
-              Rastrear nos Correios
+            <Button href={trackUrl} style={{ background: '#111', color: '#fff', padding: '10px 18px', borderRadius: 6, fontWeight: 600, fontSize: 13 }}>
+              Rastrear na {carrierLabel}
             </Button>
           </>
         )}
