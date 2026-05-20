@@ -48,6 +48,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicPaymentsMercadopagoWebhookRouteImport } from './routes/api/public/payments/mercadopago-webhook'
 import { Route as ApiPublicMelhorenvioCallbackRouteImport } from './routes/api/public/melhorenvio/callback'
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
+import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/public/hooks/price-drop-check'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -251,6 +252,12 @@ const ApiPublicHooksUpdatePricesRoute =
     path: '/api/public/hooks/update-prices',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksPriceDropCheckRoute =
+  ApiPublicHooksPriceDropCheckRouteImport.update({
+    id: '/api/public/hooks/price-drop-check',
+    path: '/api/public/hooks/price-drop-check',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -283,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/orders/': typeof OrdersIndexRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -323,6 +331,7 @@ export interface FileRoutesByTo {
   '/orders': typeof OrdersIndexRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -365,6 +374,7 @@ export interface FileRoutesById {
   '/orders/': typeof OrdersIndexRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -408,6 +418,7 @@ export interface FileRouteTypes {
     | '/orders/'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
@@ -448,6 +459,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
@@ -489,6 +501,7 @@ export interface FileRouteTypes {
     | '/orders/'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
@@ -521,6 +534,7 @@ export interface RootRouteChildren {
   PayOrderIdRoute: typeof PayOrderIdRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksPriceDropCheckRoute: typeof ApiPublicHooksPriceDropCheckRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
   ApiPublicMelhorenvioCallbackRoute: typeof ApiPublicMelhorenvioCallbackRoute
   ApiPublicPaymentsMercadopagoWebhookRoute: typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -807,6 +821,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksUpdatePricesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/price-drop-check': {
+      id: '/api/public/hooks/price-drop-check'
+      path: '/api/public/hooks/price-drop-check'
+      fullPath: '/api/public/hooks/price-drop-check'
+      preLoaderRoute: typeof ApiPublicHooksPriceDropCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -878,6 +899,7 @@ const rootRouteChildren: RootRouteChildren = {
   PayOrderIdRoute: PayOrderIdRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksPriceDropCheckRoute: ApiPublicHooksPriceDropCheckRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,
   ApiPublicMelhorenvioCallbackRoute: ApiPublicMelhorenvioCallbackRoute,
   ApiPublicPaymentsMercadopagoWebhookRoute:

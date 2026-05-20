@@ -95,6 +95,24 @@ export type Database = {
         }
         Relationships: []
       }
+      card_price_watch: {
+        Row: {
+          card_id: string
+          last_min_price_cents: number
+          updated_at: string
+        }
+        Insert: {
+          card_id: string
+          last_min_price_cents: number
+          updated_at?: string
+        }
+        Update: {
+          card_id?: string
+          last_min_price_cents?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       card_prices: {
         Row: {
           card_name: string
