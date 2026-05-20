@@ -8,6 +8,8 @@ interface OrderStatusUpdatedProps {
   orderId?: string
   status?: string
   trackingCode?: string | null
+  carrier?: 'correios' | 'latam' | null
+  trackingUrl?: string | null
 }
 
 const STATUS_LABEL: Record<string, string> = {
