@@ -234,18 +234,42 @@ function CheckoutPage() {
     fetchQuotes(clean);
   };
 
-  const shippingCost =
-    shipping === "fixed" ? (selectedQuote ? selectedQuote.priceCents / 100 : 0) : 0;
+  const shippingCents =
+    shipping === "fixed" ? (selectedQuote ? selectedQuote.priceCents : 0) : 0;
+  const shippingCost = shippingCents / 100;
   const couponNormalized = form.couponCode.trim().toUpperCase();
   const couponInfo = (() => {
     if (couponNormalized === "POKEAGIOTAGEM") return { valid: true, percent: 30, label: "POKEAGIOTAGEM −30% (admin)", maxDiscount: Infinity };
     if (couponNormalized === "PRIMEIRACOMPRA10") return { valid: true, percent: 10, label: "PRIMEIRACOMPRA10 −10% (1ª compra, até R$ 20)", maxDiscount: 20 };
     return { valid: false, percent: 0, label: "", maxDiscount: 0 };
   })();
-  const discount = couponInfo.valid ? Math.min(subtotal * (couponInfo.percent / 100), couponInfo.maxDiscount) : 0;
   const PIX_DISCOUNT_PERCENT = 5;
-  const pixDiscount = paymentMethod === "pix" ? Math.max(0, (subtotal - discount)) * (PIX_DISCOUNT_PERCENT / 100) : 0;
-  const total = subtotal - discount - pixDiscount + shippingCost;
+
+  const subtotalCents = Math.round(subtotal * 100);
+  const bundle = computeBundleDiscount(items);
+  const bundleDiscountCents = bundle.bundleDiscountCents;
+  const bundleSubtotalCents = bundle.bundleSubtotalCents;
+  // Base sobre a qual cupom e Pix podem incidir (exclui itens em combo)
+  const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundleSubtotalCents);
+  const couponDiscountCents = couponInfo.valid
+    ? Math.min(
+        Math.round((nonBundleSubtotalCents * couponInfo.percent) / 100),
+        couponInfo.maxDiscount === Infinity ? Number.MAX_SAFE_INTEGER : couponInfo.maxDiscount * 100,
+      )
+    : 0;
+  const pixDiscountCents =
+    paymentMethod === "pix"
+      ? Math.round(
+          Math.max(0, nonBundleSubtotalCents - couponDiscountCents) * (PIX_DISCOUNT_PERCENT / 100),
+        )
+      : 0;
+  const totalCents =
+    subtotalCents - bundleDiscountCents - couponDiscountCents - pixDiscountCents + shippingCents;
+
+  const discount = couponDiscountCents / 100;
+  const pixDiscount = pixDiscountCents / 100;
+  const bundleDiscount = bundleDiscountCents / 100;
+  const total = totalCents / 100;
 
   const persistAddressAndProfile = async () => {
     if (!user) return;
