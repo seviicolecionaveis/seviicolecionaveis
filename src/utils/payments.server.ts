@@ -332,14 +332,22 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
   );
   const shippingCents = computeShippingCents(data);
 
+  const bundle = computeBundleDiscount(data.items);
+  const bundleDiscountCents = bundle.bundleDiscountCents;
+  const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundle.bundleSubtotalCents);
+
   const { discountCents: couponDiscountCents, code: appliedCoupon } = await validateCoupon(
     userId,
     data.couponCode,
-    subtotalCents,
+    nonBundleSubtotalCents,
   );
 
-  const pixDiscountCents = computePixDiscountCents(subtotalCents, couponDiscountCents);
-  const discountCents = couponDiscountCents + pixDiscountCents;
+  // Pix 5% incide apenas sobre o que sobra fora do combo (após cupom)
+  const pixDiscountCents = computePixDiscountCents(
+    nonBundleSubtotalCents,
+    couponDiscountCents,
+  );
+  const discountCents = bundleDiscountCents + couponDiscountCents + pixDiscountCents;
 
   const items = await resolveCardIds(data.items);
   await ensureAvailableStock(items);
