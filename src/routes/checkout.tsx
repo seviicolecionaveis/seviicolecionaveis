@@ -698,6 +698,14 @@ function CheckoutPage() {
               <span className="text-muted-foreground">Subtotal</span>
               <span className="tabular-nums">R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
             </div>
+            {bundle.applied.map((b) => (
+              <div key={b.id} className="flex justify-between text-green-600">
+                <span className="truncate pr-2">
+                  Combo {b.sets > 1 ? `${b.sets}× ` : ""}— {b.label.replace(/^Combo\s*/i, "")}
+                </span>
+                <span className="tabular-nums shrink-0">− R$ {(b.discountCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+              </div>
+            ))}
             {couponInfo.valid && (
               <div className="flex justify-between text-green-600">
                 <span>Desconto −{couponInfo.percent}%</span>
