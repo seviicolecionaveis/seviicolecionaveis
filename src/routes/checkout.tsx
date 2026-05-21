@@ -617,8 +617,11 @@ function CheckoutPage() {
                   });
                 }} className="mt-1" />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold flex items-center gap-2"><QrCode className="h-4 w-4" /> Pix</p>
-                  <p className="text-xs text-muted-foreground">Aprovação instantânea — gera QR Code e código copia e cola.</p>
+                  <p className="text-sm font-semibold flex items-center gap-2">
+                    <QrCode className="h-4 w-4" /> Pix
+                    <span className="ml-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">5% OFF</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">Aprovação instantânea — gera QR Code e código copia e cola. Ganhe 5% de desconto automático.</p>
                 </div>
               </label>
               <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
