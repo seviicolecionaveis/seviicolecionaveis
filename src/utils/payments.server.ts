@@ -4,6 +4,7 @@ import { createPixPayment, getPixPayment, createCardPaymentMP } from "@/lib/merc
 import { markOrderPaid, cancelOrder } from "@/lib/orders.server";
 import type { CardInput, PixInput, StripeInput } from "./payments.schemas";
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
+import { computeBundleDiscount } from "@/lib/bundles";
 
 async function sendOrderReceivedEmail(orderId: string) {
   const { data: order } = await supabaseAdmin
@@ -204,11 +205,16 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
   );
   const shippingCents = computeShippingCents(data);
 
-  const { discountCents, code: appliedCoupon } = await validateCoupon(
+  const bundle = computeBundleDiscount(data.items);
+  const bundleDiscountCents = bundle.bundleDiscountCents;
+  const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundle.bundleSubtotalCents);
+
+  const { discountCents: couponDiscountCents, code: appliedCoupon } = await validateCoupon(
     userId,
     data.couponCode,
-    subtotalCents,
+    nonBundleSubtotalCents,
   );
+  const discountCents = bundleDiscountCents + couponDiscountCents;
 
   const items = await resolveCardIds(data.items);
   await ensureAvailableStock(items);
@@ -326,14 +332,22 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
   );
   const shippingCents = computeShippingCents(data);
 
+  const bundle = computeBundleDiscount(data.items);
+  const bundleDiscountCents = bundle.bundleDiscountCents;
+  const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundle.bundleSubtotalCents);
+
   const { discountCents: couponDiscountCents, code: appliedCoupon } = await validateCoupon(
     userId,
     data.couponCode,
-    subtotalCents,
+    nonBundleSubtotalCents,
   );
 
-  const pixDiscountCents = computePixDiscountCents(subtotalCents, couponDiscountCents);
-  const discountCents = couponDiscountCents + pixDiscountCents;
+  // Pix 5% incide apenas sobre o que sobra fora do combo (após cupom)
+  const pixDiscountCents = computePixDiscountCents(
+    nonBundleSubtotalCents,
+    couponDiscountCents,
+  );
+  const discountCents = bundleDiscountCents + couponDiscountCents + pixDiscountCents;
 
   const items = await resolveCardIds(data.items);
   await ensureAvailableStock(items);
@@ -465,11 +479,16 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
   );
   const shippingCents = computeShippingCents(data);
 
-  const { discountCents, code: appliedCoupon } = await validateCoupon(
+  const bundle = computeBundleDiscount(data.items);
+  const bundleDiscountCents = bundle.bundleDiscountCents;
+  const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundle.bundleSubtotalCents);
+
+  const { discountCents: couponDiscountCents, code: appliedCoupon } = await validateCoupon(
     userId,
     data.couponCode,
-    subtotalCents,
+    nonBundleSubtotalCents,
   );
+  const discountCents = bundleDiscountCents + couponDiscountCents;
 
   const items = await resolveCardIds(data.items);
   await ensureAvailableStock(items);

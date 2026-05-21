@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Copy, Check, QrCode, CreditCard, Loader2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
+import { computeBundleDiscount } from "@/lib/bundles";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -233,18 +234,42 @@ function CheckoutPage() {
     fetchQuotes(clean);
   };
 
-  const shippingCost =
-    shipping === "fixed" ? (selectedQuote ? selectedQuote.priceCents / 100 : 0) : 0;
+  const shippingCents =
+    shipping === "fixed" ? (selectedQuote ? selectedQuote.priceCents : 0) : 0;
+  const shippingCost = shippingCents / 100;
   const couponNormalized = form.couponCode.trim().toUpperCase();
   const couponInfo = (() => {
     if (couponNormalized === "POKEAGIOTAGEM") return { valid: true, percent: 30, label: "POKEAGIOTAGEM −30% (admin)", maxDiscount: Infinity };
     if (couponNormalized === "PRIMEIRACOMPRA10") return { valid: true, percent: 10, label: "PRIMEIRACOMPRA10 −10% (1ª compra, até R$ 20)", maxDiscount: 20 };
     return { valid: false, percent: 0, label: "", maxDiscount: 0 };
   })();
-  const discount = couponInfo.valid ? Math.min(subtotal * (couponInfo.percent / 100), couponInfo.maxDiscount) : 0;
   const PIX_DISCOUNT_PERCENT = 5;
-  const pixDiscount = paymentMethod === "pix" ? Math.max(0, (subtotal - discount)) * (PIX_DISCOUNT_PERCENT / 100) : 0;
-  const total = subtotal - discount - pixDiscount + shippingCost;
+
+  const subtotalCents = Math.round(subtotal * 100);
+  const bundle = computeBundleDiscount(items);
+  const bundleDiscountCents = bundle.bundleDiscountCents;
+  const bundleSubtotalCents = bundle.bundleSubtotalCents;
+  // Base sobre a qual cupom e Pix podem incidir (exclui itens em combo)
+  const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundleSubtotalCents);
+  const couponDiscountCents = couponInfo.valid
+    ? Math.min(
+        Math.round((nonBundleSubtotalCents * couponInfo.percent) / 100),
+        couponInfo.maxDiscount === Infinity ? Number.MAX_SAFE_INTEGER : couponInfo.maxDiscount * 100,
+      )
+    : 0;
+  const pixDiscountCents =
+    paymentMethod === "pix"
+      ? Math.round(
+          Math.max(0, nonBundleSubtotalCents - couponDiscountCents) * (PIX_DISCOUNT_PERCENT / 100),
+        )
+      : 0;
+  const totalCents =
+    subtotalCents - bundleDiscountCents - couponDiscountCents - pixDiscountCents + shippingCents;
+
+  const discount = couponDiscountCents / 100;
+  const pixDiscount = pixDiscountCents / 100;
+  const bundleDiscount = bundleDiscountCents / 100;
+  const total = totalCents / 100;
 
   const persistAddressAndProfile = async () => {
     if (!user) return;
@@ -357,12 +382,8 @@ function CheckoutPage() {
       } catch (e) {
         console.warn("persistAddressAndProfile falhou (seguindo mesmo assim):", e);
       }
-      const shippingCents = shipping === "fixed" && selectedQuote ? selectedQuote.priceCents : 0;
-      const subtotalCents = Math.round(subtotal * 100);
-      const discountCents = couponInfo.valid
-        ? Math.min(Math.round((subtotalCents * couponInfo.percent) / 100), couponInfo.maxDiscount * 100)
-        : 0;
-      const totalCents = subtotalCents - discountCents + shippingCents;
+      // O servidor recalcula tudo (combo + cupom + Pix) por segurança;
+      // aqui só passamos o totalCents já calculado para exibir no CardBrick.
       setCard({
         totalCents,
         payerEmail: user.email ?? "",
@@ -677,6 +698,14 @@ function CheckoutPage() {
               <span className="text-muted-foreground">Subtotal</span>
               <span className="tabular-nums">R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
             </div>
+            {bundle.applied.map((b) => (
+              <div key={b.id} className="flex justify-between text-green-600">
+                <span className="truncate pr-2">
+                  Combo {b.sets > 1 ? `${b.sets}× ` : ""}— {b.label.replace(/^Combo\s*/i, "")}
+                </span>
+                <span className="tabular-nums shrink-0">− R$ {(b.discountCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+              </div>
+            ))}
             {couponInfo.valid && (
               <div className="flex justify-between text-green-600">
                 <span>Desconto −{couponInfo.percent}%</span>
