@@ -326,11 +326,14 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
   );
   const shippingCents = computeShippingCents(data);
 
-  const { discountCents, code: appliedCoupon } = await validateCoupon(
+  const { discountCents: couponDiscountCents, code: appliedCoupon } = await validateCoupon(
     userId,
     data.couponCode,
     subtotalCents,
   );
+
+  const pixDiscountCents = computePixDiscountCents(subtotalCents, couponDiscountCents);
+  const discountCents = couponDiscountCents + pixDiscountCents;
 
   const items = await resolveCardIds(data.items);
   await ensureAvailableStock(items);
