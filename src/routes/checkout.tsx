@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Copy, Check, QrCode, CreditCard, Loader2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
+import { computeBundleDiscount } from "@/lib/bundles";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
