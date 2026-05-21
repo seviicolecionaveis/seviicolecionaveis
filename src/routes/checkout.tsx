@@ -382,12 +382,8 @@ function CheckoutPage() {
       } catch (e) {
         console.warn("persistAddressAndProfile falhou (seguindo mesmo assim):", e);
       }
-      const shippingCents = shipping === "fixed" && selectedQuote ? selectedQuote.priceCents : 0;
-      const subtotalCents = Math.round(subtotal * 100);
-      const discountCents = couponInfo.valid
-        ? Math.min(Math.round((subtotalCents * couponInfo.percent) / 100), couponInfo.maxDiscount * 100)
-        : 0;
-      const totalCents = subtotalCents - discountCents + shippingCents;
+      // O servidor recalcula tudo (combo + cupom + Pix) por segurança;
+      // aqui só passamos o totalCents já calculado para exibir no CardBrick.
       setCard({
         totalCents,
         payerEmail: user.email ?? "",
