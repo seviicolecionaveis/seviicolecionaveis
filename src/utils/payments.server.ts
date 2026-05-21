@@ -205,11 +205,16 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
   );
   const shippingCents = computeShippingCents(data);
 
-  const { discountCents, code: appliedCoupon } = await validateCoupon(
+  const bundle = computeBundleDiscount(data.items);
+  const bundleDiscountCents = bundle.bundleDiscountCents;
+  const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundle.bundleSubtotalCents);
+
+  const { discountCents: couponDiscountCents, code: appliedCoupon } = await validateCoupon(
     userId,
     data.couponCode,
-    subtotalCents,
+    nonBundleSubtotalCents,
   );
+  const discountCents = bundleDiscountCents + couponDiscountCents;
 
   const items = await resolveCardIds(data.items);
   await ensureAvailableStock(items);
