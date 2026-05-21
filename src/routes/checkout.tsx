@@ -242,7 +242,9 @@ function CheckoutPage() {
     return { valid: false, percent: 0, label: "", maxDiscount: 0 };
   })();
   const discount = couponInfo.valid ? Math.min(subtotal * (couponInfo.percent / 100), couponInfo.maxDiscount) : 0;
-  const total = subtotal - discount + shippingCost;
+  const PIX_DISCOUNT_PERCENT = 5;
+  const pixDiscount = paymentMethod === "pix" ? Math.max(0, (subtotal - discount)) * (PIX_DISCOUNT_PERCENT / 100) : 0;
+  const total = subtotal - discount - pixDiscount + shippingCost;
 
   const persistAddressAndProfile = async () => {
     if (!user) return;
