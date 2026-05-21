@@ -4,6 +4,7 @@ import { createPixPayment, getPixPayment, createCardPaymentMP } from "@/lib/merc
 import { markOrderPaid, cancelOrder } from "@/lib/orders.server";
 import type { CardInput, PixInput, StripeInput } from "./payments.schemas";
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
+import { computeBundleDiscount } from "@/lib/bundles";
 
 async function sendOrderReceivedEmail(orderId: string) {
   const { data: order } = await supabaseAdmin
