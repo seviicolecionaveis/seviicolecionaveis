@@ -115,52 +115,10 @@ function AdminPage() {
 
   const CORREIOS_URL = "https://rastreamento.correios.com.br/app/index.php";
 
-  const promptShippingInfo = (order: any) => {
-    const carrierAns = prompt(
-      "Transportadora: digite 1 para Correios ou 2 para Latam. Deixe em branco para não enviar a info ainda.",
-      order?.carrier === "latam" ? "2" : order?.carrier === "correios" ? "1" : "1",
-    );
-    if (carrierAns === null) return null;
-    const trimmed = carrierAns.trim();
-    let carrier: "correios" | "latam" | null = null;
-    if (trimmed === "1" || /correios/i.test(trimmed)) carrier = "correios";
-    else if (trimmed === "2" || /latam/i.test(trimmed)) carrier = "latam";
-
-    const codeAns = prompt(
-      "Código de rastreio (deixe em branco para enviar sem código).",
-      order?.tracking_code ?? "",
-    );
-    if (codeAns === null) return null;
-    const tracking_code = codeAns.trim() || null;
-
-    let tracking_url: string | null = null;
-    if (carrier === "correios") {
-      tracking_url = CORREIOS_URL;
-    } else if (carrier === "latam") {
-      const urlAns = prompt(
-        "Cole o link de rastreio da Latam (URL completa começando com https://).",
-        order?.tracking_url ?? "",
-      );
-      if (urlAns === null) return null;
-      tracking_url = urlAns.trim() || null;
-      if (tracking_url && !/^https?:\/\//i.test(tracking_url)) {
-        toast.error("Link inválido. A URL precisa começar com http:// ou https://");
-        return null;
-      }
-    }
-    return { carrier, tracking_code, tracking_url };
-  };
-
-  const updateStatus = async (id: string, status: string, order: any) => {
+  const updateStatus = async (id: string, status: string) => {
     try {
-      let extra: any = {};
-      if (status === "shipped") {
-        const info = promptShippingInfo(order);
-        if (info === null) return;
-        extra = info;
-      }
       await adminUpdateOrderStatus({
-        data: { order_id: id, status: status as any, ...extra },
+        data: { order_id: id, status: status as any },
       });
       await load();
     } catch (e: any) {
@@ -168,17 +126,18 @@ function AdminPage() {
     }
   };
 
-  const updateTracking = async (id: string, order: any) => {
-    const info = promptShippingInfo(order);
-    if (info === null) return;
+  const saveTracking = async (
+    id: string,
+    info: { carrier: "correios" | "latam" | null; tracking_code: string | null; tracking_url: string | null },
+  ) => {
     try {
       await adminUpdateOrderStatus({
         data: { order_id: id, status: "shipped", ...info },
       });
-      toast.success("Rastreio atualizado.");
+      toast.success("Rastreio salvo.");
       await load();
     } catch (e: any) {
-      toast.error(e?.message ?? "Erro ao atualizar rastreio.");
+      toast.error(e?.message ?? "Erro ao salvar rastreio.");
     }
   };
 
@@ -307,7 +266,7 @@ function AdminPage() {
                   </div>
                   <select
                     value={o.status}
-                    onChange={(e) => updateStatus(o.id, e.target.value, o)}
+                    onChange={(e) => updateStatus(o.id, e.target.value)}
                     className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold"
                   >
                     {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
@@ -315,35 +274,11 @@ function AdminPage() {
                 </div>
 
                 {(o.status === "shipped" || o.status === "delivered") && (
-                  <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
-                    <span className="text-muted-foreground">Rastreio:</span>
-                    {o.tracking_code ? (
-                      <>
-                        <span className="font-mono font-semibold">{o.tracking_code}</span>
-                        {o.carrier && (
-                          <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-bold uppercase">
-                            {o.carrier === "latam" ? "Latam" : "Correios"}
-                          </span>
-                        )}
-                        <a
-                          href={o.tracking_url || CORREIOS_URL}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-foreground underline"
-                        >
-                          abrir {o.carrier === "latam" ? "Latam" : "Correios"}
-                        </a>
-                      </>
-                    ) : (
-                      <span className="text-muted-foreground italic">não informado</span>
-                    )}
-                    <button
-                      onClick={() => updateTracking(o.id, o)}
-                      className="ml-auto text-foreground hover:underline font-semibold"
-                    >
-                      {o.tracking_code ? "editar" : "adicionar"}
-                    </button>
-                  </div>
+                  <TrackingEditor
+                    order={o}
+                    correiosUrl={CORREIOS_URL}
+                    onSave={(info) => saveTracking(o.id, info)}
+                  />
                 )}
 
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
@@ -427,6 +362,131 @@ function AdminPage() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+type TrackingInfo = {
+  carrier: "correios" | "latam" | null;
+  tracking_code: string | null;
+  tracking_url: string | null;
+};
+
+function TrackingEditor({
+  order,
+  correiosUrl,
+  onSave,
+}: {
+  order: any;
+  correiosUrl: string;
+  onSave: (info: TrackingInfo) => Promise<void> | void;
+}) {
+  const initialCarrier: "correios" | "latam" =
+    order.carrier === "latam" ? "latam" : "correios";
+  const [carrier, setCarrier] = useState<"correios" | "latam">(initialCarrier);
+  const [code, setCode] = useState<string>(order.tracking_code ?? "");
+  const [url, setUrl] = useState<string>(
+    order.carrier === "latam" ? (order.tracking_url ?? "") : "",
+  );
+  const [saving, setSaving] = useState(false);
+
+  // Resync when order changes (e.g. after reload)
+  useEffect(() => {
+    setCarrier(order.carrier === "latam" ? "latam" : "correios");
+    setCode(order.tracking_code ?? "");
+    setUrl(order.carrier === "latam" ? (order.tracking_url ?? "") : "");
+  }, [order.id, order.carrier, order.tracking_code, order.tracking_url]);
+
+  const trimmedCode = code.trim();
+  const trimmedUrl = url.trim();
+  const finalUrl = carrier === "correios" ? correiosUrl : (trimmedUrl || null);
+  const currentCarrier = order.carrier ?? null;
+  const currentCode = order.tracking_code ?? null;
+  const currentUrl = order.tracking_url ?? null;
+  const dirty =
+    carrier !== (currentCarrier ?? "correios") ||
+    (trimmedCode || null) !== currentCode ||
+    finalUrl !== currentUrl;
+
+  const handleSave = async () => {
+    if (carrier === "latam" && trimmedUrl && !/^https?:\/\//i.test(trimmedUrl)) {
+      toast.error("Link inválido. A URL precisa começar com http:// ou https://");
+      return;
+    }
+    setSaving(true);
+    try {
+      await onSave({
+        carrier,
+        tracking_code: trimmedCode || null,
+        tracking_url: finalUrl,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="mb-3 rounded-lg border border-border bg-muted/30 p-3 space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          Rastreio do envio
+        </span>
+        {order.tracking_code && order.tracking_url && (
+          <a
+            href={order.tracking_url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-[11px] underline text-foreground"
+          >
+            abrir {order.carrier === "latam" ? "Latam" : "Correios"}
+          </a>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <label className="flex items-center gap-1.5">
+          <input
+            type="radio"
+            name={`carrier-${order.id}`}
+            checked={carrier === "correios"}
+            onChange={() => setCarrier("correios")}
+          />
+          Correios
+        </label>
+        <label className="flex items-center gap-1.5">
+          <input
+            type="radio"
+            name={`carrier-${order.id}`}
+            checked={carrier === "latam"}
+            onChange={() => setCarrier("latam")}
+          />
+          Latam
+        </label>
+        <input
+          type="text"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          placeholder="Código de rastreio"
+          className="flex-1 min-w-[160px] rounded-md border border-border bg-background px-2 py-1 text-xs font-mono"
+        />
+      </div>
+      {carrier === "latam" && (
+        <input
+          type="url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="Link de rastreio da Latam (https://...)"
+          className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
+        />
+      )}
+      <div className="flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={saving || !dirty}
+          className="rounded-md bg-foreground text-background px-3 py-1.5 text-xs font-semibold hover:opacity-90 disabled:opacity-40"
+        >
+          {saving ? "Salvando..." : "Salvar rastreio"}
+        </button>
+      </div>
     </div>
   );
 }
