@@ -680,6 +680,12 @@ function CheckoutPage() {
                 <span className="tabular-nums">− R$ {discount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
             )}
+            {pixDiscount > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>Desconto Pix −{PIX_DISCOUNT_PERCENT}%</span>
+                <span className="tabular-nums">− R$ {pixDiscount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Frete</span>
               <span className="tabular-nums">
