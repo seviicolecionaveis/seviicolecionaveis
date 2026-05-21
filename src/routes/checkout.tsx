@@ -242,7 +242,9 @@ function CheckoutPage() {
     return { valid: false, percent: 0, label: "", maxDiscount: 0 };
   })();
   const discount = couponInfo.valid ? Math.min(subtotal * (couponInfo.percent / 100), couponInfo.maxDiscount) : 0;
-  const total = subtotal - discount + shippingCost;
+  const PIX_DISCOUNT_PERCENT = 5;
+  const pixDiscount = paymentMethod === "pix" ? Math.max(0, (subtotal - discount)) * (PIX_DISCOUNT_PERCENT / 100) : 0;
+  const total = subtotal - discount - pixDiscount + shippingCost;
 
   const persistAddressAndProfile = async () => {
     if (!user) return;
@@ -615,8 +617,11 @@ function CheckoutPage() {
                   });
                 }} className="mt-1" />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold flex items-center gap-2"><QrCode className="h-4 w-4" /> Pix</p>
-                  <p className="text-xs text-muted-foreground">Aprovação instantânea — gera QR Code e código copia e cola.</p>
+                  <p className="text-sm font-semibold flex items-center gap-2">
+                    <QrCode className="h-4 w-4" /> Pix
+                    <span className="ml-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">5% OFF</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">Aprovação instantânea — gera QR Code e código copia e cola. Ganhe 5% de desconto automático.</p>
                 </div>
               </label>
               <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
@@ -676,6 +681,12 @@ function CheckoutPage() {
               <div className="flex justify-between text-green-600">
                 <span>Desconto −{couponInfo.percent}%</span>
                 <span className="tabular-nums">− R$ {discount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+              </div>
+            )}
+            {pixDiscount > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>Desconto Pix −{PIX_DISCOUNT_PERCENT}%</span>
+                <span className="tabular-nums">− R$ {pixDiscount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
             )}
             <div className="flex justify-between">

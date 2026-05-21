@@ -36,7 +36,13 @@ const ADMIN_COUPON_PERCENT = 30;
 const FIRST_PURCHASE_COUPON = "PRIMEIRACOMPRA10";
 const FIRST_PURCHASE_PERCENT = 10;
 const FIRST_PURCHASE_MAX_DISCOUNT_CENTS = 2000; // teto de R$ 20,00
+export const PIX_DISCOUNT_PERCENT = 5; // desconto automático no Pix sobre o subtotal (após cupom)
 const PIX_EXPIRES_MINUTES = 30;
+
+export function computePixDiscountCents(subtotalCents: number, couponDiscountCents: number): number {
+  const base = Math.max(0, subtotalCents - couponDiscountCents);
+  return Math.round((base * PIX_DISCOUNT_PERCENT) / 100);
+}
 
 function computeShippingCents(input: {
   shippingMethod: "fixed" | "arrange";
@@ -320,11 +326,14 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
   );
   const shippingCents = computeShippingCents(data);
 
-  const { discountCents, code: appliedCoupon } = await validateCoupon(
+  const { discountCents: couponDiscountCents, code: appliedCoupon } = await validateCoupon(
     userId,
     data.couponCode,
     subtotalCents,
   );
+
+  const pixDiscountCents = computePixDiscountCents(subtotalCents, couponDiscountCents);
+  const discountCents = couponDiscountCents + pixDiscountCents;
 
   const items = await resolveCardIds(data.items);
   await ensureAvailableStock(items);
