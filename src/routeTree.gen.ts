@@ -49,6 +49,7 @@ import { Route as ApiPublicPaymentsMercadopagoWebhookRouteImport } from './route
 import { Route as ApiPublicMelhorenvioCallbackRouteImport } from './routes/api/public/melhorenvio/callback'
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
 import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/public/hooks/price-drop-check'
+import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api/public/hooks/auto-cancel-unpaid'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -258,6 +259,12 @@ const ApiPublicHooksPriceDropCheckRoute =
     path: '/api/public/hooks/price-drop-check',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAutoCancelUnpaidRoute =
+  ApiPublicHooksAutoCancelUnpaidRouteImport.update({
+    id: '/api/public/hooks/auto-cancel-unpaid',
+    path: '/api/public/hooks/auto-cancel-unpaid',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -290,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/orders/': typeof OrdersIndexRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
@@ -331,6 +339,7 @@ export interface FileRoutesByTo {
   '/orders': typeof OrdersIndexRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
@@ -374,6 +383,7 @@ export interface FileRoutesById {
   '/orders/': typeof OrdersIndexRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
@@ -418,6 +428,7 @@ export interface FileRouteTypes {
     | '/orders/'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
@@ -459,6 +470,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
@@ -501,6 +513,7 @@ export interface FileRouteTypes {
     | '/orders/'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
@@ -534,6 +547,7 @@ export interface RootRouteChildren {
   PayOrderIdRoute: typeof PayOrderIdRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksAutoCancelUnpaidRoute: typeof ApiPublicHooksAutoCancelUnpaidRoute
   ApiPublicHooksPriceDropCheckRoute: typeof ApiPublicHooksPriceDropCheckRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
   ApiPublicMelhorenvioCallbackRoute: typeof ApiPublicMelhorenvioCallbackRoute
@@ -828,6 +842,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksPriceDropCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/auto-cancel-unpaid': {
+      id: '/api/public/hooks/auto-cancel-unpaid'
+      path: '/api/public/hooks/auto-cancel-unpaid'
+      fullPath: '/api/public/hooks/auto-cancel-unpaid'
+      preLoaderRoute: typeof ApiPublicHooksAutoCancelUnpaidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -899,6 +920,7 @@ const rootRouteChildren: RootRouteChildren = {
   PayOrderIdRoute: PayOrderIdRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksAutoCancelUnpaidRoute: ApiPublicHooksAutoCancelUnpaidRoute,
   ApiPublicHooksPriceDropCheckRoute: ApiPublicHooksPriceDropCheckRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,
   ApiPublicMelhorenvioCallbackRoute: ApiPublicMelhorenvioCallbackRoute,
@@ -914,13 +936,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
