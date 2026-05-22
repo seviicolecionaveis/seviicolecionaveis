@@ -16,7 +16,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
         "cancellation_requested",
       ]),
       tracking_code: z.string().trim().max(60).optional().nullable(),
-      carrier: z.enum(["correios", "latam"]).optional().nullable(),
+      carrier: z.enum(["correios", "latam", "pickup"]).optional().nullable(),
       tracking_url: z.preprocess(
         (v) => (typeof v === "string" && v.trim() === "" ? null : v),
         z.string().trim().max(500).url().optional().nullable(),

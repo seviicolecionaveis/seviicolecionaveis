@@ -128,7 +128,7 @@ function AdminPage() {
 
   const saveTracking = async (
     id: string,
-    info: { carrier: "correios" | "latam" | null; tracking_code: string | null; tracking_url: string | null },
+    info: { carrier: "correios" | "latam" | "pickup" | null; tracking_code: string | null; tracking_url: string | null },
   ) => {
     try {
       await adminUpdateOrderStatus({
@@ -366,11 +366,18 @@ function AdminPage() {
   );
 }
 
+type CarrierKind = "correios" | "latam" | "pickup";
 type TrackingInfo = {
-  carrier: "correios" | "latam" | null;
+  carrier: CarrierKind | null;
   tracking_code: string | null;
   tracking_url: string | null;
 };
+
+function normalizeCarrier(c: any): CarrierKind {
+  if (c === "latam") return "latam";
+  if (c === "pickup") return "pickup";
+  return "correios";
+}
 
 function TrackingEditor({
   order,
@@ -381,9 +388,8 @@ function TrackingEditor({
   correiosUrl: string;
   onSave: (info: TrackingInfo) => Promise<void> | void;
 }) {
-  const initialCarrier: "correios" | "latam" =
-    order.carrier === "latam" ? "latam" : "correios";
-  const [carrier, setCarrier] = useState<"correios" | "latam">(initialCarrier);
+  const initialCarrier: CarrierKind = normalizeCarrier(order.carrier);
+  const [carrier, setCarrier] = useState<CarrierKind>(initialCarrier);
   const [code, setCode] = useState<string>(order.tracking_code ?? "");
   const [url, setUrl] = useState<string>(
     order.carrier === "latam" ? (order.tracking_url ?? "") : "",
@@ -392,20 +398,26 @@ function TrackingEditor({
 
   // Resync when order changes (e.g. after reload)
   useEffect(() => {
-    setCarrier(order.carrier === "latam" ? "latam" : "correios");
+    setCarrier(normalizeCarrier(order.carrier));
     setCode(order.tracking_code ?? "");
     setUrl(order.carrier === "latam" ? (order.tracking_url ?? "") : "");
   }, [order.id, order.carrier, order.tracking_code, order.tracking_url]);
 
   const trimmedCode = code.trim();
   const trimmedUrl = url.trim();
-  const finalUrl = carrier === "correios" ? correiosUrl : (trimmedUrl || null);
+  const finalCode = carrier === "pickup" ? null : (trimmedCode || null);
+  const finalUrl =
+    carrier === "pickup"
+      ? null
+      : carrier === "correios"
+        ? correiosUrl
+        : (trimmedUrl || null);
   const currentCarrier = order.carrier ?? null;
   const currentCode = order.tracking_code ?? null;
   const currentUrl = order.tracking_url ?? null;
   const dirty =
     carrier !== (currentCarrier ?? "correios") ||
-    (trimmedCode || null) !== currentCode ||
+    finalCode !== currentCode ||
     finalUrl !== currentUrl;
 
   const handleSave = async () => {
@@ -417,7 +429,7 @@ function TrackingEditor({
     try {
       await onSave({
         carrier,
-        tracking_code: trimmedCode || null,
+        tracking_code: finalCode,
         tracking_url: finalUrl,
       });
     } finally {
@@ -431,7 +443,7 @@ function TrackingEditor({
         <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
           Rastreio do envio
         </span>
-        {order.tracking_code && order.tracking_url && (
+        {order.carrier !== "pickup" && order.tracking_code && order.tracking_url && (
           <a
             href={order.tracking_url}
             target="_blank"
@@ -461,13 +473,24 @@ function TrackingEditor({
           />
           Latam
         </label>
-        <input
-          type="text"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          placeholder="Código de rastreio"
-          className="flex-1 min-w-[160px] rounded-md border border-border bg-background px-2 py-1 text-xs font-mono"
-        />
+        <label className="flex items-center gap-1.5">
+          <input
+            type="radio"
+            name={`carrier-${order.id}`}
+            checked={carrier === "pickup"}
+            onChange={() => setCarrier("pickup")}
+          />
+          Retirado em mãos
+        </label>
+        {carrier !== "pickup" && (
+          <input
+            type="text"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="Código de rastreio"
+            className="flex-1 min-w-[160px] rounded-md border border-border bg-background px-2 py-1 text-xs font-mono"
+          />
+        )}
       </div>
       {carrier === "latam" && (
         <input
@@ -477,6 +500,11 @@ function TrackingEditor({
           placeholder="Link de rastreio da Latam (https://...)"
           className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
         />
+      )}
+      {carrier === "pickup" && (
+        <p className="text-[11px] text-muted-foreground">
+          Pedido entregue em mãos — nenhum código de rastreio será enviado ao cliente.
+        </p>
       )}
       <div className="flex justify-end">
         <button

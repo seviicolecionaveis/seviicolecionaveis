@@ -8,7 +8,7 @@ interface OrderStatusUpdatedProps {
   orderId?: string
   status?: string
   trackingCode?: string | null
-  carrier?: 'correios' | 'latam' | null
+  carrier?: 'correios' | 'latam' | 'pickup' | null
   trackingUrl?: string | null
 }
 
@@ -47,7 +47,8 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
   const msg =
     (status && STATUS_MESSAGE[status]) ||
     'Houve uma atualização no status do seu pedido.'
-  const showTracking = status === 'shipped' && trackingCode
+  const isPickup = carrier === 'pickup'
+  const showTracking = status === 'shipped' && !isPickup && trackingCode
   const carrierLabel = carrier === 'latam' ? 'Latam Cargo' : 'Correios'
   const trackUrl = trackingUrl || CORREIOS_URL
 
@@ -66,6 +67,12 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
           <span style={styles.badge}>{label}</span>
         </Text>
         <Text style={{ ...styles.text, margin: 0 }}>{msg}</Text>
+
+        {status === 'shipped' && isPickup && (
+          <Text style={{ ...styles.text, margin: '16px 0 0' }}>
+            Modalidade: <strong>Retirado em mãos</strong>
+          </Text>
+        )}
 
         {showTracking && (
           <>
