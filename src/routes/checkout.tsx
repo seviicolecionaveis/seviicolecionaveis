@@ -15,6 +15,7 @@ import { Copy, Check, QrCode, CreditCard, Loader2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 import { computeBundleDiscount } from "@/lib/bundles";
+import { copyToClipboard } from "@/lib/clipboard";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -789,10 +790,14 @@ function PixScreen({ pix }: { pix: PixState }) {
   }, []);
 
   const copy = async () => {
-    await navigator.clipboard.writeText(pix.qrCode);
-    setCopied(true);
-    toast.success("Código Pix copiado!");
-    setTimeout(() => setCopied(false), 2000);
+    const ok = await copyToClipboard(pix.qrCode);
+    if (ok) {
+      setCopied(true);
+      toast.success("Código Pix copiado!");
+      setTimeout(() => setCopied(false), 2000);
+    } else {
+      toast.error("Não foi possível copiar automaticamente. Toque e segure no código para copiar manualmente.");
+    }
   };
 
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");

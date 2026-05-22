@@ -9,6 +9,7 @@ import {
   getMercadoPagoPublicKey,
 } from "@/utils/payments.functions";
 import { toast } from "sonner";
+import { copyToClipboard } from "@/lib/clipboard";
 import { Copy, Check, QrCode, CreditCard, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/pay/$orderId")({
@@ -235,10 +236,14 @@ function PixDisplay({ pix, session, onPaid }: { pix: PixState; session: any; onP
   }, []);
 
   const copy = async () => {
-    await navigator.clipboard.writeText(pix.qrCode);
-    setCopied(true);
-    toast.success("Código Pix copiado!");
-    setTimeout(() => setCopied(false), 2000);
+    const ok = await copyToClipboard(pix.qrCode);
+    if (ok) {
+      setCopied(true);
+      toast.success("Código Pix copiado!");
+      setTimeout(() => setCopied(false), 2000);
+    } else {
+      toast.error("Não foi possível copiar automaticamente. Toque e segure no código para copiar manualmente.");
+    }
   };
 
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
