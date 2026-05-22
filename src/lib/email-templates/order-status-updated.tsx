@@ -8,7 +8,7 @@ interface OrderStatusUpdatedProps {
   orderId?: string
   status?: string
   trackingCode?: string | null
-  carrier?: 'correios' | 'latam' | null
+  carrier?: 'correios' | 'latam' | 'pickup' | null
   trackingUrl?: string | null
 }
 
