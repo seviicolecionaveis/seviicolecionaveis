@@ -9,6 +9,7 @@ import {
   getMercadoPagoPublicKey,
 } from "@/utils/payments.functions";
 import { toast } from "sonner";
+import { copyToClipboard } from "@/lib/clipboard";
 import { Copy, Check, QrCode, CreditCard, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/pay/$orderId")({
