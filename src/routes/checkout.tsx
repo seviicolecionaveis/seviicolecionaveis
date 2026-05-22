@@ -15,6 +15,7 @@ import { Copy, Check, QrCode, CreditCard, Loader2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 import { computeBundleDiscount } from "@/lib/bundles";
+import { copyToClipboard } from "@/lib/clipboard";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
