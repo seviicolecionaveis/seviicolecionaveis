@@ -128,7 +128,7 @@ function AdminPage() {
 
   const saveTracking = async (
     id: string,
-    info: { carrier: "correios" | "latam" | null; tracking_code: string | null; tracking_url: string | null },
+    info: { carrier: "correios" | "latam" | "pickup" | null; tracking_code: string | null; tracking_url: string | null },
   ) => {
     try {
       await adminUpdateOrderStatus({
