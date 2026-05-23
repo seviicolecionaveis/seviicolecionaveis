@@ -2,21 +2,26 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { sendTransactionalEmailSafe } from '@/lib/email/send.server'
+import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 
 const SubscribeSchema = z.object({
-  email: z.string().trim().email().max(255),
   cardKey: z.string().min(1).max(255),
   cardName: z.string().min(1).max(255),
   cardCollection: z.string().min(1).max(255),
   cardNumber: z.string().min(1).max(64),
-  userId: z.string().uuid().nullable().optional(),
 })
 
 export const subscribeStockAlert = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => SubscribeSchema.parse(input))
-  .handler(async ({ data }) => {
-    const normalizedEmail = data.email.toLowerCase()
-    // Check suppression first
+  .handler(async ({ data, context }) => {
+    const { userId, claims } = context
+    const userEmail = (claims as any)?.email as string | undefined
+    if (!userEmail) {
+      return { success: false, reason: 'no_email' as const }
+    }
+    const normalizedEmail = userEmail.toLowerCase()
+
     const { data: suppressed } = await (supabaseAdmin as any)
       .from('suppressed_emails')
       .select('id')
@@ -35,7 +40,7 @@ export const subscribeStockAlert = createServerFn({ method: 'POST' })
           card_collection: data.cardCollection,
           card_number: data.cardNumber,
           email: normalizedEmail,
-          user_id: data.userId ?? null,
+          user_id: userId,
           notified_at: null,
         },
         { onConflict: 'card_key,email' },
@@ -62,7 +67,6 @@ const SITE_URL = 'https://seviicolecionaveis.com.br'
 export const notifyStockBack = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => NotifySchema.parse(input))
   .handler(async ({ data }) => {
-    // Verify caller is admin
     const admin = supabaseAdmin as any
     const { data: alerts, error } = await admin
       .from('stock_alerts')
@@ -95,8 +99,6 @@ export const notifyStockBack = createServerFn({ method: 'POST' })
       if (res.success) sent++
     }
 
-    // Mark all as notified (best-effort; even suppressed/failed get marked
-    // to avoid re-trying forever)
     const ids = alerts.map((a: any) => a.id)
     await admin
       .from('stock_alerts')

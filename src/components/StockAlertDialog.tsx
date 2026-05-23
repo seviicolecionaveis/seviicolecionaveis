@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Dialog,
@@ -29,7 +30,6 @@ export function StockAlertDialog({
   cardNumber,
 }: Props) {
   const { user } = useAuth();
-  const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,35 +39,26 @@ export function StockAlertDialog({
     if (open) {
       setDone(false);
       setError(null);
-      if (user?.email) setEmail(user.email);
     }
-  }, [open, user?.email]);
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const trimmed = email.trim();
-    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setError("Digite um e-mail válido.");
+    if (!user?.email) {
+      setError("Faça login para receber o alerta.");
       return;
     }
     setSubmitting(true);
     try {
       const res = await subscribe({
-        data: {
-          email: trimmed,
-          cardKey,
-          cardName,
-          cardCollection,
-          cardNumber,
-          userId: user?.id ?? null,
-        },
+        data: { cardKey, cardName, cardCollection, cardNumber },
       });
       if (res.success) {
         setDone(true);
       } else if (res.reason === "email_suppressed") {
         setError(
-          "Este e-mail foi removido da nossa lista. Use outro e-mail ou fale com a gente.",
+          "Seu e-mail foi removido da nossa lista. Fale com a gente para reativar.",
         );
       } else {
         setError("Não conseguimos cadastrar agora. Tente novamente em instantes.");
@@ -103,7 +94,7 @@ export function StockAlertDialog({
             </div>
             <p className="text-sm font-medium">Pronto! Você está na fila.</p>
             <p className="text-xs text-muted-foreground">
-              Vamos te avisar no e-mail <strong>{email}</strong>.
+              Vamos te avisar no e-mail <strong>{user?.email}</strong>.
             </p>
             <button
               onClick={onClose}
@@ -112,19 +103,25 @@ export function StockAlertDialog({
               Fechar
             </button>
           </div>
+        ) : !user ? (
+          <div className="flex flex-col items-center gap-3 py-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              Faça login para receber o aviso no seu e-mail cadastrado.
+            </p>
+            <Link
+              to="/auth"
+              onClick={onClose}
+              className="w-full rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+            >
+              Entrar / Criar conta
+            </Link>
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Seu e-mail
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="voce@exemplo.com"
-                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm normal-case tracking-normal focus:outline-none focus:ring-2 focus:ring-brand-gold"
-              />
-            </label>
+            <p className="text-sm text-muted-foreground">
+              O aviso será enviado para{" "}
+              <strong className="text-foreground">{user.email}</strong>.
+            </p>
             {error && (
               <p className="text-xs text-destructive">{error}</p>
             )}
