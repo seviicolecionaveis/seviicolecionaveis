@@ -245,30 +245,34 @@ export function CardModal({ card, onClose, magnetOnly = false }: Props) {
                 </div>
               </div>
 
-              <p className="mt-2 text-xs text-muted-foreground">
-                {card.languages.length}{" "}
-                {card.languages.length === 1 ? "idioma" : "idiomas"} •{" "}
-                {card.variants.length}{" "}
-                {card.variants.length === 1 ? "versão" : "versões"}
-              </p>
+              {!magnetOnly && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {card.languages.length}{" "}
+                  {card.languages.length === 1 ? "idioma" : "idiomas"} •{" "}
+                  {card.variants.length}{" "}
+                  {card.variants.length === 1 ? "versão" : "versões"}
+                </p>
+              )}
 
               <div className="mt-6 space-y-5">
-                {buildLanguagesWithMagnet(card, resolvePrice).map((lang) => {
+                {(magnetOnly ? buildMagnetOnlyLanguages(card) : buildLanguagesWithMagnet(card, resolvePrice)).map((lang) => {
                   const langOut = lang.stock === 0;
                   return (
                     <div key={lang.language}>
-                      <div className="mb-2 flex items-center justify-between">
-                        <p className="text-xs uppercase text-muted-foreground tracking-wider font-semibold">
-                          {lang.language}
-                        </p>
-                        <span
-                          className={`text-[10px] uppercase tracking-wider ${
-                            langOut ? "text-muted-foreground" : "text-foreground/70"
-                          }`}
-                        >
-                          {langOut ? "Esgotado" : `${lang.stock} un. no total`}
-                        </span>
-                      </div>
+                      {!magnetOnly && (
+                        <div className="mb-2 flex items-center justify-between">
+                          <p className="text-xs uppercase text-muted-foreground tracking-wider font-semibold">
+                            {lang.language}
+                          </p>
+                          <span
+                            className={`text-[10px] uppercase tracking-wider ${
+                              langOut ? "text-muted-foreground" : "text-foreground/70"
+                            }`}
+                          >
+                            {langOut ? "Esgotado" : `${lang.stock} un. no total`}
+                          </span>
+                        </div>
+                      )}
                       <ul className="divide-y divide-border rounded-lg border border-border overflow-hidden">
                         {lang.finishes.map((v) => {
                           const out = v.stock === 0;
