@@ -656,7 +656,7 @@ export type Database = {
           email: string
           id: string
           notified_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           card_collection: string
@@ -667,7 +667,7 @@ export type Database = {
           email: string
           id?: string
           notified_at?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           card_collection?: string
@@ -678,7 +678,7 @@ export type Database = {
           email?: string
           id?: string
           notified_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
