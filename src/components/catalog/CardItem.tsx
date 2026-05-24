@@ -10,6 +10,7 @@ const finishBadge: Record<Finish, string> = {
   "Reverse Foil": "bg-type-psychic text-white",
   Pokebola: "bg-type-fire text-white",
   Masterball: "bg-type-psychic text-white",
+  Rocket: "bg-foreground text-background",
   Energia: "bg-type-grass text-white",
   Promo: "bg-type-electric text-foreground",
   "Ímã": "bg-muted text-foreground",

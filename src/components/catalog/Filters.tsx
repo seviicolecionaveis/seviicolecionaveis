@@ -24,6 +24,7 @@ const finishClass: Record<Finish, string> = {
   "Reverse Foil": "bg-type-psychic/15 text-type-psychic border-type-psychic/30",
   Pokebola: "bg-type-fire/15 text-type-fire border-type-fire/30",
   Masterball: "bg-type-psychic/15 text-type-psychic border-type-psychic/30",
+  Rocket: "bg-foreground text-background border-foreground",
   Energia: "bg-type-grass/15 text-type-grass border-type-grass/30",
   Promo: "bg-type-electric/20 text-foreground border-type-electric/40",
   "Ímã": "bg-muted text-foreground border-border",
