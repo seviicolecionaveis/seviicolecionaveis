@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
+import { PanelModal, type Panel } from "@/components/catalog/PanelModal";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { useCardPrices, priceLookupKey } from "@/hooks/useCardPrices";
+import { supabase } from "@/integrations/supabase/client";
 import type { Card, Finish } from "@/data/cards";
 import logoUrl from "@/assets/logo.png";
 
@@ -33,6 +35,23 @@ function ImasPage() {
   const { cards, loading } = useCardsCatalog();
   const { prices } = useCardPrices();
   const [active, setActive] = useState<Card | null>(null);
+  const [activePanel, setActivePanel] = useState<Panel | null>(null);
+  const [panels, setPanels] = useState<Panel[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("panels")
+        .select("id, title, description, price_cents, stock, images")
+        .eq("active", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false });
+      if (!cancelled) setPanels((data ?? []) as Panel[]);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
 
   const magnetCards = useMemo(() => {
     const resolve = (c: Card, finish: Finish, language: string): number | null => {
@@ -79,6 +98,40 @@ function ImasPage() {
           </p>
         </div>
 
+        {panels.length > 0 && (
+          <section className="mb-12">
+            <h2 className="mb-4 text-xl font-bold sm:text-2xl">Painéis</h2>
+            <p className="mb-6 text-sm text-muted-foreground">
+              Coleções especiais montadas em painel magnético.
+            </p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 md:grid-cols-4">
+              {panels.map((p) => {
+                const cover = p.images[0];
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setActivePanel(p)}
+                    className="group text-left"
+                  >
+                    <div className="aspect-square overflow-hidden rounded-lg bg-secondary">
+                      {cover ? (
+                        <img src={cover} alt={p.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                      ) : (
+                        <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">Sem imagem</div>
+                      )}
+                    </div>
+                    <p className="mt-2 text-sm font-semibold line-clamp-2">{p.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      R$ {(p.price_cents / 100).toFixed(2).replace(".", ",")}
+                      {p.images.length > 1 && <span className="ml-2 text-xs">· {p.images.length} fotos</span>}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {loading && magnetCards.length === 0 ? (
           <div className="grid place-items-center py-16 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
@@ -104,7 +157,9 @@ function ImasPage() {
       </main>
 
       <CardModal card={active} onClose={() => setActive(null)} magnetOnly />
+      <PanelModal panel={activePanel} onClose={() => setActivePanel(null)} />
       <SiteFooter />
     </div>
   );
 }
+
