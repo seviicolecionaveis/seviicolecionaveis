@@ -98,6 +98,40 @@ function ImasPage() {
           </p>
         </div>
 
+        {panels.length > 0 && (
+          <section className="mb-12">
+            <h2 className="mb-4 text-xl font-bold sm:text-2xl">Painéis</h2>
+            <p className="mb-6 text-sm text-muted-foreground">
+              Coleções especiais montadas em painel magnético.
+            </p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 md:grid-cols-4">
+              {panels.map((p) => {
+                const cover = p.images[0];
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setActivePanel(p)}
+                    className="group text-left"
+                  >
+                    <div className="aspect-square overflow-hidden rounded-lg bg-secondary">
+                      {cover ? (
+                        <img src={cover} alt={p.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                      ) : (
+                        <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">Sem imagem</div>
+                      )}
+                    </div>
+                    <p className="mt-2 text-sm font-semibold line-clamp-2">{p.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      R$ {(p.price_cents / 100).toFixed(2).replace(".", ",")}
+                      {p.images.length > 1 && <span className="ml-2 text-xs">· {p.images.length} fotos</span>}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {loading && magnetCards.length === 0 ? (
           <div className="grid place-items-center py-16 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
@@ -123,7 +157,9 @@ function ImasPage() {
       </main>
 
       <CardModal card={active} onClose={() => setActive(null)} magnetOnly />
+      <PanelModal panel={activePanel} onClose={() => setActivePanel(null)} />
       <SiteFooter />
     </div>
   );
 }
+
