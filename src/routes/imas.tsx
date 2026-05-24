@@ -35,6 +35,23 @@ function ImasPage() {
   const { cards, loading } = useCardsCatalog();
   const { prices } = useCardPrices();
   const [active, setActive] = useState<Card | null>(null);
+  const [activePanel, setActivePanel] = useState<Panel | null>(null);
+  const [panels, setPanels] = useState<Panel[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("panels")
+        .select("id, title, description, price_cents, stock, images")
+        .eq("active", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false });
+      if (!cancelled) setPanels((data ?? []) as Panel[]);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
 
   const magnetCards = useMemo(() => {
     const resolve = (c: Card, finish: Finish, language: string): number | null => {
