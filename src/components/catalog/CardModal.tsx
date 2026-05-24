@@ -61,6 +61,39 @@ function buildLanguagesWithMagnet(
 interface Props {
   card: Card | null;
   onClose: () => void;
+  /** When true, hide all languages/finishes and show only an aggregated Ímã option. */
+  magnetOnly?: boolean;
+}
+
+function buildMagnetOnlyLanguages(
+  card: Card,
+): LanguageVariant[] {
+  // Sum base Foil/Normal stock across all languages — that's the maximum
+  // number of magnets we can produce from this card's inventory.
+  let foilStock = 0;
+  let normalStock = 0;
+  for (const lang of card.languages) {
+    for (const f of lang.finishes) {
+      if (f.finish === "Foil") foilStock += f.stock;
+      else if (f.finish === "Normal") normalStock += f.stock;
+    }
+  }
+  const baseStock = foilStock + normalStock;
+  if (baseStock <= 0) return [];
+  const price = foilStock > 0 ? 10 : 9;
+  const magnet: FinishVariant = {
+    finish: "Ímã",
+    condition: "NM",
+    stock: Math.min(MAGNET_VIRTUAL_STOCK, baseStock),
+    price,
+  };
+  return [
+    {
+      language: "Português",
+      finishes: [magnet],
+      stock: magnet.stock,
+    },
+  ];
 }
 
 const finishDot: Record<Finish, string> = {
@@ -80,7 +113,7 @@ const finishDot: Record<Finish, string> = {
   "Double Rare": "bg-type-fire",
 };
 
-export function CardModal({ card, onClose }: Props) {
+export function CardModal({ card, onClose, magnetOnly = false }: Props) {
   const { add } = useCart();
   const { prices, loading: pricesLoading } = useCardPrices();
   const { has, toggle } = useWishlist();
@@ -212,30 +245,34 @@ export function CardModal({ card, onClose }: Props) {
                 </div>
               </div>
 
-              <p className="mt-2 text-xs text-muted-foreground">
-                {card.languages.length}{" "}
-                {card.languages.length === 1 ? "idioma" : "idiomas"} •{" "}
-                {card.variants.length}{" "}
-                {card.variants.length === 1 ? "versão" : "versões"}
-              </p>
+              {!magnetOnly && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {card.languages.length}{" "}
+                  {card.languages.length === 1 ? "idioma" : "idiomas"} •{" "}
+                  {card.variants.length}{" "}
+                  {card.variants.length === 1 ? "versão" : "versões"}
+                </p>
+              )}
 
               <div className="mt-6 space-y-5">
-                {buildLanguagesWithMagnet(card, resolvePrice).map((lang) => {
+                {(magnetOnly ? buildMagnetOnlyLanguages(card) : buildLanguagesWithMagnet(card, resolvePrice)).map((lang) => {
                   const langOut = lang.stock === 0;
                   return (
                     <div key={lang.language}>
-                      <div className="mb-2 flex items-center justify-between">
-                        <p className="text-xs uppercase text-muted-foreground tracking-wider font-semibold">
-                          {lang.language}
-                        </p>
-                        <span
-                          className={`text-[10px] uppercase tracking-wider ${
-                            langOut ? "text-muted-foreground" : "text-foreground/70"
-                          }`}
-                        >
-                          {langOut ? "Esgotado" : `${lang.stock} un. no total`}
-                        </span>
-                      </div>
+                      {!magnetOnly && (
+                        <div className="mb-2 flex items-center justify-between">
+                          <p className="text-xs uppercase text-muted-foreground tracking-wider font-semibold">
+                            {lang.language}
+                          </p>
+                          <span
+                            className={`text-[10px] uppercase tracking-wider ${
+                              langOut ? "text-muted-foreground" : "text-foreground/70"
+                            }`}
+                          >
+                            {langOut ? "Esgotado" : `${lang.stock} un. no total`}
+                          </span>
+                        </div>
+                      )}
                       <ul className="divide-y divide-border rounded-lg border border-border overflow-hidden">
                         {lang.finishes.map((v) => {
                           const out = v.stock === 0;

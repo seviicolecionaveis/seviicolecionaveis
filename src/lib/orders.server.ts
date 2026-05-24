@@ -12,13 +12,40 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
 
   const { data: items } = await supabaseAdmin
     .from("order_items")
-    .select("card_id, quantity")
+    .select("card_id, quantity, finish, card_name, collection, card_number")
     .eq("order_id", orderId);
 
   if (items) {
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     for (const it of items) {
-      if (!it.card_id || !UUID_RE.test(it.card_id)) continue; // virtual product (e.g. Ímã)
+      // Magnet (Ímã) is a virtual finish — decrement from the underlying base
+      // Foil/Normal cards (Foil first, then Normal) matching name/collection/number.
+      if (it.finish === "Ímã") {
+        let remaining = it.quantity;
+        const { data: bases } = await supabaseAdmin
+          .from("cards")
+          .select("id, stock, finish")
+          .eq("name", it.card_name)
+          .eq("collection", it.collection ?? "")
+          .eq("card_number", it.card_number ?? "")
+          .in("finish", ["Foil", "Normal"]);
+        const ordered = (bases ?? []).sort((a, b) => {
+          if (a.finish === b.finish) return (b.stock ?? 0) - (a.stock ?? 0);
+          return a.finish === "Foil" ? -1 : 1;
+        });
+        for (const b of ordered) {
+          if (remaining <= 0) break;
+          const take = Math.min(remaining, b.stock ?? 0);
+          if (take <= 0) continue;
+          await supabaseAdmin
+            .from("cards")
+            .update({ stock: (b.stock ?? 0) - take })
+            .eq("id", b.id);
+          remaining -= take;
+        }
+        continue;
+      }
+      if (!it.card_id || !UUID_RE.test(it.card_id)) continue; // other virtual product
       const { data: card } = await supabaseAdmin
         .from("cards")
         .select("stock")

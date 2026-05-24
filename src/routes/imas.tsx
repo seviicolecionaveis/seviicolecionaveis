@@ -103,7 +103,7 @@ function ImasPage() {
         )}
       </main>
 
-      <CardModal card={active} onClose={() => setActive(null)} />
+      <CardModal card={active} onClose={() => setActive(null)} magnetOnly />
       <SiteFooter />
     </div>
   );
