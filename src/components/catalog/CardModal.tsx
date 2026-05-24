@@ -89,7 +89,7 @@ function buildMagnetOnlyLanguages(
   };
   return [
     {
-      language: "Variado",
+      language: "Português",
       finishes: [magnet],
       stock: magnet.stock,
     },
