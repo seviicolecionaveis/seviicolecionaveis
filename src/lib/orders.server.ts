@@ -18,6 +18,22 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
   if (items) {
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     for (const it of items) {
+      // Panel (virtual product with its own stock in the panels table)
+      if (typeof it.card_id === "string" && it.card_id.startsWith("panel:")) {
+        const panelId = it.card_id.slice("panel:".length);
+        if (UUID_RE.test(panelId)) {
+          const { data: panel } = await supabaseAdmin
+            .from("panels")
+            .select("stock")
+            .eq("id", panelId)
+            .maybeSingle();
+          if (panel) {
+            const newStock = Math.max(0, (panel.stock ?? 0) - it.quantity);
+            await supabaseAdmin.from("panels").update({ stock: newStock }).eq("id", panelId);
+          }
+        }
+        continue;
+      }
       // Magnet (Ímã) is a virtual finish — decrement from the underlying base
       // Foil/Normal cards (Foil first, then Normal) matching name/collection/number.
       if (it.finish === "Ímã") {
