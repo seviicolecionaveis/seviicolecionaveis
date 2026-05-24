@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
+import { PanelModal, type Panel } from "@/components/catalog/PanelModal";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { useCardPrices, priceLookupKey } from "@/hooks/useCardPrices";
+import { supabase } from "@/integrations/supabase/client";
 import type { Card, Finish } from "@/data/cards";
 import logoUrl from "@/assets/logo.png";
 
