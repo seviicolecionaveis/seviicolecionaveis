@@ -61,6 +61,39 @@ function buildLanguagesWithMagnet(
 interface Props {
   card: Card | null;
   onClose: () => void;
+  /** When true, hide all languages/finishes and show only an aggregated Ímã option. */
+  magnetOnly?: boolean;
+}
+
+function buildMagnetOnlyLanguages(
+  card: Card,
+): LanguageVariant[] {
+  // Sum base Foil/Normal stock across all languages — that's the maximum
+  // number of magnets we can produce from this card's inventory.
+  let foilStock = 0;
+  let normalStock = 0;
+  for (const lang of card.languages) {
+    for (const f of lang.finishes) {
+      if (f.finish === "Foil") foilStock += f.stock;
+      else if (f.finish === "Normal") normalStock += f.stock;
+    }
+  }
+  const baseStock = foilStock + normalStock;
+  if (baseStock <= 0) return [];
+  const price = foilStock > 0 ? 10 : 9;
+  const magnet: FinishVariant = {
+    finish: "Ímã",
+    condition: "NM",
+    stock: Math.min(MAGNET_VIRTUAL_STOCK, baseStock),
+    price,
+  };
+  return [
+    {
+      language: "Variado",
+      finishes: [magnet],
+      stock: magnet.stock,
+    },
+  ];
 }
 
 const finishDot: Record<Finish, string> = {
