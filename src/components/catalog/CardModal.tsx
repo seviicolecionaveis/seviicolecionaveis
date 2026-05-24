@@ -21,7 +21,10 @@ const MAGNET_EXCLUDED_KEYS = new Set<string>([
   "Kabutops__MEW - 151__141/165",
   "Totodile__ASC - Heróis Excelsos__041/217",
 ]);
-function buildLanguagesWithMagnet(card: Card): LanguageVariant[] {
+function buildLanguagesWithMagnet(
+  card: Card,
+  resolvePrice: (finish: Finish, language: string) => number | null,
+): LanguageVariant[] {
   if (card.category !== "Pokémon") return card.languages;
   if (MAGNET_EXCLUDED_KEYS.has(`${card.name}__${card.collection}__${card.number}`)) return card.languages;
   return card.languages.map((lang) => {
@@ -30,6 +33,15 @@ function buildLanguagesWithMagnet(card: Card): LanguageVariant[] {
     const normalStock = lang.finishes.filter((f) => f.finish === "Normal").reduce((s, f) => s + f.stock, 0);
     const baseStock = foilStock + normalStock;
     if (baseStock <= 0) return lang;
+
+    // Regra: se qualquer variante base (Foil/Normal) custar acima de R$ 2,
+    // não oferecemos o acabamento "Ímã" para essa carta/idioma.
+    const basePrices = lang.finishes
+      .filter((f) => f.finish === "Foil" || f.finish === "Normal")
+      .map((f) => f.price ?? resolvePrice(f.finish, lang.language))
+      .filter((p): p is number => p != null);
+    if (basePrices.some((p) => p > 2)) return lang;
+
     const price = foilStock > 0 ? 10 : 9;
     const magnetStock = Math.min(MAGNET_VIRTUAL_STOCK, baseStock);
     const magnet: FinishVariant = {
@@ -208,7 +220,7 @@ export function CardModal({ card, onClose }: Props) {
               </p>
 
               <div className="mt-6 space-y-5">
-                {buildLanguagesWithMagnet(card).map((lang) => {
+                {buildLanguagesWithMagnet(card, resolvePrice).map((lang) => {
                   const langOut = lang.stock === 0;
                   return (
                     <div key={lang.language}>
