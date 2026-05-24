@@ -32,6 +32,7 @@ import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as CartaSlugRouteImport } from './routes/carta.$slug'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
+import { Route as AdminPanelsRouteImport } from './routes/admin.panels'
 import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-cards'
 import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
 import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
@@ -166,6 +167,11 @@ const AdminShippingRoute = AdminShippingRouteImport.update({
   path: '/shipping',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPanelsRoute = AdminPanelsRouteImport.update({
+  id: '/panels',
+  path: '/panels',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminManageCardsRoute = AdminManageCardsRouteImport.update({
   id: '/manage-cards',
   path: '/manage-cards',
@@ -286,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
+  '/admin/panels': typeof AdminPanelsRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
   '/carta/$slug': typeof CartaSlugRoute
@@ -328,6 +335,7 @@ export interface FileRoutesByTo {
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
+  '/admin/panels': typeof AdminPanelsRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
   '/carta/$slug': typeof CartaSlugRoute
@@ -372,6 +380,7 @@ export interface FileRoutesById {
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
+  '/admin/panels': typeof AdminPanelsRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
   '/carta/$slug': typeof CartaSlugRoute
@@ -417,6 +426,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/integrations'
     | '/admin/manage-cards'
+    | '/admin/panels'
     | '/admin/shipping'
     | '/admin/users'
     | '/carta/$slug'
@@ -459,6 +469,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/integrations'
     | '/admin/manage-cards'
+    | '/admin/panels'
     | '/admin/shipping'
     | '/admin/users'
     | '/carta/$slug'
@@ -502,6 +513,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/integrations'
     | '/admin/manage-cards'
+    | '/admin/panels'
     | '/admin/shipping'
     | '/admin/users'
     | '/carta/$slug'
@@ -723,6 +735,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminShippingRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/panels': {
+      id: '/admin/panels'
+      path: '/panels'
+      fullPath: '/admin/panels'
+      preLoaderRoute: typeof AdminPanelsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/manage-cards': {
       id: '/admin/manage-cards'
       path: '/manage-cards'
@@ -858,6 +877,7 @@ interface AdminRouteChildren {
   AdminEmailsRoute: typeof AdminEmailsRoute
   AdminIntegrationsRoute: typeof AdminIntegrationsRoute
   AdminManageCardsRoute: typeof AdminManageCardsRoute
+  AdminPanelsRoute: typeof AdminPanelsRoute
   AdminShippingRoute: typeof AdminShippingRoute
   AdminUsersRoute: typeof AdminUsersRoute
 }
@@ -868,6 +888,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminEmailsRoute: AdminEmailsRoute,
   AdminIntegrationsRoute: AdminIntegrationsRoute,
   AdminManageCardsRoute: AdminManageCardsRoute,
+  AdminPanelsRoute: AdminPanelsRoute,
   AdminShippingRoute: AdminShippingRoute,
   AdminUsersRoute: AdminUsersRoute,
 }
