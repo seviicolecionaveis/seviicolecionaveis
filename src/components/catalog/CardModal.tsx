@@ -220,7 +220,7 @@ export function CardModal({ card, onClose }: Props) {
               </p>
 
               <div className="mt-6 space-y-5">
-                {buildLanguagesWithMagnet(card).map((lang) => {
+                {buildLanguagesWithMagnet(card, resolvePrice).map((lang) => {
                   const langOut = lang.stock === 0;
                   return (
                     <div key={lang.language}>
