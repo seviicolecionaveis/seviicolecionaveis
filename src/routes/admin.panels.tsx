@@ -285,18 +285,47 @@ function PanelEditor({ panel, onClose, onSaved }: { panel: Panel; onClose: () =>
             {images.length > 0 && (
               <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {images.map((url, i) => (
-                  <li key={`${url}-${i}`} className="relative group rounded-md overflow-hidden border border-border bg-secondary aspect-square">
+                  <li key={`${url}-${i}`} className="relative rounded-md overflow-hidden border border-border bg-secondary aspect-square">
                     <img src={url} alt="" className="h-full w-full object-cover" />
                     {i === 0 && (
                       <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">Capa</span>
                     )}
-                    <div className="absolute inset-x-0 bottom-0 flex justify-between bg-foreground/60 p-1 opacity-0 group-hover:opacity-100 transition">
-                      <div className="flex gap-1">
-                        <button onClick={() => moveImage(i, -1)} disabled={i === 0} className="rounded bg-background/80 px-1 text-xs disabled:opacity-30">←</button>
-                        <button onClick={() => moveImage(i, 1)} disabled={i === images.length - 1} className="rounded bg-background/80 px-1 text-xs disabled:opacity-30">→</button>
-                      </div>
-                      <button onClick={() => removeImage(i)} className="rounded bg-background/80 px-1 text-xs text-destructive">
-                        <Trash2 className="h-3 w-3" />
+                    <button
+                      onClick={() => removeImage(i)}
+                      className="absolute right-1 top-1 rounded-full bg-background/90 p-1 text-destructive shadow"
+                      aria-label="Remover imagem"
+                      type="button"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                    <div className="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-foreground/70 p-1">
+                      <button
+                        onClick={() => moveImage(i, -1)}
+                        disabled={i === 0}
+                        className="flex-1 rounded bg-background/90 py-1 text-xs font-bold disabled:opacity-30"
+                        aria-label="Mover para esquerda"
+                        type="button"
+                      >
+                        ←
+                      </button>
+                      {i !== 0 && (
+                        <button
+                          onClick={() => setImages((arr) => { const next = [...arr]; const [it] = next.splice(i, 1); next.unshift(it); return next; })}
+                          className="flex-1 rounded bg-background/90 py-1 text-[10px] font-bold"
+                          aria-label="Definir como capa"
+                          type="button"
+                        >
+                          Capa
+                        </button>
+                      )}
+                      <button
+                        onClick={() => moveImage(i, 1)}
+                        disabled={i === images.length - 1}
+                        className="flex-1 rounded bg-background/90 py-1 text-xs font-bold disabled:opacity-30"
+                        aria-label="Mover para direita"
+                        type="button"
+                      >
+                        →
                       </button>
                     </div>
                   </li>
