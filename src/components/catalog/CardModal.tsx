@@ -113,7 +113,7 @@ const finishDot: Record<Finish, string> = {
   "Double Rare": "bg-type-fire",
 };
 
-export function CardModal({ card, onClose }: Props) {
+export function CardModal({ card, onClose, magnetOnly = false }: Props) {
   const { add } = useCart();
   const { prices, loading: pricesLoading } = useCardPrices();
   const { has, toggle } = useWishlist();
