@@ -193,7 +193,8 @@ function AdminPage() {
             <AdminCancellationBell />
           <div className="flex gap-3 text-xs flex-wrap">
             <Link to="/admin/dashboard" className="font-semibold text-foreground hover:underline">Dashboard</Link>
-            <Link to="/admin/manage-cards" className="font-semibold text-foreground hover:underline">Gerenciar cartas</Link>
+           <Link to="/admin/manage-cards" className="font-semibold text-foreground hover:underline">Gerenciar cartas</Link>
+           <Link to="/admin/panels" className="font-semibold text-foreground hover:underline">Painéis</Link>
             <Link to="/admin/banners" className="font-semibold text-foreground hover:underline">Banners</Link>
             
             <Link to="/admin/shipping" className="font-semibold text-foreground hover:underline">Expedição</Link>
