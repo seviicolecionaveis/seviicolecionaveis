@@ -145,10 +145,18 @@ function isVirtualItem(it: { finish: string }) {
   return finishKey(it.finish) === "ima";
 }
 
+function isPanelItem(it: { cardId?: string }) {
+  return typeof it.cardId === "string" && it.cardId.startsWith("panel:");
+}
+
 async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]> {
   const resolved: T[] = [];
   for (const raw of items) {
     const it = normalizeCheckoutItem(raw);
+    if (isPanelItem(it)) {
+      resolved.push(it);
+      continue;
+    }
     if (isVirtualItem(it)) {
       resolved.push(it);
       continue;
@@ -179,6 +187,21 @@ async function ensureAvailableStock(
   items: { cardId: string; quantity: number; name: string; finish: string }[],
 ) {
   for (const it of items) {
+    if (isPanelItem(it)) {
+      const panelId = it.cardId.slice("panel:".length);
+      const { data } = await supabaseAdmin
+        .from("panels")
+        .select("stock")
+        .eq("id", panelId)
+        .maybeSingle();
+      const available = Number(data?.stock ?? 0);
+      if (available < it.quantity) {
+        throw new Error(
+          `Estoque insuficiente para "${it.name}". Disponível: ${available}, solicitado: ${it.quantity}.`,
+        );
+      }
+      continue;
+    }
     if (isVirtualItem(it)) continue;
     const { data, error } = await supabaseAdmin
       .from("cards")
@@ -194,6 +217,7 @@ async function ensureAvailableStock(
     }
   }
 }
+
 
 export async function createOrderCheckoutServer(data: StripeInput, userId: string) {
   const env = data.environment as StripeEnv;
