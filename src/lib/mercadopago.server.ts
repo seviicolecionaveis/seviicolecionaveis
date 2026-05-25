@@ -73,7 +73,10 @@ export interface CardPaymentResult {
 
 export async function createCardPaymentMP(input: CreateCardInput): Promise<CardPaymentResult> {
   const token = getAccessToken();
-  const cleanCpf = input.payerCpf?.replace(/\D/g, "") || undefined;
+  const cleanCpf = validateCpf(input.payerCpf) ?? undefined;
+  if (input.payerCpf && !cleanCpf) {
+    throw new Error("CPF inválido. Verifique o número informado e tente novamente.");
+  }
 
   const body: Record<string, unknown> = {
     transaction_amount: Number((input.amountCents / 100).toFixed(2)),
