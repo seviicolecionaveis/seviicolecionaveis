@@ -41,7 +41,9 @@ export function RecentlyViewed({ excludeId, limit = 6 }: Props) {
         </div>
         <div className="grid grid-cols-3 gap-x-4 gap-y-8 sm:gap-x-6 md:grid-cols-4 lg:grid-cols-6">
           {items.map((card) => (
-            <CardItem key={card.id} card={card} onClick={() => setActive(card)} />
+            <div key={card.id} className="mx-auto w-[70%]">
+              <CardItem card={card} onClick={() => setActive(card)} />
+            </div>
           ))}
         </div>
       </div>
