@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { sendTransactionalEmailSafe } from '@/lib/email/send.server'
 import { cardSlug } from '@/lib/slug'
+import { verifyCronAuth } from '@/lib/cron-auth.server'
 
 const SITE_URL = 'https://seviicolecionaveis.com.br'
 
