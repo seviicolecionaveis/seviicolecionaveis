@@ -16,7 +16,9 @@ export const Route = createFileRoute("/api/public/hooks/auto-cancel-unpaid")({
   },
 });
 
-async function handler() {
+async function handler({ request }: { request: Request }) {
+  const unauthorized = verifyCronAuth(request);
+  if (unauthorized) return unauthorized;
   const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
   const { data: candidates, error } = await supabaseAdmin
     .from("orders")
