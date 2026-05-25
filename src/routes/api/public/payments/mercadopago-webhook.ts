@@ -1,31 +1,86 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { createHmac, timingSafeEqual } from "crypto";
 
-// Mercado Pago notification format:
+// Verifies the Mercado Pago `x-signature` header per:
 // https://www.mercadopago.com.br/developers/pt/docs/your-integrations/notifications/webhooks
-// We accept query string `id` + `topic`, or JSON body { type, data: { id } }
+// Manifest format: "id:{data.id};request-id:{x-request-id};ts:{ts};"
+function verifyMpSignature(
+  request: Request,
+  url: URL,
+  secret: string,
+  bodyPaymentId: string | null,
+): boolean {
+  const sigHeader = request.headers.get("x-signature");
+  const requestId = request.headers.get("x-request-id") ?? "";
+  if (!sigHeader) return false;
+
+  const parts = Object.fromEntries(
+    sigHeader.split(",").map((p) => {
+      const [k, ...v] = p.trim().split("=");
+      return [k.trim(), v.join("=").trim()];
+    }),
+  );
+  const ts = parts.ts;
+  const v1 = parts.v1;
+  if (!ts || !v1) return false;
+
+  const dataId =
+    url.searchParams.get("data.id") ?? url.searchParams.get("id") ?? bodyPaymentId ?? "";
+  const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
+  const expected = createHmac("sha256", secret).update(manifest).digest("hex");
+  try {
+    const a = Buffer.from(v1, "hex");
+    const b = Buffer.from(expected, "hex");
+    return a.length === b.length && timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+}
+
 export const Route = createFileRoute("/api/public/payments/mercadopago-webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         try {
           const url = new URL(request.url);
+          const rawBody = await request.text();
+
           let paymentId: string | null = null;
+          let parsedBody: any = null;
           const topicQp = url.searchParams.get("topic") ?? url.searchParams.get("type");
           const idQp = url.searchParams.get("id") ?? url.searchParams.get("data.id");
 
           if (idQp && (topicQp === "payment" || topicQp === null)) {
             paymentId = idQp;
-          } else {
+          } else if (rawBody) {
             try {
-              const body = await request.json();
-              if (body?.type === "payment" || body?.action?.startsWith?.("payment.")) {
-                paymentId = String(body?.data?.id ?? body?.id ?? "");
-              } else if (body?.data?.id) {
-                paymentId = String(body.data.id);
+              parsedBody = JSON.parse(rawBody);
+              if (
+                parsedBody?.type === "payment" ||
+                parsedBody?.action?.startsWith?.("payment.")
+              ) {
+                paymentId = String(parsedBody?.data?.id ?? parsedBody?.id ?? "");
+              } else if (parsedBody?.data?.id) {
+                paymentId = String(parsedBody.data.id);
               }
             } catch {
               // no body
             }
+          }
+
+          // Signature verification (Mercado Pago x-signature header).
+          // Gated on MERCADOPAGO_WEBHOOK_SECRET being configured — until then
+          // the handler still re-verifies the payment with MP's API below.
+          const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+          if (secret) {
+            const ok = verifyMpSignature(request, url, secret, paymentId);
+            if (!ok) {
+              return new Response("Invalid signature", { status: 401 });
+            }
+          } else {
+            console.warn(
+              "[MP webhook] MERCADOPAGO_WEBHOOK_SECRET not configured — accepting without signature verification.",
+            );
           }
 
           if (!paymentId) {

@@ -154,16 +154,26 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
   for (const raw of items) {
     const it = normalizeCheckoutItem(raw);
     if (isPanelItem(it)) {
-      resolved.push(it);
-      continue;
-    }
-    if (isVirtualItem(it)) {
-      resolved.push(it);
+      const panelId = it.cardId.slice("panel:".length);
+      const { data: panel, error: pErr } = await supabaseAdmin
+        .from("panels")
+        .select("price_cents, active")
+        .eq("id", panelId)
+        .maybeSingle();
+      if (pErr) throw new Error(pErr.message);
+      if (!panel || panel.active === false) {
+        throw new Error(`Painel não encontrado ou indisponível: "${it.name}".`);
+      }
+      const cents = Number(panel.price_cents ?? 0);
+      if (cents <= 0) {
+        throw new Error(`Preço indisponível para o painel "${it.name}".`);
+      }
+      resolved.push({ ...it, unitPrice: cents / 100 });
       continue;
     }
     let query = supabaseAdmin
       .from("cards")
-      .select("id")
+      .select("id, base_price_cents")
       .eq("name", it.name)
       .eq("finish", it.finish as never)
       .eq("language", it.language as never)
@@ -178,7 +188,28 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
         `Carta não encontrada no estoque: "${it.name}" (${it.finish}/${it.language}${it.condition ? "/" + it.condition : ""}).`,
       );
     }
-    resolved.push({ ...it, cardId: data.id });
+    // Server-authoritative price: prefer cards.base_price_cents, fall back to
+    // card_prices (the scraped Liga Pokémon price). Never trust client input.
+    let priceCents: number | null =
+      data.base_price_cents != null ? Number(data.base_price_cents) : null;
+    if (priceCents == null) {
+      const { data: scraped } = await supabaseAdmin
+        .from("card_prices")
+        .select("price_cents")
+        .eq("card_name", it.name)
+        .eq("collection", it.collection ?? "")
+        .eq("card_number", it.number ?? "")
+        .eq("finish", it.finish)
+        .eq("language", it.language)
+        .maybeSingle();
+      if (scraped?.price_cents != null) priceCents = Number(scraped.price_cents);
+    }
+    if (priceCents == null || priceCents <= 0) {
+      throw new Error(
+        `Preço indisponível para "${it.name}". Tente novamente em instantes.`,
+      );
+    }
+    resolved.push({ ...it, cardId: data.id, unitPrice: priceCents / 100 });
   }
   return resolved;
 }
@@ -223,13 +254,17 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
   const env = data.environment as StripeEnv;
   const stripe = createStripeClient(env);
 
-  const subtotalCents = data.items.reduce(
+  // Resolve cards and override unitPrice with the server-side authoritative price.
+  const items = await resolveCardIds(data.items);
+  await ensureAvailableStock(items);
+
+  const subtotalCents = items.reduce(
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
   const shippingCents = computeShippingCents(data);
 
-  const bundle = computeBundleDiscount(data.items);
+  const bundle = computeBundleDiscount(items);
   const bundleDiscountCents = bundle.bundleDiscountCents;
   const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundle.bundleSubtotalCents);
 
@@ -239,9 +274,6 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
     nonBundleSubtotalCents,
   );
   const discountCents = bundleDiscountCents + couponDiscountCents;
-
-  const items = await resolveCardIds(data.items);
-  await ensureAvailableStock(items);
 
   const totalCents = subtotalCents - discountCents + shippingCents;
 
@@ -350,13 +382,16 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
 }
 
 export async function createPixOrderServer(data: PixInput, userId: string) {
-  const subtotalCents = data.items.reduce(
+  const items = await resolveCardIds(data.items);
+  await ensureAvailableStock(items);
+
+  const subtotalCents = items.reduce(
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
   const shippingCents = computeShippingCents(data);
 
-  const bundle = computeBundleDiscount(data.items);
+  const bundle = computeBundleDiscount(items);
   const bundleDiscountCents = bundle.bundleDiscountCents;
   const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundle.bundleSubtotalCents);
 
@@ -372,9 +407,6 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     couponDiscountCents,
   );
   const discountCents = bundleDiscountCents + couponDiscountCents + pixDiscountCents;
-
-  const items = await resolveCardIds(data.items);
-  await ensureAvailableStock(items);
 
   const totalCents = subtotalCents - discountCents + shippingCents;
   if (totalCents < 100) throw new Error("Valor mínimo para Pix: R$ 1,00");
@@ -497,13 +529,16 @@ export async function checkPixOrderStatusServer(orderId: string, userId: string)
 }
 
 export async function createCardOrderServer(data: CardInput, userId: string) {
-  const subtotalCents = data.items.reduce(
+  const items = await resolveCardIds(data.items);
+  await ensureAvailableStock(items);
+
+  const subtotalCents = items.reduce(
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
   const shippingCents = computeShippingCents(data);
 
-  const bundle = computeBundleDiscount(data.items);
+  const bundle = computeBundleDiscount(items);
   const bundleDiscountCents = bundle.bundleDiscountCents;
   const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundle.bundleSubtotalCents);
 
@@ -513,9 +548,6 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
     nonBundleSubtotalCents,
   );
   const discountCents = bundleDiscountCents + couponDiscountCents;
-
-  const items = await resolveCardIds(data.items);
-  await ensureAvailableStock(items);
 
   const totalCents = subtotalCents - discountCents + shippingCents;
   if (totalCents < 100) throw new Error("Valor mínimo: R$ 1,00");
