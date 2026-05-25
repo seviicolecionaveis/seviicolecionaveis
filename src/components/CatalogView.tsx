@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { type Card } from "@/data/cards";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
@@ -32,7 +32,7 @@ const DEFAULT_FILTERS: FilterState = {
 
 type Sort = "relevance" | "price-asc" | "price-desc" | "name";
 
-const BATCH_SIZE = 36;
+const BATCH_SIZE = 50;
 
 interface Props {
   heading?: string;
@@ -47,7 +47,6 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
   const [active, setActive] = useState<Card | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const stats = useCardStats();
 
@@ -137,18 +136,6 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
     setVisibleCount(BATCH_SIZE);
   }, [filters, query, sort]);
 
-  useEffect(() => {
-    const node = sentinelRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) setVisibleCount((v) => v + BATCH_SIZE);
-      },
-      { rootMargin: "400px" },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [visibleCount, filtered.length]);
 
   return (
     <div className="min-h-screen text-foreground">
@@ -279,11 +266,19 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
                 ))}
               </div>
               {visibleCount < filtered.length && (
-                <div ref={sentinelRef} className="mt-12 grid place-items-center py-8 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
-                    Carregando mais cartas...
-                  </div>
+                <div className="mt-12 flex flex-col items-center gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    Exibindo {Math.min(visibleCount, filtered.length)} de {filtered.length} cartas
+                  </p>
+                  <button
+                    onClick={() => setVisibleCount((v) => v + BATCH_SIZE)}
+                    className="rounded-full px-6 py-2.5 text-sm font-medium text-white transition-colors"
+                    style={{ backgroundColor: "#20a5c9" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1b8eae")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#20a5c9")}
+                  >
+                    Ver mais cartas
+                  </button>
                 </div>
               )}
               {visibleCount >= filtered.length && filtered.length > BATCH_SIZE && (
@@ -301,7 +296,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
       <WelcomeDialog />
 
       <RecentlyViewed />
-      <SiteFooter />
+      {visibleCount >= filtered.length && <SiteFooter />}
     </div>
   );
 }
