@@ -29,7 +29,9 @@ function priceKey(name: string, collection: string, number: string) {
 export const Route = createFileRoute('/api/public/hooks/price-drop-check')({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        const unauthorized = verifyCronAuth(request)
+        if (unauthorized) return unauthorized
         const admin = supabaseAdmin as any
 
         // 1. Distinct wishlisted card ids
