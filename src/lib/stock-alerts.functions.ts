@@ -65,8 +65,19 @@ const NotifySchema = z.object({
 const SITE_URL = 'https://seviicolecionaveis.com.br'
 
 export const notifyStockBack = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => NotifySchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { userId } = context
+    const { data: roleRow } = await (supabaseAdmin as any)
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .maybeSingle()
+    if (!roleRow) {
+      throw new Response('Forbidden', { status: 403 })
+    }
     const admin = supabaseAdmin as any
     const { data: alerts, error } = await admin
       .from('stock_alerts')
