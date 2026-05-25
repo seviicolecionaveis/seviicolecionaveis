@@ -382,13 +382,16 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
 }
 
 export async function createPixOrderServer(data: PixInput, userId: string) {
-  const subtotalCents = data.items.reduce(
+  const items = await resolveCardIds(data.items);
+  await ensureAvailableStock(items);
+
+  const subtotalCents = items.reduce(
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
   const shippingCents = computeShippingCents(data);
 
-  const bundle = computeBundleDiscount(data.items);
+  const bundle = computeBundleDiscount(items);
   const bundleDiscountCents = bundle.bundleDiscountCents;
   const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundle.bundleSubtotalCents);
 
@@ -404,9 +407,6 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     couponDiscountCents,
   );
   const discountCents = bundleDiscountCents + couponDiscountCents + pixDiscountCents;
-
-  const items = await resolveCardIds(data.items);
-  await ensureAvailableStock(items);
 
   const totalCents = subtotalCents - discountCents + shippingCents;
   if (totalCents < 100) throw new Error("Valor mínimo para Pix: R$ 1,00");
