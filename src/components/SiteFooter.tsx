@@ -27,7 +27,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
         <div className="grid sm:grid-cols-3 gap-10">
           {/* Coluna 1 — Marca */}
-          <div>
+          <div className="flex flex-col items-center text-center">
             <img
               src={logoUrl}
               alt="Sevii Colecionáveis"
