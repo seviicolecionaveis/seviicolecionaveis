@@ -25,6 +25,25 @@ function getAccessToken(): string {
   return token;
 }
 
+// Valida CPF (algoritmo dos dígitos verificadores).
+// Retorna o CPF limpo (11 dígitos) ou null se inválido.
+function validateCpf(raw: string | null | undefined): string | null {
+  const cpf = raw?.replace(/\D/g, "") ?? "";
+  if (cpf.length !== 11) return null;
+  if (/^(\d)\1{10}$/.test(cpf)) return null; // todos iguais
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(cpf[i], 10) * (10 - i);
+  let d1 = (sum * 10) % 11;
+  if (d1 === 10) d1 = 0;
+  if (d1 !== parseInt(cpf[9], 10)) return null;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(cpf[i], 10) * (11 - i);
+  let d2 = (sum * 10) % 11;
+  if (d2 === 10) d2 = 0;
+  if (d2 !== parseInt(cpf[10], 10)) return null;
+  return cpf;
+}
+
 export function getMercadoPagoPublicKeyServer(): string {
   const key = process.env.MERCADOPAGO_PUBLIC_KEY;
   if (!key) throw new Error("MERCADOPAGO_PUBLIC_KEY não configurado");
@@ -54,7 +73,10 @@ export interface CardPaymentResult {
 
 export async function createCardPaymentMP(input: CreateCardInput): Promise<CardPaymentResult> {
   const token = getAccessToken();
-  const cleanCpf = input.payerCpf?.replace(/\D/g, "") || undefined;
+  const cleanCpf = validateCpf(input.payerCpf) ?? undefined;
+  if (input.payerCpf && !cleanCpf) {
+    throw new Error("CPF inválido. Verifique o número informado e tente novamente.");
+  }
 
   const body: Record<string, unknown> = {
     transaction_amount: Number((input.amountCents / 100).toFixed(2)),
@@ -127,7 +149,14 @@ export async function createPixPayment(input: CreatePixInput): Promise<PixPaymen
   const token = getAccessToken();
   const expiresMin = input.expiresInMinutes ?? 30;
   const expirationDate = new Date(Date.now() + expiresMin * 60 * 1000).toISOString();
-  const cleanCpf = input.payerCpf?.replace(/\D/g, "") || undefined;
+  const cleanCpf = validateCpf(input.payerCpf);
+  if (!cleanCpf) {
+    throw new Error(
+      input.payerCpf
+        ? "CPF inválido. Verifique o número informado no checkout — o Mercado Pago exige um CPF válido para gerar o Pix."
+        : "CPF é obrigatório para pagamento via Pix. Preencha o campo CPF no checkout.",
+    );
+  }
 
   const body: Record<string, unknown> = {
     transaction_amount: Number((input.amountCents / 100).toFixed(2)),
@@ -140,9 +169,7 @@ export async function createPixPayment(input: CreatePixInput): Promise<PixPaymen
       email: input.payerEmail,
       first_name: input.payerFirstName?.slice(0, 50) ?? "Cliente",
       last_name: input.payerLastName?.slice(0, 50) ?? "Sevii",
-      ...(cleanCpf && cleanCpf.length === 11
-        ? { identification: { type: "CPF", number: cleanCpf } }
-        : {}),
+      identification: { type: "CPF", number: cleanCpf },
     },
   };
 
