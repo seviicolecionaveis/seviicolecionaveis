@@ -136,18 +136,6 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
     setVisibleCount(BATCH_SIZE);
   }, [filters, query, sort]);
 
-  useEffect(() => {
-    const node = sentinelRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) setVisibleCount((v) => v + BATCH_SIZE);
-      },
-      { rootMargin: "400px" },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [visibleCount, filtered.length]);
 
   return (
     <div className="min-h-screen text-foreground">
