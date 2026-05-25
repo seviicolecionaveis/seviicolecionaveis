@@ -107,6 +107,8 @@ export const Route = createFileRoute("/api/public/hooks/update-prices")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const unauthorized = verifyCronAuth(request);
+        if (unauthorized) return unauthorized;
         const [{ supabaseAdmin }, { scrapeLigaPokemon }] = await Promise.all([
           import("@/integrations/supabase/client.server"),
           import("@/utils/cardPrices.server"),
