@@ -17,6 +17,7 @@ import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as ImasRouteImport } from './routes/imas'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as EnviosRouteImport } from './routes/envios'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartasRouteImport } from './routes/cartas'
@@ -90,6 +91,11 @@ const FavoritosRoute = FavoritosRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnviosRoute = EnviosRouteImport.update({
+  id: '/envios',
+  path: '/envios',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContaRoute = ContaRouteImport.update({
@@ -279,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/conta': typeof ContaRoute
+  '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
@@ -323,6 +330,7 @@ export interface FileRoutesByTo {
   '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/conta': typeof ContaRoute
+  '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
@@ -367,6 +375,7 @@ export interface FileRoutesById {
   '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/conta': typeof ContaRoute
+  '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
@@ -413,6 +422,7 @@ export interface FileRouteTypes {
     | '/cartas'
     | '/checkout'
     | '/conta'
+    | '/envios'
     | '/faq'
     | '/favoritos'
     | '/imas'
@@ -457,6 +467,7 @@ export interface FileRouteTypes {
     | '/cartas'
     | '/checkout'
     | '/conta'
+    | '/envios'
     | '/faq'
     | '/favoritos'
     | '/imas'
@@ -500,6 +511,7 @@ export interface FileRouteTypes {
     | '/cartas'
     | '/checkout'
     | '/conta'
+    | '/envios'
     | '/faq'
     | '/favoritos'
     | '/imas'
@@ -545,6 +557,7 @@ export interface RootRouteChildren {
   CartasRoute: typeof CartasRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ContaRoute: typeof ContaRoute
+  EnviosRoute: typeof EnviosRoute
   FaqRoute: typeof FaqRoute
   FavoritosRoute: typeof FavoritosRoute
   ImasRoute: typeof ImasRoute
@@ -628,6 +641,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/envios': {
+      id: '/envios'
+      path: '/envios'
+      fullPath: '/envios'
+      preLoaderRoute: typeof EnviosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/conta': {
@@ -927,6 +947,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartasRoute: CartasRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   ContaRoute: ContaRoute,
+  EnviosRoute: EnviosRoute,
   FaqRoute: FaqRoute,
   FavoritosRoute: FavoritosRoute,
   ImasRoute: ImasRoute,
@@ -957,13 +978,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
