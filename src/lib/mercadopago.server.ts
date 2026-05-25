@@ -169,9 +169,7 @@ export async function createPixPayment(input: CreatePixInput): Promise<PixPaymen
       email: input.payerEmail,
       first_name: input.payerFirstName?.slice(0, 50) ?? "Cliente",
       last_name: input.payerLastName?.slice(0, 50) ?? "Sevii",
-      ...(cleanCpf && cleanCpf.length === 11
-        ? { identification: { type: "CPF", number: cleanCpf } }
-        : {}),
+      identification: { type: "CPF", number: cleanCpf },
     },
   };
 
