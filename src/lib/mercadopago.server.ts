@@ -149,7 +149,14 @@ export async function createPixPayment(input: CreatePixInput): Promise<PixPaymen
   const token = getAccessToken();
   const expiresMin = input.expiresInMinutes ?? 30;
   const expirationDate = new Date(Date.now() + expiresMin * 60 * 1000).toISOString();
-  const cleanCpf = input.payerCpf?.replace(/\D/g, "") || undefined;
+  const cleanCpf = validateCpf(input.payerCpf);
+  if (!cleanCpf) {
+    throw new Error(
+      input.payerCpf
+        ? "CPF inválido. Verifique o número informado no checkout — o Mercado Pago exige um CPF válido para gerar o Pix."
+        : "CPF é obrigatório para pagamento via Pix. Preencha o campo CPF no checkout.",
+    );
+  }
 
   const body: Record<string, unknown> = {
     transaction_amount: Number((input.amountCents / 100).toFixed(2)),
