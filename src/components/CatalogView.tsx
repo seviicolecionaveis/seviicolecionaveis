@@ -32,7 +32,7 @@ const DEFAULT_FILTERS: FilterState = {
 
 type Sort = "relevance" | "price-asc" | "price-desc" | "name";
 
-const BATCH_SIZE = 36;
+const BATCH_SIZE = 50;
 
 interface Props {
   heading?: string;
