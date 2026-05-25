@@ -22,7 +22,7 @@ async function handler({ request }: { request: Request }) {
   const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
   const { data: candidates, error } = await supabaseAdmin
     .from("orders")
-    .select("id, mercadopago_payment_id, status, created_at")
+    .select("id, mercadopago_payment_id, stripe_payment_intent, status, created_at")
     .eq("status", "pending")
     .lt("created_at", cutoff)
     .limit(500);
@@ -31,7 +31,7 @@ async function handler({ request }: { request: Request }) {
     return Response.json({ ok: false, error: error.message }, { status: 500 });
   }
   if (!candidates || candidates.length === 0) {
-    return Response.json({ ok: true, checked: 0, paid: 0, cancelled: 0 });
+    return Response.json({ ok: true, checked: 0, paid: 0, cancelled: 0, skipped: 0 });
   }
 
   const { getPixPayment } = await import("@/lib/mercadopago.server");
@@ -39,10 +39,19 @@ async function handler({ request }: { request: Request }) {
 
   let paid = 0;
   let cancelled = 0;
+  let skipped = 0;
   const errors: string[] = [];
 
   for (const o of candidates) {
     try {
+      // Safety: never auto-cancel an order without a payment reference.
+      // Those are likely manually-created or in-flight orders that only the
+      // admin should resolve. Cron should never silently change their status.
+      if (!o.mercadopago_payment_id && !o.stripe_payment_intent) {
+        skipped++;
+        continue;
+      }
+
       if (o.mercadopago_payment_id) {
         const remote = await getPixPayment(o.mercadopago_payment_id);
         if (remote.status === "approved") {
@@ -50,10 +59,27 @@ async function handler({ request }: { request: Request }) {
           paid++;
           continue;
         }
-        // Any other status (pending / cancelled / rejected / refunded on MP) → safe to cancel here.
+        // Only cancel when MP explicitly says the payment is terminated.
+        // Statuses like "pending", "in_process", "authorized" mean the
+        // customer may still complete it (PIX waiting for confirmation,
+        // card under review, etc.) — leave those alone.
+        if (
+          remote.status === "cancelled" ||
+          remote.status === "rejected" ||
+          remote.status === "refunded" ||
+          remote.status === "charged_back"
+        ) {
+          await cancelOrder(o.id);
+          cancelled++;
+          continue;
+        }
+        skipped++;
+        continue;
       }
-      await cancelOrder(o.id);
-      cancelled++;
+
+      // Stripe-backed order with no MP id: don't cancel from cron.
+      // Stripe's own webhook is the source of truth for those.
+      skipped++;
     } catch (e: any) {
       console.error("[auto-cancel] order", o.id, e?.message ?? e);
       errors.push(`${o.id}: ${e?.message ?? "unknown"}`);
@@ -65,6 +91,7 @@ async function handler({ request }: { request: Request }) {
     checked: candidates.length,
     paid,
     cancelled,
+    skipped,
     errors,
   });
 }
