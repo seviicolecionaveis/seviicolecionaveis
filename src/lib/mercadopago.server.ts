@@ -25,6 +25,25 @@ function getAccessToken(): string {
   return token;
 }
 
+// Valida CPF (algoritmo dos dígitos verificadores).
+// Retorna o CPF limpo (11 dígitos) ou null se inválido.
+function validateCpf(raw: string | null | undefined): string | null {
+  const cpf = raw?.replace(/\D/g, "") ?? "";
+  if (cpf.length !== 11) return null;
+  if (/^(\d)\1{10}$/.test(cpf)) return null; // todos iguais
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(cpf[i], 10) * (10 - i);
+  let d1 = (sum * 10) % 11;
+  if (d1 === 10) d1 = 0;
+  if (d1 !== parseInt(cpf[9], 10)) return null;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(cpf[i], 10) * (11 - i);
+  let d2 = (sum * 10) % 11;
+  if (d2 === 10) d2 = 0;
+  if (d2 !== parseInt(cpf[10], 10)) return null;
+  return cpf;
+}
+
 export function getMercadoPagoPublicKeyServer(): string {
   const key = process.env.MERCADOPAGO_PUBLIC_KEY;
   if (!key) throw new Error("MERCADOPAGO_PUBLIC_KEY não configurado");
