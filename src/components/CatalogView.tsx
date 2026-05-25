@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { type Card } from "@/data/cards";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
