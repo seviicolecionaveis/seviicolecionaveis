@@ -35,7 +35,7 @@ export function SiteFooter() {
               height={56}
               className="h-12 w-auto mb-4"
             />
-            <p className="text-xs leading-relaxed text-neutral-600 max-w-[260px]">
+            <p className="text-sm leading-relaxed text-neutral-600 max-w-[260px]">
               Cartas Pokémon originais, com garantia de autenticidade e envio
               rastreado para todo o Brasil.
             </p>
