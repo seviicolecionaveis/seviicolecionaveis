@@ -254,13 +254,17 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
   const env = data.environment as StripeEnv;
   const stripe = createStripeClient(env);
 
-  const subtotalCents = data.items.reduce(
+  // Resolve cards and override unitPrice with the server-side authoritative price.
+  const items = await resolveCardIds(data.items);
+  await ensureAvailableStock(items);
+
+  const subtotalCents = items.reduce(
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
   const shippingCents = computeShippingCents(data);
 
-  const bundle = computeBundleDiscount(data.items);
+  const bundle = computeBundleDiscount(items);
   const bundleDiscountCents = bundle.bundleDiscountCents;
   const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundle.bundleSubtotalCents);
 
@@ -270,9 +274,6 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
     nonBundleSubtotalCents,
   );
   const discountCents = bundleDiscountCents + couponDiscountCents;
-
-  const items = await resolveCardIds(data.items);
-  await ensureAvailableStock(items);
 
   const totalCents = subtotalCents - discountCents + shippingCents;
 
