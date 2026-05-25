@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyCronAuth } from "@/lib/cron-auth.server";
 
 const BATCH_SIZE = 40; // ~2 min por lote (margem segura no Worker)
 
