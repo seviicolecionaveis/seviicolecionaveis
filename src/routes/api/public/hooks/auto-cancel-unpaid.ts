@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { verifyCronAuth } from "@/lib/cron-auth.server";
 
 // Auto-cancels pending orders older than 30 minutes, but ONLY after
 // double-checking Mercado Pago to make sure the customer didn't actually pay.
