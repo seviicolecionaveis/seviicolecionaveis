@@ -296,7 +296,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
       <WelcomeDialog />
 
       <RecentlyViewed />
-      {visibleCount >= filtered.length && <SiteFooter />}
+      <SiteFooter />
     </div>
   );
 }
