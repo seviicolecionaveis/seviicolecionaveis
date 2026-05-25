@@ -33,7 +33,7 @@ export function SiteFooter() {
               alt="Sevii Colecionáveis"
               width={224}
               height={56}
-              className="h-12 w-auto mb-4"
+              className="h-16 w-auto mb-4"
             />
             <p className="text-sm leading-relaxed text-neutral-600 max-w-[260px]">
               Cartas Pokémon originais, com garantia de autenticidade e envio
