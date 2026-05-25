@@ -47,7 +47,6 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
   const [active, setActive] = useState<Card | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const stats = useCardStats();
 
