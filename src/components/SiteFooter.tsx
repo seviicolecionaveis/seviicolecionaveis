@@ -30,6 +30,9 @@ export function SiteFooter() {
               <li>
                 <Link to="/faq" className="hover:underline">Perguntas frequentes</Link>
               </li>
+              <li>
+                <Link to="/envios" className="hover:underline">Envios e Retirada</Link>
+              </li>
             </ul>
           </div>
 
