@@ -186,7 +186,7 @@ export const COLLECTIONS = Array.from(
   new Set([...CARDS.map((c) => c.collection).filter(Boolean), ...EXTRA_COLLECTIONS]),
 ).sort();
 
-export const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Masterball", "Rocket", "Energia", "Promo", "Ímã", "Shattered Holo", "Illustration Rare", "Ultra Rara", "Black Star Promo", "Double Rare"];
+export const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Masterball", "Rocket", "Energia", "Promo", "Shattered Holo", "Illustration Rare", "Ultra Rara", "Black Star Promo", "Double Rare"];
 
 const EXTRA_LANGUAGES: Language[] = ["Japonês", "Chinês"];
 export const LANGUAGES = Array.from(
