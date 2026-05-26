@@ -8,6 +8,7 @@ import { WishlistProvider } from "@/hooks/useWishlist";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { GlobalHeaderActions } from "@/components/GlobalHeaderActions";
 
 function NotFoundComponent() {
   return (
