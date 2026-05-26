@@ -26,7 +26,7 @@ function SealedAdmin() {
   const nav = useNavigate();
   const [items, setItems] = useState<Sealed[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<Panel | null>(null);
+  const [editing, setEditing] = useState<Sealed | null>(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -142,7 +142,7 @@ function SealedAdmin() {
 
       {editing && (
         <SealedEditor
-          panel={editing}
+          item={editing}
           onClose={() => setEditing(null)}
           onSaved={async () => { await load(); setEditing(null); }}
         />
@@ -151,7 +151,7 @@ function SealedAdmin() {
   );
 }
 
-function SealedEditor({ panel, onClose, onSaved }: { item: Sealed; onClose: () => void; onSaved: () => void }) {
+function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () => void; onSaved: () => void }) {
   const [title, setTitle] = useState(item.title);
   const [description, setDescription] = useState(item.description ?? "");
   const [price, setPrice] = useState((item.price_cents / 100).toFixed(2));
