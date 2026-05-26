@@ -175,6 +175,24 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
       resolved.push({ ...it, unitPrice: cents / 100 });
       continue;
     }
+    if (isSealedItem(it)) {
+      const sealedId = it.cardId.slice("sealed:".length);
+      const { data: sealed, error: sErr } = await supabaseAdmin
+        .from("sealed_products")
+        .select("price_cents, active")
+        .eq("id", sealedId)
+        .maybeSingle();
+      if (sErr) throw new Error(sErr.message);
+      if (!sealed || sealed.active === false) {
+        throw new Error(`Produto selado não encontrado ou indisponível: "${it.name}".`);
+      }
+      const cents = Number(sealed.price_cents ?? 0);
+      if (cents <= 0) {
+        throw new Error(`Preço indisponível para o produto selado "${it.name}".`);
+      }
+      resolved.push({ ...it, unitPrice: cents / 100 });
+      continue;
+    }
     let query = supabaseAdmin
       .from("cards")
       .select("id, base_price_cents")
