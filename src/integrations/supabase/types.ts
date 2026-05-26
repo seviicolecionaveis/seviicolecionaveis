@@ -685,6 +685,45 @@ export type Database = {
         }
         Relationships: []
       }
+      sealed_products: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          images: string[]
+          price_cents: number
+          sort_order: number
+          stock: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          price_cents?: number
+          sort_order?: number
+          stock?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          price_cents?: number
+          sort_order?: number
+          stock?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stock_alerts: {
         Row: {
           card_collection: string
