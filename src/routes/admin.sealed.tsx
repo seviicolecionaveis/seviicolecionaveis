@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Trash2, Plus, X, Upload, Link as LinkIcon, ArrowUp, ArrowDown } from "lucide-react";
 
-export const Route = createFileRoute("/admin/panels")({
+export const Route = createFileRoute("/admin/sealed")({
   head: () => ({ meta: [{ title: "Painéis — Admin" }] }),
   component: PanelsAdmin,
 });
