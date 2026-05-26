@@ -149,6 +149,10 @@ function isPanelItem(it: { cardId?: string }) {
   return typeof it.cardId === "string" && it.cardId.startsWith("panel:");
 }
 
+function isSealedItem(it: { cardId?: string }) {
+  return typeof it.cardId === "string" && it.cardId.startsWith("sealed:");
+}
+
 async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]> {
   const resolved: T[] = [];
   for (const raw of items) {
@@ -167,6 +171,24 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
       const cents = Number(panel.price_cents ?? 0);
       if (cents <= 0) {
         throw new Error(`Preço indisponível para o painel "${it.name}".`);
+      }
+      resolved.push({ ...it, unitPrice: cents / 100 });
+      continue;
+    }
+    if (isSealedItem(it)) {
+      const sealedId = it.cardId.slice("sealed:".length);
+      const { data: sealed, error: sErr } = await supabaseAdmin
+        .from("sealed_products")
+        .select("price_cents, active")
+        .eq("id", sealedId)
+        .maybeSingle();
+      if (sErr) throw new Error(sErr.message);
+      if (!sealed || sealed.active === false) {
+        throw new Error(`Produto selado não encontrado ou indisponível: "${it.name}".`);
+      }
+      const cents = Number(sealed.price_cents ?? 0);
+      if (cents <= 0) {
+        throw new Error(`Preço indisponível para o produto selado "${it.name}".`);
       }
       resolved.push({ ...it, unitPrice: cents / 100 });
       continue;
@@ -224,6 +246,21 @@ async function ensureAvailableStock(
         .from("panels")
         .select("stock")
         .eq("id", panelId)
+        .maybeSingle();
+      const available = Number(data?.stock ?? 0);
+      if (available < it.quantity) {
+        throw new Error(
+          `Estoque insuficiente para "${it.name}". Disponível: ${available}, solicitado: ${it.quantity}.`,
+        );
+      }
+      continue;
+    }
+    if (isSealedItem(it)) {
+      const sealedId = it.cardId.slice("sealed:".length);
+      const { data } = await supabaseAdmin
+        .from("sealed_products")
+        .select("stock")
+        .eq("id", sealedId)
         .maybeSingle();
       const available = Number(data?.stock ?? 0);
       if (available < it.quantity) {
