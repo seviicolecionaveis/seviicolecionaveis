@@ -13,6 +13,7 @@ import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeladosRouteImport } from './routes/selados'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as ImasRouteImport } from './routes/imas'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
@@ -72,6 +73,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SeladosRoute = SeladosRouteImport.update({
   id: '/selados',
   path: '/selados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrdersRoute = OrdersRouteImport.update({
@@ -296,6 +302,7 @@ export interface FileRoutesByFullPath {
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
   '/orders': typeof OrdersRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
@@ -341,6 +348,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
@@ -388,6 +396,7 @@ export interface FileRoutesById {
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
   '/orders': typeof OrdersRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
@@ -436,6 +445,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/imas'
     | '/orders'
+    | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
     | '/sobre'
@@ -481,6 +491,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/favoritos'
     | '/imas'
+    | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
     | '/sobre'
@@ -527,6 +538,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/imas'
     | '/orders'
+    | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
     | '/sobre'
@@ -574,6 +586,7 @@ export interface RootRouteChildren {
   FavoritosRoute: typeof FavoritosRoute
   ImasRoute: typeof ImasRoute
   OrdersRoute: typeof OrdersRouteWithChildren
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SeladosRoute: typeof SeladosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
@@ -625,6 +638,13 @@ declare module '@tanstack/react-router' {
       path: '/selados'
       fullPath: '/selados'
       preLoaderRoute: typeof SeladosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/orders': {
@@ -973,6 +993,7 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritosRoute: FavoritosRoute,
   ImasRoute: ImasRoute,
   OrdersRoute: OrdersRouteWithChildren,
+  ResetPasswordRoute: ResetPasswordRoute,
   SeladosRoute: SeladosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
