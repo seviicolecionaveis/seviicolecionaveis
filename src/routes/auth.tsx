@@ -32,6 +32,7 @@ function AuthPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr(null);
+    setInfo(null);
     setLoading(true);
     try {
       if (mode === "signup") {
@@ -44,11 +45,18 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+        nav({ to: "/" });
+      } else if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        setInfo("Enviamos um link de recuperação para o seu e-mail.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        nav({ to: "/" });
       }
-      nav({ to: "/" });
     } catch (e: any) {
       setErr(e?.message ?? "Erro ao autenticar");
     } finally {
@@ -56,18 +64,22 @@ function AuthPage() {
     }
   };
 
+  const title = mode === "login" ? "Entrar" : mode === "signup" ? "Criar conta" : "Recuperar senha";
+  const subtitle =
+    mode === "login"
+      ? "Acesse sua conta para finalizar compras."
+      : mode === "signup"
+      ? "Cadastre-se para acompanhar seus pedidos."
+      : "Informe seu e-mail e enviaremos um link para redefinir sua senha.";
+
   return (
     <div className="min-h-screen grid place-items-center bg-background px-4">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm">
         <Link to="/" className="text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground">
           ← Voltar ao catálogo
         </Link>
-        <h1 className="mt-4 text-2xl font-bold tracking-tight">
-          {mode === "login" ? "Entrar" : "Criar conta"}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {mode === "login" ? "Acesse sua conta para finalizar compras." : "Cadastre-se para acompanhar seus pedidos."}
-        </p>
+        <h1 className="mt-4 text-2xl font-bold tracking-tight">{title}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
 
         <form onSubmit={submit} className="mt-6 space-y-4">
           {mode === "signup" && (
@@ -119,35 +131,58 @@ function AuthPage() {
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-foreground"
             />
           </div>
-          <div>
-            <label className="block text-xs font-medium uppercase tracking-wide mb-1">Senha</label>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-foreground"
-            />
-          </div>
+          {mode !== "forgot" && (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-medium uppercase tracking-wide">Senha</label>
+                {mode === "login" && (
+                  <button
+                    type="button"
+                    onClick={() => { setMode("forgot"); setErr(null); setInfo(null); }}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Esqueci minha senha
+                  </button>
+                )}
+              </div>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-foreground"
+              />
+            </div>
+          )}
 
           {err && <p className="text-sm text-red-600">{err}</p>}
+          {info && <p className="text-sm text-green-600">{info}</p>}
 
           <button
             type="submit"
             disabled={loading}
             className="w-full rounded-md bg-foreground text-background py-2.5 text-sm font-semibold uppercase tracking-wide disabled:opacity-50"
           >
-            {loading ? "..." : mode === "login" ? "Entrar" : "Criar conta"}
+            {loading ? "..." : mode === "login" ? "Entrar" : mode === "signup" ? "Criar conta" : "Enviar link"}
           </button>
         </form>
 
-        <button
-          onClick={() => setMode(mode === "login" ? "signup" : "login")}
-          className="mt-4 w-full text-xs text-muted-foreground hover:text-foreground"
-        >
-          {mode === "login" ? "Não tem conta? Cadastre-se" : "Já tem conta? Entrar"}
-        </button>
+        {mode === "forgot" ? (
+          <button
+            onClick={() => { setMode("login"); setErr(null); setInfo(null); }}
+            className="mt-4 w-full text-xs text-muted-foreground hover:text-foreground"
+          >
+            ← Voltar ao login
+          </button>
+        ) : (
+          <button
+            onClick={() => { setMode(mode === "login" ? "signup" : "login"); setErr(null); setInfo(null); }}
+            className="mt-4 w-full text-xs text-muted-foreground hover:text-foreground"
+          >
+            {mode === "login" ? "Não tem conta? Cadastre-se" : "Já tem conta? Entrar"}
+          </button>
+        )}
       </div>
     </div>
   );
