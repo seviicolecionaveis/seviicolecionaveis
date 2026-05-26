@@ -34,6 +34,22 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
         }
         continue;
       }
+      // Sealed product (own stock in the sealed_products table)
+      if (typeof it.card_id === "string" && it.card_id.startsWith("sealed:")) {
+        const sealedId = it.card_id.slice("sealed:".length);
+        if (UUID_RE.test(sealedId)) {
+          const { data: sealed } = await supabaseAdmin
+            .from("sealed_products")
+            .select("stock")
+            .eq("id", sealedId)
+            .maybeSingle();
+          if (sealed) {
+            const newStock = Math.max(0, (sealed.stock ?? 0) - it.quantity);
+            await supabaseAdmin.from("sealed_products").update({ stock: newStock }).eq("id", sealedId);
+          }
+        }
+        continue;
+      }
       // Magnet (Ímã) is a virtual finish — decrement from the underlying base
       // Foil/Normal cards (Foil first, then Normal) matching name/collection/number.
       if (it.finish === "Ímã") {
