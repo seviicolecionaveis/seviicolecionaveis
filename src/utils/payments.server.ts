@@ -255,6 +255,21 @@ async function ensureAvailableStock(
       }
       continue;
     }
+    if (isSealedItem(it)) {
+      const sealedId = it.cardId.slice("sealed:".length);
+      const { data } = await supabaseAdmin
+        .from("sealed_products")
+        .select("stock")
+        .eq("id", sealedId)
+        .maybeSingle();
+      const available = Number(data?.stock ?? 0);
+      if (available < it.quantity) {
+        throw new Error(
+          `Estoque insuficiente para "${it.name}". Disponível: ${available}, solicitado: ${it.quantity}.`,
+        );
+      }
+      continue;
+    }
     if (isVirtualItem(it)) continue;
     const { data, error } = await supabaseAdmin
       .from("cards")
