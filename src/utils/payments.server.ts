@@ -149,6 +149,10 @@ function isPanelItem(it: { cardId?: string }) {
   return typeof it.cardId === "string" && it.cardId.startsWith("panel:");
 }
 
+function isSealedItem(it: { cardId?: string }) {
+  return typeof it.cardId === "string" && it.cardId.startsWith("sealed:");
+}
+
 async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]> {
   const resolved: T[] = [];
   for (const raw of items) {
