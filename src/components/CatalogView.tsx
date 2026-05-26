@@ -170,7 +170,6 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
           </div>
 
           <div className="flex items-center gap-1">
-            <HeaderActions onCartOpen={() => setCartOpen(true)} />
             <button
               onClick={() => setDrawerOpen(true)}
               className="flex lg:hidden items-center gap-2 rounded-full border border-border px-3 py-2 text-xs font-medium ml-1"
