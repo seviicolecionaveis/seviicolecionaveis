@@ -7,10 +7,10 @@ import { Trash2, Plus, X, Upload, Link as LinkIcon, ArrowUp, ArrowDown } from "l
 
 export const Route = createFileRoute("/admin/sealed")({
   head: () => ({ meta: [{ title: "Painéis — Admin" }] }),
-  component: PanelsAdmin,
+  component: SealedAdmin,
 });
 
-type Panel = {
+type Sealed = {
   id: string;
   title: string;
   description: string | null;
@@ -21,10 +21,10 @@ type Panel = {
   sort_order: number;
 };
 
-function PanelsAdmin() {
+function SealedAdmin() {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const nav = useNavigate();
-  const [panels, setPanels] = useState<Panel[]>([]);
+  const [items, setItems] = useState<Sealed[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Panel | null>(null);
 
@@ -38,11 +38,11 @@ function PanelsAdmin() {
   const load = async () => {
     setLoading(true);
     const { data } = await supabase
-      .from("panels")
+      .from("sealed_products")
       .select("*")
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false });
-    setPanels((data ?? []) as Panel[]);
+    setItems((data ?? []) as Sealed[]);
     setLoading(false);
   };
 
@@ -50,27 +50,27 @@ function PanelsAdmin() {
 
   const createNew = async () => {
     const { data, error } = await supabase
-      .from("panels")
+      .from("sealed_products")
       .insert({ title: "Novo painel", price_cents: 0, stock: 0, images: [], active: false })
       .select("*")
       .single();
     if (error) { toast.error(error.message); return; }
     await load();
-    setEditing(data as Panel);
+    setEditing(data as Sealed);
   };
 
   const remove = async (id: string) => {
     if (!confirm("Remover este painel?")) return;
-    await supabase.from("panels").delete().eq("id", id);
+    await supabase.from("sealed_products").delete().eq("id", id);
     await load();
   };
 
   const move = async (id: string, dir: -1 | 1) => {
-    const idx = panels.findIndex((p) => p.id === id);
-    const swap = panels[idx + dir];
+    const idx = items.findIndex((p) => p.id === id);
+    const swap = items[idx + dir];
     if (!swap) return;
-    await supabase.from("panels").update({ sort_order: swap.sort_order }).eq("id", id);
-    await supabase.from("panels").update({ sort_order: panels[idx].sort_order }).eq("id", swap.id);
+    await supabase.from("sealed_products").update({ sort_order: swap.sort_order }).eq("id", id);
+    await supabase.from("sealed_products").update({ sort_order: items[idx].sort_order }).eq("id", swap.id);
     await load();
   };
 
@@ -102,11 +102,11 @@ function PanelsAdmin() {
 
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : panels.length === 0 ? (
+        ) : items.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhum painel cadastrado.</p>
         ) : (
           <ul className="space-y-3">
-            {panels.map((p, i) => (
+            {items.map((p, i) => (
               <li key={p.id} className="rounded-xl border border-border bg-card p-4 flex flex-wrap items-center gap-4">
                 <img
                   src={p.images[0] ?? ""}
@@ -124,7 +124,7 @@ function PanelsAdmin() {
                   <button onClick={() => move(p.id, -1)} disabled={i === 0} className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-30">
                     <ArrowUp className="h-3 w-3" />
                   </button>
-                  <button onClick={() => move(p.id, 1)} disabled={i === panels.length - 1} className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-30">
+                  <button onClick={() => move(p.id, 1)} disabled={i === items.length - 1} className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-30">
                     <ArrowDown className="h-3 w-3" />
                   </button>
                 </div>
@@ -141,7 +141,7 @@ function PanelsAdmin() {
       </main>
 
       {editing && (
-        <PanelEditor
+        <SealedEditor
           panel={editing}
           onClose={() => setEditing(null)}
           onSaved={async () => { await load(); setEditing(null); }}
@@ -151,13 +151,13 @@ function PanelsAdmin() {
   );
 }
 
-function PanelEditor({ panel, onClose, onSaved }: { panel: Panel; onClose: () => void; onSaved: () => void }) {
-  const [title, setTitle] = useState(panel.title);
-  const [description, setDescription] = useState(panel.description ?? "");
-  const [price, setPrice] = useState((panel.price_cents / 100).toFixed(2));
-  const [stock, setStock] = useState(String(panel.stock));
-  const [active, setActive] = useState(panel.active);
-  const [images, setImages] = useState<string[]>(panel.images ?? []);
+function SealedEditor({ panel, onClose, onSaved }: { item: Sealed; onClose: () => void; onSaved: () => void }) {
+  const [title, setTitle] = useState(item.title);
+  const [description, setDescription] = useState(item.description ?? "");
+  const [price, setPrice] = useState((item.price_cents / 100).toFixed(2));
+  const [stock, setStock] = useState(String(item.stock));
+  const [active, setActive] = useState(item.active);
+  const [images, setImages] = useState<string[]>(item.images ?? []);
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -174,7 +174,7 @@ function PanelEditor({ panel, onClose, onSaved }: { panel: Panel; onClose: () =>
     setUploading(true);
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `panels/${crypto.randomUUID()}.${ext}`;
+      const path = `sealed/${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("card-images")
         .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
@@ -207,7 +207,7 @@ function PanelEditor({ panel, onClose, onSaved }: { panel: Panel; onClose: () =>
     if (!Number.isInteger(stockN) || stockN < 0) { toast.error("Estoque inválido"); return; }
     setSaving(true);
     const { error } = await supabase
-      .from("panels")
+      .from("sealed_products")
       .update({
         title: title.trim(),
         description: description.trim() || null,
@@ -216,7 +216,7 @@ function PanelEditor({ panel, onClose, onSaved }: { panel: Panel; onClose: () =>
         active,
         images,
       })
-      .eq("id", panel.id);
+      .eq("id", item.id);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Salvo");
