@@ -175,6 +175,7 @@ export const EXTRA_COLLECTIONS = [
   "TEF - Forças Temporais",
   "SSH - Espada e Escudo",
   "CRI - Caos Ascendente",
+  "CPA - Caminho do Campeão",
   "EVO - Evolutions",
   "FLF - Flash de Fogo",
   "UPR - Ultraprisma",

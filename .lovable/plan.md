@@ -1,17 +1,7 @@
-## Unificar coleção "Caos Ascendente"
+## Adicionar coleção CPA - Caminho do Campeão
 
-Rodar um `UPDATE` na tabela `cards` para renomear todas as 122 cartas que estão como `Caos Ascendente` para `CRI - Caos Ascendente`, juntando com as 72 já existentes (total: 194 cartas em uma única coleção).
+Adicionar `"CPA - Caminho do Campeão"` ao array `EXTRA_COLLECTIONS` em `src/data/cards.ts`.
 
-### SQL
+Isso fará a coleção aparecer no filtro de Coleção em `/cartas` mesmo sem cartas cadastradas ainda, ficando pronta para receber cartas via `/admin/manage-cards`.
 
-```sql
-UPDATE cards
-SET collection = 'CRI - Caos Ascendente', updated_at = now()
-WHERE collection = 'Caos Ascendente';
-```
-
-### Depois disso
-
-- Em `/cartas`, filtrar por **CRI - Caos Ascendente** mostra as 194 cartas.
-- As 122 novas continuam aparecendo como "esgotadas" até receberem estoque/preço em `/admin/manage-cards`.
-- Nenhuma alteração de código é necessária.
+Nenhuma outra alteração necessária — `COLLECTIONS` já é derivado de `EXTRA_COLLECTIONS` + coleções vindas do banco.
