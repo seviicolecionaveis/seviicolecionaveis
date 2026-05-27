@@ -196,6 +196,7 @@ function AdminPage() {
            <Link to="/admin/manage-cards" className="font-semibold text-foreground hover:underline">Gerenciar cartas</Link>
            <Link to="/admin/panels" className="font-semibold text-foreground hover:underline">Painéis</Link>
            <Link to="/admin/sealed" className="font-semibold text-foreground hover:underline">Selados</Link>
+           <Link to="/admin/accessories" className="font-semibold text-foreground hover:underline">Acessórios</Link>
             <Link to="/admin/banners" className="font-semibold text-foreground hover:underline">Banners</Link>
             
             <Link to="/admin/shipping" className="font-semibold text-foreground hover:underline">Expedição</Link>
