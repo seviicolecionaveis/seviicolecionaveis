@@ -256,6 +256,8 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
               <option value="price-desc">Preço: Maior → Menor</option>
               <option value="price-asc">Preço: Menor → Maior</option>
               <option value="name">Nome (A-Z)</option>
+              <option value="number-asc">Numeração do Card [0-9]</option>
+              <option value="number-desc">Numeração do Card [9-0]</option>
             </select>
           </div>
 
