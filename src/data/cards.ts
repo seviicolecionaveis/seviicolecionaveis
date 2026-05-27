@@ -177,6 +177,7 @@ export const EXTRA_COLLECTIONS = [
   "CRI - Caos Ascendente",
   "CPA - Caminho do Campeão",
   "CRE - Reinado Arrepiante",
+  "EVS - Céus em Evolução",
   "EVO - Evolutions",
   "FLF - Flash de Fogo",
   "UPR - Ultraprisma",
