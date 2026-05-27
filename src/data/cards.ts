@@ -178,6 +178,7 @@ export const EXTRA_COLLECTIONS = [
   "CPA - Caminho do Campeão",
   "CRE - Reinado Arrepiante",
   "EVS - Céus em Evolução",
+  "PGO - Pokémon Go",
   "EVO - Evolutions",
   "FLF - Flash de Fogo",
   "UPR - Ultraprisma",
