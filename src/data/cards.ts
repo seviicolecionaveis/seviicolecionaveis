@@ -179,6 +179,7 @@ export const EXTRA_COLLECTIONS = [
   "CRE - Reinado Arrepiante",
   "EVS - Céus em Evolução",
   "PGO - Pokémon Go",
+  "SM11 - Sintonia Mental",
   "EVO - Evolutions",
   "FLF - Flash de Fogo",
   "UPR - Ultraprisma",
