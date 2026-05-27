@@ -30,7 +30,12 @@ const DEFAULT_FILTERS: FilterState = {
   numberQuery: "",
 };
 
-type Sort = "relevance" | "price-asc" | "price-desc" | "name";
+type Sort = "relevance" | "price-asc" | "price-desc" | "name" | "number-asc" | "number-desc";
+
+const cardNumValue = (n: string) => {
+  const m = n.match(/\d+/);
+  return m ? parseInt(m[0], 10) : Number.MAX_SAFE_INTEGER;
+};
 
 const BATCH_SIZE = 50;
 
@@ -110,6 +115,10 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
         });
       case "name":
         return [...list].sort((a, b) => a.name.localeCompare(b.name));
+      case "number-asc":
+        return [...list].sort((a, b) => cardNumValue(a.number) - cardNumValue(b.number) || a.number.localeCompare(b.number));
+      case "number-desc":
+        return [...list].sort((a, b) => cardNumValue(b.number) - cardNumValue(a.number) || b.number.localeCompare(a.number));
       default: {
         const maxViews = Math.max(1, ...Array.from(stats.views.values()));
         const maxSales = Math.max(1, ...Array.from(stats.sales.values()));
@@ -247,6 +256,8 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
               <option value="price-desc">Preço: Maior → Menor</option>
               <option value="price-asc">Preço: Menor → Maior</option>
               <option value="name">Nome (A-Z)</option>
+              <option value="number-asc">Numeração do Card [0-9]</option>
+              <option value="number-desc">Numeração do Card [9-0]</option>
             </select>
           </div>
 
