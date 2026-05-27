@@ -30,7 +30,12 @@ const DEFAULT_FILTERS: FilterState = {
   numberQuery: "",
 };
 
-type Sort = "relevance" | "price-asc" | "price-desc" | "name";
+type Sort = "relevance" | "price-asc" | "price-desc" | "name" | "number-asc" | "number-desc";
+
+const cardNumValue = (n: string) => {
+  const m = n.match(/\d+/);
+  return m ? parseInt(m[0], 10) : Number.MAX_SAFE_INTEGER;
+};
 
 const BATCH_SIZE = 50;
 
