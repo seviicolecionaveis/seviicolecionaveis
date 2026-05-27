@@ -180,6 +180,7 @@ export const EXTRA_COLLECTIONS = [
   "EVS - Céus em Evolução",
   "PGO - Pokémon Go",
   "SM11 - Sintonia Mental",
+  "BKT - Turbo Revolução",
   "EVO - Evolutions",
   "FLF - Flash de Fogo",
   "UPR - Ultraprisma",
