@@ -1,76 +1,53 @@
 
-# Integração Melhor Envio (sandbox, OAuth2, em paralelo ao Superfrete)
+## Objetivo
 
-## Pré-requisitos (você precisa fazer)
+Criar uma nova seção **Acessórios** no site, posicionada no menu entre **Ímãs** e **Selados**, seguindo o mesmo padrão usado em Selados (vitrine pública + área admin para cadastrar produtos), mas com uma **categoria** obrigatória por produto.
 
-1. Criar conta no sandbox: https://sandbox.melhorenvio.com.br
-2. Em **Configurações → Tokens e Aplicativos → Meus Aplicativos**, criar um app com:
-   - **Redirect URI**: `https://seviicolecionaveis.com.br/api/public/melhorenvio/callback`
-   - **Scopes**: `shipping-calculate`, `shipping-cart`, `shipping-checkout`, `shipping-generate`, `shipping-print`, `shipping-tracking`, `cart-read`, `cart-write`
-3. Anotar `client_id` e `client_secret` — vou pedir como secrets quando estiver pronto.
+Categorias disponíveis:
+- Sleeves/Shields
+- Dados
+- Marcadores de dano
+- Moedas
+- Playmats
+- Binders
+- Top Loader
+- Deck box
+- Kit jogável
 
-## Arquitetura
+## Mudanças
 
-```text
-Admin                         Sevii server                Melhor Envio
-  │  clica "Conectar"            │                             │
-  │ ───────────────────────────► │                             │
-  │  redirect p/ ME authorize    │                             │
-  │ ◄─────────────────────────── │                             │
-  │  login + autoriza            │                             │
-  │ ──────────────────────────────────────────────────────────►│
-  │  redirect c/ ?code           │                             │
-  │ ◄──────────────────────────────────────────────────────────│
-  │     /api/public/melhorenvio/callback?code=...              │
-  │ ───────────────────────────► │  troca code → tokens        │
-  │                              │ ──────────────────────────► │
-  │                              │  salva em melhorenvio_tokens│
-  │  ◄──────redirect /admin ──── │                             │
-```
+### 1. Banco de dados (migração)
+Nova tabela `public.accessories` (mesma estrutura de `sealed_products` + coluna `category`):
+- `title`, `description`, `price_cents`, `stock`, `images[]`, `active`, `sort_order`, `category` (text com CHECK das 9 categorias)
+- GRANTs para anon (SELECT) / authenticated / service_role
+- RLS: "Anyone can view active accessories" (active=true ou admin) + "Admins manage accessories"
+- Trigger `update_updated_at`
 
-Depois disso, cotação no checkout chama Melhor Envio com `access_token` armazenado (refresh automático quando expira).
+### 2. Frontend público — `src/routes/acessorios.tsx`
+- Estrutura igual à página Selados: header com `SiteNav`, grid de cards, modal ao clicar
+- Adicional: barra de filtro por categoria (chips "Todos" + as 9 categorias)
+- Carregamento via `supabase.from("accessories")...eq("active", true)`
+- SEO: title/description próprios
 
-## O que vai mudar no código
+### 3. Modal — `src/components/catalog/AccessoryModal.tsx`
+- Cópia do `SealedModal` adaptada: exibe a categoria abaixo do título
+- Ao adicionar ao carrinho usa `id: accessory:<id>`, `collection: "Acessório"`, `finish: <categoria>`
 
-### 1. Banco
-Nova tabela `melhorenvio_tokens` (singleton, só admin acessa):
-- `access_token`, `refresh_token`, `expires_at`, `environment` (`sandbox`/`production`), `scope`
-- RLS: só admin lê/escreve
+### 4. Navegação — `src/components/SiteNav.tsx`
+Inserir item `{ to: "/acessorios", label: "Acessórios" }` entre Ímãs e Selados.
 
-### 2. Secrets
-- `MELHORENVIO_CLIENT_ID`
-- `MELHORENVIO_CLIENT_SECRET`
-- `MELHORENVIO_ENVIRONMENT` = `sandbox`
+### 5. Admin — `src/routes/admin.accessories.tsx`
+Cópia do `admin.sealed.tsx` com:
+- Lista de produtos com capa, título, preço, estoque, **categoria**
+- Botões "Novo acessório", editar, remover, reordenar
+- Editor (modal) com campos: título, descrição, preço, estoque, ativo, **select de categoria (obrigatório)**, gerenciador de imagens (upload + URL, igual ao Sealed)
 
-### 3. Arquivos novos
-- `src/lib/melhorenvio.server.ts` — cliente da API (token refresh, cotação, compra, etiqueta)
-- `src/utils/melhorenvio.functions.ts` — server fns:
-  - `getMelhorEnvioAuthUrl` (admin) → retorna URL de autorização
-  - `getMelhorEnvioStatus` (admin) → conectado? expira quando?
-  - `disconnectMelhorEnvio` (admin)
-- `src/routes/api/public/melhorenvio/callback.ts` — recebe `?code=`, troca por tokens, salva, redireciona para `/admin`
+### 6. Link no header do admin — `src/routes/admin.tsx`
+Adicionar `<Link to="/admin/accessories">Acessórios</Link>` na barra de navegação do admin, próximo a "Selados".
 
-### 4. Arquivos editados
-- `src/utils/shipping.functions.ts` — `getShippingQuotes` chama Superfrete **e** Melhor Envio em paralelo, mescla e ordena por preço. IDs ficam `melhorenvio:<service-id>` para diferenciar.
-- `src/routes/admin.tsx` (ou nova seção) — botão "Conectar Melhor Envio (sandbox)" + status
-- `src/components/checkout/...` — nada muda (já lista quotes por `id`/`serviceName`)
-- `src/lib/superfrete-label.server.ts` — **não muda agora**. Compra de etiqueta continua só pelo Superfrete. Se quiser comprar etiqueta no ME quando o cliente escolher uma cotação ME, fazemos numa segunda etapa.
+## Detalhes técnicos
 
-## Escopo desta entrega
-
-✅ OAuth2 completo (connect/refresh/disconnect)
-✅ Cotação Melhor Envio no checkout, em paralelo ao Superfrete
-✅ UI admin para conectar/desconectar e ver status
-✅ Sandbox por padrão (controlado por `MELHORENVIO_ENVIRONMENT`)
-
-❌ Compra automática de etiqueta no ME (fica para próxima — exige fluxo cart→checkout→generate→print, bem maior)
-❌ Tracking ME (fica para depois)
-
-## Próximo passo
-
-Você cria o app no sandbox do Melhor Envio com o redirect URI acima e me confirma. Quando confirmar, eu:
-1. Crio a migration da tabela
-2. Peço os 2 secrets via formulário
-3. Implemento tudo
-
-OK assim?
+- Imagens reutilizam o bucket público `card-images` em pasta `accessories/`
+- A categoria entra no banco como `text` com `CHECK (category IN (...))` para garantir consistência sem precisar de enum
+- A página `/acessorios` segue o padrão SSR/route-tree (será detectada automaticamente pelo plugin TanStack; `routeTree.gen.ts` é regenerado)
+- Nenhuma alteração no fluxo de checkout/orders: produtos viram itens do carrinho com `cardId="accessory:<uuid>"` (mesmo padrão dos selados, que já é tratado em `orders.server.ts` / `payments.server.ts`)

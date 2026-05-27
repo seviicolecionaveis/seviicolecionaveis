@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      accessories: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          images: string[]
+          price_cents: number
+          sort_order: number
+          stock: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          price_cents?: number
+          sort_order?: number
+          stock?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          price_cents?: number
+          sort_order?: number
+          stock?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       addresses: {
         Row: {
           cep: string
