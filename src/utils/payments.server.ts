@@ -31,6 +31,29 @@ async function sendOrderReceivedEmail(orderId: string) {
   });
 }
 
+/**
+ * Cancela quaisquer pedidos pendentes anteriores do mesmo usuário para evitar
+ * duplicação (cliente inicia um Pix/cartão, não paga, recomeça e paga — sem
+ * isso, ficavam dois registros: "Pedido recebido" + "Pago" para o mesmo carrinho).
+ * Libera também as reservas de estoque desses pedidos antigos.
+ */
+async function cancelOtherPendingOrdersForUser(userId: string, exceptOrderId?: string) {
+  const { data, error } = await supabaseAdmin
+    .from("orders")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("status", "pending");
+  if (error || !data) return;
+  for (const o of data) {
+    if (exceptOrderId && o.id === exceptOrderId) continue;
+    try {
+      await cancelOrder(o.id);
+    } catch (e) {
+      console.error("[cancelOtherPendingOrdersForUser] falhou ao cancelar", o.id, e);
+    }
+  }
+}
+
 const SHIPPING_FIXED_CENTS = 2500;
 const ADMIN_COUPON_CODE = "POKEAGIOTAGEM";
 const ADMIN_COUPON_PERCENT = 30;
