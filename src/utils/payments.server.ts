@@ -593,6 +593,8 @@ export async function checkPixOrderStatusServer(orderId: string, userId: string)
 }
 
 export async function createCardOrderServer(data: CardInput, userId: string) {
+  await cancelOtherPendingOrdersForUser(userId);
+
   const items = await resolveCardIds(data.items);
   await ensureAvailableStock(items);
 
