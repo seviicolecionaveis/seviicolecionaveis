@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Sparkles, Check, Copy } from "lucide-react";
 
-const STORAGE_KEY = "welcome-dialog-dismissed";
+const STORAGE_KEY = "welcome-dialog-dismissed-v2";
 const COUPON = "PRIMEIRACOMPRA10";
 
 export function WelcomeDialog() {
@@ -17,6 +17,12 @@ export function WelcomeDialog() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // Clean up old key from previous version
+    try {
+      localStorage.removeItem("welcome-dialog-dismissed");
+    } catch {
+      // ignore
+    }
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (!dismissed) {
       const t = setTimeout(() => setOpen(true), 600);
@@ -24,9 +30,6 @@ export function WelcomeDialog() {
     }
   }, []);
 
-  const handleClose = (next: boolean) => {
-    setOpen(next);
-    if (!next) localStorage.setItem(STORAGE_KEY, "1");
   };
 
   const handleCopy = async () => {
