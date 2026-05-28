@@ -30,7 +30,11 @@ export function WelcomeDialog() {
     }
   }, []);
 
+  const handleClose = (next: boolean) => {
+    setOpen(next);
+    if (!next) localStorage.setItem(STORAGE_KEY, "1");
   };
+
 
   const handleCopy = async () => {
     try {
