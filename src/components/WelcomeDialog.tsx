@@ -7,34 +7,58 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Sparkles, Check, Copy } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
-const STORAGE_KEY = "welcome-dialog-dismissed-v2";
+const SESSION_KEY = "welcome-dialog-shown-session";
 const COUPON = "PRIMEIRACOMPRA10";
 
 export function WelcomeDialog() {
+  const { user, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    // Clean up old key from previous version
-    try {
-      localStorage.removeItem("welcome-dialog-dismissed");
-    } catch {
-      // ignore
-    }
-    const dismissed = localStorage.getItem(STORAGE_KEY);
-    if (!dismissed) {
-      const t = setTimeout(() => setOpen(true), 600);
-      return () => clearTimeout(t);
-    }
-  }, []);
+    if (loading) return;
+
+    // Already shown in this session — don't reopen
+    if (sessionStorage.getItem(SESSION_KEY)) return;
+
+    let cancelled = false;
+
+    const decide = async () => {
+      // Logged-in: check if the user has already used the welcome coupon
+      if (user?.id) {
+        const { data, error } = await supabase
+          .from("orders")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("coupon_code", COUPON)
+          .limit(1);
+        if (error) {
+          console.error("[WelcomeDialog] coupon check failed", error);
+          return;
+        }
+        if ((data?.length ?? 0) > 0) return; // already used → don't show
+      }
+
+      if (cancelled) return;
+      sessionStorage.setItem(SESSION_KEY, "1");
+      setTimeout(() => {
+        if (!cancelled) setOpen(true);
+      }, 600);
+    };
+
+    decide();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, loading]);
 
   const handleClose = (next: boolean) => {
     setOpen(next);
-    if (!next) localStorage.setItem(STORAGE_KEY, "1");
   };
-
 
   const handleCopy = async () => {
     try {
