@@ -444,6 +444,8 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
 }
 
 export async function createPixOrderServer(data: PixInput, userId: string) {
+  await cancelOtherPendingOrdersForUser(userId);
+
   const items = await resolveCardIds(data.items);
   await ensureAvailableStock(items);
 
