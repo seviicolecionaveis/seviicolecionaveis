@@ -311,6 +311,8 @@ async function ensureAvailableStock(
 
 
 export async function createOrderCheckoutServer(data: StripeInput, userId: string) {
+  await cancelOtherPendingOrdersForUser(userId);
+
   const env = data.environment as StripeEnv;
   const stripe = createStripeClient(env);
 
