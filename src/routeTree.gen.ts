@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
+import { Route as TiposDeCartaRouteImport } from './routes/tipos-de-carta'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeladosRouteImport } from './routes/selados'
@@ -60,6 +61,11 @@ import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TiposDeCartaRoute = TiposDeCartaRouteImport.update({
+  id: '/tipos-de-carta',
+  path: '/tipos-de-carta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SobreRoute = SobreRouteImport.update({
@@ -319,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
+  '/tipos-de-carta': typeof TiposDeCartaRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -367,6 +374,7 @@ export interface FileRoutesByTo {
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
+  '/tipos-de-carta': typeof TiposDeCartaRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -417,6 +425,7 @@ export interface FileRoutesById {
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
+  '/tipos-de-carta': typeof TiposDeCartaRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -468,6 +477,7 @@ export interface FileRouteTypes {
     | '/selados'
     | '/sitemap.xml'
     | '/sobre'
+    | '/tipos-de-carta'
     | '/unsubscribe'
     | '/admin/accessories'
     | '/admin/banners'
@@ -516,6 +526,7 @@ export interface FileRouteTypes {
     | '/selados'
     | '/sitemap.xml'
     | '/sobre'
+    | '/tipos-de-carta'
     | '/unsubscribe'
     | '/admin/accessories'
     | '/admin/banners'
@@ -565,6 +576,7 @@ export interface FileRouteTypes {
     | '/selados'
     | '/sitemap.xml'
     | '/sobre'
+    | '/tipos-de-carta'
     | '/unsubscribe'
     | '/admin/accessories'
     | '/admin/banners'
@@ -615,6 +627,7 @@ export interface RootRouteChildren {
   SeladosRoute: typeof SeladosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
+  TiposDeCartaRoute: typeof TiposDeCartaRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   CartaSlugRoute: typeof CartaSlugRoute
   ColecaoSlugRoute: typeof ColecaoSlugRoute
@@ -642,6 +655,13 @@ declare module '@tanstack/react-router' {
       path: '/unsubscribe'
       fullPath: '/unsubscribe'
       preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tipos-de-carta': {
+      id: '/tipos-de-carta'
+      path: '/tipos-de-carta'
+      fullPath: '/tipos-de-carta'
+      preLoaderRoute: typeof TiposDeCartaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sobre': {
@@ -1039,6 +1059,7 @@ const rootRouteChildren: RootRouteChildren = {
   SeladosRoute: SeladosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
+  TiposDeCartaRoute: TiposDeCartaRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   CartaSlugRoute: CartaSlugRoute,
   ColecaoSlugRoute: ColecaoSlugRoute,
