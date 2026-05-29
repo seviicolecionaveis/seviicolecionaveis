@@ -48,7 +48,7 @@ export function SiteNav({ className = "" }: { className?: string }) {
             aria-haspopup="menu"
             aria-expanded={open}
           >
-            FAQ
+            Dúvidas (FAQ)
             <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
           </button>
         </PopoverTrigger>
