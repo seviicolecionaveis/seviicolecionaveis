@@ -42,7 +42,7 @@ const TYPES = [
   },
   {
     tag: "SPECIAL ILLUSTRATION RARE",
-    image: "https://i.ebayimg.com/images/g/L9YAAeSwIgVo7sSE/s-l1200.jpg",
+    image: "https://efour.b-cdn.net/uploads/default/original/3X/a/2/a2763c6b19ab5a708f180de141beadd90467c85d.jpeg",
     title: "Special Illustration Rare (SIR)",
     description:
       "Combinam arte Full Art com acabamento texturizado e um estilo artístico único — muitas vezes ilustradas por artistas convidados com traços completamente diferentes do padrão oficial. São consideradas as cartas visualmente mais bonitas do jogo moderno e têm altíssima demanda no mercado colecionável.",
@@ -127,12 +127,12 @@ function TiposDeCartaPage() {
                 key={t.title}
                 className="group flex flex-col md:flex-row overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition hover:shadow-md hover:-translate-y-0.5"
               >
-                <div className="md:w-44 lg:w-52 shrink-0 bg-neutral-50 flex items-center justify-center p-4">
+                <div className="md:w-60 lg:w-64 shrink-0 bg-neutral-50 flex items-center justify-center p-4">
                   <img
                     src={t.image}
                     alt={t.title}
                     loading="lazy"
-                    className="h-44 md:h-full w-full object-contain"
+                    className="h-64 w-full object-contain"
                   />
                 </div>
                 <div className="flex-1 p-5">
