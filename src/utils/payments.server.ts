@@ -118,7 +118,41 @@ async function validateCoupon(
     };
   }
 
-  throw new Error("Cupom inválido");
+  // Fallback: cupons gerenciáveis na tabela public.coupons
+  const { data: coupon, error: couponErr } = await supabaseAdmin
+    .from("coupons")
+    .select("id, code, user_id, percent, max_discount_cents, max_uses, used_count, expires_at, active")
+    .eq("code", code)
+    .maybeSingle();
+  if (couponErr) throw new Error(couponErr.message);
+  if (!coupon || !coupon.active) throw new Error("Cupom inválido");
+  if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+    throw new Error("Cupom expirado");
+  }
+  if (coupon.user_id && coupon.user_id !== userId) {
+    throw new Error("Este cupom não está disponível para sua conta");
+  }
+  if (coupon.used_count >= coupon.max_uses) {
+    throw new Error("Cupom já foi utilizado");
+  }
+
+  // Reserva o uso de forma atômica (evita corrida de uso duplicado)
+  const { data: claimed, error: claimErr } = await supabaseAdmin
+    .from("coupons")
+    .update({ used_count: coupon.used_count + 1 })
+    .eq("id", coupon.id)
+    .eq("used_count", coupon.used_count)
+    .select("id")
+    .maybeSingle();
+  if (claimErr) throw new Error(claimErr.message);
+  if (!claimed) throw new Error("Cupom já foi utilizado");
+
+  const raw = Math.round((subtotalCents * coupon.percent) / 100);
+  const discountCents =
+    coupon.max_discount_cents && coupon.max_discount_cents > 0
+      ? Math.min(raw, coupon.max_discount_cents)
+      : raw;
+  return { discountCents, code: coupon.code };
 }
 
 type ResolvableItem = {
