@@ -8,6 +8,7 @@ import { trackRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { cardSlug } from "@/lib/slug";
 import { Plus, Check, Heart, Share2, ZoomIn, ZoomOut, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { StockAlertDialog } from "@/components/StockAlertDialog";
 
 // Para cartas Pokémon, o acabamento "Ímã" é um produto interno disponível
