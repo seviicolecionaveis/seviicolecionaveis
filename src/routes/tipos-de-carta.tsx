@@ -175,6 +175,19 @@ function TiposDeCartaPage() {
       </main>
 
       <SiteFooter />
+
+      <Dialog open={!!zoomImage} onOpenChange={(open) => !open && setZoomImage(null)}>
+        <DialogContent className="max-w-3xl p-2 bg-white">
+          {zoomImage && (
+            <img
+              src={zoomImage.src}
+              alt={zoomImage.alt}
+              className="w-full h-auto max-h-[85vh] object-contain rounded-md"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
