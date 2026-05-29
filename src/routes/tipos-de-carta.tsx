@@ -21,7 +21,7 @@ const TYPES = [
   },
   {
     tag: "HOLO FOIL",
-    image: "https://i.ibb.co/v4PNm5Kt/foil.png",
+    image: "/images/foil-gengar.png",
     title: "Foil (Holográfica)",
     description:
       "O brilho holográfico aparece diretamente sobre o Pokémon, criando o efeito metálico característico. É uma das raridades mais clássicas do TCG, presente desde os primeiros sets. Ao mover a carta, a ilustração reflete a luz de forma única — cada ângulo revela um padrão diferente.",
