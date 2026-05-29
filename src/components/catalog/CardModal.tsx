@@ -8,6 +8,7 @@ import { trackRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { cardSlug } from "@/lib/slug";
 import { Plus, Check, Heart, Share2, ZoomIn, ZoomOut, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { StockAlertDialog } from "@/components/StockAlertDialog";
 
 // Para cartas Pokémon, o acabamento "Ímã" é um produto interno disponível
@@ -246,12 +247,21 @@ export function CardModal({ card, onClose, magnetOnly = false }: Props) {
               </div>
 
               {!magnetOnly && (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {card.languages.length}{" "}
-                  {card.languages.length === 1 ? "idioma" : "idiomas"} •{" "}
-                  {card.variants.length}{" "}
-                  {card.variants.length === 1 ? "versão" : "versões"}
-                </p>
+                <>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {card.languages.length}{" "}
+                    {card.languages.length === 1 ? "idioma" : "idiomas"} •{" "}
+                    {card.variants.length}{" "}
+                    {card.variants.length === 1 ? "versão" : "versões"}
+                  </p>
+                  <Link
+                    to="/tipos-de-carta"
+                    onClick={onClose}
+                    className="mt-1 inline-block text-xs font-medium text-[#20a5c9] hover:underline"
+                  >
+                    Sobre os Tipos de Carta
+                  </Link>
+                </>
               )}
 
               <div className="mt-6 space-y-5">
