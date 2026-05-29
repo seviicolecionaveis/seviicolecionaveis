@@ -101,8 +101,11 @@ export const Route = createFileRoute("/tipos-de-carta")({
 });
 
 function TiposDeCartaPage() {
+  const [zoomImage, setZoomImage] = useState<{ src: string; alt: string } | null>(null);
+
   return (
     <div className="min-h-screen bg-white text-black flex flex-col">
+
       <header className="border-b border-neutral-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <Link to="/" className="text-lg font-bold">
