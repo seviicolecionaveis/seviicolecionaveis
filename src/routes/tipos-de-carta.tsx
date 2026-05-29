@@ -137,7 +137,7 @@ function TiposDeCartaPage() {
                 <button
                   type="button"
                   onClick={() => setZoomImage({ src: t.image, alt: t.title })}
-                  className="md:w-80 lg:w-[22rem] shrink-0 bg-neutral-50 flex items-center justify-center p-4 cursor-zoom-in group/img"
+                  className="md:w-64 lg:w-72 shrink-0 bg-neutral-50 flex items-center justify-center p-4 cursor-zoom-in group/img"
                   aria-label={`Ampliar imagem: ${t.title}`}
                 >
                   <img
