@@ -67,9 +67,10 @@ const TYPES = [
   {
     tag: "ENERGIA",
     image: "https://repositorio.sbrauble.com/arquivos/in/pokemon_bkp/cd/761/6981059c0ca74-1fgs7-e8a2c-447f35d1fc824ee02c1187646107a29f.jpg",
-    title: "Carta de Energia",
+    title: "Padrão de Símbolo de Energia",
     description:
-      "As cartas de Energia são peças fundamentais para jogar o TCG Pokémon, sem elas, os Pokémon não conseguem usar seus ataques. Existem 11 tipos de energia (Fogo, Água, Grama, Elétrico, Psíquico, Lutador, Sombrio, Metal, Fada, Dragão e Normal), além das Energias Especiais, que oferecem efeitos extras durante a batalha.",
+      "As cartas com o padrão de símbolo de energia possuem um acabamento reverso holográfico, onde toda a superfície da carta brilha, exceto a ilustração principal do Pokémon. É presente no centro do fundo holográfico um único ícone do tipo do pokemon, como folhas para Pokémon de Grama, chamas para Fogo ou gotas para Água, criado num efeito metálico característico.",
+
   },
   {
     tag: "POKÉBOLA",
