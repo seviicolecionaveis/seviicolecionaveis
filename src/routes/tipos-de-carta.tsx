@@ -156,7 +156,7 @@ function TiposDeCartaPage() {
                     {t.tag}
                   </span>
                   <h2 className="mt-3 text-lg font-bold">{t.title}</h2>
-                  <p className="mt-2 text-sm text-neutral-700 leading-relaxed">{t.description}</p>
+                  <p className="mt-2 text-sm text-neutral-700 leading-relaxed text-justify">{t.description}</p>
                 </div>
               </article>
             ))}
