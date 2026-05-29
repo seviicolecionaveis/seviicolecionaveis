@@ -13,7 +13,8 @@ const LINKS = [
 ] as const;
 
 const FAQ_GROUP = [
-  { to: "/faq", label: "Perguntas frequentes" },
+  { to: "/faq", label: "Dúvidas (FAQ)" },
+  { to: "/tipos-de-carta", label: "Tipos de Carta" },
   { to: "/envios", label: "Envios e Retirada" },
 ] as const;
 
