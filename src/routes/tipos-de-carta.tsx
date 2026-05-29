@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+
 
 const BRAND = "#20a5c9";
 
@@ -98,8 +101,11 @@ export const Route = createFileRoute("/tipos-de-carta")({
 });
 
 function TiposDeCartaPage() {
+  const [zoomImage, setZoomImage] = useState<{ src: string; alt: string } | null>(null);
+
   return (
     <div className="min-h-screen bg-white text-black flex flex-col">
+
       <header className="border-b border-neutral-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <Link to="/" className="text-lg font-bold">
@@ -128,14 +134,20 @@ function TiposDeCartaPage() {
                 key={t.title}
                 className="group flex flex-col md:flex-row overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition hover:shadow-md hover:-translate-y-0.5"
               >
-                <div className="md:w-60 lg:w-64 shrink-0 bg-neutral-50 flex items-center justify-center p-4">
+                <button
+                  type="button"
+                  onClick={() => setZoomImage({ src: t.image, alt: t.title })}
+                  className="md:w-80 lg:w-[22rem] shrink-0 bg-neutral-50 flex items-center justify-center p-4 cursor-zoom-in group/img"
+                  aria-label={`Ampliar imagem: ${t.title}`}
+                >
                   <img
                     src={t.image}
                     alt={t.title}
                     loading="lazy"
-                    className="h-64 w-full object-contain"
+                    className="h-[22rem] w-full object-contain transition-transform group-hover/img:scale-105"
                   />
-                </div>
+                </button>
+
                 <div className="flex-1 p-5">
                   <span
                     className="inline-block rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wider text-white"
@@ -163,6 +175,19 @@ function TiposDeCartaPage() {
       </main>
 
       <SiteFooter />
+
+      <Dialog open={!!zoomImage} onOpenChange={(open) => !open && setZoomImage(null)}>
+        <DialogContent className="max-w-3xl p-2 bg-white">
+          {zoomImage && (
+            <img
+              src={zoomImage.src}
+              alt={zoomImage.alt}
+              className="w-full h-auto max-h-[85vh] object-contain rounded-md"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
