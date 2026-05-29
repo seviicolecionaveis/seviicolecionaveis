@@ -127,7 +127,7 @@ function TiposDeCartaPage() {
           />
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-12">
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-12">
           <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
             {TYPES.map((t) => (
               <article
