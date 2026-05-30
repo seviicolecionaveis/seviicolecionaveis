@@ -56,8 +56,21 @@ function ShippingPage() {
         .select("*, order_items(*)")
         .eq("status", "paid")
         .order("created_at", { ascending: true });
-      setOrders(data ?? []);
+      const list = data ?? [];
+      setOrders(list);
       setLoading(false);
+      const codes = Array.from(
+        new Set(list.map((o: any) => o.coupon_code).filter(Boolean) as string[]),
+      );
+      if (codes.length) {
+        const { data: cs } = await supabase
+          .from("coupons")
+          .select("code, percent, amount_cents, user_id")
+          .in("code", codes);
+        const map: Record<string, any> = {};
+        (cs ?? []).forEach((c: any) => { map[c.code.toUpperCase()] = c; });
+        setCoupons(map);
+      }
     })();
   }, [isAdmin]);
 
