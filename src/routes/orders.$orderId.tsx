@@ -97,6 +97,16 @@ function OrderDetailPage() {
         setOrder(data);
         setLoading(false);
       }
+      if (data?.coupon_code) {
+        const { data: c } = await supabase
+          .from("coupons")
+          .select("code, percent, amount_cents, user_id, notes")
+          .ilike("code", data.coupon_code)
+          .maybeSingle();
+        if (!cancelled) setCoupon(c);
+      } else if (!cancelled) {
+        setCoupon(null);
+      }
     };
     load();
 
