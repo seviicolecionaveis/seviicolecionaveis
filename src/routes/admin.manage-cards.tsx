@@ -56,6 +56,9 @@ interface CardRow {
   base_price_cents: number | null;
   image: string;
   updated_at: string;
+  created_at?: string;
+  created_by?: string | null;
+  created_by_email?: string | null;
 }
 
 interface FormState {
@@ -192,7 +195,7 @@ function AdminCardsManagePage() {
         form.category,
       );
     }
-    const payload = {
+    const payload: any = {
       name: form.name.trim(),
       card_number: form.card_number.trim(),
       collection: form.collection.trim(),
@@ -204,6 +207,10 @@ function AdminCardsManagePage() {
       base_price_cents: priceCents,
       image: form.image.trim(),
     };
+    if (!editingId) {
+      payload.created_by = user?.id ?? null;
+      payload.created_by_email = user?.email ?? null;
+    }
     const { error } = editingId
       ? await supabase.from("cards").update(payload).eq("id", editingId)
       : await supabase.from("cards").insert(payload);
@@ -326,6 +333,7 @@ function AdminCardsManagePage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
+        <RecentlyAddedPanel rows={rows} />
         <section className="rounded-lg border border-border bg-card p-6">
           <h1 className="text-xl font-bold mb-1">{editingId ? "Editar carta" : "Adicionar nova carta"}</h1>
           <p className="text-xs text-muted-foreground mb-4">
@@ -728,5 +736,92 @@ function AdminCardsManagePage() {
         </section>
       </main>
     </div>
+  );
+}
+
+function RecentlyAddedPanel({ rows }: { rows: CardRow[] }) {
+  const [open, setOpen] = useState(true);
+  const [limit, setLimit] = useState(10);
+  const recent = useMemo(() => {
+    return [...rows]
+      .filter((r) => r.created_at)
+      .sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""))
+      .slice(0, limit);
+  }, [rows, limit]);
+
+  return (
+    <section className="rounded-lg border border-border bg-card p-6">
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div>
+          <h2 className="text-lg font-bold">Adicionadas recentemente</h2>
+          <p className="text-xs text-muted-foreground">
+            Histórico das últimas cartas cadastradas — útil para evitar duplicar registros.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <select
+            value={limit}
+            onChange={(e) => setLimit(parseInt(e.target.value))}
+            className="rounded border border-border bg-background px-2 py-1 text-xs"
+          >
+            <option value={10}>Últimas 10</option>
+            <option value={25}>Últimas 25</option>
+            <option value={50}>Últimas 50</option>
+            <option value={100}>Últimas 100</option>
+          </select>
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="rounded border border-border bg-background px-2 py-1 text-xs font-semibold hover:bg-secondary"
+          >
+            {open ? "Ocultar" : "Mostrar"}
+          </button>
+        </div>
+      </div>
+
+      {open && (
+        recent.length === 0 ? (
+          <p className="text-xs text-muted-foreground">Nenhuma carta com data de criação registrada ainda.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="text-left text-muted-foreground">
+                <tr className="border-b border-border">
+                  <th className="py-2 pr-3 font-semibold">Data / hora</th>
+                  <th className="py-2 pr-3 font-semibold">Carta</th>
+                  <th className="py-2 pr-3 font-semibold">Coleção</th>
+                  <th className="py-2 pr-3 font-semibold">Variante</th>
+                  <th className="py-2 pr-3 font-semibold">Estoque</th>
+                  <th className="py-2 pr-3 font-semibold">Adicionado por</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recent.map((r) => {
+                  const dt = r.created_at ? new Date(r.created_at) : null;
+                  return (
+                    <tr key={r.id} className="border-b border-border/50 last:border-0">
+                      <td className="py-2 pr-3 whitespace-nowrap tabular-nums">
+                        {dt ? dt.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—"}
+                      </td>
+                      <td className="py-2 pr-3">
+                        <div className="font-semibold">{r.name}</div>
+                        <div className="text-muted-foreground">{r.card_number}</div>
+                      </td>
+                      <td className="py-2 pr-3">{r.collection}</td>
+                      <td className="py-2 pr-3 text-muted-foreground">
+                        {r.finish} · {r.language} · {r.condition ?? "NM"}
+                      </td>
+                      <td className="py-2 pr-3 tabular-nums">{r.stock}</td>
+                      <td className="py-2 pr-3 text-muted-foreground">
+                        {r.created_by_email ?? <span className="italic">não registrado</span>}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )
+      )}
+    </section>
   );
 }

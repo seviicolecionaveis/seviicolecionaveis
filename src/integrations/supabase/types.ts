@@ -226,6 +226,8 @@ export type Database = {
           collection: string
           condition: Database["public"]["Enums"]["card_condition"]
           created_at: string
+          created_by: string | null
+          created_by_email: string | null
           finish: Database["public"]["Enums"]["card_finish"]
           id: string
           image: string
@@ -241,6 +243,8 @@ export type Database = {
           collection: string
           condition?: Database["public"]["Enums"]["card_condition"]
           created_at?: string
+          created_by?: string | null
+          created_by_email?: string | null
           finish: Database["public"]["Enums"]["card_finish"]
           id?: string
           image?: string
@@ -256,6 +260,8 @@ export type Database = {
           collection?: string
           condition?: Database["public"]["Enums"]["card_condition"]
           created_at?: string
+          created_by?: string | null
+          created_by_email?: string | null
           finish?: Database["public"]["Enums"]["card_finish"]
           id?: string
           image?: string
