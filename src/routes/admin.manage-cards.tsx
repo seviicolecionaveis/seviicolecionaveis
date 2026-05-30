@@ -192,7 +192,7 @@ function AdminCardsManagePage() {
         form.category,
       );
     }
-    const payload = {
+    const payload: any = {
       name: form.name.trim(),
       card_number: form.card_number.trim(),
       collection: form.collection.trim(),
@@ -204,6 +204,10 @@ function AdminCardsManagePage() {
       base_price_cents: priceCents,
       image: form.image.trim(),
     };
+    if (!editingId) {
+      payload.created_by = user?.id ?? null;
+      payload.created_by_email = user?.email ?? null;
+    }
     const { error } = editingId
       ? await supabase.from("cards").update(payload).eq("id", editingId)
       : await supabase.from("cards").insert(payload);
