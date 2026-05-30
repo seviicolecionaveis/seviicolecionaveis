@@ -240,6 +240,53 @@ function ShippingPage() {
                       </div>
                     </div>
 
+                    <div className="mt-3 rounded-md border border-border bg-secondary/30 p-3 text-xs grid sm:grid-cols-2 gap-x-4 gap-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Subtotal</span>
+                        <span className="tabular-nums">R$ {((o.subtotal_cents ?? 0) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Frete</span>
+                        <span className="tabular-nums">R$ {((o.shipping_cost_cents ?? 0) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      {o.discount_cents > 0 && (() => {
+                        const c = o.coupon_code ? coupons[o.coupon_code.toUpperCase()] : null;
+                        const isGift = c && c.amount_cents != null && c.user_id;
+                        const isPercent = c && c.percent != null;
+                        const label = isGift
+                          ? "Vale-presente"
+                          : isPercent
+                            ? `Cupom (${c.percent}%)`
+                            : "Cupom de desconto";
+                        return (
+                          <div className="flex justify-between text-green-700 sm:col-span-2">
+                            <span>
+                              {label}
+                              {o.coupon_code ? <span className="font-mono ml-1 opacity-80">({o.coupon_code})</span> : null}
+                            </span>
+                            <span className="tabular-nums">- R$ {(o.discount_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                          </div>
+                        );
+                      })()}
+                      <div className="flex justify-between sm:col-span-2 border-t border-border pt-1 mt-1 font-bold">
+                        <span>Total pago</span>
+                        <span className="tabular-nums">R$ {((o.total_cents ?? 0) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between sm:col-span-2">
+                        <span className="text-muted-foreground">Pagamento</span>
+                        <span className="font-medium">
+                          {o.payment_method === "pix"
+                            ? "Pix"
+                            : o.payment_method === "stripe"
+                              ? "Cartão (Stripe)"
+                              : o.payment_method === "mercadopago_card"
+                                ? "Cartão (Mercado Pago)"
+                                : o.payment_method ?? "—"}
+                        </span>
+                      </div>
+                    </div>
+
+
                     {o.superfrete_status === "failed" && (
                       <div className="no-print mt-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/20 p-2 text-xs text-amber-800 dark:text-amber-200">
                         ⚠️ Etiqueta Superfrete falhou: {o.superfrete_error ?? "erro desconhecido"}. Compre manualmente no painel Superfrete.
