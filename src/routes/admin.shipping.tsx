@@ -14,6 +14,7 @@ export const Route = createFileRoute("/admin/shipping")({
 function ShippingPage() {
   const { isAdmin, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
+  const [coupons, setCoupons] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [tracking, setTracking] = useState<Record<string, string>>({});
