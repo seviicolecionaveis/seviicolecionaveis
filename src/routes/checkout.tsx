@@ -8,6 +8,7 @@ import {
   checkPixOrderStatus,
   createCardOrder,
   getMercadoPagoPublicKey,
+  previewCoupon,
 } from "@/utils/payments.functions";
 import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
@@ -129,6 +130,12 @@ function CheckoutPage() {
   const [card, setCard] = useState<CardState | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [couponPreview, setCouponPreview] = useState<
+    | { valid: true; discountCents: number; code: string; label: string; kind: "amount" | "percent"; percent: number | null; amountCents: number | null }
+    | { valid: false; error: string }
+    | null
+  >(null);
+  const [couponChecking, setCouponChecking] = useState(false);
 
   const selectedQuote = quotes.find((q) => q.id === selectedQuoteId) ?? null;
 
@@ -239,11 +246,6 @@ function CheckoutPage() {
     shipping === "fixed" ? (selectedQuote ? selectedQuote.priceCents : 0) : 0;
   const shippingCost = shippingCents / 100;
   const couponNormalized = form.couponCode.trim().toUpperCase();
-  const couponInfo = (() => {
-    if (couponNormalized === "POKEAGIOTAGEM") return { valid: true, percent: 30, label: "POKEAGIOTAGEM −30% (admin)", maxDiscount: Infinity };
-    if (couponNormalized === "PRIMEIRACOMPRA10") return { valid: true, percent: 10, label: "PRIMEIRACOMPRA10 −10% (1ª compra, até R$ 20)", maxDiscount: 20 };
-    return { valid: false, percent: 0, label: "", maxDiscount: 0 };
-  })();
   const PIX_DISCOUNT_PERCENT = 5;
 
   const subtotalCents = Math.round(subtotal * 100);
@@ -252,12 +254,35 @@ function CheckoutPage() {
   const bundleSubtotalCents = bundle.bundleSubtotalCents;
   // Base sobre a qual cupom e Pix podem incidir (exclui itens em combo)
   const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundleSubtotalCents);
-  const couponDiscountCents = couponInfo.valid
-    ? Math.min(
-        Math.round((nonBundleSubtotalCents * couponInfo.percent) / 100),
-        couponInfo.maxDiscount === Infinity ? Number.MAX_SAFE_INTEGER : couponInfo.maxDiscount * 100,
-      )
-    : 0;
+
+  // Valida cupom no servidor (debounced) — cobre cupons da tabela `coupons` (vales-presente, broadcasts)
+  useEffect(() => {
+    if (!couponNormalized || !user) {
+      setCouponPreview(null);
+      setCouponChecking(false);
+      return;
+    }
+    setCouponChecking(true);
+    const handle = setTimeout(async () => {
+      try {
+        const res = await previewCoupon({
+          data: { code: couponNormalized, subtotalCents: nonBundleSubtotalCents },
+        });
+        setCouponPreview(res);
+      } catch (e) {
+        setCouponPreview({ valid: false, error: e instanceof Error ? e.message : "Cupom inválido" });
+      } finally {
+        setCouponChecking(false);
+      }
+    }, 350);
+    return () => clearTimeout(handle);
+  }, [couponNormalized, nonBundleSubtotalCents, user]);
+
+  const couponDiscountCents =
+    couponPreview && couponPreview.valid && couponPreview.code === couponNormalized
+      ? Math.min(couponPreview.discountCents, nonBundleSubtotalCents)
+      : 0;
+
   const pixDiscountCents =
     paymentMethod === "pix"
       ? Math.round(
@@ -611,8 +636,14 @@ function CheckoutPage() {
               placeholder="Ex: PRIMEIRACOMPRA10"
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-foreground"
             />
-            {couponInfo.valid && (
-              <p className="mt-1 text-xs text-green-600 font-semibold">✓ Cupom aplicado: {couponInfo.label}</p>
+            {couponNormalized && couponChecking && (
+              <p className="mt-1 text-xs text-muted-foreground">Validando cupom…</p>
+            )}
+            {couponPreview && couponPreview.valid && couponPreview.code === couponNormalized && (
+              <p className="mt-1 text-xs text-green-600 font-semibold">✓ Cupom aplicado: {couponPreview.label}</p>
+            )}
+            {couponPreview && !couponPreview.valid && !couponChecking && (
+              <p className="mt-1 text-xs text-red-600">✗ {couponPreview.error}</p>
             )}
           </div>
 
@@ -707,9 +738,13 @@ function CheckoutPage() {
                 <span className="tabular-nums shrink-0">− R$ {(b.discountCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
             ))}
-            {couponInfo.valid && (
+            {couponDiscountCents > 0 && couponPreview && couponPreview.valid && (
               <div className="flex justify-between text-green-600">
-                <span>Desconto −{couponInfo.percent}%</span>
+                <span>
+                  {couponPreview.kind === "amount"
+                    ? `Vale-presente ${couponPreview.code}`
+                    : `Desconto ${couponPreview.code} −${couponPreview.percent}%`}
+                </span>
                 <span className="tabular-nums">− R$ {discount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
             )}
