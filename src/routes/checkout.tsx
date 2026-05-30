@@ -738,9 +738,13 @@ function CheckoutPage() {
                 <span className="tabular-nums shrink-0">− R$ {(b.discountCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
             ))}
-            {couponInfo.valid && (
+            {couponDiscountCents > 0 && couponPreview && couponPreview.valid && (
               <div className="flex justify-between text-green-600">
-                <span>Desconto −{couponInfo.percent}%</span>
+                <span>
+                  {couponPreview.kind === "amount"
+                    ? `Vale-presente ${couponPreview.code}`
+                    : `Desconto ${couponPreview.code} −${couponPreview.percent}%`}
+                </span>
                 <span className="tabular-nums">− R$ {discount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
             )}
