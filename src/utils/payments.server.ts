@@ -121,7 +121,7 @@ async function validateCoupon(
   // Fallback: cupons gerenciáveis na tabela public.coupons
   const { data: coupon, error: couponErr } = await supabaseAdmin
     .from("coupons")
-    .select("id, code, user_id, percent, max_discount_cents, max_uses, used_count, expires_at, active")
+    .select("id, code, user_id, percent, amount_cents, max_discount_cents, max_uses, used_count, expires_at, active")
     .eq("code", code)
     .maybeSingle();
   if (couponErr) throw new Error(couponErr.message);
@@ -147,11 +147,18 @@ async function validateCoupon(
   if (claimErr) throw new Error(claimErr.message);
   if (!claimed) throw new Error("Cupom já foi utilizado");
 
-  const raw = Math.round((subtotalCents * coupon.percent) / 100);
-  const discountCents =
-    coupon.max_discount_cents && coupon.max_discount_cents > 0
-      ? Math.min(raw, coupon.max_discount_cents)
-      : raw;
+  let discountCents: number;
+  if (coupon.amount_cents && coupon.amount_cents > 0) {
+    // Vale-presente de valor fixo
+    discountCents = Math.min(coupon.amount_cents, subtotalCents);
+  } else {
+    const percent = coupon.percent ?? 0;
+    const raw = Math.round((subtotalCents * percent) / 100);
+    discountCents =
+      coupon.max_discount_cents && coupon.max_discount_cents > 0
+        ? Math.min(raw, coupon.max_discount_cents)
+        : raw;
+  }
   return { discountCents, code: coupon.code };
 }
 
