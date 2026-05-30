@@ -269,6 +269,7 @@ export type Database = {
       coupons: {
         Row: {
           active: boolean
+          amount_cents: number | null
           code: string
           created_at: string
           expires_at: string | null
@@ -276,13 +277,14 @@ export type Database = {
           max_discount_cents: number | null
           max_uses: number
           notes: string | null
-          percent: number
+          percent: number | null
           updated_at: string
           used_count: number
           user_id: string | null
         }
         Insert: {
           active?: boolean
+          amount_cents?: number | null
           code: string
           created_at?: string
           expires_at?: string | null
@@ -290,13 +292,14 @@ export type Database = {
           max_discount_cents?: number | null
           max_uses?: number
           notes?: string | null
-          percent: number
+          percent?: number | null
           updated_at?: string
           used_count?: number
           user_id?: string | null
         }
         Update: {
           active?: boolean
+          amount_cents?: number | null
           code?: string
           created_at?: string
           expires_at?: string | null
@@ -304,7 +307,7 @@ export type Database = {
           max_discount_cents?: number | null
           max_uses?: number
           notes?: string | null
-          percent?: number
+          percent?: number | null
           updated_at?: string
           used_count?: number
           user_id?: string | null
