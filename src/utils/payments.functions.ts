@@ -83,3 +83,19 @@ export const resendPendingOrderEmails = createServerFn({ method: "POST" })
     const { resendPendingOrderEmailsServer } = await import("./payments.server");
     return resendPendingOrderEmailsServer();
   });
+
+export const previewCoupon = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        code: z.string().trim().min(1).max(60),
+        subtotalCents: z.number().int().min(0).max(100_000_000),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { previewCouponServer } = await import("./payments.server");
+    return previewCouponServer(context.userId, data.code, data.subtotalCents);
+  });
+
