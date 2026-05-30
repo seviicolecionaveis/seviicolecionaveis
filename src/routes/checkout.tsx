@@ -8,6 +8,7 @@ import {
   checkPixOrderStatus,
   createCardOrder,
   getMercadoPagoPublicKey,
+  previewCoupon,
 } from "@/utils/payments.functions";
 import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
