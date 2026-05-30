@@ -81,3 +81,41 @@ export const sendGiftVoucherEmail = createServerFn({ method: "POST" })
     const { sendGiftVoucherEmailServer } = await import("./coupons.server");
     return sendGiftVoucherEmailServer(context.userId, data.coupon_id);
   });
+
+export const setCouponActive = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z.object({ coupon_id: z.string().uuid(), active: z.boolean() }).parse(d),
+  )
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context, data }) => {
+    const { setCouponActiveServer } = await import("./coupons.server");
+    return setCouponActiveServer(context.userId, data.coupon_id, data.active);
+  });
+
+export const countBroadcastRecipients = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { countBroadcastRecipientsServer } = await import("./coupons.server");
+    return countBroadcastRecipientsServer(context.userId);
+  });
+
+export const previewCouponEmail = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z
+      .object({
+        kind: z.enum(["broadcast", "voucher"]),
+        code: codeSchema,
+        percent: z.number().int().min(1).max(100).nullable(),
+        amount_cents: z.number().int().min(1).max(10_000_000).nullable(),
+        expires_at: z.string().datetime().nullable(),
+        message: z.string().max(500).nullable().optional(),
+        recipient_email: z.string().email().max(255).nullable().optional(),
+      })
+      .parse(d),
+  )
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context, data }) => {
+    const { previewCouponEmailServer } = await import("./coupons.server");
+    return previewCouponEmailServer(context.userId, data);
+  });
+

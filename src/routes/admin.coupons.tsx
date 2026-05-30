@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -7,6 +7,9 @@ import {
   createBroadcastCoupon,
   createGiftVoucher,
   sendGiftVoucherEmail,
+  setCouponActive,
+  countBroadcastRecipients,
+  previewCouponEmail,
 } from "@/utils/coupons.functions";
 import { toast } from "sonner";
 
@@ -16,6 +19,7 @@ export const Route = createFileRoute("/admin/coupons")({
 });
 
 type DiscountKind = "percent" | "amount";
+type StatusFilter = "all" | "active" | "inactive" | "expired" | "exhausted";
 
 interface CouponRow {
   id: string;
@@ -34,7 +38,6 @@ interface CouponRow {
 
 function toIsoOrNull(date: string): string | null {
   if (!date) return null;
-  // datetime-local input: "2026-12-31T23:59"
   const d = new Date(date);
   if (isNaN(d.getTime())) return null;
   return d.toISOString();
@@ -47,6 +50,36 @@ function fmtDiscount(c: CouponRow) {
   return "—";
 }
 
+function couponStatus(c: CouponRow): {
+  label: string;
+  tone: "ok" | "muted" | "warn" | "bad";
+} {
+  if (!c.active) return { label: "inativo", tone: "muted" };
+  if (c.expires_at && new Date(c.expires_at) < new Date())
+    return { label: "expirado", tone: "bad" };
+  if (c.used_count >= c.max_uses) return { label: "esgotado", tone: "warn" };
+  return { label: "ativo", tone: "ok" };
+}
+
+const toneCls: Record<string, string> = {
+  ok: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
+  muted: "bg-muted text-muted-foreground",
+  warn: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+  bad: "bg-red-500/15 text-red-700 dark:text-red-400",
+};
+
+interface PreviewState {
+  open: boolean;
+  html: string;
+  subject: string;
+  // For broadcast: confirm step after preview
+  confirmBroadcast?: {
+    recipients: number | null;
+    typed: string;
+    submitting: boolean;
+  };
+}
+
 function AdminCouponsPage() {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const nav = useNavigate();
@@ -54,10 +87,17 @@ function AdminCouponsPage() {
   const createBroadcast = useServerFn(createBroadcastCoupon);
   const createVoucher = useServerFn(createGiftVoucher);
   const sendVoucher = useServerFn(sendGiftVoucherEmail);
+  const toggleActive = useServerFn(setCouponActive);
+  const countRecipients = useServerFn(countBroadcastRecipients);
+  const previewEmail = useServerFn(previewCouponEmail);
 
   const [coupons, setCoupons] = useState<CouponRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+
+  // Filters
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
   // Broadcast form
   const [bCode, setBCode] = useState("");
@@ -77,6 +117,8 @@ function AdminCouponsPage() {
   const [vAmount, setVAmount] = useState("");
   const [vExpires, setVExpires] = useState("");
   const [vNotes, setVNotes] = useState("");
+
+  const [preview, setPreview] = useState<PreviewState | null>(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -102,16 +144,90 @@ function AdminCouponsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
-  const submitBroadcast = async (e: React.FormEvent) => {
+  // --- Filtered list ---
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return coupons.filter((c) => {
+      if (q) {
+        const hay = `${c.code} ${c.user_email ?? ""} ${c.notes ?? ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      if (statusFilter !== "all") {
+        const s = couponStatus(c);
+        if (statusFilter === "active" && s.label !== "ativo") return false;
+        if (statusFilter === "inactive" && s.label !== "inativo") return false;
+        if (statusFilter === "expired" && s.label !== "expirado") return false;
+        if (statusFilter === "exhausted" && s.label !== "esgotado") return false;
+      }
+      return true;
+    });
+  }, [coupons, search, statusFilter]);
+
+  // --- Broadcast: open preview + confirmation flow ---
+  const openBroadcastPreview = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
+    try {
+      const percent = bKind === "percent" ? Number(bPercent) : null;
+      const amount_cents =
+        bKind === "amount"
+          ? Math.round(Number(bAmount.replace(",", ".")) * 100)
+          : null;
+      const expires_at = toIsoOrNull(bExpires);
+      const message = bMessage.trim() || null;
+      const previewRes = await previewEmail({
+        data: {
+          kind: "broadcast",
+          code: bCode,
+          percent,
+          amount_cents,
+          expires_at,
+          message,
+        },
+      });
+      const r: any = previewRes;
+      let recipients: number | null = null;
+      if (bSendEmail) {
+        try {
+          const cr: any = await countRecipients();
+          recipients = cr.count;
+        } catch {
+          recipients = null;
+        }
+      }
+      setPreview({
+        open: true,
+        html: r.html,
+        subject: r.subject,
+        confirmBroadcast: {
+          recipients,
+          typed: "",
+          submitting: false,
+        },
+      });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao gerar prévia.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const confirmBroadcastSubmit = async () => {
+    if (!preview?.confirmBroadcast) return;
+    if (bSendEmail && preview.confirmBroadcast.typed !== "ENVIAR") return;
+    setPreview({
+      ...preview,
+      confirmBroadcast: { ...preview.confirmBroadcast, submitting: true },
+    });
     try {
       const res = await createBroadcast({
         data: {
           code: bCode,
           percent: bKind === "percent" ? Number(bPercent) : null,
           amount_cents:
-            bKind === "amount" ? Math.round(Number(bAmount.replace(",", ".")) * 100) : null,
+            bKind === "amount"
+              ? Math.round(Number(bAmount.replace(",", ".")) * 100)
+              : null,
           max_uses: Number(bMaxUses),
           expires_at: toIsoOrNull(bExpires),
           message: bMessage.trim() || null,
@@ -126,11 +242,15 @@ function AdminCouponsPage() {
       );
       setBCode("");
       setBMessage("");
+      setPreview(null);
       await load();
     } catch (e: any) {
       toast.error(e?.message ?? "Erro ao criar cupom.");
-    } finally {
-      setBusy(false);
+      setPreview((p) =>
+        p?.confirmBroadcast
+          ? { ...p, confirmBroadcast: { ...p.confirmBroadcast, submitting: false } }
+          : p,
+      );
     }
   };
 
@@ -144,7 +264,9 @@ function AdminCouponsPage() {
           email: vEmail,
           percent: vKind === "percent" ? Number(vPercent) : null,
           amount_cents:
-            vKind === "amount" ? Math.round(Number(vAmount.replace(",", ".")) * 100) : null,
+            vKind === "amount"
+              ? Math.round(Number(vAmount.replace(",", ".")) * 100)
+              : null,
           expires_at: toIsoOrNull(vExpires),
           notes: vNotes.trim() || null,
         },
@@ -162,6 +284,32 @@ function AdminCouponsPage() {
     }
   };
 
+  const previewVoucherForm = async () => {
+    setBusy(true);
+    try {
+      const percent = vKind === "percent" ? Number(vPercent) : null;
+      const amount_cents =
+        vKind === "amount"
+          ? Math.round(Number(vAmount.replace(",", ".")) * 100)
+          : null;
+      const res: any = await previewEmail({
+        data: {
+          kind: "voucher",
+          code: vCode || "PREVIEW",
+          percent,
+          amount_cents,
+          expires_at: toIsoOrNull(vExpires),
+          recipient_email: vEmail || null,
+        },
+      });
+      setPreview({ open: true, html: res.html, subject: res.subject });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao gerar prévia.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const handleSend = async (couponId: string) => {
     if (!confirm("Enviar o e-mail do vale-presente para o cliente agora?")) return;
     try {
@@ -169,6 +317,59 @@ function AdminCouponsPage() {
       toast.success("E-mail enfileirado.");
     } catch (e: any) {
       toast.error(e?.message ?? "Erro ao enviar.");
+    }
+  };
+
+  const handleToggle = async (c: CouponRow) => {
+    const next = !c.active;
+    if (
+      !confirm(
+        next
+          ? `Reativar o cupom ${c.code}?`
+          : `Desativar o cupom ${c.code}? Ele deixa de funcionar imediatamente.`,
+      )
+    )
+      return;
+    try {
+      await toggleActive({ data: { coupon_id: c.id, active: next } });
+      setCoupons((prev) =>
+        prev.map((x) => (x.id === c.id ? { ...x, active: next } : x)),
+      );
+      toast.success(next ? "Cupom reativado." : "Cupom desativado.");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao atualizar.");
+    }
+  };
+
+  const handleCopy = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      toast.success(`Código ${code} copiado.`);
+    } catch {
+      toast.error("Não foi possível copiar.");
+    }
+  };
+
+  const handlePreviewExisting = async (c: CouponRow) => {
+    setBusy(true);
+    try {
+      const isVoucher = !!c.user_id;
+      const res: any = await previewEmail({
+        data: {
+          kind: isVoucher ? "voucher" : "broadcast",
+          code: c.code,
+          percent: c.percent,
+          amount_cents: c.amount_cents,
+          expires_at: c.expires_at,
+          message: c.notes,
+          recipient_email: c.user_email,
+        },
+      });
+      setPreview({ open: true, html: res.html, subject: res.subject });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao gerar prévia.");
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -182,7 +383,8 @@ function AdminCouponsPage() {
 
   const inputCls =
     "w-full rounded-md border border-border bg-background px-3 py-2 text-sm";
-  const labelCls = "block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1";
+  const labelCls =
+    "block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1";
 
   return (
     <div className="min-h-screen bg-background">
@@ -191,19 +393,22 @@ function AdminCouponsPage() {
           <Link to="/admin" className="text-sm font-bold uppercase tracking-widest">
             ← Admin
           </Link>
-          <h1 className="text-sm font-bold uppercase tracking-widest">Cupons & vale-presentes</h1>
+          <h1 className="text-sm font-bold uppercase tracking-widest">
+            Cupons & vale-presentes
+          </h1>
         </div>
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-10">
+        {/* ============ Broadcast ============ */}
         <section className="rounded-xl border border-border bg-card p-6">
           <h2 className="text-lg font-bold mb-1">Cupom de divulgação</h2>
           <p className="text-xs text-muted-foreground mb-4">
-            Cupom genérico que pode ser usado por qualquer cliente. Opcionalmente envia e-mail
-            para todos os usuários cadastrados.
+            Cupom genérico que pode ser usado por qualquer cliente. Opcionalmente envia
+            e-mail para todos os usuários cadastrados.
           </p>
 
-          <form onSubmit={submitBroadcast} className="grid md:grid-cols-2 gap-4">
+          <form onSubmit={openBroadcastPreview} className="grid md:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Código</label>
               <input
@@ -321,17 +526,18 @@ function AdminCouponsPage() {
                 disabled={busy}
                 className="rounded-md bg-foreground text-background px-4 py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-40"
               >
-                {busy ? "Criando..." : "Criar cupom"}
+                {busy ? "..." : "Pré-visualizar e criar"}
               </button>
             </div>
           </form>
         </section>
 
+        {/* ============ Voucher ============ */}
         <section className="rounded-xl border border-border bg-card p-6">
           <h2 className="text-lg font-bold mb-1">Vale-presente exclusivo</h2>
           <p className="text-xs text-muted-foreground mb-4">
-            Cupom de uso único vinculado a um cliente específico (por e-mail). Após criar, use o
-            botão <strong>Enviar e-mail</strong> na lista abaixo.
+            Cupom de uso único vinculado a um cliente específico (por e-mail). Após criar,
+            use o botão <strong>Enviar e-mail</strong> na lista abaixo.
           </p>
 
           <form onSubmit={submitVoucher} className="grid md:grid-cols-2 gap-4">
@@ -431,7 +637,15 @@ function AdminCouponsPage() {
               />
             </div>
 
-            <div className="md:col-span-2 flex justify-end">
+            <div className="md:col-span-2 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={previewVoucherForm}
+                disabled={busy}
+                className="rounded-md border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-secondary disabled:opacity-40"
+              >
+                Pré-visualizar e-mail
+              </button>
               <button
                 type="submit"
                 disabled={busy}
@@ -443,12 +657,42 @@ function AdminCouponsPage() {
           </form>
         </section>
 
+        {/* ============ List ============ */}
         <section>
-          <h2 className="text-lg font-bold mb-3">Cupons recentes</h2>
+          <div className="flex flex-wrap items-end justify-between gap-3 mb-3">
+            <h2 className="text-lg font-bold">Cupons recentes</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por código, e-mail, nota..."
+                className="rounded-md border border-border bg-background px-3 py-1.5 text-sm w-64"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                className="rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+              >
+                <option value="all">Todos status</option>
+                <option value="active">Ativos</option>
+                <option value="inactive">Inativos</option>
+                <option value="expired">Expirados</option>
+                <option value="exhausted">Esgotados</option>
+              </select>
+              <span className="text-xs text-muted-foreground">
+                {filtered.length}/{coupons.length}
+              </span>
+            </div>
+          </div>
+
           {loading ? (
             <p className="text-sm text-muted-foreground">Carregando...</p>
-          ) : coupons.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum cupom criado ainda.</p>
+          ) : filtered.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {coupons.length === 0
+                ? "Nenhum cupom criado ainda."
+                : "Nenhum cupom encontrado com esses filtros."}
+            </p>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-border">
               <table className="w-full text-sm">
@@ -458,56 +702,199 @@ function AdminCouponsPage() {
                     <th className="text-left p-3">Desconto</th>
                     <th className="text-left p-3">Tipo</th>
                     <th className="text-left p-3">Usos</th>
+                    <th className="text-left p-3">Status</th>
                     <th className="text-left p-3">Validade</th>
-                    <th className="text-left p-3">Criado</th>
                     <th className="text-right p-3">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {coupons.map((c) => (
-                    <tr key={c.id} className="border-t border-border">
-                      <td className="p-3 font-mono font-semibold">{c.code}</td>
-                      <td className="p-3 tabular-nums">{fmtDiscount(c)}</td>
-                      <td className="p-3">
-                        {c.user_id ? (
-                          <span className="text-xs">
-                            🎁 vale-presente
-                            <br />
-                            <span className="text-muted-foreground">{c.user_email ?? "—"}</span>
-                          </span>
-                        ) : (
-                          <span className="text-xs">📣 divulgação</span>
-                        )}
-                      </td>
-                      <td className="p-3 tabular-nums text-xs">
-                        {c.used_count}/{c.max_uses}
-                      </td>
-                      <td className="p-3 text-xs">
-                        {c.expires_at
-                          ? new Date(c.expires_at).toLocaleDateString("pt-BR")
-                          : "—"}
-                      </td>
-                      <td className="p-3 text-xs text-muted-foreground">
-                        {new Date(c.created_at).toLocaleString("pt-BR")}
-                      </td>
-                      <td className="p-3 text-right">
-                        {c.user_id && (
-                          <button
-                            onClick={() => handleSend(c.id)}
-                            className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold hover:bg-secondary"
+                  {filtered.map((c) => {
+                    const s = couponStatus(c);
+                    return (
+                      <tr key={c.id} className="border-t border-border align-top">
+                        <td className="p-3 font-mono font-semibold whitespace-nowrap">
+                          {c.code}
+                          <div className="text-[10px] text-muted-foreground font-sans font-normal">
+                            {new Date(c.created_at).toLocaleDateString("pt-BR")}
+                          </div>
+                        </td>
+                        <td className="p-3 tabular-nums">{fmtDiscount(c)}</td>
+                        <td className="p-3">
+                          {c.user_id ? (
+                            <span className="text-xs">
+                              🎁 vale-presente
+                              <br />
+                              <span className="text-muted-foreground">
+                                {c.user_email ?? "—"}
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-xs">📣 divulgação</span>
+                          )}
+                        </td>
+                        <td className="p-3 tabular-nums text-xs">
+                          {c.used_count}/{c.max_uses}
+                        </td>
+                        <td className="p-3">
+                          <span
+                            className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${toneCls[s.tone]}`}
                           >
-                            Enviar e-mail
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                            {s.label}
+                          </span>
+                        </td>
+                        <td className="p-3 text-xs">
+                          {c.expires_at
+                            ? new Date(c.expires_at).toLocaleDateString("pt-BR")
+                            : "—"}
+                        </td>
+                        <td className="p-3 text-right">
+                          <div className="inline-flex flex-wrap gap-1.5 justify-end">
+                            <button
+                              onClick={() => handleCopy(c.code)}
+                              className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-secondary"
+                              title="Copiar código"
+                            >
+                              Copiar
+                            </button>
+                            <button
+                              onClick={() => handlePreviewExisting(c)}
+                              className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-secondary"
+                              title="Ver prévia do e-mail"
+                            >
+                              Prévia
+                            </button>
+                            {c.user_id && (
+                              <button
+                                onClick={() => handleSend(c.id)}
+                                className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-secondary"
+                              >
+                                Enviar e-mail
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleToggle(c)}
+                              className={`rounded-md border border-border px-2 py-1 text-[11px] font-semibold ${
+                                c.active
+                                  ? "bg-background hover:bg-red-500/10 text-red-700 dark:text-red-400"
+                                  : "bg-background hover:bg-secondary"
+                              }`}
+                            >
+                              {c.active ? "Desativar" : "Reativar"}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           )}
         </section>
       </main>
+
+      {/* ============ Preview / Confirm Modal ============ */}
+      {preview?.open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() =>
+            !preview.confirmBroadcast?.submitting && setPreview(null)
+          }
+        >
+          <div
+            className="bg-background rounded-xl border border-border w-full max-w-3xl max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-border flex items-start justify-between gap-3">
+              <div>
+                <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Assunto
+                </div>
+                <div className="font-semibold text-sm">{preview.subject}</div>
+              </div>
+              <button
+                onClick={() => setPreview(null)}
+                disabled={preview.confirmBroadcast?.submitting}
+                className="text-muted-foreground hover:text-foreground text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto bg-white">
+              <iframe
+                title="Prévia do e-mail"
+                srcDoc={preview.html}
+                className="w-full"
+                style={{ height: "60vh", border: 0 }}
+              />
+            </div>
+
+            {preview.confirmBroadcast && (
+              <div className="p-4 border-t border-border space-y-3 bg-card">
+                <div className="text-sm">
+                  {bSendEmail ? (
+                    <>
+                      Vai criar o cupom <span className="font-mono font-bold">{bCode}</span>{" "}
+                      <strong>e enviar este e-mail para</strong>{" "}
+                      <span className="font-bold">
+                        {preview.confirmBroadcast.recipients ?? "?"} destinatário
+                        {preview.confirmBroadcast.recipients === 1 ? "" : "s"}
+                      </span>
+                      . Para confirmar, digite <code className="px-1 py-0.5 bg-muted rounded">ENVIAR</code> abaixo.
+                    </>
+                  ) : (
+                    <>
+                      Vai criar o cupom{" "}
+                      <span className="font-mono font-bold">{bCode}</span> sem disparar
+                      e-mail.
+                    </>
+                  )}
+                </div>
+                {bSendEmail && (
+                  <input
+                    value={preview.confirmBroadcast.typed}
+                    onChange={(e) =>
+                      setPreview({
+                        ...preview,
+                        confirmBroadcast: {
+                          ...preview.confirmBroadcast!,
+                          typed: e.target.value.toUpperCase(),
+                        },
+                      })
+                    }
+                    placeholder="Digite ENVIAR"
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-mono"
+                  />
+                )}
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setPreview(null)}
+                    disabled={preview.confirmBroadcast.submitting}
+                    className="rounded-md border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-secondary"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={confirmBroadcastSubmit}
+                    disabled={
+                      preview.confirmBroadcast.submitting ||
+                      (bSendEmail && preview.confirmBroadcast.typed !== "ENVIAR")
+                    }
+                    className="rounded-md bg-foreground text-background px-4 py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-40"
+                  >
+                    {preview.confirmBroadcast.submitting
+                      ? "Enviando..."
+                      : bSendEmail
+                        ? "Criar e disparar"
+                        : "Criar cupom"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
