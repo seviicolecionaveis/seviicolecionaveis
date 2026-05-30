@@ -162,6 +162,100 @@ async function validateCoupon(
   return { discountCents, code: coupon.code };
 }
 
+export async function previewCouponServer(
+  userId: string,
+  rawCode: string,
+  subtotalCents: number,
+): Promise<
+  | { valid: true; discountCents: number; code: string; label: string; kind: "amount" | "percent"; percent: number | null; amountCents: number | null }
+  | { valid: false; error: string }
+> {
+  const code = (rawCode ?? "").trim().toUpperCase();
+  if (!code) return { valid: false, error: "Informe um código" };
+  try {
+    if (code === ADMIN_COUPON_CODE) {
+      const { data: roleRow } = await supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (!roleRow) return { valid: false, error: "Cupom restrito a administradores" };
+      return {
+        valid: true,
+        discountCents: Math.round((subtotalCents * ADMIN_COUPON_PERCENT) / 100),
+        code,
+        label: `${code} −${ADMIN_COUPON_PERCENT}% (admin)`,
+        kind: "percent",
+        percent: ADMIN_COUPON_PERCENT,
+        amountCents: null,
+      };
+    }
+    if (code === FIRST_PURCHASE_COUPON) {
+      const { count } = await supabaseAdmin
+        .from("orders")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("status", "paid");
+      if ((count ?? 0) > 0) return { valid: false, error: "Cupom válido apenas para a primeira compra" };
+      const raw = Math.round((subtotalCents * FIRST_PURCHASE_PERCENT) / 100);
+      return {
+        valid: true,
+        discountCents: Math.min(raw, FIRST_PURCHASE_MAX_DISCOUNT_CENTS),
+        code,
+        label: `${code} −${FIRST_PURCHASE_PERCENT}% (1ª compra, até R$ ${FIRST_PURCHASE_MAX_DISCOUNT_CENTS / 100})`,
+        kind: "percent",
+        percent: FIRST_PURCHASE_PERCENT,
+        amountCents: null,
+      };
+    }
+
+    const { data: coupon } = await supabaseAdmin
+      .from("coupons")
+      .select("id, code, user_id, percent, amount_cents, max_discount_cents, max_uses, used_count, expires_at, active")
+      .eq("code", code)
+      .maybeSingle();
+    if (!coupon || !coupon.active) return { valid: false, error: "Cupom inválido" };
+    if (coupon.expires_at && new Date(coupon.expires_at) < new Date())
+      return { valid: false, error: "Cupom expirado" };
+    if (coupon.user_id && coupon.user_id !== userId)
+      return { valid: false, error: "Este cupom não está disponível para sua conta" };
+    if (coupon.used_count >= coupon.max_uses)
+      return { valid: false, error: "Cupom já foi utilizado" };
+
+    if (coupon.amount_cents && coupon.amount_cents > 0) {
+      const discountCents = Math.min(coupon.amount_cents, subtotalCents);
+      return {
+        valid: true,
+        discountCents,
+        code: coupon.code,
+        label: `${coupon.code} − vale-presente de R$ ${(coupon.amount_cents / 100).toFixed(2).replace(".", ",")}`,
+        kind: "amount",
+        percent: null,
+        amountCents: coupon.amount_cents,
+      };
+    }
+    const percent = coupon.percent ?? 0;
+    const raw = Math.round((subtotalCents * percent) / 100);
+    const discountCents =
+      coupon.max_discount_cents && coupon.max_discount_cents > 0
+        ? Math.min(raw, coupon.max_discount_cents)
+        : raw;
+    return {
+      valid: true,
+      discountCents,
+      code: coupon.code,
+      label: `${coupon.code} −${percent}%`,
+      kind: "percent",
+      percent,
+      amountCents: null,
+    };
+  } catch (e) {
+    return { valid: false, error: e instanceof Error ? e.message : "Cupom inválido" };
+  }
+}
+
+
 type ResolvableItem = {
   cardId: string;
   name: string;
