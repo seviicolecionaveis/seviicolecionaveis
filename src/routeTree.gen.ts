@@ -42,6 +42,7 @@ import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-card
 import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
 import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as AdminAccessoriesRouteImport } from './routes/admin.accessories'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -223,6 +224,11 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCouponsRoute = AdminCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminBannersRoute = AdminBannersRouteImport.update({
   id: '/banners',
   path: '/banners',
@@ -329,6 +335,7 @@ export interface FileRoutesByFullPath {
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/coupons': typeof AdminCouponsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
@@ -378,6 +385,7 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/coupons': typeof AdminCouponsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
@@ -429,6 +437,7 @@ export interface FileRoutesById {
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/coupons': typeof AdminCouponsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
@@ -481,6 +490,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/admin/accessories'
     | '/admin/banners'
+    | '/admin/coupons'
     | '/admin/dashboard'
     | '/admin/emails'
     | '/admin/integrations'
@@ -530,6 +540,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/admin/accessories'
     | '/admin/banners'
+    | '/admin/coupons'
     | '/admin/dashboard'
     | '/admin/emails'
     | '/admin/integrations'
@@ -580,6 +591,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/admin/accessories'
     | '/admin/banners'
+    | '/admin/coupons'
     | '/admin/dashboard'
     | '/admin/emails'
     | '/admin/integrations'
@@ -881,6 +893,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/coupons': {
+      id: '/admin/coupons'
+      path: '/coupons'
+      fullPath: '/admin/coupons'
+      preLoaderRoute: typeof AdminCouponsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/banners': {
       id: '/admin/banners'
       path: '/banners'
@@ -992,6 +1011,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminAccessoriesRoute: typeof AdminAccessoriesRoute
   AdminBannersRoute: typeof AdminBannersRoute
+  AdminCouponsRoute: typeof AdminCouponsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEmailsRoute: typeof AdminEmailsRoute
   AdminIntegrationsRoute: typeof AdminIntegrationsRoute
@@ -1005,6 +1025,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAccessoriesRoute: AdminAccessoriesRoute,
   AdminBannersRoute: AdminBannersRoute,
+  AdminCouponsRoute: AdminCouponsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEmailsRoute: AdminEmailsRoute,
   AdminIntegrationsRoute: AdminIntegrationsRoute,
