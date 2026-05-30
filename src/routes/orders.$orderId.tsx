@@ -271,12 +271,24 @@ function OrderDetailPage() {
             <span className="text-muted-foreground">Subtotal</span>
             <span className="tabular-nums">R$ {(order.subtotal_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
           </div>
-          {order.discount_cents > 0 && (
-            <div className="flex justify-between text-green-700">
-              <span>Desconto {order.coupon_code ? `(${order.coupon_code})` : ""}</span>
-              <span className="tabular-nums">- R$ {(order.discount_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
-            </div>
-          )}
+          {order.discount_cents > 0 && (() => {
+            const isGift = coupon && coupon.amount_cents != null && coupon.user_id;
+            const isPercent = coupon && coupon.percent != null;
+            const label = isGift
+              ? "Vale-presente"
+              : isPercent
+                ? `Cupom de desconto (${coupon.percent}%)`
+                : "Cupom de desconto";
+            return (
+              <div className="flex justify-between text-green-700">
+                <span>
+                  {label}
+                  {order.coupon_code ? <span className="font-mono ml-1 opacity-80">({order.coupon_code})</span> : null}
+                </span>
+                <span className="tabular-nums">- R$ {(order.discount_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+              </div>
+            );
+          })()}
           <div className="flex justify-between">
             <span className="text-muted-foreground">
               {order.shipping_method === "fixed" ? "Frete (Mini Envios)" : "Envio a combinar"}
@@ -286,6 +298,18 @@ function OrderDetailPage() {
           <div className="flex justify-between border-t border-border pt-2 text-base font-bold">
             <span>Total</span>
             <span className="tabular-nums">R$ {(order.total_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+          </div>
+          <div className="flex justify-between border-t border-border pt-2 text-xs text-muted-foreground">
+            <span>Forma de pagamento</span>
+            <span className="font-medium text-foreground">
+              {order.payment_method === "pix"
+                ? "Pix"
+                : order.payment_method === "stripe"
+                  ? "Cartão de crédito (Stripe)"
+                  : order.payment_method === "mercadopago_card"
+                    ? "Cartão de crédito (Mercado Pago)"
+                    : order.payment_method ?? "A definir"}
+            </span>
           </div>
         </section>
 
