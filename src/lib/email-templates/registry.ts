@@ -16,6 +16,7 @@ import { template as adminCancellationRequested } from './admin-cancellation-req
 import { template as backInStock } from './back-in-stock'
 import { template as priceDrop } from './price-drop'
 import { template as giftVoucher } from './gift-voucher'
+import { template as couponBroadcast } from './coupon-broadcast'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'order-received': orderReceived,
@@ -25,4 +26,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'back-in-stock': backInStock,
   'price-drop': priceDrop,
   'gift-voucher': giftVoucher,
+  'coupon-broadcast': couponBroadcast,
 }
