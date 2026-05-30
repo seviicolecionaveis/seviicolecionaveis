@@ -636,8 +636,14 @@ function CheckoutPage() {
               placeholder="Ex: PRIMEIRACOMPRA10"
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-foreground"
             />
-            {couponInfo.valid && (
-              <p className="mt-1 text-xs text-green-600 font-semibold">✓ Cupom aplicado: {couponInfo.label}</p>
+            {couponNormalized && couponChecking && (
+              <p className="mt-1 text-xs text-muted-foreground">Validando cupom…</p>
+            )}
+            {couponPreview && couponPreview.valid && couponPreview.code === couponNormalized && (
+              <p className="mt-1 text-xs text-green-600 font-semibold">✓ Cupom aplicado: {couponPreview.label}</p>
+            )}
+            {couponPreview && !couponPreview.valid && !couponChecking && (
+              <p className="mt-1 text-xs text-red-600">✗ {couponPreview.error}</p>
             )}
           </div>
 
