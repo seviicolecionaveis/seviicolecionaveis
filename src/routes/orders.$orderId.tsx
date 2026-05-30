@@ -47,6 +47,7 @@ function OrderDetailPage() {
   const { user, loading: authLoading } = useAuth();
   const nav = useNavigate();
   const [order, setOrder] = useState<any>(null);
+  const [coupon, setCoupon] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
 
