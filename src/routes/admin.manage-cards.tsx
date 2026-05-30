@@ -56,6 +56,9 @@ interface CardRow {
   base_price_cents: number | null;
   image: string;
   updated_at: string;
+  created_at?: string;
+  created_by?: string | null;
+  created_by_email?: string | null;
 }
 
 interface FormState {
