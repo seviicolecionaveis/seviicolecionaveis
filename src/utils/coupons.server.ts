@@ -252,3 +252,110 @@ export async function sendGiftVoucherEmailServer(
   if (!res.success) throw new Response(res.error || res.reason || "Falha ao enviar e-mail.", { status: 500 });
   return { ok: true, email };
 }
+
+export async function setCouponActiveServer(
+  userId: string,
+  couponId: string,
+  active: boolean,
+) {
+  await assertAdmin(userId);
+  const { error } = await supabaseAdmin
+    .from("coupons")
+    .update({ active })
+    .eq("id", couponId);
+  if (error) throw new Response(error.message, { status: 500 });
+  return { ok: true };
+}
+
+async function countAllUserEmails(): Promise<number> {
+  const emails = new Set<string>();
+  let page = 1;
+  while (page < 50) {
+    const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({
+      page,
+      perPage: 1000,
+    });
+    if (error) break;
+    for (const u of list.users) if (u.email) emails.add(u.email.toLowerCase());
+    if (!list.users.length || list.users.length < 1000) break;
+    page++;
+  }
+  return emails.size;
+}
+
+export async function countBroadcastRecipientsServer(userId: string) {
+  await assertAdmin(userId);
+  return { count: await countAllUserEmails() };
+}
+
+interface PreviewInput {
+  kind: "broadcast" | "voucher";
+  code: string;
+  percent: number | null;
+  amount_cents: number | null;
+  expires_at: string | null;
+  message?: string | null;
+  recipient_email?: string | null;
+}
+
+export async function previewCouponEmailServer(
+  userId: string,
+  input: PreviewInput,
+) {
+  await assertAdmin(userId);
+  let recipientName: string | null = null;
+  if (input.kind === "voucher" && input.recipient_email) {
+    // Best-effort name lookup
+    const email = input.recipient_email.toLowerCase();
+    let page = 1;
+    while (page < 50) {
+      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage: 1000,
+      });
+      if (error) break;
+      const u = list.users.find((x) => x.email?.toLowerCase() === email);
+      if (u) {
+        const { data: profile } = await supabaseAdmin
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", u.id)
+          .maybeSingle();
+        recipientName = ((profile as any)?.full_name?.split(" ")[0]) ?? null;
+        break;
+      }
+      if (!list.users.length || list.users.length < 1000) break;
+      page++;
+    }
+  }
+
+  const isAmount = input.kind === "voucher" && !!input.amount_cents;
+  const templateName = isAmount ? "gift-voucher" : "coupon-broadcast";
+  const entry = TEMPLATES[templateName];
+  if (!entry) throw new Response("Template não encontrado", { status: 500 });
+
+  const data: Record<string, any> = isAmount
+    ? {
+        recipientName,
+        code: input.code,
+        amountCents: input.amount_cents,
+        expiresAt: input.expires_at,
+      }
+    : {
+        code: input.code,
+        percent: input.percent,
+        amountCents: input.amount_cents,
+        expiresAt: input.expires_at,
+        message:
+          input.kind === "voucher"
+            ? `${recipientName ? `Olá, ${recipientName}! ` : ""}Liberamos um cupom exclusivo pra você.`
+            : input.message ?? null,
+      };
+
+  const subject =
+    typeof entry.subject === "function" ? entry.subject(data) : entry.subject;
+  const element = React.createElement(entry.component as any, data);
+  const html = await render(element);
+  return { html, subject };
+}
+
