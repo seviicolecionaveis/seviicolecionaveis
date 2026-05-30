@@ -130,6 +130,12 @@ function CheckoutPage() {
   const [card, setCard] = useState<CardState | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [couponPreview, setCouponPreview] = useState<
+    | { valid: true; discountCents: number; code: string; label: string; kind: "amount" | "percent"; percent: number | null; amountCents: number | null }
+    | { valid: false; error: string }
+    | null
+  >(null);
+  const [couponChecking, setCouponChecking] = useState(false);
 
   const selectedQuote = quotes.find((q) => q.id === selectedQuoteId) ?? null;
 
