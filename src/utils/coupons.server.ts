@@ -1,5 +1,8 @@
+import * as React from "react";
+import { render } from "@react-email/components";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTransactionalEmailServer } from "@/lib/email/send.server";
+import { TEMPLATES } from "@/lib/email-templates/registry";
 
 async function assertAdmin(userId: string) {
   const { data, error } = await supabaseAdmin
