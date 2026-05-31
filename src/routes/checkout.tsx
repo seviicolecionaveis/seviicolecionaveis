@@ -673,7 +673,7 @@ function CheckoutPage() {
                         </p>
                       </div>
                     </label>
-                    {pickupPoint && pickupPoint !== "app" && (
+                    {pickupPoint && (
                       <div className="rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
                         <span className="font-semibold text-foreground">Atenção:</span> retiradas são feitas no período da
                         tarde, das <span className="font-semibold text-foreground">14h às 18h</span>, em qualquer dia útil
