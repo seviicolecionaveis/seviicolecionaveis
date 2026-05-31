@@ -120,7 +120,7 @@ function CheckoutPage() {
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
   const [shipping, setShipping] = useState<"fixed" | "arrange">("fixed");
-  const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | null>(null);
+  const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | "app" | null>(null);
   const [quotes, setQuotes] = useState<ShippingQuote[]>([]);
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [quotesError, setQuotesError] = useState<string | null>(null);
@@ -345,9 +345,10 @@ function CheckoutPage() {
       quantity: i.quantity,
     }));
 
-  const PICKUP_LABELS: Record<"aruana" | "aeroporto", string> = {
+  const PICKUP_LABELS: Record<"aruana" | "aeroporto" | "app", string> = {
     aruana: "Aruana — Rua Josepha Andrade Irmã Fontes, 600, Residencial Vista Aruana",
     aeroporto: "Aeroporto — Av. Silvério Leite Fontes, 1128, Palm Ville Residence",
+    app: "Entrega por aplicativo (Uber/99)",
   };
 
   const buildNotes = () => {
@@ -357,7 +358,9 @@ function CheckoutPage() {
     const favsLine = favs.length ? `Pokémons favoritos: ${favs.join(", ")}` : "";
     const pickupLine =
       shipping === "arrange" && pickupPoint
-        ? `Retirada em mãos: ${PICKUP_LABELS[pickupPoint]}. Horário: tarde das 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.`
+        ? pickupPoint === "app"
+          ? `Entrega por aplicativo (Uber/99): cliente solicitará disponibilidade pelo WhatsApp.`
+          : `Retirada em mãos: ${PICKUP_LABELS[pickupPoint]}. Horário: tarde das 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.`
         : "";
     const combined = [pickupLine, favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
     return combined || null;
@@ -404,7 +407,7 @@ function CheckoutPage() {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
     }
     if (shipping === "arrange" && !pickupPoint) {
-      return "Selecione o ponto de retirada (Aruana ou Aeroporto).";
+      return "Selecione uma opção: Aruana, Aeroporto ou Entrega por aplicativo.";
     }
     return null;
   };
@@ -625,8 +628,8 @@ function CheckoutPage() {
                 <label className="flex items-start gap-3 p-4 cursor-pointer hover:bg-secondary/50">
                   <input type="radio" name="ship" checked={shipping === "arrange"} onChange={() => setShipping("arrange")} className="mt-1" />
                   <div className="flex-1">
-                    <p className="text-sm font-semibold">Retirada em mãos (somente em Aracaju)</p>
-                    <p className="text-xs text-muted-foreground">Escolha um dos pontos de retirada abaixo</p>
+                    <p className="text-sm font-semibold">Retirada em mãos ou entrega por aplicativo (somente em Aracaju)</p>
+                    <p className="text-xs text-muted-foreground">Escolha uma das opções abaixo</p>
                   </div>
                 </label>
                 {shipping === "arrange" && (
@@ -640,7 +643,7 @@ function CheckoutPage() {
                         className="mt-1"
                       />
                       <div className="flex-1">
-                        <p className="text-sm font-semibold">Aruana</p>
+                        <p className="text-sm font-semibold">Retirada — Aruana</p>
                         <p className="text-xs text-muted-foreground">
                           Rua Josepha Andrade Irmã Fontes, 600 — Residencial Vista Aruana
                         </p>
@@ -655,17 +658,38 @@ function CheckoutPage() {
                         className="mt-1"
                       />
                       <div className="flex-1">
-                        <p className="text-sm font-semibold">Aeroporto</p>
+                        <p className="text-sm font-semibold">Retirada — Aeroporto</p>
                         <p className="text-xs text-muted-foreground">
                           Av. Silvério Leite Fontes, 1128 — Palm Ville Residence
                         </p>
                       </div>
                     </label>
-                    {pickupPoint && (
+                    <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
+                      <input
+                        type="radio"
+                        name="pickup"
+                        checked={pickupPoint === "app"}
+                        onChange={() => setPickupPoint("app")}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold">Entrega por aplicativo (Uber / 99)</p>
+                        <p className="text-xs text-muted-foreground">
+                          Após a compra, solicite a disponibilidade pelo WhatsApp — o valor da corrida é por sua conta.
+                        </p>
+                      </div>
+                    </label>
+                    {pickupPoint && pickupPoint !== "app" && (
                       <div className="rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
                         <span className="font-semibold text-foreground">Atenção:</span> retiradas são feitas no período da
                         tarde, das <span className="font-semibold text-foreground">14h às 18h</span>, em qualquer dia útil
                         da semana, desde que você entre em contato com a gente pela manhã do mesmo dia.
+                      </div>
+                    )}
+                    {pickupPoint === "app" && (
+                      <div className="rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
+                        Assim que o pedido for confirmado, abra o pedido em <span className="font-semibold text-foreground">Meus pedidos</span> e
+                        clique no botão <span className="font-semibold text-foreground">"Solicitar entrega por aplicativo"</span> para falar com a loja no WhatsApp.
                       </div>
                     )}
                   </div>

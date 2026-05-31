@@ -325,6 +325,30 @@ function OrderDetailPage() {
           {order.phone && <p className="text-muted-foreground mt-1">Tel: {order.phone}</p>}
         </section>
 
+        {order.shipping_method === "arrange" && typeof order.notes === "string" && order.notes.includes("Entrega por aplicativo") && (
+          <section className="rounded-xl border border-border bg-card p-5 text-sm space-y-3">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                Entrega por aplicativo
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Solicite a disponibilidade da entrega por aplicativo (Uber / 99) direto pelo WhatsApp da loja.
+                O custo da corrida é por sua conta.
+              </p>
+            </div>
+            <a
+              href={`https://wa.me/557998150955?text=${encodeURIComponent(
+                `Olá, acabei de realizar uma compra pelo site do pedido #${order.id.slice(0, 8)} e queria solicitar disponibilidade para entrega por aplicativo.`,
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block rounded-full bg-green-600 text-white px-4 py-2 text-xs font-semibold hover:bg-green-700"
+            >
+              Solicitar entrega por aplicativo no WhatsApp
+            </a>
+          </section>
+        )}
+
         {(order.status === "paid" || order.status === "shipped" || order.status === "delivered") && (
           <PostPurchaseSurvey orderId={order.id} />
         )}
