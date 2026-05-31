@@ -120,6 +120,7 @@ function CheckoutPage() {
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
   const [shipping, setShipping] = useState<"fixed" | "arrange">("fixed");
+  const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | null>(null);
   const [quotes, setQuotes] = useState<ShippingQuote[]>([]);
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [quotesError, setQuotesError] = useState<string | null>(null);
@@ -344,12 +345,21 @@ function CheckoutPage() {
       quantity: i.quantity,
     }));
 
+  const PICKUP_LABELS: Record<"aruana" | "aeroporto", string> = {
+    aruana: "Aruana — Rua Josepha Andrade Irmã Fontes, 600, Residencial Vista Aruana",
+    aeroporto: "Aeroporto — Av. Silvério Leite Fontes, 1128, Palm Ville Residence",
+  };
+
   const buildNotes = () => {
     const favs = [form.favPokemon1, form.favPokemon2, form.favPokemon3]
       .map((p) => p.trim())
       .filter(Boolean);
     const favsLine = favs.length ? `Pokémons favoritos: ${favs.join(", ")}` : "";
-    const combined = [favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
+    const pickupLine =
+      shipping === "arrange" && pickupPoint
+        ? `Retirada em mãos: ${PICKUP_LABELS[pickupPoint]}. Horário: tarde das 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.`
+        : "";
+    const combined = [pickupLine, favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
     return combined || null;
   };
 
@@ -392,6 +402,9 @@ function CheckoutPage() {
   const validateShippingChoice = (): string | null => {
     if (shipping === "fixed" && !selectedQuote) {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
+    }
+    if (shipping === "arrange" && !pickupPoint) {
+      return "Selecione o ponto de retirada (Aruana ou Aeroporto).";
     }
     return null;
   };
@@ -608,13 +621,56 @@ function CheckoutPage() {
                   </div>
                 )}
               </div>
-              <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
-                <input type="radio" name="ship" checked={shipping === "arrange"} onChange={() => setShipping("arrange")} className="mt-1" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">Retirada em mãos (somente em Aracaju)</p>
-                  <p className="text-xs text-muted-foreground">Entraremos em contato por e-mail ou whatsapp</p>
-                </div>
-              </label>
+              <div className="rounded-lg border border-border">
+                <label className="flex items-start gap-3 p-4 cursor-pointer hover:bg-secondary/50">
+                  <input type="radio" name="ship" checked={shipping === "arrange"} onChange={() => setShipping("arrange")} className="mt-1" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold">Retirada em mãos (somente em Aracaju)</p>
+                    <p className="text-xs text-muted-foreground">Escolha um dos pontos de retirada abaixo</p>
+                  </div>
+                </label>
+                {shipping === "arrange" && (
+                  <div className="px-4 pb-4 space-y-2">
+                    <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
+                      <input
+                        type="radio"
+                        name="pickup"
+                        checked={pickupPoint === "aruana"}
+                        onChange={() => setPickupPoint("aruana")}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold">Aruana</p>
+                        <p className="text-xs text-muted-foreground">
+                          Rua Josepha Andrade Irmã Fontes, 600 — Residencial Vista Aruana
+                        </p>
+                      </div>
+                    </label>
+                    <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
+                      <input
+                        type="radio"
+                        name="pickup"
+                        checked={pickupPoint === "aeroporto"}
+                        onChange={() => setPickupPoint("aeroporto")}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold">Aeroporto</p>
+                        <p className="text-xs text-muted-foreground">
+                          Av. Silvério Leite Fontes, 1128 — Palm Ville Residence
+                        </p>
+                      </div>
+                    </label>
+                    {pickupPoint && (
+                      <div className="rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
+                        <span className="font-semibold text-foreground">Atenção:</span> retiradas são feitas no período da
+                        tarde, das <span className="font-semibold text-foreground">14h às 18h</span>, em qualquer dia útil
+                        da semana, desde que você entre em contato com a gente pela manhã do mesmo dia.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
