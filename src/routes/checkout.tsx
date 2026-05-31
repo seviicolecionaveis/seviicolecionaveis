@@ -407,7 +407,7 @@ function CheckoutPage() {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
     }
     if (shipping === "arrange" && !pickupPoint) {
-      return "Selecione o ponto de retirada (Aruana ou Aeroporto).";
+      return "Selecione uma opção: Aruana, Aeroporto ou Entrega por aplicativo.";
     }
     return null;
   };
