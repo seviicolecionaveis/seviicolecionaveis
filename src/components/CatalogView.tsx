@@ -288,7 +288,15 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
                     Exibindo {Math.min(visibleCount, filtered.length)} de {filtered.length} cartas
                   </p>
                   <button
-                    onClick={() => setVisibleCount((v) => v + BATCH_SIZE)}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const y = typeof window !== "undefined" ? window.scrollY : 0;
+                      setVisibleCount((v) => v + BATCH_SIZE);
+                      if (typeof window !== "undefined") {
+                        requestAnimationFrame(() => window.scrollTo({ top: y }));
+                      }
+                    }}
                     className="rounded-full px-6 py-2.5 text-sm font-medium text-white transition-colors"
                     style={{ backgroundColor: "#20a5c9" }}
                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1b8eae")}
