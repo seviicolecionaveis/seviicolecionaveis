@@ -345,9 +345,10 @@ function CheckoutPage() {
       quantity: i.quantity,
     }));
 
-  const PICKUP_LABELS: Record<"aruana" | "aeroporto", string> = {
+  const PICKUP_LABELS: Record<"aruana" | "aeroporto" | "app", string> = {
     aruana: "Aruana — Rua Josepha Andrade Irmã Fontes, 600, Residencial Vista Aruana",
     aeroporto: "Aeroporto — Av. Silvério Leite Fontes, 1128, Palm Ville Residence",
+    app: "Entrega por aplicativo (Uber/99)",
   };
 
   const buildNotes = () => {
@@ -357,7 +358,9 @@ function CheckoutPage() {
     const favsLine = favs.length ? `Pokémons favoritos: ${favs.join(", ")}` : "";
     const pickupLine =
       shipping === "arrange" && pickupPoint
-        ? `Retirada em mãos: ${PICKUP_LABELS[pickupPoint]}. Horário: tarde das 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.`
+        ? pickupPoint === "app"
+          ? `Entrega por aplicativo (Uber/99): cliente solicitará disponibilidade pelo WhatsApp.`
+          : `Retirada em mãos: ${PICKUP_LABELS[pickupPoint]}. Horário: tarde das 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.`
         : "";
     const combined = [pickupLine, favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
     return combined || null;
