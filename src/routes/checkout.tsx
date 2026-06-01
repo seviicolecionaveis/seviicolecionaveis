@@ -108,7 +108,7 @@ interface CardState {
   payerEmail: string;
   payerCpf: string | null;
   itemsPayload: ItemPayload[];
-  shipping: "fixed" | "arrange";
+  shipping: "fixed" | "arrange" | "arte_em_cards";
   shippingQuote: ShippingQuote | null;
   address: AddressPayload;
   notes: string | null;
