@@ -69,6 +69,11 @@ function AccountPage() {
             <AddressesManager />
           </TabsContent>
 
+          <TabsContent value="arte-em-cards" className="mt-6 max-w-2xl">
+            <ArteEmCardsCard />
+          </TabsContent>
+
+
           <TabsContent value="atalhos" className="mt-6">
             <div className="grid sm:grid-cols-2 gap-4 max-w-2xl">
               <Link
