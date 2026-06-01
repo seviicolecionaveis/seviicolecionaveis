@@ -329,6 +329,26 @@ function OrderDetailPage() {
           {order.phone && <p className="text-muted-foreground mt-1">Tel: {order.phone}</p>}
         </section>
 
+        {order.shipping_method === "arte_em_cards" && order.arte_em_cards_code && (
+          <section className="rounded-xl border border-amber-300 bg-amber-50 p-5 text-sm space-y-2">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-900">
+              ✨ Seu código Arte em Cards
+            </h2>
+            <code className="block rounded-md bg-white border border-amber-300 px-3 py-2 font-mono text-base font-bold tracking-wider text-amber-900">
+              {order.arte_em_cards_code}
+            </code>
+            <p className="text-xs text-amber-900">
+              Use este código no checkout, na modalidade <strong>Retirada na Arte em Cards</strong>,
+              em quantas compras quiser nesta semana sem pagar a taxa novamente.
+              Válido até a próxima sexta-feira às 11h59. Também enviamos por e-mail e está disponível
+              em <Link to="/conta" className="underline font-semibold">Minha conta → Arte em Cards</Link>.
+            </p>
+            <p className="text-xs text-amber-900">
+              Retiradas: 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.
+            </p>
+          </section>
+        )}
+
         {order.shipping_method === "arrange" && typeof order.notes === "string" && order.notes.includes("Entrega por aplicativo") && (
           <section className="rounded-xl border border-border bg-card p-5 text-sm space-y-3">
             <div>
