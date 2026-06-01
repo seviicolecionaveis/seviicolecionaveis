@@ -871,11 +871,11 @@ function CheckoutPage() {
                     {arteCodeStatus.state !== "valid" && (
                       <div className="rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
                         Sem código? Tudo bem — após o pagamento da taxa de R$ 5,00, você receberá
-                        um código por e-mail e poderá consultá-lo em{" "}
-                        <span className="font-semibold text-foreground">Minha conta → Arte em Cards</span>.
+                        um código por e-mail e poderá consultá-lo também na página do seu pedido.
                         Retiradas no mesmo horário: 14h às 18h em dias úteis, mediante contato pela manhã.
                       </div>
                     )}
+
                   </div>
                 )}
               </div>
