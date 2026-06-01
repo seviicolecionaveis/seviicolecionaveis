@@ -499,6 +499,7 @@ function CheckoutPage() {
         address: buildAddressPayload(),
         notes: buildNotes(),
         couponCode: couponNormalized || null,
+        arteEmCardsCode: arteCodePayload(),
       });
       setStep("card");
     } catch (e: any) {
@@ -532,6 +533,7 @@ function CheckoutPage() {
           address: buildAddressPayload(),
           notes: buildNotes(),
           couponCode: couponNormalized || null,
+          arteEmCardsCode: arteCodePayload(),
         },
       });
       setPix(result);
