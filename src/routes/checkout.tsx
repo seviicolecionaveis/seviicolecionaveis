@@ -423,6 +423,9 @@ function CheckoutPage() {
     if (shipping === "arrange" && !pickupPoint) {
       return "Selecione uma opção: Aruana, Aeroporto ou Entrega por aplicativo.";
     }
+    if (shipping === "arte_em_cards" && arteCode.trim() && arteCodeStatus.state !== "valid") {
+      return "Valide o código Arte em Cards informado ou remova-o para pagar a taxa.";
+    }
     return null;
   };
 
