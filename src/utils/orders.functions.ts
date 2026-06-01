@@ -46,10 +46,17 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
 
     if (!statusChanged && !trackingChanged && !carrierChanged && !trackingUrlChanged) return { ok: true };
 
-    if (statusChanged && data.status === "paid") {
+    // Decrementar estoque sempre que o pedido transitar de um status "pré-pagamento"
+    // (pending / cancellation_requested / cancelled) para qualquer status pós-pagamento
+    // (paid / preparing / shipped / delivered). Antes, apenas a transição para "paid"
+    // disparava o decremento, então mover direto para "preparing" deixava o estoque intacto.
+    const PRE_PAID = ["pending", "cancellation_requested", "cancelled"];
+    const POST_PAID = ["paid", "preparing", "shipped", "delivered"];
+    if (statusChanged && PRE_PAID.includes(order.status) && POST_PAID.includes(data.status)) {
       const { markOrderPaid } = await import("@/lib/orders.server");
       await markOrderPaid(order.id);
-      return { ok: true };
+      if (data.status === "paid") return { ok: true };
+      // markOrderPaid deixou o pedido como "paid"; segue o fluxo para aplicar o status final.
     }
 
     if (statusChanged && data.status === "cancelled") {
