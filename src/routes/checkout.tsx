@@ -1201,6 +1201,7 @@ function CardScreen({
                     address: card.address,
                     notes: card.notes,
                     couponCode: card.couponCode,
+                    arteEmCardsCode: card.arteEmCardsCode,
                     card: {
                       token: cardFormData.token,
                       paymentMethodId: cardFormData.payment_method_id,
