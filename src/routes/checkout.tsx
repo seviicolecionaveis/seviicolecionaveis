@@ -793,7 +793,13 @@ function CheckoutPage() {
                     type="radio"
                     name="ship"
                     checked={shipping === "arte_em_cards"}
-                    onChange={() => setShipping("arte_em_cards")}
+                    onChange={() => {
+                      if (arteTermsAccepted) {
+                        setShipping("arte_em_cards");
+                      } else {
+                        setArteTermsOpen(true);
+                      }
+                    }}
                     className="mt-1"
                   />
                   <div className="flex-1">
