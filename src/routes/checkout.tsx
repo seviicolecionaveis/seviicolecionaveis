@@ -123,6 +123,8 @@ function CheckoutPage() {
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
   const [shipping, setShipping] = useState<"fixed" | "arrange" | "arte_em_cards">("fixed");
+  const [arteTermsAccepted, setArteTermsAccepted] = useState(false);
+  const [arteTermsOpen, setArteTermsOpen] = useState(false);
   const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | "app" | null>(null);
   const [arteCode, setArteCode] = useState("");
   const [arteCodeStatus, setArteCodeStatus] = useState<
