@@ -62,16 +62,34 @@ const FIRST_PURCHASE_PERCENT = 10;
 const FIRST_PURCHASE_MAX_DISCOUNT_CENTS = 2000; // teto de R$ 20,00
 export const PIX_DISCOUNT_PERCENT = 5; // desconto automático no Pix sobre o subtotal (após cupom)
 const PIX_EXPIRES_MINUTES = 30;
+export const ARTE_EM_CARDS_FEE_CENTS = 500; // taxa semanal R$ 5,00
 
 export function computePixDiscountCents(subtotalCents: number, couponDiscountCents: number): number {
   const base = Math.max(0, subtotalCents - couponDiscountCents);
   return Math.round((base * PIX_DISCOUNT_PERCENT) / 100);
 }
 
+async function resolveArteEmCardsFee(
+  userId: string,
+  rawCode: string | null | undefined,
+): Promise<{ feeCents: number; codeUsed: string | null }> {
+  const code = (rawCode ?? "").trim().toUpperCase();
+  if (code) {
+    const { validateCodeForUser } = await import("@/lib/arte-em-cards.server");
+    const v = await validateCodeForUser(userId, code);
+    if (v.valid) return { feeCents: 0, codeUsed: v.code };
+  }
+  return { feeCents: ARTE_EM_CARDS_FEE_CENTS, codeUsed: null };
+}
+
 function computeShippingCents(input: {
-  shippingMethod: "fixed" | "arrange";
+  shippingMethod: "fixed" | "arrange" | "arte_em_cards";
   shippingQuote?: { priceCents: number } | null;
 }): number {
+  if (input.shippingMethod === "arte_em_cards") {
+    // Caller handles Arte em Cards fee separately (needs DB lookup).
+    return 0;
+  }
   if (input.shippingQuote && input.shippingQuote.priceCents >= 0) {
     return input.shippingQuote.priceCents;
   }
