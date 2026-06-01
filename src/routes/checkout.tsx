@@ -120,8 +120,17 @@ function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
-  const [shipping, setShipping] = useState<"fixed" | "arrange">("fixed");
+  const [shipping, setShipping] = useState<"fixed" | "arrange" | "arte_em_cards">("fixed");
   const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | "app" | null>(null);
+  const [arteCode, setArteCode] = useState("");
+  const [arteCodeStatus, setArteCodeStatus] = useState<
+    | { state: "idle" }
+    | { state: "checking" }
+    | { state: "valid"; code: string; cycleEnd: string }
+    | { state: "invalid"; reason: string }
+  >({ state: "idle" });
+  const [arteExistingCode, setArteExistingCode] = useState<{ code: string; cycleEnd: string } | null>(null);
+  const ARTE_FEE_CENTS = 500;
   const [quotes, setQuotes] = useState<ShippingQuote[]>([]);
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [quotesError, setQuotesError] = useState<string | null>(null);
