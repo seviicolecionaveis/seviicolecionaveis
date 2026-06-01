@@ -136,6 +136,18 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
         .from("orders")
         .update({ arte_em_cards_code: issued.code })
         .eq("id", orderId);
+      if (full.email) {
+        await sendTransactionalEmailSafe({
+          templateName: "arte-em-cards-code",
+          recipientEmail: full.email,
+          idempotencyKey: `arte-em-cards-code-${full.user_id}-${issued.cycleStart.toISOString()}`,
+          templateData: {
+            recipientName: full.recipient_name?.split(/\s+/)[0],
+            code: issued.code,
+            cycleEnd: issued.cycleEnd.toISOString(),
+          },
+        });
+      }
     } catch (e) {
       console.error("[markOrderPaid] ensureCodeForUser falhou:", e);
     }
