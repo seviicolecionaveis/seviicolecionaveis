@@ -183,6 +183,22 @@ function ShippingPage() {
                         <p className="text-xs text-muted-foreground">
                           {new Date(o.created_at).toLocaleDateString("pt-BR")}
                         </p>
+                        {o.shipping_method === "arte_em_cards" && (
+                          <span className="inline-block mt-1 rounded-md bg-purple-100 dark:bg-purple-950/40 text-purple-800 dark:text-purple-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                            Retirada na Arte em Cards
+                            {o.arte_em_cards_code ? ` · ${o.arte_em_cards_code}` : ""}
+                          </span>
+                        )}
+                        {o.shipping_method === "pickup" && (
+                          <span className="inline-block mt-1 rounded-md bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                            Retirada em mãos
+                          </span>
+                        )}
+                        {o.shipping_method === "app_delivery" && (
+                          <span className="inline-block mt-1 rounded-md bg-sky-100 dark:bg-sky-950/40 text-sky-800 dark:text-sky-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                            Entrega por aplicativo
+                          </span>
+                        )}
                       </div>
                       <div className="text-right">
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
