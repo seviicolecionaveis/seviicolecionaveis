@@ -17,6 +17,7 @@ import { template as backInStock } from './back-in-stock'
 import { template as priceDrop } from './price-drop'
 import { template as giftVoucher } from './gift-voucher'
 import { template as couponBroadcast } from './coupon-broadcast'
+import { template as arteEmCardsCode } from './arte-em-cards-code'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'order-received': orderReceived,
@@ -27,4 +28,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'price-drop': priceDrop,
   'gift-voucher': giftVoucher,
   'coupon-broadcast': couponBroadcast,
+  'arte-em-cards-code': arteEmCardsCode,
 }
