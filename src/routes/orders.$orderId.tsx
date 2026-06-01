@@ -291,7 +291,11 @@ function OrderDetailPage() {
           })()}
           <div className="flex justify-between">
             <span className="text-muted-foreground">
-              {order.shipping_method === "fixed" ? "Frete (Mini Envios)" : "Envio a combinar"}
+              {order.shipping_method === "fixed"
+                ? "Frete (Mini Envios)"
+                : order.shipping_method === "arte_em_cards"
+                  ? "Taxa Arte em Cards"
+                  : "Envio a combinar"}
             </span>
             <span className="tabular-nums">R$ {(order.shipping_cost_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
           </div>
