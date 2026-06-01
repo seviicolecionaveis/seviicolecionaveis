@@ -6,7 +6,6 @@ import { PersonalDataForm } from "@/components/account/PersonalDataForm";
 import { PreferencesForm } from "@/components/account/PreferencesForm";
 import { AddressesManager } from "@/components/account/AddressesManager";
 import { ShoppingBag, Heart } from "lucide-react";
-import { ArteEmCardsCard } from "@/components/account/ArteEmCardsCard";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/conta")({
@@ -53,7 +52,6 @@ function AccountPage() {
             <TabsTrigger value="dados">Dados</TabsTrigger>
             <TabsTrigger value="preferencias">Preferências</TabsTrigger>
             <TabsTrigger value="enderecos">Endereços</TabsTrigger>
-            <TabsTrigger value="arte-em-cards">Arte em Cards</TabsTrigger>
             <TabsTrigger value="atalhos">Pedidos & Favoritos</TabsTrigger>
           </TabsList>
 
@@ -68,11 +66,6 @@ function AccountPage() {
           <TabsContent value="enderecos" className="mt-6">
             <AddressesManager />
           </TabsContent>
-
-          <TabsContent value="arte-em-cards" className="mt-6 max-w-2xl">
-            <ArteEmCardsCard />
-          </TabsContent>
-
 
           <TabsContent value="atalhos" className="mt-6">
             <div className="grid sm:grid-cols-2 gap-4 max-w-2xl">
