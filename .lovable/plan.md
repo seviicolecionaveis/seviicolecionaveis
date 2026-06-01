@@ -1,43 +1,109 @@
-# Emitir cupom único de 5% para o cliente do pedido #fe9f83bd
+# Retirada na Arte em Cards — taxa semanal com código
 
-Hoje os cupons (`POKEAGIOTAGEM`, `PRIMEIRACOMPRA10`) são fixos no código (`src/utils/payments.server.ts`). Não existe tabela de cupons no banco, então não há como emitir um código pessoal de uso único sem criar essa estrutura.
+## Conceito
 
-Cliente identificado: `hugoberg.paypal@gmail.com` (user_id `089e6719-7735-4b21-94cd-1248fb6b87d4`).
+Nova modalidade de entrega no checkout. Cobra R$ 5,00 uma vez por **ciclo semanal fixo** (sexta 12:00 → próxima sexta 11:59). Após pagamento, o cliente recebe um código pessoal que isenta a taxa em compras posteriores **dentro do mesmo ciclo**.
 
-## Etapas
+## Banco de dados (migration)
 
-### 1. Criar tabela `coupons` (migration)
-Campos:
-- `code` (texto, único, maiúsculo) — o código que o cliente digita
-- `user_id` (uuid, opcional) — quando preenchido, só esse usuário pode usar
-- `percent` (int) — percentual de desconto
-- `max_discount_cents` (int, opcional) — teto de desconto
-- `max_uses` (int, default 1) — quantos usos no total
-- `used_count` (int, default 0)
-- `expires_at` (timestamp, opcional)
-- `active` (bool, default true)
+Nova tabela `arte_em_cards_codes`:
+- `id` uuid PK
+- `user_id` uuid (dono do código)
+- `code` text único (formato `AEC-XXXXXX`)
+- `cycle_start` timestamptz (sexta 12:00 do ciclo)
+- `cycle_end` timestamptz (próxima sexta 11:59:59)
+- `created_at`, `updated_at`
 
-RLS: só admins gerenciam; leitura via função `SECURITY DEFINER` chamada pelo servidor.
+Constraints/índices:
+- Unique parcial em `(user_id, cycle_start)` — garante um código por cliente por ciclo
+- Index em `code`, em `(user_id, cycle_end)`
+- RLS: cliente vê apenas o próprio; admins veem tudo
+- GRANTs para `authenticated` e `service_role`
 
-### 2. Atualizar `validateCoupon` em `src/utils/payments.server.ts`
-Depois de checar os dois cupons fixos existentes, fazer fallback para uma busca em `coupons` pelo código informado. Validar:
-- existe, está ativo, não expirou
-- `used_count < max_uses`
-- se `user_id` está setado, deve bater com o usuário atual
-- aplicar desconto respeitando `max_discount_cents`
+Função SQL `current_cycle_bounds()` que retorna `(cycle_start, cycle_end)` baseado em `now()` em horário de São Paulo (-03), para usar nas validações server-side.
 
-Quando o pedido é pago (em `markOrderPaid`/equivalente, ou no insert do pedido com cupom), incrementar `used_count`. Para manter o escopo pequeno, faço o incremento no momento em que o pedido é criado com `coupon_code` (igual ao fluxo atual, antes do pagamento) — isso já bloqueia segundo uso. Posso ajustar para incrementar só em "paid" se preferir.
+## Server functions (`src/lib/arte-em-cards.functions.ts`)
 
-### 3. Inserir o cupom para o cliente
-Algo como:
-```
-INSERT INTO coupons (code, user_id, percent, max_uses, active)
-VALUES ('DESCULPA5-XXXX', '089e6719-...', 5, 1, true);
-```
+- `validateArteEmCardsCode({ code })` — middleware auth. Verifica:
+  - código existe
+  - pertence ao `userId` logado
+  - `now()` entre `cycle_start` e `cycle_end`
+  - retorna `{ valid: true, expiresAt }` ou `{ valid: false, reason }`
+- `getMyArteEmCardsCode()` — retorna código ativo do usuário no ciclo atual (se houver) + `cycle_end`.
 
-## Pontos a confirmar
+## Lógica de geração (`src/lib/arte-em-cards.server.ts`)
 
-1. **Código do cupom**: prefere algum nome específico (ex: `DESCULPA5`, `VOLTASEVII5`) ou gero um aleatório tipo `SEVII-5OFF-A7K2`?
-2. **Validade**: quer prazo de validade (ex: 60 dias) ou sem expiração?
-3. **Teto de desconto**: aplicar 5% sem limite, ou colocar um teto (ex: até R$ 30)?
-4. **Incremento de uso**: trava no momento da criação do pedido (mesmo se não pagar) ou só quando o pedido for marcado como pago? A primeira é mais simples; a segunda evita "queimar" o cupom se o cliente desistir.
+Helper `ensureCodeForUser(userId)`:
+1. Calcula ciclo atual (sexta 12:00 SP).
+2. Busca código do user com `cycle_start = ciclo_atual`.
+3. Se existir, retorna.
+4. Senão cria novo com `code = "AEC-" + 8 chars aleatórios`.
+
+Chamado a partir de `markOrderPaid` em `src/lib/orders.server.ts`: **se** o pedido foi pago com modalidade `arte_em_cards` **e** o pedido cobrou a taxa (i.e. não usou código pré-existente), gerar/garantir código para o `user_id` do pedido e armazenar em `order.notes` (ou novo campo) para exibir no recibo.
+
+## Checkout (`src/routes/checkout.tsx`)
+
+Adicionar 4ª opção de envio: **Retirada na Arte em Cards** (paralela a Frete / Retirada em mãos / Entrega por app). Quando selecionada:
+- Mostra campo opcional "Código Arte em Cards"
+- Botão "Validar código" chama `validateArteEmCardsCode`
+- Se válido: badge verde com data de expiração, taxa = R$ 0,00
+- Se inválido/expirado/de outro cliente: erro vermelho, taxa = R$ 5,00
+- Se sem código: aviso "Será cobrada taxa de R$ 5,00 e você receberá um código válido até [próxima sexta 11:59]"
+
+Passa para o servidor: `shippingMethod: "arte_em_cards"`, `arteEmCardsCode?: string`.
+
+## Validação server-side de preço (`src/utils/payments.server.ts` + schemas)
+
+Adicionar `arte_em_cards` ao enum `shippingMethod` em `payments.schemas.ts`. Adicionar campo opcional `arteEmCardsCode`.
+
+No cálculo do `shipping_cost_cents`:
+- Se `shippingMethod === "arte_em_cards"`:
+  - Se `arteEmCardsCode` válido para o `userId` no ciclo atual → 0
+  - Senão → 500 (R$ 5,00)
+- Persistir na `orders` o método e (se aplicável) `arte_em_cards_code_used`.
+
+Após `markOrderPaid`, se método = `arte_em_cards` e taxa = 500, chamar `ensureCodeForUser`.
+
+## Área do cliente (`src/routes/conta.tsx`)
+
+Nova aba "Arte em Cards" (ou card dentro de "Atalhos"):
+- Componente `ArteEmCardsCard` que chama `getMyArteEmCardsCode`
+- Mostra: código (copiável), Status (Ativo/Expirado), expiração formatada, aviso "Válido até próxima sexta 11:59"
+- Estado vazio: "Você ainda não tem um código deste ciclo. Faça uma compra com Retirada na Arte em Cards."
+
+## Exibição no pedido (`src/routes/orders.$orderId.tsx`)
+
+Quando `shipping_method === "arte_em_cards"`:
+- Mostrar bloco com endereço da loja e horários
+- Se taxa cobrada: exibir o código gerado + validade
+- Se código usado: exibir "Código usado: AEC-XXXX (válido até …)"
+
+## Painel admin
+
+`src/routes/admin.shipping.tsx` (ou onde os pedidos aparecem): adicionar label "Arte em Cards" e mostrar código usado/gerado para facilitar conferência presencial.
+
+## Arquivos a criar/editar
+
+**Migration:** `supabase/migrations/<timestamp>_arte_em_cards_codes.sql`
+
+**Novos:**
+- `src/lib/arte-em-cards.server.ts`
+- `src/lib/arte-em-cards.functions.ts`
+- `src/components/account/ArteEmCardsCard.tsx`
+
+**Editados:**
+- `src/lib/orders.server.ts` (gerar código após pagamento)
+- `src/utils/payments.schemas.ts` (enum + campo)
+- `src/utils/payments.server.ts` (cálculo da taxa)
+- `src/routes/checkout.tsx` (UI + validação)
+- `src/routes/conta.tsx` (aba/card)
+- `src/routes/orders.$orderId.tsx` (exibição do código)
+- `src/routes/admin.shipping.tsx` (label + código)
+
+## Notas técnicas
+
+- Cálculo da "sexta 12:00 SP": usar `date-fns-tz` (já no projeto? checar) ou cálculo manual com offset -03 fixo, evitando lib pesada.
+- Endereço físico da loja Arte em Cards: **precisa ser confirmado pelo cliente** — usarei placeholder "Arte em Cards (endereço a confirmar)" e perguntarei após este plano ser aprovado.
+- Código gerado com `crypto.randomBytes` no server; colisões tratadas com retry (until insert succeed via unique constraint).
+
+Aguardo aprovação para implementar.
