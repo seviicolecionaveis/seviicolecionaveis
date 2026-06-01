@@ -117,9 +117,30 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
   // Send "payment confirmed" email (fire-and-forget)
   const { data: full } = await supabaseAdmin
     .from("orders")
-    .select("id, email, recipient_name, total_cents")
+    .select("id, email, recipient_name, total_cents, user_id, shipping_method, shipping_cost_cents, arte_em_cards_code")
     .eq("id", orderId)
     .maybeSingle();
+
+  // Garante código Arte em Cards quando o pedido pagou a taxa semanal
+  // e ainda não usou um código existente.
+  if (
+    full?.shipping_method === "arte_em_cards" &&
+    full.user_id &&
+    !full.arte_em_cards_code &&
+    (full.shipping_cost_cents ?? 0) > 0
+  ) {
+    try {
+      const { ensureCodeForUser } = await import("@/lib/arte-em-cards.server");
+      const issued = await ensureCodeForUser(full.user_id);
+      await supabaseAdmin
+        .from("orders")
+        .update({ arte_em_cards_code: issued.code })
+        .eq("id", orderId);
+    } catch (e) {
+      console.error("[markOrderPaid] ensureCodeForUser falhou:", e);
+    }
+  }
+
   if (full?.email) {
     await sendTransactionalEmailSafe({
       templateName: "payment-confirmed",
