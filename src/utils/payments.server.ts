@@ -477,7 +477,11 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
-  const shippingCents = computeShippingCents(data);
+  const baseShippingCents = computeShippingCents(data);
+  const arte = data.shippingMethod === "arte_em_cards"
+    ? await resolveArteEmCardsFee(userId, data.arteEmCardsCode)
+    : { feeCents: 0, codeUsed: null as string | null };
+  const shippingCents = baseShippingCents + arte.feeCents;
 
   const bundle = computeBundleDiscount(items);
   const bundleDiscountCents = bundle.bundleDiscountCents;
@@ -519,6 +523,7 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
       city: data.address.city,
       state: data.address.state,
       notes: data.notes,
+      arte_em_cards_code: arte.codeUsed,
       superfrete_service_id: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceId ?? null : null,
       superfrete_service_name: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceName ?? null : null,
     })
@@ -606,7 +611,11 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
-  const shippingCents = computeShippingCents(data);
+  const baseShippingCents = computeShippingCents(data);
+  const arte = data.shippingMethod === "arte_em_cards"
+    ? await resolveArteEmCardsFee(userId, data.arteEmCardsCode)
+    : { feeCents: 0, codeUsed: null as string | null };
+  const shippingCents = baseShippingCents + arte.feeCents;
 
   const bundle = computeBundleDiscount(items);
   const bundleDiscountCents = bundle.bundleDiscountCents;
@@ -657,6 +666,7 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
       city: data.address.city,
       state: data.address.state,
       notes: data.notes,
+      arte_em_cards_code: arte.codeUsed,
       pix_expires_at: pixExpires.toISOString(),
       superfrete_service_id: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceId ?? null : null,
       superfrete_service_name: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceName ?? null : null,
@@ -755,7 +765,11 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
     (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
     0,
   );
-  const shippingCents = computeShippingCents(data);
+  const baseShippingCents = computeShippingCents(data);
+  const arte = data.shippingMethod === "arte_em_cards"
+    ? await resolveArteEmCardsFee(userId, data.arteEmCardsCode)
+    : { feeCents: 0, codeUsed: null as string | null };
+  const shippingCents = baseShippingCents + arte.feeCents;
 
   const bundle = computeBundleDiscount(items);
   const bundleDiscountCents = bundle.bundleDiscountCents;
@@ -798,6 +812,7 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
       city: data.address.city,
       state: data.address.state,
       notes: data.notes,
+      arte_em_cards_code: arte.codeUsed,
       superfrete_service_id: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceId ?? null : null,
       superfrete_service_name: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceName ?? null : null,
     })
