@@ -18,6 +18,7 @@ import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 import { computeBundleDiscount } from "@/lib/bundles";
 import { copyToClipboard } from "@/lib/clipboard";
+import { ArteEmCardsTermsDialog } from "@/components/ArteEmCardsTermsDialog";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -122,6 +123,8 @@ function CheckoutPage() {
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
   const [shipping, setShipping] = useState<"fixed" | "arrange" | "arte_em_cards">("fixed");
+  const [arteTermsAccepted, setArteTermsAccepted] = useState(false);
+  const [arteTermsOpen, setArteTermsOpen] = useState(false);
   const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | "app" | null>(null);
   const [arteCode, setArteCode] = useState("");
   const [arteCodeStatus, setArteCodeStatus] = useState<
@@ -585,6 +588,15 @@ function CheckoutPage() {
   // step === "address"
   return (
     <div className="min-h-screen bg-background">
+      <ArteEmCardsTermsDialog
+        open={arteTermsOpen}
+        onAccept={() => {
+          setArteTermsAccepted(true);
+          setArteTermsOpen(false);
+          setShipping("arte_em_cards");
+        }}
+        onCancel={() => setArteTermsOpen(false)}
+      />
       <header className="border-b border-border px-4 py-4">
         <div className="mx-auto max-w-5xl flex items-center justify-between">
           <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis</Link>
@@ -790,7 +802,13 @@ function CheckoutPage() {
                     type="radio"
                     name="ship"
                     checked={shipping === "arte_em_cards"}
-                    onChange={() => setShipping("arte_em_cards")}
+                    onChange={() => {
+                      if (arteTermsAccepted) {
+                        setShipping("arte_em_cards");
+                      } else {
+                        setArteTermsOpen(true);
+                      }
+                    }}
                     className="mt-1"
                   />
                   <div className="flex-1">
