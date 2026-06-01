@@ -18,6 +18,7 @@ import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 import { computeBundleDiscount } from "@/lib/bundles";
 import { copyToClipboard } from "@/lib/clipboard";
+import { ArteEmCardsTermsDialog } from "@/components/ArteEmCardsTermsDialog";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
