@@ -35,31 +35,34 @@ const AddressSchema = z.object({
 
 export const StripeInputSchema = z.object({
   items: z.array(ItemSchema).min(1).max(50),
-  shippingMethod: z.enum(["fixed", "arrange"]),
+  shippingMethod: z.enum(["fixed", "arrange", "arte_em_cards"]),
   shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
   couponCode: z.string().max(50).optional().nullable(),
+  arteEmCardsCode: z.string().trim().max(40).optional().nullable(),
   returnUrl: z.string().url(),
   environment: z.enum(["sandbox", "live"]),
 });
 
 export const PixInputSchema = z.object({
   items: z.array(ItemSchema).min(1).max(50),
-  shippingMethod: z.enum(["fixed", "arrange"]),
+  shippingMethod: z.enum(["fixed", "arrange", "arte_em_cards"]),
   shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
   couponCode: z.string().max(50).optional().nullable(),
+  arteEmCardsCode: z.string().trim().max(40).optional().nullable(),
 });
 
 export const CardInputSchema = z.object({
   items: z.array(ItemSchema).min(1).max(50),
-  shippingMethod: z.enum(["fixed", "arrange"]),
+  shippingMethod: z.enum(["fixed", "arrange", "arte_em_cards"]),
   shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
   couponCode: z.string().max(50).optional().nullable(),
+  arteEmCardsCode: z.string().trim().max(40).optional().nullable(),
   card: z.object({
     token: z.string().min(5).max(200),
     paymentMethodId: z.string().min(1).max(50),
