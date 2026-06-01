@@ -113,6 +113,7 @@ interface CardState {
   address: AddressPayload;
   notes: string | null;
   couponCode: string | null;
+  arteEmCardsCode: string | null;
 }
 
 function CheckoutPage() {
@@ -165,6 +166,51 @@ function CheckoutPage() {
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/auth" });
   }, [authLoading, user, nav]);
+
+  // Carrega código Arte em Cards ativo do cliente (se houver)
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await getMyArteEmCardsCode({});
+        if (cancelled) return;
+        if (r.hasCode) {
+          setArteExistingCode({ code: r.code, cycleEnd: r.cycleEnd });
+        } else {
+          setArteExistingCode(null);
+        }
+      } catch {
+        // silencioso — usuário ainda pode pagar a taxa normalmente
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const handleValidateArteCode = async () => {
+    const code = arteCode.trim().toUpperCase();
+    if (!code) {
+      setArteCodeStatus({ state: "invalid", reason: "Informe o código." });
+      return;
+    }
+    setArteCodeStatus({ state: "checking" });
+    try {
+      const r = await validateArteEmCardsCode({ data: { code } });
+      if (r.valid) {
+        setArteCodeStatus({ state: "valid", code: r.code, cycleEnd: r.cycleEnd });
+      } else {
+        setArteCodeStatus({ state: "invalid", reason: r.reason });
+      }
+    } catch (e: any) {
+      setArteCodeStatus({
+        state: "invalid",
+        reason: e?.message ?? "Erro ao validar código.",
+      });
+    }
+  };
+
 
   useEffect(() => {
     if (!user) return;
@@ -375,7 +421,9 @@ function CheckoutPage() {
         ? pickupPoint === "app"
           ? `Entrega por aplicativo (Uber/99): cliente solicitará disponibilidade pelo WhatsApp.`
           : `Retirada em mãos: ${PICKUP_LABELS[pickupPoint]}. Horário: tarde das 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.`
-        : "";
+        : shipping === "arte_em_cards"
+          ? `Retirada na Arte em Cards. Taxa semanal R$ 5,00 (isenta com código válido). Horário: 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.`
+          : "";
     const combined = [pickupLine, favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
     return combined || null;
   };
@@ -416,6 +464,15 @@ function CheckoutPage() {
     };
   };
 
+  const arteCodePayload = (): string | null => {
+    if (shipping !== "arte_em_cards") return null;
+    const typed = arteCode.trim().toUpperCase();
+    if (typed && arteCodeStatus.state === "valid" && arteCodeStatus.code === typed) {
+      return typed;
+    }
+    return null;
+  };
+
   const validateShippingChoice = (): string | null => {
     if (shipping === "fixed" && !selectedQuote) {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
@@ -453,6 +510,7 @@ function CheckoutPage() {
         address: buildAddressPayload(),
         notes: buildNotes(),
         couponCode: couponNormalized || null,
+        arteEmCardsCode: arteCodePayload(),
       });
       setStep("card");
     } catch (e: any) {
@@ -486,6 +544,7 @@ function CheckoutPage() {
           address: buildAddressPayload(),
           notes: buildNotes(),
           couponCode: couponNormalized || null,
+          arteEmCardsCode: arteCodePayload(),
         },
       });
       setPix(result);
@@ -724,6 +783,102 @@ function CheckoutPage() {
                   )}
                 </div>
               </label>
+
+              <div className="rounded-lg border border-border">
+                <label className="flex items-start gap-3 p-4 cursor-pointer hover:bg-secondary/50">
+                  <input
+                    type="radio"
+                    name="ship"
+                    checked={shipping === "arte_em_cards"}
+                    onChange={() => setShipping("arte_em_cards")}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold flex items-center gap-2">
+                      <Sparkles className="h-4 w-4" /> Retirada na Arte em Cards
+                      <span className="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                        R$ 5,00/semana
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Pague uma taxa única de R$ 5,00 e receba um código válido até a próxima
+                      sexta às 11h59 — use em quantas compras quiser na semana sem nova cobrança.
+                    </p>
+                  </div>
+                </label>
+                {shipping === "arte_em_cards" && (
+                  <div className="px-4 pb-4 space-y-3">
+                    {arteExistingCode && (
+                      <div className="rounded-md border border-green-300 bg-green-50 p-3 text-xs text-green-900">
+                        Você já tem um código ativo neste ciclo:{" "}
+                        <code className="font-mono font-bold">{arteExistingCode.code}</code>.
+                        Use-o abaixo para isentar a taxa.
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setArteCode(arteExistingCode.code);
+                            setArteCodeStatus({ state: "idle" });
+                          }}
+                          className="ml-2 underline font-semibold"
+                        >
+                          Preencher
+                        </button>
+                      </div>
+                    )}
+                    <label className="block text-xs font-medium uppercase tracking-wide">
+                      Já tenho um código (opcional)
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        value={arteCode}
+                        onChange={(e) => {
+                          setArteCode(e.target.value.toUpperCase());
+                          setArteCodeStatus({ state: "idle" });
+                        }}
+                        placeholder="AEC-XXXXXXXX"
+                        className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm font-mono uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-foreground"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleValidateArteCode}
+                        disabled={arteCodeStatus.state === "checking" || !arteCode.trim()}
+                        className="rounded-md border border-border px-4 py-2 text-xs font-semibold hover:bg-secondary disabled:opacity-50"
+                      >
+                        {arteCodeStatus.state === "checking" ? "Validando…" : "Validar"}
+                      </button>
+                    </div>
+                    {arteCodeStatus.state === "valid" && (
+                      <div className="rounded-md border border-green-300 bg-green-50 p-3 text-xs text-green-900">
+                        ✓ Código válido! Taxa isenta. Válido até{" "}
+                        <span className="font-semibold">
+                          {new Date(arteCodeStatus.cycleEnd).toLocaleString("pt-BR", {
+                            weekday: "short",
+                            day: "2-digit",
+                            month: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            timeZone: "America/Sao_Paulo",
+                          })}
+                        </span>
+                        .
+                      </div>
+                    )}
+                    {arteCodeStatus.state === "invalid" && (
+                      <div className="rounded-md border border-red-300 bg-red-50 p-3 text-xs text-red-800">
+                        ✗ {arteCodeStatus.reason} Sem código válido, será cobrada a taxa de R$ 5,00.
+                      </div>
+                    )}
+                    {arteCodeStatus.state !== "valid" && (
+                      <div className="rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
+                        Sem código? Tudo bem — após o pagamento da taxa de R$ 5,00, você receberá
+                        um código por e-mail e poderá consultá-lo em{" "}
+                        <span className="font-semibold text-foreground">Minha conta → Arte em Cards</span>.
+                        Retiradas no mesmo horário: 14h às 18h em dias úteis, mediante contato pela manhã.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -864,13 +1019,19 @@ function CheckoutPage() {
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Frete</span>
+              <span className="text-muted-foreground">
+                {shipping === "arte_em_cards" ? "Taxa Arte em Cards" : "Frete"}
+              </span>
               <span className="tabular-nums">
                 {shipping === "fixed"
                   ? selectedQuote
                     ? `R$ ${(selectedQuote.priceCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
                     : "—"
-                  : "A combinar"}
+                  : shipping === "arte_em_cards"
+                    ? arteFeeCents > 0
+                      ? `R$ ${(arteFeeCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                      : "Isenta (código válido)"
+                    : "A combinar"}
               </span>
             </div>
             <div className="flex justify-between text-base font-bold pt-2 border-t border-border">
@@ -1144,6 +1305,7 @@ function CardScreen({
                     address: card.address,
                     notes: card.notes,
                     couponCode: card.couponCode,
+                    arteEmCardsCode: card.arteEmCardsCode,
                     card: {
                       token: cardFormData.token,
                       paymentMethodId: cardFormData.payment_method_id,
