@@ -462,6 +462,15 @@ function CheckoutPage() {
     };
   };
 
+  const arteCodePayload = (): string | null => {
+    if (shipping !== "arte_em_cards") return null;
+    const typed = arteCode.trim().toUpperCase();
+    if (typed && arteCodeStatus.state === "valid" && arteCodeStatus.code === typed) {
+      return typed;
+    }
+    return null;
+  };
+
   const validateShippingChoice = (): string | null => {
     if (shipping === "fixed" && !selectedQuote) {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
