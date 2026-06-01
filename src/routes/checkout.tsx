@@ -10,9 +10,10 @@ import {
   getMercadoPagoPublicKey,
   previewCoupon,
 } from "@/utils/payments.functions";
+import { validateArteEmCardsCode, getMyArteEmCardsCode } from "@/lib/arte-em-cards.functions";
 import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
-import { Copy, Check, QrCode, CreditCard, Loader2 } from "lucide-react";
+import { Copy, Check, QrCode, CreditCard, Loader2, Sparkles } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 import { computeBundleDiscount } from "@/lib/bundles";
@@ -107,7 +108,7 @@ interface CardState {
   payerEmail: string;
   payerCpf: string | null;
   itemsPayload: ItemPayload[];
-  shipping: "fixed" | "arrange";
+  shipping: "fixed" | "arrange" | "arte_em_cards";
   shippingQuote: ShippingQuote | null;
   address: AddressPayload;
   notes: string | null;
@@ -119,8 +120,17 @@ function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
-  const [shipping, setShipping] = useState<"fixed" | "arrange">("fixed");
+  const [shipping, setShipping] = useState<"fixed" | "arrange" | "arte_em_cards">("fixed");
   const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | "app" | null>(null);
+  const [arteCode, setArteCode] = useState("");
+  const [arteCodeStatus, setArteCodeStatus] = useState<
+    | { state: "idle" }
+    | { state: "checking" }
+    | { state: "valid"; code: string; cycleEnd: string }
+    | { state: "invalid"; reason: string }
+  >({ state: "idle" });
+  const [arteExistingCode, setArteExistingCode] = useState<{ code: string; cycleEnd: string } | null>(null);
+  const ARTE_FEE_CENTS = 500;
   const [quotes, setQuotes] = useState<ShippingQuote[]>([]);
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [quotesError, setQuotesError] = useState<string | null>(null);
@@ -243,8 +253,12 @@ function CheckoutPage() {
     fetchQuotes(clean);
   };
 
+  const arteFeeApplies =
+    shipping === "arte_em_cards" &&
+    !(arteCodeStatus.state === "valid" && arteCodeStatus.code === arteCode.trim().toUpperCase());
+  const arteFeeCents = arteFeeApplies ? ARTE_FEE_CENTS : 0;
   const shippingCents =
-    shipping === "fixed" ? (selectedQuote ? selectedQuote.priceCents : 0) : 0;
+    (shipping === "fixed" ? (selectedQuote ? selectedQuote.priceCents : 0) : 0) + arteFeeCents;
   const shippingCost = shippingCents / 100;
   const couponNormalized = form.couponCode.trim().toUpperCase();
   const PIX_DISCOUNT_PERCENT = 5;
@@ -408,6 +422,9 @@ function CheckoutPage() {
     }
     if (shipping === "arrange" && !pickupPoint) {
       return "Selecione uma opção: Aruana, Aeroporto ou Entrega por aplicativo.";
+    }
+    if (shipping === "arte_em_cards" && arteCode.trim() && arteCodeStatus.state !== "valid") {
+      return "Valide o código Arte em Cards informado ou remova-o para pagar a taxa.";
     }
     return null;
   };

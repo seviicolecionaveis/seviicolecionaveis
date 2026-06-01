@@ -104,6 +104,36 @@ export type Database = {
         }
         Relationships: []
       }
+      arte_em_cards_codes: {
+        Row: {
+          code: string
+          created_at: string
+          cycle_end: string
+          cycle_start: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          cycle_end: string
+          cycle_start: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          cycle_end?: string
+          cycle_start?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       banners: {
         Row: {
           active: boolean
@@ -501,6 +531,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          arte_em_cards_code: string | null
           carrier: string | null
           cep: string
           city: string
@@ -544,6 +575,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          arte_em_cards_code?: string | null
           carrier?: string | null
           cep: string
           city: string
@@ -587,6 +619,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          arte_em_cards_code?: string | null
           carrier?: string | null
           cep?: string
           city?: string
