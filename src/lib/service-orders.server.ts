@@ -91,6 +91,9 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
     arteCodeUsed = arte.codeUsed;
   } else if (input.method === "app") {
     amountCents = 0;
+  } else if (input.method === "presencial") {
+    if (!input.pickupPoint) throw new Error("Selecione o ponto de retirada (Aruana ou Aeroporto).");
+    amountCents = 0;
   }
 
   const { data: userData } = await supabaseAdmin.auth.admin.getUserById(input.userId);
