@@ -19,12 +19,13 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-const STATUSES = ["pending", "paid", "preparing", "shipped", "delivered", "cancelled"] as const;
+const STATUSES = ["pending", "paid", "preparing", "shipped", "awaiting_pickup", "delivered", "cancelled"] as const;
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pedido recebido",
   paid: "Pago",
   preparing: "Em preparação",
   shipped: "Enviado",
+  awaiting_pickup: "Aguardando retirada na Arte em Cards",
   delivered: "Entregue",
   cancelled: "Cancelado",
   cancellation_requested: "Cancelamento solicitado",
