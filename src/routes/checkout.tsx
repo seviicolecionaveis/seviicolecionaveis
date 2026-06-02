@@ -588,14 +588,14 @@ function CheckoutPage() {
   // step === "address"
   return (
     <div className="min-h-screen bg-background">
-      <ArteEmCardsTermsDialog
-        open={arteTermsOpen}
+      <CardStackTermsDialog
+        open={stackTermsOpen}
         onAccept={() => {
-          setArteTermsAccepted(true);
-          setArteTermsOpen(false);
-          setShipping("arte_em_cards");
+          setStackTermsAccepted(true);
+          setStackTermsOpen(false);
+          setShipping("card_stack");
         }}
-        onCancel={() => setArteTermsOpen(false)}
+        onCancel={() => setStackTermsOpen(false)}
       />
       <header className="border-b border-border px-4 py-4">
         <div className="mx-auto max-w-5xl flex items-center justify-between">
