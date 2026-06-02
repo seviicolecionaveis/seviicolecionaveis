@@ -11,6 +11,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
         "paid",
         "preparing",
         "shipped",
+        "awaiting_pickup",
         "delivered",
         "cancelled",
         "cancellation_requested",
