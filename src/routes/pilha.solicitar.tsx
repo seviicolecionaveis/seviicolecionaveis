@@ -428,6 +428,29 @@ function SolicitarPage() {
               </section>
             )}
 
+            {method === "presencial" && (
+              <section className="rounded-xl border border-border bg-card p-5 mb-6 space-y-2">
+                <h2 className="text-sm font-semibold uppercase tracking-widest">Ponto de retirada</h2>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Retirada gratuita. Horário: 14h às 18h em dias úteis, mediante contato pela manhã.
+                </p>
+                <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/30">
+                  <input type="radio" name="pickup" checked={pickupPoint === "aruana"} onChange={() => setPickupPoint("aruana")} className="mt-1" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold">Aruana</p>
+                    <p className="text-xs text-muted-foreground">Rua Josepha Andrade Irmã Fontes, 600 — Residencial Vista Aruana</p>
+                  </div>
+                </label>
+                <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/30">
+                  <input type="radio" name="pickup" checked={pickupPoint === "aeroporto"} onChange={() => setPickupPoint("aeroporto")} className="mt-1" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold">Aeroporto</p>
+                    <p className="text-xs text-muted-foreground">Av. Silvério Leite Fontes, 1128 — Palm Ville Residence</p>
+                  </div>
+                </label>
+              </section>
+            )}
+
             <section className="rounded-xl border border-border bg-card p-5 mb-6">
               <textarea
                 className="w-full border rounded-md px-3 py-2 text-sm min-h-[64px]"
