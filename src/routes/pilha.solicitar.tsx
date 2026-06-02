@@ -25,7 +25,7 @@ export const Route = createFileRoute("/pilha/solicitar")({
   component: SolicitarPage,
 });
 
-type Method = "correios" | "app" | "arte_em_cards";
+type Method = "correios" | "app" | "arte_em_cards" | "presencial";
 
 interface Quote {
   id: string;
