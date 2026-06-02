@@ -128,17 +128,8 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
     .in("id", input.itemIds);
   if (updErr) throw new Error(updErr.message);
 
-  // Notifica admin
-  await sendTransactionalEmailSafe({
-    templateName: "admin-cancellation-requested",
-    recipientEmail: "seviicolecionaveis@gmail.com",
-    idempotencyKey: `so-created-${created.id}`,
-    templateData: {
-      title: `Nova OS #${created.code} — Pilha de Cartas`,
-      message: `Cliente solicitou ${input.method === "correios" ? "envio pelos Correios" : input.method === "arte_em_cards" ? "retirada na Arte em Cards" : "entrega por aplicativo"} de ${items.length} item(s).`,
-      orderId: created.id,
-    },
-  }).catch(() => {});
+  // TODO Fase 3: notificar admin por e-mail e adicionar contador no sino.
+  console.log(`[service-orders] Nova OS #${created.code} criada (${input.method}) — ${items.length} item(s).`);
 
   // Sem cobrança: já está paga
   if (amountCents === 0) {
