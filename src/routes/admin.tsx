@@ -2,14 +2,9 @@ import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tansta
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  approveOrderCancellation,
-  rejectOrderCancellation,
-  adminCancelOrder,
-  adminUpdateOrderStatus,
-} from "@/utils/orders.functions";
-import { toast } from "sonner";
 import { AdminCancellationBell } from "@/components/AdminCancellationBell";
+import { ChevronRight, ImageOff } from "lucide-react";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Sevii Colecionáveis" }] }),
