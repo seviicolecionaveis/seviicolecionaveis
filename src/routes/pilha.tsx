@@ -223,13 +223,19 @@ function PilhaPage() {
 
                 <div className="px-4 py-4 border-t border-border bg-secondary/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <p className="text-xs text-muted-foreground">
-                    Solicitação de envio/retirada estará disponível em breve.
+                    Selecione as cartas que deseja solicitar.
                   </p>
                   <button
                     type="button"
-                    disabled
-                    className="rounded-full bg-foreground/30 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-background cursor-not-allowed"
-                    title="Em breve"
+                    disabled={selected.size === 0}
+                    onClick={() => {
+                      const ids = Array.from(selected);
+                      try {
+                        sessionStorage.setItem("pilha:selectedItems", JSON.stringify(ids));
+                      } catch {}
+                      nav({ to: "/pilha/solicitar" });
+                    }}
+                    className="rounded-full bg-foreground px-5 py-2 text-xs font-semibold uppercase tracking-wide text-background disabled:bg-foreground/30 disabled:cursor-not-allowed"
                   >
                     Solicitar Retirada / Envio
                   </button>
