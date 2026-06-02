@@ -106,20 +106,30 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
     })
     .eq("id", orderId);
 
-  // Compra etiqueta Superfrete automaticamente (best-effort)
-  try {
-    const { purchaseShippingLabel } = await import("@/lib/superfrete-label.server");
-    await purchaseShippingLabel(orderId);
-  } catch (e) {
-    console.error("[markOrderPaid] purchaseShippingLabel falhou:", e);
-  }
-
-  // Send "payment confirmed" email (fire-and-forget)
+  // Lookup do pedido (necessário para decidir Superfrete x Pilha)
   const { data: full } = await supabaseAdmin
     .from("orders")
     .select("id, email, recipient_name, total_cents, user_id, shipping_method, shipping_cost_cents, arte_em_cards_code")
     .eq("id", orderId)
     .maybeSingle();
+
+  if (full?.shipping_method === "card_stack") {
+    // Pilha de Cartas: não compra etiqueta; armazena os itens na pilha do cliente.
+    try {
+      const { addOrderToStack } = await import("@/lib/card-stack.server");
+      await addOrderToStack(orderId);
+    } catch (e) {
+      console.error("[markOrderPaid] addOrderToStack falhou:", e);
+    }
+  } else {
+    // Compra etiqueta Superfrete automaticamente (best-effort)
+    try {
+      const { purchaseShippingLabel } = await import("@/lib/superfrete-label.server");
+      await purchaseShippingLabel(orderId);
+    } catch (e) {
+      console.error("[markOrderPaid] purchaseShippingLabel falhou:", e);
+    }
+  }
 
   // Garante código Arte em Cards quando o pedido pagou a taxa semanal
   // e ainda não usou um código existente.
