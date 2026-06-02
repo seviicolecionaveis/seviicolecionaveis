@@ -407,15 +407,6 @@ function CheckoutPage() {
     };
   };
 
-  const arteCodePayload = (): string | null => {
-    if (shipping !== "arte_em_cards") return null;
-    const typed = arteCode.trim().toUpperCase();
-    if (typed && arteCodeStatus.state === "valid" && arteCodeStatus.code === typed) {
-      return typed;
-    }
-    return null;
-  };
-
   const validateShippingChoice = (): string | null => {
     if (shipping === "fixed" && !selectedQuote) {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
@@ -423,8 +414,8 @@ function CheckoutPage() {
     if (shipping === "arrange" && !pickupPoint) {
       return "Selecione uma opção: Aruana, Aeroporto ou Entrega por aplicativo.";
     }
-    if (shipping === "arte_em_cards" && arteCode.trim() && arteCodeStatus.state !== "valid") {
-      return "Valide o código Arte em Cards informado ou remova-o para pagar a taxa.";
+    if (shipping === "card_stack" && !stackTermsAccepted) {
+      return "Aceite os termos da Pilha de Cartas para continuar.";
     }
     return null;
   };
