@@ -189,117 +189,106 @@ function AdminPage() {
         ) : filtered.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhum pedido.</p>
         ) : (
-          <div className="space-y-4">
-            {filtered.map((o) => (
-              <div
-                key={o.id}
-                ref={o.id === focusId ? focusRef : undefined}
-                className={`rounded-xl border p-5 bg-card transition ${o.id === focusId ? "border-orange-500 ring-2 ring-orange-300" : "border-border"}`}
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-                  <div>
-                    <p className="text-xs text-muted-foreground font-mono">#{o.id.slice(0, 8)}</p>
-                    <p className="text-sm font-semibold">{o.recipient_name}</p>
-                    <p className="text-xs text-muted-foreground">{o.email} · {o.phone}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(o.created_at).toLocaleString("pt-BR")}
-                    </p>
-                  </div>
-                  <select
-                    value={o.status}
-                    onChange={(e) => updateStatus(o.id, e.target.value)}
-                    className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold"
-                  >
-                    {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
-                  </select>
-                </div>
-
-                {(o.status === "shipped" || o.status === "delivered") && (
-                  <TrackingEditor
-                    order={o}
-                    correiosUrl={CORREIOS_URL}
-                    onSave={(info) => saveTracking(o.id, info)}
-                  />
-                )}
-
-                <div className="grid md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">Endereço</p>
-                    <p>{o.street}, {o.number}{o.complement ? ` — ${o.complement}` : ""}</p>
-                    <p>{o.neighborhood} · {o.city}/{o.state}</p>
-                    <p>CEP: {o.cep}</p>
-                    {o.cpf && <p className="text-xs text-muted-foreground">CPF: {o.cpf}</p>}
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">Itens</p>
-                    <ul className="space-y-0.5">
-                      {o.order_items?.map((it: any) => {
-                        const lineTotal = (it.unit_price_cents ?? 0) * (it.quantity ?? 0);
-                        return (
-                          <li key={it.id} className="text-xs flex justify-between gap-2">
-                            <span>
-                              {it.quantity}× {it.card_name}{it.card_number ? ` ${it.card_number}` : ""} <span className="text-muted-foreground">({it.finish}, {it.language})</span>
-                            </span>
-                            <span className="tabular-nums text-muted-foreground shrink-0">
-                              R$ {(it.unit_price_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                              {it.quantity > 1 && (
-                                <> · <span className="font-semibold text-foreground">R$ {(lineTotal / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span></>
-                              )}
-                            </span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                </div>
-
-                {o.notes && (
-                  <p className="mt-3 text-xs italic text-muted-foreground">Obs: {o.notes}</p>
-                )}
-
-                <div className="mt-3 pt-3 border-t border-border flex flex-wrap justify-between gap-2 text-sm">
-                  <span className="text-muted-foreground">
-                    {o.shipping_method === "fixed" ? `Frete: R$ ${(o.shipping_cost_cents / 100).toFixed(2).replace(".", ",")}` : "Envio a combinar"}
-                  </span>
-                  <span className="font-bold tabular-nums">
-                    Total: R$ {(o.total_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-
-                {o.status === "cancellation_requested" && (
-                  <div className="mt-3 pt-3 border-t border-orange-300 bg-orange-50 -mx-5 -mb-5 px-5 py-3 rounded-b-xl flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-xs text-orange-900">
-                      <strong>Cliente solicitou cancelamento.</strong> Status anterior: {STATUS_LABEL[o.pre_cancel_status] ?? o.pre_cancel_status ?? "—"}
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleRejectCancel(o.id)}
-                        className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold hover:bg-secondary"
+          <div className="space-y-3">
+            {filtered.map((o) => {
+              const items: any[] = o.order_items ?? [];
+              const totalQty = items.reduce((s, it) => s + (it.quantity ?? 0), 0);
+              const visible = items.slice(0, 5);
+              const extra = items.length - visible.length;
+              const isHighlight = o.id === focusId;
+              const isCancellation = o.status === "cancellation_requested";
+              return (
+                <Link
+                  key={o.id}
+                  to="/admin/orders/$orderId"
+                  params={{ orderId: o.id }}
+                  ref={isHighlight ? (focusRef as any) : undefined}
+                  className={`group flex items-center gap-4 rounded-xl border bg-card p-4 hover:border-foreground/40 hover:shadow-sm transition ${
+                    isHighlight
+                      ? "border-orange-500 ring-2 ring-orange-300"
+                      : isCancellation
+                        ? "border-orange-300"
+                        : "border-border"
+                  }`}
+                >
+                  <div className="flex shrink-0 -space-x-2">
+                    {visible.map((it: any) => (
+                      <div
+                        key={it.id}
+                        className="h-16 w-12 rounded-md overflow-hidden bg-secondary border-2 border-card ring-1 ring-border grid place-items-center"
                       >
-                        Recusar
-                      </button>
-                      <button
-                        onClick={() => handleApproveCancel(o.id)}
-                        className="rounded-md bg-red-600 text-white px-3 py-1.5 text-xs font-semibold hover:bg-red-700"
+                        {it.card_image ? (
+                          <img
+                            src={it.card_image}
+                            alt={it.card_name}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <ImageOff className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
+                    ))}
+                    {extra > 0 && (
+                      <div className="h-16 w-12 rounded-md border-2 border-card ring-1 ring-border bg-secondary grid place-items-center text-xs font-semibold text-muted-foreground">
+                        +{extra}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-xs font-mono text-muted-foreground">#{o.id.slice(0, 8)}</p>
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide ${
+                          isCancellation
+                            ? "bg-orange-100 text-orange-800"
+                            : o.status === "pending"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : o.status === "paid"
+                                ? "bg-blue-100 text-blue-800"
+                                : o.status === "shipped"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : o.status === "delivered"
+                                    ? "bg-green-100 text-green-800"
+                                    : o.status === "cancelled"
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-secondary text-foreground"
+                        }`}
                       >
-                        Aprovar cancelamento
-                      </button>
+                        {STATUS_LABEL[o.status] ?? o.status}
+                      </span>
                     </div>
+                    <p className="text-sm font-semibold mt-1 truncate">{o.recipient_name}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {o.email}
+                      {o.phone ? ` · ${o.phone}` : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {new Date(o.created_at).toLocaleString("pt-BR", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                      {" · "}
+                      {totalQty} {totalQty === 1 ? "item" : "itens"}
+                    </p>
                   </div>
-                )}
 
-                {o.status !== "cancelled" && o.status !== "cancellation_requested" && (
-                  <div className="mt-3 flex justify-end">
-                    <button
-                      onClick={() => handleAdminCancel(o.id)}
-                      className="text-xs text-destructive hover:underline font-semibold"
-                    >
-                      Cancelar pedido
-                    </button>
+                  <div className="text-right shrink-0">
+                    <p className="text-base font-bold tabular-nums">
+                      R$ {(o.total_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </p>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground inline-block mt-1 group-hover:translate-x-0.5 transition" />
                   </div>
-                )}
-              </div>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         )}
       </main>
@@ -307,155 +296,3 @@ function AdminPage() {
   );
 }
 
-type CarrierKind = "correios" | "latam" | "pickup";
-type TrackingInfo = {
-  carrier: CarrierKind | null;
-  tracking_code: string | null;
-  tracking_url: string | null;
-};
-
-function normalizeCarrier(c: any): CarrierKind {
-  if (c === "latam") return "latam";
-  if (c === "pickup") return "pickup";
-  return "correios";
-}
-
-function TrackingEditor({
-  order,
-  correiosUrl,
-  onSave,
-}: {
-  order: any;
-  correiosUrl: string;
-  onSave: (info: TrackingInfo) => Promise<void> | void;
-}) {
-  const initialCarrier: CarrierKind = normalizeCarrier(order.carrier);
-  const [carrier, setCarrier] = useState<CarrierKind>(initialCarrier);
-  const [code, setCode] = useState<string>(order.tracking_code ?? "");
-  const [url, setUrl] = useState<string>(
-    order.carrier === "latam" ? (order.tracking_url ?? "") : "",
-  );
-  const [saving, setSaving] = useState(false);
-
-  // Resync when order changes (e.g. after reload)
-  useEffect(() => {
-    setCarrier(normalizeCarrier(order.carrier));
-    setCode(order.tracking_code ?? "");
-    setUrl(order.carrier === "latam" ? (order.tracking_url ?? "") : "");
-  }, [order.id, order.carrier, order.tracking_code, order.tracking_url]);
-
-  const trimmedCode = code.trim();
-  const trimmedUrl = url.trim();
-  const finalCode = carrier === "pickup" ? null : (trimmedCode || null);
-  const finalUrl =
-    carrier === "pickup"
-      ? null
-      : carrier === "correios"
-        ? correiosUrl
-        : (trimmedUrl || null);
-  const currentCarrier = order.carrier ?? null;
-  const currentCode = order.tracking_code ?? null;
-  const currentUrl = order.tracking_url ?? null;
-  const dirty =
-    carrier !== (currentCarrier ?? "correios") ||
-    finalCode !== currentCode ||
-    finalUrl !== currentUrl;
-
-  const handleSave = async () => {
-    if (carrier === "latam" && trimmedUrl && !/^https?:\/\//i.test(trimmedUrl)) {
-      toast.error("Link inválido. A URL precisa começar com http:// ou https://");
-      return;
-    }
-    setSaving(true);
-    try {
-      await onSave({
-        carrier,
-        tracking_code: finalCode,
-        tracking_url: finalUrl,
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="mb-3 rounded-lg border border-border bg-muted/30 p-3 space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-          Rastreio do envio
-        </span>
-        {order.carrier !== "pickup" && order.tracking_code && order.tracking_url && (
-          <a
-            href={order.tracking_url}
-            target="_blank"
-            rel="noreferrer"
-            className="text-[11px] underline text-foreground"
-          >
-            abrir {order.carrier === "latam" ? "Latam" : "Correios"}
-          </a>
-        )}
-      </div>
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        <label className="flex items-center gap-1.5">
-          <input
-            type="radio"
-            name={`carrier-${order.id}`}
-            checked={carrier === "correios"}
-            onChange={() => setCarrier("correios")}
-          />
-          Correios
-        </label>
-        <label className="flex items-center gap-1.5">
-          <input
-            type="radio"
-            name={`carrier-${order.id}`}
-            checked={carrier === "latam"}
-            onChange={() => setCarrier("latam")}
-          />
-          Latam
-        </label>
-        <label className="flex items-center gap-1.5">
-          <input
-            type="radio"
-            name={`carrier-${order.id}`}
-            checked={carrier === "pickup"}
-            onChange={() => setCarrier("pickup")}
-          />
-          Retirado em mãos
-        </label>
-        {carrier !== "pickup" && (
-          <input
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Código de rastreio"
-            className="flex-1 min-w-[160px] rounded-md border border-border bg-background px-2 py-1 text-xs font-mono"
-          />
-        )}
-      </div>
-      {carrier === "latam" && (
-        <input
-          type="url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="Link de rastreio da Latam (https://...)"
-          className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
-        />
-      )}
-      {carrier === "pickup" && (
-        <p className="text-[11px] text-muted-foreground">
-          Pedido entregue em mãos — nenhum código de rastreio será enviado ao cliente.
-        </p>
-      )}
-      <div className="flex justify-end">
-        <button
-          onClick={handleSave}
-          disabled={saving || !dirty}
-          className="rounded-md bg-foreground text-background px-3 py-1.5 text-xs font-semibold hover:opacity-90 disabled:opacity-40"
-        >
-          {saving ? "Salvando..." : "Salvar rastreio"}
-        </button>
-      </div>
-    </div>
-  );
-}
