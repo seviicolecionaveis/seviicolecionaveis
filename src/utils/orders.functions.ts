@@ -11,6 +11,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
         "paid",
         "preparing",
         "shipped",
+        "awaiting_pickup",
         "delivered",
         "cancelled",
         "cancellation_requested",
@@ -51,7 +52,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
     // (paid / preparing / shipped / delivered). Antes, apenas a transição para "paid"
     // disparava o decremento, então mover direto para "preparing" deixava o estoque intacto.
     const PRE_PAID = ["pending", "cancellation_requested", "cancelled"];
-    const POST_PAID = ["paid", "preparing", "shipped", "delivered"];
+    const POST_PAID = ["paid", "preparing", "shipped", "awaiting_pickup", "delivered"];
     if (statusChanged && PRE_PAID.includes(order.status) && POST_PAID.includes(data.status)) {
       const { markOrderPaid } = await import("@/lib/orders.server");
       await markOrderPaid(order.id);
