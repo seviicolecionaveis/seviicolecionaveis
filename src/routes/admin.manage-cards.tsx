@@ -93,6 +93,7 @@ function AdminCardsManagePage() {
   const [rows, setRows] = useState<CardRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<CardCategory[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
