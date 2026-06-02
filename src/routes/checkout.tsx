@@ -478,7 +478,7 @@ function CheckoutPage() {
           address: buildAddressPayload(),
           notes: buildNotes(),
           couponCode: couponNormalized || null,
-          arteEmCardsCode: arteCodePayload(),
+          arteEmCardsCode: null,
         },
       });
       setPix(result);
