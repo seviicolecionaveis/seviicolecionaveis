@@ -1068,20 +1068,16 @@ function CheckoutPage() {
             )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">
-                {shipping === "arte_em_cards" ? "Taxa Arte em Cards" : shipping === "card_stack" ? "Pilha de Cartas" : "Frete"}
+                {shipping === "card_stack" ? "Pilha de Cartas" : "Frete"}
               </span>
               <span className="tabular-nums">
                 {shipping === "fixed"
                   ? selectedQuote
                     ? `R$ ${(selectedQuote.priceCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
                     : "—"
-                  : shipping === "arte_em_cards"
-                    ? arteFeeCents > 0
-                      ? `R$ ${(arteFeeCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
-                      : "Isenta (código válido)"
-                    : shipping === "card_stack"
-                      ? "Grátis (até 30 dias)"
-                      : "A combinar"}
+                  : shipping === "card_stack"
+                    ? "Grátis (até 30 dias)"
+                    : "A combinar"}
               </span>
             </div>
             <div className="flex justify-between text-base font-bold pt-2 border-t border-border">
