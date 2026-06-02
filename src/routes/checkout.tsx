@@ -366,9 +366,7 @@ function CheckoutPage() {
         ? pickupPoint === "app"
           ? `Entrega por aplicativo (Uber/99): cliente solicitará disponibilidade pelo WhatsApp.`
           : `Retirada em mãos: ${PICKUP_LABELS[pickupPoint]}. Horário: tarde das 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.`
-        : shipping === "arte_em_cards"
-          ? `Retirada na Arte em Cards. Taxa semanal R$ 5,00 (isenta com código válido). Horário: 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.`
-          : "";
+        : "";
     const combined = [pickupLine, favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
     return combined || null;
   };
