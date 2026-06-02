@@ -249,12 +249,7 @@ function CheckoutPage() {
     fetchQuotes(clean);
   };
 
-  const arteFeeApplies =
-    shipping === "arte_em_cards" &&
-    !(arteCodeStatus.state === "valid" && arteCodeStatus.code === arteCode.trim().toUpperCase());
-  const arteFeeCents = arteFeeApplies ? ARTE_FEE_CENTS : 0;
-  const shippingCents =
-    (shipping === "fixed" ? (selectedQuote ? selectedQuote.priceCents : 0) : 0) + arteFeeCents;
+  const shippingCents = shipping === "fixed" ? (selectedQuote ? selectedQuote.priceCents : 0) : 0;
   const shippingCost = shippingCents / 100;
   const couponNormalized = form.couponCode.trim().toUpperCase();
   const PIX_DISCOUNT_PERCENT = 5;
