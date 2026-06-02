@@ -92,19 +92,29 @@ export const Route = createFileRoute("/api/public/payments/mercadopago-webhook")
             import("@/lib/orders.server"),
           ]);
           const remote = await getPixPayment(paymentId);
-          const orderId = remote.external_reference;
-          if (!orderId) {
+          const externalRef = remote.external_reference;
+          if (!externalRef) {
             return Response.json({ received: true, ignored: "no external_reference" });
           }
 
-          if (remote.status === "approved") {
-            await markOrderPaid(orderId, { mercadopagoPaymentId: paymentId });
-          } else if (
-            remote.status === "cancelled" ||
-            remote.status === "rejected" ||
-            remote.status === "refunded"
-          ) {
-            await cancelOrder(orderId);
+          // Suporta dois tipos: pedidos normais (uuid) e ordens de serviço (so:<uuid>)
+          if (externalRef.startsWith("so:")) {
+            const serviceOrderId = externalRef.slice(3);
+            if (remote.status === "approved") {
+              const { markServiceOrderPaid } = await import("@/lib/service-orders.server");
+              await markServiceOrderPaid(serviceOrderId);
+            }
+          } else {
+            const orderId = externalRef;
+            if (remote.status === "approved") {
+              await markOrderPaid(orderId, { mercadopagoPaymentId: paymentId });
+            } else if (
+              remote.status === "cancelled" ||
+              remote.status === "rejected" ||
+              remote.status === "refunded"
+            ) {
+              await cancelOrder(orderId);
+            }
           }
 
           return Response.json({ received: true });
