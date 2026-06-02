@@ -5,7 +5,7 @@ export const ARTE_EM_CARDS_FEE_CENTS = 500;
 const PIX_EXPIRES_MINUTES = 30;
 const STORE_WHATSAPP = "5579981509552"; // Sevii Colecionáveis (somente dígitos com DDI)
 
-export type ServiceOrderMethod = "correios" | "app" | "arte_em_cards";
+export type ServiceOrderMethod = "correios" | "app" | "arte_em_cards" | "presencial";
 
 export interface ServiceOrderAddress {
   recipientName: string;
