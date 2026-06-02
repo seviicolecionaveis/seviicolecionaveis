@@ -479,7 +479,7 @@ function SolicitarPage() {
               className="w-full rounded-full bg-foreground px-5 py-3 text-sm font-semibold uppercase tracking-wide text-background disabled:opacity-50 inline-flex items-center justify-center gap-2"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {method === "app" ? "Criar solicitação" : totalCents > 0 ? "Gerar Pix" : "Confirmar solicitação"}
+              {method === "app" ? "Criar solicitação" : totalCents > 0 ? "Gerar Pix" : (method === "presencial" ? "Confirmar retirada" : "Confirmar solicitação")}
             </button>
           </>
         )}
