@@ -160,49 +160,6 @@ function CheckoutPage() {
     if (!authLoading && !user) nav({ to: "/auth" });
   }, [authLoading, user, nav]);
 
-  // Carrega código Arte em Cards ativo do cliente (se houver)
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const r = await getMyArteEmCardsCode({});
-        if (cancelled) return;
-        if (r.hasCode) {
-          setArteExistingCode({ code: r.code, cycleEnd: r.cycleEnd });
-        } else {
-          setArteExistingCode(null);
-        }
-      } catch {
-        // silencioso — usuário ainda pode pagar a taxa normalmente
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
-
-  const handleValidateArteCode = async () => {
-    const code = arteCode.trim().toUpperCase();
-    if (!code) {
-      setArteCodeStatus({ state: "invalid", reason: "Informe o código." });
-      return;
-    }
-    setArteCodeStatus({ state: "checking" });
-    try {
-      const r = await validateArteEmCardsCode({ data: { code } });
-      if (r.valid) {
-        setArteCodeStatus({ state: "valid", code: r.code, cycleEnd: r.cycleEnd });
-      } else {
-        setArteCodeStatus({ state: "invalid", reason: r.reason });
-      }
-    } catch (e: any) {
-      setArteCodeStatus({
-        state: "invalid",
-        reason: e?.message ?? "Erro ao validar código.",
-      });
-    }
-  };
 
 
   useEffect(() => {
