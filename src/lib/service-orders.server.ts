@@ -117,7 +117,10 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
       city: input.address?.city ?? null,
       state: input.address?.state?.toUpperCase() ?? null,
       phone: input.address?.phone ?? null,
-      notes: input.notes ?? null,
+      notes:
+        input.method === "presencial" && input.pickupPoint
+          ? `Retirada presencial: ${input.pickupPoint === "aruana" ? "Aruana" : "Aeroporto"}.${input.notes ? `\n\n${input.notes}` : ""}`
+          : (input.notes ?? null),
       arte_em_cards_code: arteCodeUsed,
     })
     .select("id, code")
