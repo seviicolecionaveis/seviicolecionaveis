@@ -114,6 +114,7 @@ interface CardState {
   address: AddressPayload;
   notes: string | null;
   couponCode: string | null;
+  arteEmCardsCode: string | null;
 }
 
 function CheckoutPage() {
