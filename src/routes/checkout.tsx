@@ -109,12 +109,11 @@ interface CardState {
   payerEmail: string;
   payerCpf: string | null;
   itemsPayload: ItemPayload[];
-  shipping: "fixed" | "arrange" | "arte_em_cards" | "card_stack";
+  shipping: "fixed" | "arrange" | "card_stack";
   shippingQuote: ShippingQuote | null;
   address: AddressPayload;
   notes: string | null;
   couponCode: string | null;
-  arteEmCardsCode: string | null;
 }
 
 function CheckoutPage() {
@@ -122,19 +121,10 @@ function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
-  const [shipping, setShipping] = useState<"fixed" | "arrange" | "arte_em_cards" | "card_stack">("fixed");
-  const [arteTermsAccepted, setArteTermsAccepted] = useState(false);
-  const [arteTermsOpen, setArteTermsOpen] = useState(false);
+  const [shipping, setShipping] = useState<"fixed" | "arrange" | "card_stack">("fixed");
+  const [stackTermsAccepted, setStackTermsAccepted] = useState(false);
+  const [stackTermsOpen, setStackTermsOpen] = useState(false);
   const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | "app" | null>(null);
-  const [arteCode, setArteCode] = useState("");
-  const [arteCodeStatus, setArteCodeStatus] = useState<
-    | { state: "idle" }
-    | { state: "checking" }
-    | { state: "valid"; code: string; cycleEnd: string }
-    | { state: "invalid"; reason: string }
-  >({ state: "idle" });
-  const [arteExistingCode, setArteExistingCode] = useState<{ code: string; cycleEnd: string } | null>(null);
-  const ARTE_FEE_CENTS = 500;
   const [quotes, setQuotes] = useState<ShippingQuote[]>([]);
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [quotesError, setQuotesError] = useState<string | null>(null);
