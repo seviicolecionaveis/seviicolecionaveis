@@ -93,6 +93,7 @@ function AdminCardsManagePage() {
   const [rows, setRows] = useState<CardRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<CardCategory[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -151,17 +152,26 @@ function AdminCardsManagePage() {
 
   useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
 
+  const availableCategories = useMemo(() => {
+    const set = new Set<CardCategory>();
+    rows.forEach((r) => { if (r.category) set.add(r.category); });
+    return CATEGORIES.filter((c) => set.has(c));
+  }, [rows]);
+
   const filteredAll = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) =>
-      r.name.toLowerCase().includes(q) ||
-      r.collection.toLowerCase().includes(q) ||
-      r.card_number.toLowerCase().includes(q),
-    );
-  }, [rows, search]);
+    return rows.filter((r) => {
+      if (categoryFilter.length > 0 && !categoryFilter.includes(r.category)) return false;
+      if (!q) return true;
+      return (
+        r.name.toLowerCase().includes(q) ||
+        r.collection.toLowerCase().includes(q) ||
+        r.card_number.toLowerCase().includes(q)
+      );
+    });
+  }, [rows, search, categoryFilter]);
 
-  useEffect(() => { setPage(1); }, [search, pageSize]);
+  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredAll.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -501,7 +511,41 @@ function AdminCardsManagePage() {
                   {msg.text}
                 </span>
               )}
+          </div>
+
+          {availableCategories.length > 0 && (
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-3 py-2">
+              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Tipo:</span>
+              {availableCategories.map((cat) => {
+                const checked = categoryFilter.includes(cat);
+                const count = rows.filter((r) => r.category === cat).length;
+                return (
+                  <label key={cat} className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e) =>
+                        setCategoryFilter((prev) =>
+                          e.target.checked ? [...prev, cat] : prev.filter((c) => c !== cat),
+                        )
+                      }
+                      className="rounded border-border accent-foreground"
+                    />
+                    <span>{cat} <span className="text-muted-foreground">({count})</span></span>
+                  </label>
+                );
+              })}
+              {categoryFilter.length > 0 && (
+                <button
+                  onClick={() => setCategoryFilter([])}
+                  className="ml-auto text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                >
+                  Limpar
+                </button>
+              )}
             </div>
+          )}
+
           </form>
         </section>
 
