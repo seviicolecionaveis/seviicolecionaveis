@@ -511,7 +511,41 @@ function AdminCardsManagePage() {
                   {msg.text}
                 </span>
               )}
+          </div>
+
+          {availableCategories.length > 0 && (
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-3 py-2">
+              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Tipo:</span>
+              {availableCategories.map((cat) => {
+                const checked = categoryFilter.includes(cat);
+                const count = rows.filter((r) => r.category === cat).length;
+                return (
+                  <label key={cat} className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e) =>
+                        setCategoryFilter((prev) =>
+                          e.target.checked ? [...prev, cat] : prev.filter((c) => c !== cat),
+                        )
+                      }
+                      className="rounded border-border accent-foreground"
+                    />
+                    <span>{cat} <span className="text-muted-foreground">({count})</span></span>
+                  </label>
+                );
+              })}
+              {categoryFilter.length > 0 && (
+                <button
+                  onClick={() => setCategoryFilter([])}
+                  className="ml-auto text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                >
+                  Limpar
+                </button>
+              )}
             </div>
+          )}
+
           </form>
         </section>
 
