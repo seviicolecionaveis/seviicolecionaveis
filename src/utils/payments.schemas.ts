@@ -33,9 +33,11 @@ const AddressSchema = z.object({
   state: z.string().min(2).max(2),
 });
 
+export const ShippingMethodEnum = z.enum(["fixed", "arrange", "arte_em_cards", "card_stack"]);
+
 export const StripeInputSchema = z.object({
   items: z.array(ItemSchema).min(1).max(50),
-  shippingMethod: z.enum(["fixed", "arrange", "arte_em_cards"]),
+  shippingMethod: ShippingMethodEnum,
   shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
@@ -47,7 +49,7 @@ export const StripeInputSchema = z.object({
 
 export const PixInputSchema = z.object({
   items: z.array(ItemSchema).min(1).max(50),
-  shippingMethod: z.enum(["fixed", "arrange", "arte_em_cards"]),
+  shippingMethod: ShippingMethodEnum,
   shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
@@ -57,7 +59,7 @@ export const PixInputSchema = z.object({
 
 export const CardInputSchema = z.object({
   items: z.array(ItemSchema).min(1).max(50),
-  shippingMethod: z.enum(["fixed", "arrange", "arte_em_cards"]),
+  shippingMethod: ShippingMethodEnum,
   shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
@@ -73,6 +75,7 @@ export const CardInputSchema = z.object({
   }),
 });
 
+export type ShippingMethod = z.infer<typeof ShippingMethodEnum>;
 export type StripeInput = z.infer<typeof StripeInputSchema>;
 export type PixInput = z.infer<typeof PixInputSchema>;
 export type CardInput = z.infer<typeof CardInputSchema>;
