@@ -39,6 +39,7 @@ import { Route as CartaSlugRouteImport } from './routes/carta.$slug'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
 import { Route as AdminSealedRouteImport } from './routes/admin.sealed'
+import { Route as AdminPilhaRouteImport } from './routes/admin.pilha'
 import { Route as AdminPanelsRouteImport } from './routes/admin.panels'
 import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-cards'
 import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
@@ -211,6 +212,11 @@ const AdminSealedRoute = AdminSealedRouteImport.update({
   path: '/sealed',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPilhaRoute = AdminPilhaRouteImport.update({
+  id: '/pilha',
+  path: '/pilha',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPanelsRoute = AdminPanelsRouteImport.update({
   id: '/panels',
   path: '/panels',
@@ -354,6 +360,7 @@ export interface FileRoutesByFullPath {
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/panels': typeof AdminPanelsRoute
+  '/admin/pilha': typeof AdminPilhaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
@@ -406,6 +413,7 @@ export interface FileRoutesByTo {
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/panels': typeof AdminPanelsRoute
+  '/admin/pilha': typeof AdminPilhaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
@@ -460,6 +468,7 @@ export interface FileRoutesById {
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/panels': typeof AdminPanelsRoute
+  '/admin/pilha': typeof AdminPilhaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
@@ -515,6 +524,7 @@ export interface FileRouteTypes {
     | '/admin/integrations'
     | '/admin/manage-cards'
     | '/admin/panels'
+    | '/admin/pilha'
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/users'
@@ -567,6 +577,7 @@ export interface FileRouteTypes {
     | '/admin/integrations'
     | '/admin/manage-cards'
     | '/admin/panels'
+    | '/admin/pilha'
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/users'
@@ -620,6 +631,7 @@ export interface FileRouteTypes {
     | '/admin/integrations'
     | '/admin/manage-cards'
     | '/admin/panels'
+    | '/admin/pilha'
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/users'
@@ -897,6 +909,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSealedRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/pilha': {
+      id: '/admin/pilha'
+      path: '/pilha'
+      fullPath: '/admin/pilha'
+      preLoaderRoute: typeof AdminPilhaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/panels': {
       id: '/admin/panels'
       path: '/panels'
@@ -1056,6 +1075,7 @@ interface AdminRouteChildren {
   AdminIntegrationsRoute: typeof AdminIntegrationsRoute
   AdminManageCardsRoute: typeof AdminManageCardsRoute
   AdminPanelsRoute: typeof AdminPanelsRoute
+  AdminPilhaRoute: typeof AdminPilhaRoute
   AdminSealedRoute: typeof AdminSealedRoute
   AdminShippingRoute: typeof AdminShippingRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -1070,6 +1090,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminIntegrationsRoute: AdminIntegrationsRoute,
   AdminManageCardsRoute: AdminManageCardsRoute,
   AdminPanelsRoute: AdminPanelsRoute,
+  AdminPilhaRoute: AdminPilhaRoute,
   AdminSealedRoute: AdminSealedRoute,
   AdminShippingRoute: AdminShippingRoute,
   AdminUsersRoute: AdminUsersRoute,

@@ -24,7 +24,13 @@ export const adminUpdateServiceOrder = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!roleRow) throw new Error("Apenas administradores.");
 
-    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    const patch: {
+      updated_at: string;
+      status?: string;
+      carrier?: string | null;
+      tracking_code?: string | null;
+      tracking_url?: string | null;
+    } = { updated_at: new Date().toISOString() };
     if (data.status) patch.status = data.status;
     if (data.carrier !== undefined) patch.carrier = data.carrier;
     if (data.trackingCode !== undefined) patch.tracking_code = data.trackingCode;

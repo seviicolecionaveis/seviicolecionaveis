@@ -102,7 +102,13 @@ function AdminPilhaPage() {
     [orders],
   );
 
-  async function patch(id: string, body: Parameters<typeof adminUpdateServiceOrder>[0]["data"]) {
+  async function patch(id: string, body: {
+    serviceOrderId: string;
+    status?: "paid" | "dispatched" | "delivered" | "cancelled";
+    carrier?: "correios" | "latam" | "pickup" | null;
+    trackingCode?: string | null;
+    trackingUrl?: string | null;
+  }) {
     try {
       await update({ data: body });
       toast.success("Atualizado.");
