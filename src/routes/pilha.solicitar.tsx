@@ -76,6 +76,7 @@ function SolicitarPage() {
     | { state: "invalid"; reason: string }
   >({ state: "idle" });
   const [arteExisting, setArteExisting] = useState<{ code: string; cycleEnd: string } | null>(null);
+  const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
