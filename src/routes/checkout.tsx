@@ -734,7 +734,13 @@ function CheckoutPage() {
                 type="radio"
                 name="ship"
                 checked={shipping === "card_stack"}
-                onChange={() => setShipping("card_stack")}
+                onChange={() => {
+                  if (stackTermsAccepted) {
+                    setShipping("card_stack");
+                  } else {
+                    setStackTermsOpen(true);
+                  }
+                }}
                 className="mt-1"
               />
               <div className="flex-1">
@@ -752,7 +758,7 @@ function CheckoutPage() {
                 {shipping === "card_stack" && (
                   <div className="mt-2 rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
                     Quando quiser despachar, acesse <span className="font-semibold text-foreground">Pilha de Cartas</span> na sua conta,
-                    selecione as cartas e escolha o método de envio (Correios, aplicativo ou Arte em Cards).
+                    selecione as cartas e escolha o método (Correios, aplicativo, retirada presencial ou Arte em Cards).
                     Você receberá avisos por e-mail quando o prazo estiver acabando.
                   </div>
                 )}
