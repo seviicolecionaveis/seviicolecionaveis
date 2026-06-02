@@ -109,7 +109,7 @@ interface CardState {
   payerEmail: string;
   payerCpf: string | null;
   itemsPayload: ItemPayload[];
-  shipping: "fixed" | "arrange" | "arte_em_cards";
+  shipping: "fixed" | "arrange" | "arte_em_cards" | "card_stack";
   shippingQuote: ShippingQuote | null;
   address: AddressPayload;
   notes: string | null;
@@ -122,7 +122,7 @@ function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
-  const [shipping, setShipping] = useState<"fixed" | "arrange" | "arte_em_cards">("fixed");
+  const [shipping, setShipping] = useState<"fixed" | "arrange" | "arte_em_cards" | "card_stack">("fixed");
   const [arteTermsAccepted, setArteTermsAccepted] = useState(false);
   const [arteTermsOpen, setArteTermsOpen] = useState(false);
   const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | "app" | null>(null);
@@ -898,6 +898,36 @@ function CheckoutPage() {
                 )}
               </div>
             </div>
+
+            <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
+              <input
+                type="radio"
+                name="ship"
+                checked={shipping === "card_stack"}
+                onChange={() => setShipping("card_stack")}
+                className="mt-1"
+              />
+              <div className="flex-1">
+                <p className="text-sm font-semibold flex items-center gap-2">
+                  🃏 Pilha de Cartas
+                  <span className="ml-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+                    Grátis
+                  </span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Guarde suas cartas com a gente por até 30 dias e junte várias compras antes de
+                  pedir o envio ou retirada. O prazo conta a partir do seu primeiro pedido na
+                  pilha e não reinicia a cada nova compra.
+                </p>
+                {shipping === "card_stack" && (
+                  <div className="mt-2 rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
+                    Quando quiser despachar, acesse <span className="font-semibold text-foreground">Pilha de Cartas</span> na sua conta,
+                    selecione as cartas e escolha o método de envio (Correios, aplicativo ou Arte em Cards).
+                    Você receberá avisos por e-mail quando o prazo estiver acabando.
+                  </div>
+                )}
+              </div>
+            </label>
           </div>
 
           <div>
@@ -1038,7 +1068,7 @@ function CheckoutPage() {
             )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">
-                {shipping === "arte_em_cards" ? "Taxa Arte em Cards" : "Frete"}
+                {shipping === "arte_em_cards" ? "Taxa Arte em Cards" : shipping === "card_stack" ? "Pilha de Cartas" : "Frete"}
               </span>
               <span className="tabular-nums">
                 {shipping === "fixed"
@@ -1049,7 +1079,9 @@ function CheckoutPage() {
                     ? arteFeeCents > 0
                       ? `R$ ${(arteFeeCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
                       : "Isenta (código válido)"
-                    : "A combinar"}
+                    : shipping === "card_stack"
+                      ? "Grátis (até 30 dias)"
+                      : "A combinar"}
               </span>
             </div>
             <div className="flex justify-between text-base font-bold pt-2 border-t border-border">

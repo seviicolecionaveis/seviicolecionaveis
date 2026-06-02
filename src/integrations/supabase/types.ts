@@ -227,6 +227,126 @@ export type Database = {
         }
         Relationships: []
       }
+      card_stack_items: {
+        Row: {
+          card_id: string
+          card_image: string | null
+          card_name: string
+          card_number: string | null
+          collection: string | null
+          condition: string | null
+          created_at: string
+          finish: string | null
+          id: string
+          language: string | null
+          order_id: string
+          order_item_id: string | null
+          quantity: number
+          service_order_id: string | null
+          stack_id: string
+          status: string
+          unit_price_cents: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          card_image?: string | null
+          card_name: string
+          card_number?: string | null
+          collection?: string | null
+          condition?: string | null
+          created_at?: string
+          finish?: string | null
+          id?: string
+          language?: string | null
+          order_id: string
+          order_item_id?: string | null
+          quantity: number
+          service_order_id?: string | null
+          stack_id: string
+          status?: string
+          unit_price_cents?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          card_image?: string | null
+          card_name?: string
+          card_number?: string | null
+          collection?: string | null
+          condition?: string | null
+          created_at?: string
+          finish?: string | null
+          id?: string
+          language?: string | null
+          order_id?: string
+          order_item_id?: string | null
+          quantity?: number
+          service_order_id?: string | null
+          stack_id?: string
+          status?: string
+          unit_price_cents?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_stack_items_service_order_fk"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_stack_items_stack_id_fkey"
+            columns: ["stack_id"]
+            isOneToOne: false
+            referencedRelation: "card_stacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      card_stacks: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          reminder_24h_sent_at: string | null
+          reminder_48h_sent_at: string | null
+          reminder_7d_sent_at: string | null
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          reminder_24h_sent_at?: string | null
+          reminder_48h_sent_at?: string | null
+          reminder_7d_sent_at?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          reminder_24h_sent_at?: string | null
+          reminder_48h_sent_at?: string | null
+          reminder_7d_sent_at?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       card_stats: {
         Row: {
           card_key: string
@@ -852,6 +972,101 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      service_orders: {
+        Row: {
+          amount_cents: number
+          arte_em_cards_code: string | null
+          carrier: string | null
+          cep: string | null
+          city: string | null
+          code: number
+          complement: string | null
+          created_at: string
+          id: string
+          method: string
+          neighborhood: string | null
+          notes: string | null
+          number: string | null
+          payment_order_id: string | null
+          phone: string | null
+          recipient_name: string | null
+          shipping_cost_cents: number
+          stack_id: string
+          state: string | null
+          status: string
+          street: string | null
+          tracking_code: string | null
+          tracking_url: string | null
+          updated_at: string
+          user_id: string
+          whatsapp_sent_at: string | null
+        }
+        Insert: {
+          amount_cents?: number
+          arte_em_cards_code?: string | null
+          carrier?: string | null
+          cep?: string | null
+          city?: string | null
+          code?: number
+          complement?: string | null
+          created_at?: string
+          id?: string
+          method: string
+          neighborhood?: string | null
+          notes?: string | null
+          number?: string | null
+          payment_order_id?: string | null
+          phone?: string | null
+          recipient_name?: string | null
+          shipping_cost_cents?: number
+          stack_id: string
+          state?: string | null
+          status?: string
+          street?: string | null
+          tracking_code?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id: string
+          whatsapp_sent_at?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          arte_em_cards_code?: string | null
+          carrier?: string | null
+          cep?: string | null
+          city?: string | null
+          code?: number
+          complement?: string | null
+          created_at?: string
+          id?: string
+          method?: string
+          neighborhood?: string | null
+          notes?: string | null
+          number?: string | null
+          payment_order_id?: string | null
+          phone?: string | null
+          recipient_name?: string | null
+          shipping_cost_cents?: number
+          stack_id?: string
+          state?: string | null
+          status?: string
+          street?: string | null
+          tracking_code?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id?: string
+          whatsapp_sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_stack_id_fkey"
+            columns: ["stack_id"]
+            isOneToOne: false
+            referencedRelation: "card_stacks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stock_alerts: {
         Row: {

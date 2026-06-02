@@ -1,109 +1,65 @@
-# Retirada na Arte em Cards — taxa semanal com código
+# Pilha de Cartas
 
-## Conceito
+Funcionalidade grande, vou dividir em fases para entregar de forma incremental.
 
-Nova modalidade de entrega no checkout. Cobra R$ 5,00 uma vez por **ciclo semanal fixo** (sexta 12:00 → próxima sexta 11:59). Após pagamento, o cliente recebe um código pessoal que isenta a taxa em compras posteriores **dentro do mesmo ciclo**.
+## Resumo do funcionamento
 
-## Banco de dados (migration)
+- No checkout, nova opção de "envio": **Pilha de Cartas** (gratuita).
+- Ao pagar o 1º pedido com essa opção, abre-se uma **pilha** para o cliente com prazo de **30 dias** (contados desde o 1º pedido — não reinicia).
+- Pedidos seguintes com Pilha de Cartas entram na mesma pilha ativa.
+- Cliente vê nova página **"Pilha de Cartas"** na conta, com contagem regressiva, lista de cartas e checkboxes.
+- Cliente seleciona cartas → "Solicitar Retirada / Envio" → mini-checkout que reaproveita os 3 métodos existentes (Correios, Aplicativo de entrega, Arte em Cards R$5). Sem reexibir a opção Pilha de Cartas.
+- Cada solicitação gera uma **Ordem de Serviço (OS)** com status próprios.
+- Admin tem nova página "Ordens de Serviço da Pilha de Cartas" + notificações por e-mail.
+- E-mails automáticos ao cliente em 7 dias, 48 h e 24 h antes do vencimento.
 
-Nova tabela `arte_em_cards_codes`:
-- `id` uuid PK
-- `user_id` uuid (dono do código)
-- `code` text único (formato `AEC-XXXXXX`)
-- `cycle_start` timestamptz (sexta 12:00 do ciclo)
-- `cycle_end` timestamptz (próxima sexta 11:59:59)
-- `created_at`, `updated_at`
+## Modelo de dados (nova migração)
 
-Constraints/índices:
-- Unique parcial em `(user_id, cycle_start)` — garante um código por cliente por ciclo
-- Index em `code`, em `(user_id, cycle_end)`
-- RLS: cliente vê apenas o próprio; admins veem tudo
-- GRANTs para `authenticated` e `service_role`
+- `card_stacks`: `id`, `user_id` (unique-por-ativa), `started_at`, `expires_at` (= started_at + 30d), `status` (`active` | `closed` | `expired`), timestamps.
+- `card_stack_items`: `id`, `stack_id`, `order_id`, `order_item_id`, `card_id`, snapshot (nome/imagem/coleção/número/finish/quantity), `status` (`stored` | `requested` | `dispatched` | `cancelled`), `service_order_id` nullable.
+- `service_orders`: `id`, `code` (sequencial visível), `user_id`, `stack_id`, `method` (`correios` | `app` | `arte_em_cards`), `status` (`awaiting_payment`, `paid`, `picking`, `ready`, `shipped`, `delivered`, `cancelled`), `amount_cents`, `order_id` nullable (pedido de pagamento associado), endereço, timestamps.
+- `service_order_items`: vincula `service_order_id` ↔ `card_stack_item_id`.
+- Notificações: campo `last_reminder_sent_at` + flags por marco (7d/48h/24h) na `card_stacks`.
+- RLS: cliente só vê suas pilhas/itens/OS; admin vê tudo.
 
-Função SQL `current_cycle_bounds()` que retorna `(cycle_start, cycle_end)` baseado em `now()` em horário de São Paulo (-03), para usar nas validações server-side.
+## Backend (server functions + cron)
 
-## Server functions (`src/lib/arte-em-cards.functions.ts`)
+- `stack.functions.ts`: `getMyStack`, `requestServiceOrder({itemIds, method, shippingAddress})`, `cancelStackItem`.
+- Reaproveitar `payments.server.ts`: novo fluxo paralelo `createServiceOrderCheckout` que cria pagamento Pix/Cartão sem decrementar estoque (cartas já são do cliente). Estoque NÃO é alterado nas OS.
+- Hook em `markOrderPaid` (orders.server.ts): se `shipping_method === "card_stack"` → criar pilha (se não existir ativa) e mover items para `card_stack_items` em vez de despachar.
+- Hook em pagamento de OS: ao confirmar pagamento, marca `service_orders.status = paid`, marca itens como `dispatched`, dispara compra de etiqueta (no método Correios) e e-mail admin.
+- Cron diário (`/api/public/hooks/stack-reminders`): envia e-mails de 7d/48h/24h e expira pilhas vencidas.
+- Templates de e-mail novos: `stack-reminder` (cliente) e `service-order-created` (admin).
 
-- `validateArteEmCardsCode({ code })` — middleware auth. Verifica:
-  - código existe
-  - pertence ao `userId` logado
-  - `now()` entre `cycle_start` e `cycle_end`
-  - retorna `{ valid: true, expiresAt }` ou `{ valid: false, reason }`
-- `getMyArteEmCardsCode()` — retorna código ativo do usuário no ciclo atual (se houver) + `cycle_end`.
+## Frontend
 
-## Lógica de geração (`src/lib/arte-em-cards.server.ts`)
+- **Checkout** (`src/routes/checkout.tsx`): nova opção de envio "Pilha de Cartas" (frete R$ 0, sem cálculo de frete). Tooltip/popup explicativo (igual ao da Arte em Cards) com termos (30 dias, e-mails de aviso, custo de envio na hora da retirada).
+- **Conta**: adicionar item "Pilha de Cartas" no painel `/conta` (atalhos) e nova rota `/_authenticated/pilha.tsx`:
+  - Cabeçalho: data início, vencimento, **contador regressivo em tempo real**, totais.
+  - Tabela/grid de cartas com foto, nome, pedido, data, qtd, checkbox.
+  - Botão "Solicitar Retirada / Envio" → modal/rota `/pilha/solicitar` que reproduz layout do checkout (sem opção Pilha).
+  - Após método "Aplicativo de entrega": tela final com botão **WhatsApp** pré-preenchido (`https://wa.me/<numero>?text=...`).
+- **Admin**: nova rota `/admin/service-orders` (lista + filtros + detalhes + mudança de status). Sino `AdminCancellationBell` ganha contador de OS novas.
 
-Helper `ensureCodeForUser(userId)`:
-1. Calcula ciclo atual (sexta 12:00 SP).
-2. Busca código do user com `cycle_start = ciclo_atual`.
-3. Se existir, retorna.
-4. Senão cria novo com `code = "AEC-" + 8 chars aleatórios`.
+## Fases de entrega
 
-Chamado a partir de `markOrderPaid` em `src/lib/orders.server.ts`: **se** o pedido foi pago com modalidade `arte_em_cards` **e** o pedido cobrou a taxa (i.e. não usou código pré-existente), gerar/garantir código para o `user_id` do pedido e armazenar em `order.notes` (ou novo campo) para exibir no recibo.
+1. **Fase 1 — Fundação**: migração (`card_stacks`, `card_stack_items`, `service_orders`, `service_order_items`, RLS, grants), opção "Pilha de Cartas" no checkout, hook no `markOrderPaid` para criar pilha e mover itens, página `/conta` → "Pilha de Cartas" só leitura com contador.
+2. **Fase 2 — Solicitação de OS**: server fns + UI de "Solicitar Retirada/Envio" reaproveitando os 3 métodos, geração de OS, pagamento (Correios/Arte em Cards) e fluxo WhatsApp (Aplicativo).
+3. **Fase 3 — Admin + notificações**: página admin de OS, e-mail para admin ao criar OS, sino com contador.
+4. **Fase 4 — Cron de avisos**: template `stack-reminder`, endpoint `/api/public/hooks/stack-reminders`, agendamento pg_cron diário, expiração automática.
 
-## Checkout (`src/routes/checkout.tsx`)
+## Considerações
 
-Adicionar 4ª opção de envio: **Retirada na Arte em Cards** (paralela a Frete / Retirada em mãos / Entrega por app). Quando selecionada:
-- Mostra campo opcional "Código Arte em Cards"
-- Botão "Validar código" chama `validateArteEmCardsCode`
-- Se válido: badge verde com data de expiração, taxa = R$ 0,00
-- Se inválido/expirado/de outro cliente: erro vermelho, taxa = R$ 5,00
-- Se sem código: aviso "Será cobrada taxa de R$ 5,00 e você receberá um código válido até [próxima sexta 11:59]"
+- Estoque: itens da pilha já foram pagos no pedido original → OS NÃO mexem em `cards.stock`.
+- Reembolsos/cancelamento de pedido original: ao cancelar pedido com itens na pilha, remover os `card_stack_items` correspondentes e devolver estoque (mesma lógica de `order-cancellation.server.ts`).
+- Número da loja para WhatsApp: usar variável já existente ou pedir secret `STORE_WHATSAPP_NUMBER` na Fase 2.
 
-Passa para o servidor: `shippingMethod: "arte_em_cards"`, `arteEmCardsCode?: string`.
+## Confirmação antes de começar
 
-## Validação server-side de preço (`src/utils/payments.server.ts` + schemas)
+Esta é uma feature grande (4 fases, ~15-20 arquivos novos, 1 migração, 1 cron, 2 templates de e-mail). Posso:
 
-Adicionar `arte_em_cards` ao enum `shippingMethod` em `payments.schemas.ts`. Adicionar campo opcional `arteEmCardsCode`.
+**(A)** Começar pela **Fase 1** agora (migração + checkout + página de leitura da pilha) e seguir nas próximas mensagens conforme você aprovar cada fase.
 
-No cálculo do `shipping_cost_cents`:
-- Se `shippingMethod === "arte_em_cards"`:
-  - Se `arteEmCardsCode` válido para o `userId` no ciclo atual → 0
-  - Senão → 500 (R$ 5,00)
-- Persistir na `orders` o método e (se aplicável) `arte_em_cards_code_used`.
+**(B)** Implementar tudo de uma vez (resposta longa, mais difícil de revisar).
 
-Após `markOrderPaid`, se método = `arte_em_cards` e taxa = 500, chamar `ensureCodeForUser`.
-
-## Área do cliente (`src/routes/conta.tsx`)
-
-Nova aba "Arte em Cards" (ou card dentro de "Atalhos"):
-- Componente `ArteEmCardsCard` que chama `getMyArteEmCardsCode`
-- Mostra: código (copiável), Status (Ativo/Expirado), expiração formatada, aviso "Válido até próxima sexta 11:59"
-- Estado vazio: "Você ainda não tem um código deste ciclo. Faça uma compra com Retirada na Arte em Cards."
-
-## Exibição no pedido (`src/routes/orders.$orderId.tsx`)
-
-Quando `shipping_method === "arte_em_cards"`:
-- Mostrar bloco com endereço da loja e horários
-- Se taxa cobrada: exibir o código gerado + validade
-- Se código usado: exibir "Código usado: AEC-XXXX (válido até …)"
-
-## Painel admin
-
-`src/routes/admin.shipping.tsx` (ou onde os pedidos aparecem): adicionar label "Arte em Cards" e mostrar código usado/gerado para facilitar conferência presencial.
-
-## Arquivos a criar/editar
-
-**Migration:** `supabase/migrations/<timestamp>_arte_em_cards_codes.sql`
-
-**Novos:**
-- `src/lib/arte-em-cards.server.ts`
-- `src/lib/arte-em-cards.functions.ts`
-- `src/components/account/ArteEmCardsCard.tsx`
-
-**Editados:**
-- `src/lib/orders.server.ts` (gerar código após pagamento)
-- `src/utils/payments.schemas.ts` (enum + campo)
-- `src/utils/payments.server.ts` (cálculo da taxa)
-- `src/routes/checkout.tsx` (UI + validação)
-- `src/routes/conta.tsx` (aba/card)
-- `src/routes/orders.$orderId.tsx` (exibição do código)
-- `src/routes/admin.shipping.tsx` (label + código)
-
-## Notas técnicas
-
-- Cálculo da "sexta 12:00 SP": usar `date-fns-tz` (já no projeto? checar) ou cálculo manual com offset -03 fixo, evitando lib pesada.
-- Endereço físico da loja Arte em Cards: **precisa ser confirmado pelo cliente** — usarei placeholder "Arte em Cards (endereço a confirmar)" e perguntarei após este plano ser aprovado.
-- Código gerado com `crypto.randomBytes` no server; colisões tratadas com retry (until insert succeed via unique constraint).
-
-Aguardo aprovação para implementar.
+Recomendo **A**. Posso seguir?
