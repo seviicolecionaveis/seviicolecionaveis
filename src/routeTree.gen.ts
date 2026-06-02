@@ -29,6 +29,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
+import { Route as PilhaSolicitarRouteImport } from './routes/pilha.solicitar'
 import { Route as PayOrderIdRouteImport } from './routes/pay.$orderId'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
@@ -159,6 +160,11 @@ const OrdersIndexRoute = OrdersIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => OrdersRoute,
+} as any)
+const PilhaSolicitarRoute = PilhaSolicitarRouteImport.update({
+  id: '/solicitar',
+  path: '/solicitar',
+  getParentRoute: () => PilhaRoute,
 } as any)
 const PayOrderIdRoute = PayOrderIdRouteImport.update({
   id: '/pay/$orderId',
@@ -333,7 +339,7 @@ export interface FileRoutesByFullPath {
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
   '/orders': typeof OrdersRouteWithChildren
-  '/pilha': typeof PilhaRoute
+  '/pilha': typeof PilhaRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -357,6 +363,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
+  '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/orders/': typeof OrdersIndexRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -384,7 +391,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
-  '/pilha': typeof PilhaRoute
+  '/pilha': typeof PilhaRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -408,6 +415,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
+  '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/orders': typeof OrdersIndexRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -437,7 +445,7 @@ export interface FileRoutesById {
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
   '/orders': typeof OrdersRouteWithChildren
-  '/pilha': typeof PilhaRoute
+  '/pilha': typeof PilhaRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -461,6 +469,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
+  '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/orders/': typeof OrdersIndexRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -515,6 +524,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/orders/$orderId'
     | '/pay/$orderId'
+    | '/pilha/solicitar'
     | '/orders/'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
@@ -566,6 +576,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/orders/$orderId'
     | '/pay/$orderId'
+    | '/pilha/solicitar'
     | '/orders'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
@@ -618,6 +629,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/orders/$orderId'
     | '/pay/$orderId'
+    | '/pilha/solicitar'
     | '/orders/'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
@@ -647,7 +659,7 @@ export interface RootRouteChildren {
   FavoritosRoute: typeof FavoritosRoute
   ImasRoute: typeof ImasRoute
   OrdersRoute: typeof OrdersRouteWithChildren
-  PilhaRoute: typeof PilhaRoute
+  PilhaRoute: typeof PilhaRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   SeladosRoute: typeof SeladosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -814,6 +826,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/orders/'
       preLoaderRoute: typeof OrdersIndexRouteImport
       parentRoute: typeof OrdersRoute
+    }
+    '/pilha/solicitar': {
+      id: '/pilha/solicitar'
+      path: '/solicitar'
+      fullPath: '/pilha/solicitar'
+      preLoaderRoute: typeof PilhaSolicitarRouteImport
+      parentRoute: typeof PilhaRoute
     }
     '/pay/$orderId': {
       id: '/pay/$orderId'
@@ -1083,6 +1102,16 @@ const OrdersRouteChildren: OrdersRouteChildren = {
 const OrdersRouteWithChildren =
   OrdersRoute._addFileChildren(OrdersRouteChildren)
 
+interface PilhaRouteChildren {
+  PilhaSolicitarRoute: typeof PilhaSolicitarRoute
+}
+
+const PilhaRouteChildren: PilhaRouteChildren = {
+  PilhaSolicitarRoute: PilhaSolicitarRoute,
+}
+
+const PilhaRouteWithChildren = PilhaRoute._addFileChildren(PilhaRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcessoriosRoute: AcessoriosRoute,
@@ -1096,7 +1125,7 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritosRoute: FavoritosRoute,
   ImasRoute: ImasRoute,
   OrdersRoute: OrdersRouteWithChildren,
-  PilhaRoute: PilhaRoute,
+  PilhaRoute: PilhaRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   SeladosRoute: SeladosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
