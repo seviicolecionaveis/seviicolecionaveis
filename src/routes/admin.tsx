@@ -109,66 +109,6 @@ function AdminPage() {
     return () => clearTimeout(t);
   }, [focusId, loading, orders]);
 
-  const CORREIOS_URL = "https://rastreamento.correios.com.br/app/index.php";
-
-  const updateStatus = async (id: string, status: string) => {
-    try {
-      await adminUpdateOrderStatus({
-        data: { order_id: id, status: status as any },
-      });
-      await load();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Erro ao atualizar status.");
-    }
-  };
-
-  const saveTracking = async (
-    id: string,
-    info: { carrier: "correios" | "latam" | "pickup" | null; tracking_code: string | null; tracking_url: string | null },
-  ) => {
-    try {
-      await adminUpdateOrderStatus({
-        data: { order_id: id, status: "shipped", ...info },
-      });
-      toast.success("Rastreio salvo.");
-      await load();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Erro ao salvar rastreio.");
-    }
-  };
-
-  const handleApproveCancel = async (id: string) => {
-    if (!confirm("Aprovar o cancelamento deste pedido? O estoque será devolvido se o pedido já estava pago.")) return;
-    try {
-      await approveOrderCancellation({ data: { order_id: id } });
-      toast.success("Cancelamento aprovado.");
-      await load();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Erro ao aprovar cancelamento.");
-    }
-  };
-
-  const handleRejectCancel = async (id: string) => {
-    if (!confirm("Recusar o cancelamento? O pedido voltará ao status anterior.")) return;
-    try {
-      await rejectOrderCancellation({ data: { order_id: id } });
-      toast.success("Cancelamento recusado.");
-      await load();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Erro ao recusar cancelamento.");
-    }
-  };
-
-  const handleAdminCancel = async (id: string) => {
-    if (!confirm("Cancelar este pedido? Esta ação não pode ser desfeita.")) return;
-    try {
-      await adminCancelOrder({ data: { order_id: id } });
-      toast.success("Pedido cancelado.");
-      await load();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Erro ao cancelar pedido.");
-    }
-  };
 
   if (authLoading || !isAdmin) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
