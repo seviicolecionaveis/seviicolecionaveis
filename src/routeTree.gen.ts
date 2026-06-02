@@ -50,6 +50,7 @@ import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as AdminAccessoriesRouteImport } from './routes/admin.accessories'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
+import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -268,6 +269,11 @@ const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
   path: '/api/public/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
+  id: '/orders/$orderId',
+  path: '/orders/$orderId',
+  getParentRoute: () => AdminRoute,
+} as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -379,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/orders/': typeof OrdersIndexRoute
+  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
@@ -433,6 +440,7 @@ export interface FileRoutesByTo {
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/orders': typeof OrdersIndexRoute
+  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
@@ -489,6 +497,7 @@ export interface FileRoutesById {
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/orders/': typeof OrdersIndexRoute
+  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
@@ -546,6 +555,7 @@ export interface FileRouteTypes {
     | '/pay/$orderId'
     | '/pilha/solicitar'
     | '/orders/'
+    | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
@@ -600,6 +610,7 @@ export interface FileRouteTypes {
     | '/pay/$orderId'
     | '/pilha/solicitar'
     | '/orders'
+    | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
@@ -655,6 +666,7 @@ export interface FileRouteTypes {
     | '/pay/$orderId'
     | '/pilha/solicitar'
     | '/orders/'
+    | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
@@ -1000,6 +1012,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/orders/$orderId': {
+      id: '/admin/orders/$orderId'
+      path: '/orders/$orderId'
+      fullPath: '/admin/orders/$orderId'
+      preLoaderRoute: typeof AdminOrdersOrderIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -1100,6 +1119,7 @@ interface AdminRouteChildren {
   AdminSealedRoute: typeof AdminSealedRoute
   AdminShippingRoute: typeof AdminShippingRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -1115,6 +1135,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSealedRoute: AdminSealedRoute,
   AdminShippingRoute: AdminShippingRoute,
   AdminUsersRoute: AdminUsersRoute,
+  AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
