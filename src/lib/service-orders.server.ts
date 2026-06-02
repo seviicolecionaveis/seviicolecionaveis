@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { createPixPayment, getPixPayment } from "@/lib/mercadopago.server";
+import { createPixPayment } from "@/lib/mercadopago.server";
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
 
 export const ARTE_EM_CARDS_FEE_CENTS = 500;
