@@ -929,7 +929,6 @@ function CheckoutPage() {
               </div>
             </label>
           </div>
-        </div>
 
           <div>
             <h2 className="text-lg font-bold mb-1">Conte pra gente! ⭐</h2>
