@@ -145,7 +145,7 @@ function RootComponent() {
               opacity: 0.08,
             }}
           />
-          <PaymentTestModeBanner />
+          
           <AnalyticsTracker />
             <Outlet />
             <GlobalHeaderActions />
