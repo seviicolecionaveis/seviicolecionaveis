@@ -152,17 +152,26 @@ function AdminCardsManagePage() {
 
   useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
 
+  const availableCategories = useMemo(() => {
+    const set = new Set<CardCategory>();
+    rows.forEach((r) => { if (r.category) set.add(r.category); });
+    return CATEGORIES.filter((c) => set.has(c));
+  }, [rows]);
+
   const filteredAll = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) =>
-      r.name.toLowerCase().includes(q) ||
-      r.collection.toLowerCase().includes(q) ||
-      r.card_number.toLowerCase().includes(q),
-    );
-  }, [rows, search]);
+    return rows.filter((r) => {
+      if (categoryFilter.length > 0 && !categoryFilter.includes(r.category)) return false;
+      if (!q) return true;
+      return (
+        r.name.toLowerCase().includes(q) ||
+        r.collection.toLowerCase().includes(q) ||
+        r.card_number.toLowerCase().includes(q)
+      );
+    });
+  }, [rows, search, categoryFilter]);
 
-  useEffect(() => { setPage(1); }, [search, pageSize]);
+  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredAll.length / pageSize));
   const currentPage = Math.min(page, totalPages);
