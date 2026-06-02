@@ -109,7 +109,7 @@ interface CardState {
   payerEmail: string;
   payerCpf: string | null;
   itemsPayload: ItemPayload[];
-  shipping: "fixed" | "arrange" | "arte_em_cards";
+  shipping: "fixed" | "arrange" | "arte_em_cards" | "card_stack";
   shippingQuote: ShippingQuote | null;
   address: AddressPayload;
   notes: string | null;
