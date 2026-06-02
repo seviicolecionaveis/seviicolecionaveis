@@ -1,0 +1,96 @@
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+
+const STACK_DURATION_DAYS = 30;
+
+/**
+ * Garante uma pilha de cartas ativa para o usuário.
+ * Se não houver pilha ativa, cria uma nova com vencimento em 30 dias.
+ * Se já houver uma ativa, mantém a data de início original (o prazo não reinicia).
+ */
+export async function ensureActiveStack(userId: string): Promise<{
+  id: string;
+  started_at: string;
+  expires_at: string;
+}> {
+  const { data: existing } = await supabaseAdmin
+    .from("card_stacks")
+    .select("id, started_at, expires_at")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (existing) return existing;
+
+  const startedAt = new Date();
+  const expiresAt = new Date(startedAt);
+  expiresAt.setDate(expiresAt.getDate() + STACK_DURATION_DAYS);
+
+  const { data: created, error } = await supabaseAdmin
+    .from("card_stacks")
+    .insert({
+      user_id: userId,
+      started_at: startedAt.toISOString(),
+      expires_at: expiresAt.toISOString(),
+      status: "active",
+    })
+    .select("id, started_at, expires_at")
+    .single();
+
+  if (error || !created) {
+    throw new Error(`Falha ao criar pilha de cartas: ${error?.message ?? "desconhecido"}`);
+  }
+  return created;
+}
+
+/**
+ * Move os itens de um pedido pago para a pilha de cartas ativa do cliente.
+ * Idempotente: se já houver itens lançados para esse pedido na pilha, não duplica.
+ */
+export async function addOrderToStack(orderId: string): Promise<void> {
+  const { data: order } = await supabaseAdmin
+    .from("orders")
+    .select("id, user_id, shipping_method")
+    .eq("id", orderId)
+    .maybeSingle();
+
+  if (!order || order.shipping_method !== "card_stack") return;
+
+  // Idempotência
+  const { count } = await supabaseAdmin
+    .from("card_stack_items")
+    .select("id", { count: "exact", head: true })
+    .eq("order_id", orderId);
+  if ((count ?? 0) > 0) return;
+
+  const stack = await ensureActiveStack(order.user_id);
+
+  const { data: items } = await supabaseAdmin
+    .from("order_items")
+    .select(
+      "id, card_id, card_name, card_image, collection, card_number, finish, language, condition, quantity, unit_price_cents",
+    )
+    .eq("order_id", orderId);
+
+  if (!items || items.length === 0) return;
+
+  const rows = items.map((it) => ({
+    stack_id: stack.id,
+    user_id: order.user_id,
+    order_id: orderId,
+    order_item_id: it.id,
+    card_id: it.card_id,
+    card_name: it.card_name,
+    card_image: it.card_image,
+    collection: it.collection,
+    card_number: it.card_number,
+    finish: it.finish,
+    language: it.language,
+    condition: it.condition,
+    quantity: it.quantity,
+    unit_price_cents: it.unit_price_cents ?? 0,
+    status: "stored" as const,
+  }));
+
+  const { error } = await supabaseAdmin.from("card_stack_items").insert(rows);
+  if (error) throw new Error(`Falha ao adicionar itens à pilha: ${error.message}`);
+}
