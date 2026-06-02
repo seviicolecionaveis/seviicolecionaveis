@@ -14,7 +14,7 @@ export async function isAdmin(userId: string) {
 
 export async function restoreStockIfPaid(orderId: string, statusBefore: string) {
   // Qualquer status pós-pagamento já teve estoque decrementado e precisa ser devolvido ao cancelar.
-  if (!["paid", "preparing", "shipped", "delivered"].includes(statusBefore)) return;
+  if (!["paid", "preparing", "shipped", "awaiting_pickup", "delivered"].includes(statusBefore)) return;
   const { data: items } = await supabaseAdmin
     .from("order_items")
     .select("card_id, quantity")
