@@ -85,6 +85,14 @@ function AccountPage() {
                 <h3 className="font-semibold">Meus favoritos</h3>
                 <p className="text-xs text-muted-foreground mt-1">Cartas que você salvou</p>
               </Link>
+              <Link
+                to="/pilha"
+                className="rounded-xl border border-border bg-card p-6 hover:border-foreground/40 transition"
+              >
+                <Layers className="h-6 w-6 mb-3" />
+                <h3 className="font-semibold">Pilha de Cartas</h3>
+                <p className="text-xs text-muted-foreground mt-1">Armazene cartas por até 30 dias</p>
+              </Link>
             </div>
           </TabsContent>
         </Tabs>
