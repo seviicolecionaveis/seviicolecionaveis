@@ -83,11 +83,15 @@ async function resolveArteEmCardsFee(
 }
 
 function computeShippingCents(input: {
-  shippingMethod: "fixed" | "arrange" | "arte_em_cards";
+  shippingMethod: "fixed" | "arrange" | "arte_em_cards" | "card_stack";
   shippingQuote?: { priceCents: number } | null;
 }): number {
   if (input.shippingMethod === "arte_em_cards") {
     // Caller handles Arte em Cards fee separately (needs DB lookup).
+    return 0;
+  }
+  if (input.shippingMethod === "card_stack") {
+    // Pilha de Cartas: armazenamento gratuito; frete é cobrado quando o cliente solicita o envio.
     return 0;
   }
   if (input.shippingQuote && input.shippingQuote.priceCents >= 0) {
