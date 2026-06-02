@@ -232,6 +232,10 @@ function SolicitarPage() {
         return;
       }
     }
+    if (method === "presencial" && !pickupPoint) {
+      setErr("Selecione o ponto de retirada (Aruana ou Aeroporto).");
+      return;
+    }
     setSubmitting(true);
     try {
       const r = await createServiceOrderRequest({
