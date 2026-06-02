@@ -59,6 +59,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicPaymentsMercadopagoWebhookRouteImport } from './routes/api/public/payments/mercadopago-webhook'
 import { Route as ApiPublicMelhorenvioCallbackRouteImport } from './routes/api/public/melhorenvio/callback'
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
+import { Route as ApiPublicHooksStackRemindersRouteImport } from './routes/api/public/hooks/stack-reminders'
 import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/public/hooks/price-drop-check'
 import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api/public/hooks/auto-cancel-unpaid'
 
@@ -319,6 +320,12 @@ const ApiPublicHooksUpdatePricesRoute =
     path: '/api/public/hooks/update-prices',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksStackRemindersRoute =
+  ApiPublicHooksStackRemindersRouteImport.update({
+    id: '/api/public/hooks/stack-reminders',
+    path: '/api/public/hooks/stack-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksPriceDropCheckRoute =
   ApiPublicHooksPriceDropCheckRouteImport.update({
     id: '/api/public/hooks/price-drop-check',
@@ -376,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
+  '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -429,6 +437,7 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
+  '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -484,6 +493,7 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
+  '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -540,6 +550,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/price-drop-check'
+    | '/api/public/hooks/stack-reminders'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
@@ -593,6 +604,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/price-drop-check'
+    | '/api/public/hooks/stack-reminders'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
@@ -647,6 +659,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/price-drop-check'
+    | '/api/public/hooks/stack-reminders'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
@@ -686,6 +699,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksAutoCancelUnpaidRoute: typeof ApiPublicHooksAutoCancelUnpaidRoute
   ApiPublicHooksPriceDropCheckRoute: typeof ApiPublicHooksPriceDropCheckRoute
+  ApiPublicHooksStackRemindersRoute: typeof ApiPublicHooksStackRemindersRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
   ApiPublicMelhorenvioCallbackRoute: typeof ApiPublicMelhorenvioCallbackRoute
   ApiPublicPaymentsMercadopagoWebhookRoute: typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -1049,6 +1063,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksUpdatePricesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/stack-reminders': {
+      id: '/api/public/hooks/stack-reminders'
+      path: '/api/public/hooks/stack-reminders'
+      fullPath: '/api/public/hooks/stack-reminders'
+      preLoaderRoute: typeof ApiPublicHooksStackRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/price-drop-check': {
       id: '/api/public/hooks/price-drop-check'
       path: '/api/public/hooks/price-drop-check'
@@ -1161,6 +1182,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksAutoCancelUnpaidRoute: ApiPublicHooksAutoCancelUnpaidRoute,
   ApiPublicHooksPriceDropCheckRoute: ApiPublicHooksPriceDropCheckRoute,
+  ApiPublicHooksStackRemindersRoute: ApiPublicHooksStackRemindersRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,
   ApiPublicMelhorenvioCallbackRoute: ApiPublicMelhorenvioCallbackRoute,
   ApiPublicPaymentsMercadopagoWebhookRoute:
