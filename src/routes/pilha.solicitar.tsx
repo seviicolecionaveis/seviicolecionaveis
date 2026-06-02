@@ -262,6 +262,7 @@ function SolicitarPage() {
                 }
               : null,
           arteEmCardsCode: method === "arte_em_cards" ? (arteCode || arteExisting?.code || null) : null,
+          pickupPoint: method === "presencial" ? pickupPoint : null,
           notes: notes || null,
           cpf: cpf || null,
         },
