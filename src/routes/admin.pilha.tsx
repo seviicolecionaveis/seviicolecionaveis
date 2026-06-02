@@ -15,6 +15,7 @@ const METHOD_LABEL: Record<string, string> = {
   correios: "Envio Correios",
   app: "Envio por App",
   arte_em_cards: "Retirada Arte em Cards",
+  presencial: "Retirada Presencial",
 };
 
 const STATUS_LABEL: Record<string, string> = {

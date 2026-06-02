@@ -5,7 +5,7 @@ export const ARTE_EM_CARDS_FEE_CENTS = 500;
 const PIX_EXPIRES_MINUTES = 30;
 const STORE_WHATSAPP = "5579981509552"; // Sevii Colecionáveis (somente dígitos com DDI)
 
-export type ServiceOrderMethod = "correios" | "app" | "arte_em_cards";
+export type ServiceOrderMethod = "correios" | "app" | "arte_em_cards" | "presencial";
 
 export interface ServiceOrderAddress {
   recipientName: string;
@@ -26,6 +26,7 @@ export interface CreateServiceOrderInput {
   shippingQuote?: { serviceId: string; serviceName: string; company: string; priceCents: number } | null;
   address?: ServiceOrderAddress | null;
   arteEmCardsCode?: string | null;
+  pickupPoint?: "aruana" | "aeroporto" | null;
   notes?: string | null;
   cpf?: string | null;
 }
@@ -90,6 +91,9 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
     arteCodeUsed = arte.codeUsed;
   } else if (input.method === "app") {
     amountCents = 0;
+  } else if (input.method === "presencial") {
+    if (!input.pickupPoint) throw new Error("Selecione o ponto de retirada (Aruana ou Aeroporto).");
+    amountCents = 0;
   }
 
   const { data: userData } = await supabaseAdmin.auth.admin.getUserById(input.userId);
@@ -113,7 +117,10 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
       city: input.address?.city ?? null,
       state: input.address?.state?.toUpperCase() ?? null,
       phone: input.address?.phone ?? null,
-      notes: input.notes ?? null,
+      notes:
+        input.method === "presencial" && input.pickupPoint
+          ? `Retirada presencial: ${input.pickupPoint === "aruana" ? "Aruana" : "Aeroporto"}.${input.notes ? `\n\n${input.notes}` : ""}`
+          : (input.notes ?? null),
       arte_em_cards_code: arteCodeUsed,
     })
     .select("id, code")

@@ -23,10 +23,11 @@ const QuoteSchema = z.object({
 
 const InputSchema = z.object({
   itemIds: z.array(z.string().uuid()).min(1).max(200),
-  method: z.enum(["correios", "app", "arte_em_cards"]),
+  method: z.enum(["correios", "app", "arte_em_cards", "presencial"]),
   shippingQuote: QuoteSchema.nullable().optional(),
   address: AddressSchema.nullable().optional(),
   arteEmCardsCode: z.string().trim().max(40).nullable().optional(),
+  pickupPoint: z.enum(["aruana", "aeroporto"]).nullable().optional(),
   notes: z.string().max(500).nullable().optional(),
   cpf: z.string().max(20).nullable().optional(),
 });
@@ -43,6 +44,7 @@ export const createServiceOrderRequest = createServerFn({ method: "POST" })
       shippingQuote: data.shippingQuote ?? null,
       address: data.address ?? null,
       arteEmCardsCode: data.arteEmCardsCode ?? null,
+      pickupPoint: data.pickupPoint ?? null,
       notes: data.notes ?? null,
       cpf: data.cpf ?? null,
     });
