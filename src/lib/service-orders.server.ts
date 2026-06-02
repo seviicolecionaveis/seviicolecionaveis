@@ -26,6 +26,7 @@ export interface CreateServiceOrderInput {
   shippingQuote?: { serviceId: string; serviceName: string; company: string; priceCents: number } | null;
   address?: ServiceOrderAddress | null;
   arteEmCardsCode?: string | null;
+  pickupPoint?: "aruana" | "aeroporto" | null;
   notes?: string | null;
   cpf?: string | null;
 }
