@@ -14,7 +14,7 @@ export interface ServiceOrderAddress {
   cep: string;
   street: string;
   number: string;
-  complement: string | null;
+  complement?: string | null;
   neighborhood: string;
   city: string;
   state: string;
