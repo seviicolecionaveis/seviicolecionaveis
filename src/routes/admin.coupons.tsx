@@ -34,6 +34,25 @@ interface CouponRow {
   user_email: string | null;
   notes: string | null;
   created_at: string;
+  last_email_status?: string | null;
+  last_email_at?: string | null;
+  last_email_error?: string | null;
+}
+
+function emailStatusBadge(c: CouponRow): { label: string; tone: string; title?: string } | null {
+  if (!c.user_id) return null;
+  const s = c.last_email_status;
+  if (!s) return { label: "não enviado", tone: "muted" };
+  const when = c.last_email_at
+    ? new Date(c.last_email_at).toLocaleString("pt-BR")
+    : "";
+  if (s === "sent") return { label: `enviado`, tone: "ok", title: when };
+  if (s === "pending") return { label: "na fila", tone: "warn", title: when };
+  if (s === "suppressed") return { label: "suprimido", tone: "warn", title: c.last_email_error ?? when };
+  if (s === "bounced") return { label: "rejeitado", tone: "bad", title: c.last_email_error ?? when };
+  if (s === "dlq" || s === "failed")
+    return { label: "falhou", tone: "bad", title: c.last_email_error ?? when };
+  return { label: s, tone: "muted", title: when };
 }
 
 function toIsoOrNull(date: string): string | null {
@@ -727,6 +746,18 @@ function AdminCouponsPage() {
                               <span className="text-muted-foreground">
                                 {c.user_email ?? "—"}
                               </span>
+                              {(() => {
+                                const b = emailStatusBadge(c);
+                                if (!b) return null;
+                                return (
+                                  <span
+                                    title={b.title}
+                                    className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${toneCls[b.tone]}`}
+                                  >
+                                    e-mail: {b.label}
+                                  </span>
+                                );
+                              })()}
                             </span>
                           ) : (
                             <span className="text-xs">📣 divulgação</span>
@@ -767,8 +798,9 @@ function AdminCouponsPage() {
                               <button
                                 onClick={() => handleSend(c.id)}
                                 className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-secondary"
+                                title="Enviar/reenviar o e-mail ao cliente"
                               >
-                                Enviar e-mail
+                                {c.last_email_status ? "Reenviar e-mail" : "Enviar e-mail"}
                               </button>
                             )}
                             <button
@@ -792,6 +824,7 @@ function AdminCouponsPage() {
           )}
         </section>
       </main>
+
 
       {/* ============ Preview / Confirm Modal ============ */}
       {preview?.open && (

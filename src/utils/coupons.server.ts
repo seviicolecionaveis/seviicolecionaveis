@@ -28,6 +28,37 @@ export interface CouponRow {
   user_email: string | null;
   notes: string | null;
   created_at: string;
+  last_email_status?: string | null;
+  last_email_at?: string | null;
+  last_email_error?: string | null;
+}
+
+async function lastEmailFor(
+  recipient: string | null,
+  sinceIso: string,
+): Promise<{ status: string | null; at: string | null; error: string | null }> {
+  if (!recipient) return { status: null, at: null, error: null };
+  const { data } = await supabaseAdmin
+    .from("email_send_log")
+    .select("status, created_at, error_message, message_id")
+    .eq("recipient_email", recipient.toLowerCase())
+    .in("template_name", ["gift-voucher", "coupon-broadcast"])
+    .gte("created_at", sinceIso)
+    .order("created_at", { ascending: false })
+    .limit(20);
+  if (!data || data.length === 0)
+    return { status: null, at: null, error: null };
+  // Latest row per message_id, then pick most recent non-pending if available
+  const byMsg = new Map<string, any>();
+  for (const r of data) {
+    if (!byMsg.has((r as any).message_id)) byMsg.set((r as any).message_id, r);
+  }
+  const latest = [...byMsg.values()][0] as any;
+  return {
+    status: latest.status ?? null,
+    at: latest.created_at ?? null,
+    error: latest.error_message ?? null,
+  };
 }
 
 async function emailForUserId(userId: string | null): Promise<string | null> {
@@ -50,9 +81,16 @@ export async function listCouponsServer(userId: string): Promise<CouponRow[]> {
   if (error) throw new Response(error.message, { status: 500 });
   const rows: CouponRow[] = [];
   for (const c of data ?? []) {
+    const user_email = await emailForUserId((c as any).user_id);
+    const last = user_email
+      ? await lastEmailFor(user_email, (c as any).created_at)
+      : { status: null, at: null, error: null };
     rows.push({
       ...(c as any),
-      user_email: await emailForUserId((c as any).user_id),
+      user_email,
+      last_email_status: last.status,
+      last_email_at: last.at,
+      last_email_error: last.error,
     });
   }
   return rows;
