@@ -355,8 +355,16 @@ function AdminOrderDetailPage() {
             <div className="border-t border-border pt-2 mt-2">
               <Row label="Total pago" value={fmtBRL(totalCents)} tone="total" />
             </div>
+            {(order.refunded_cents ?? 0) > 0 && (
+              <Row
+                label="Reembolsado ao cliente"
+                value={`− ${fmtBRL(order.refunded_cents)}`}
+                tone="discount"
+              />
+            )}
           </dl>
         </div>
+
 
         {/* Observações */}
         {order.notes && (
