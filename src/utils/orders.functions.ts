@@ -391,10 +391,12 @@ export const adminPartialCancelItem = createServerFn({ method: "POST" })
             refundCents,
             refundMethod: data.refund_method,
             couponCode,
+            adminNote: data.notes ?? null,
           },
         },
       });
     }
+
 
     return { ok: true, refundCents, couponCode, refundDetails };
   });
