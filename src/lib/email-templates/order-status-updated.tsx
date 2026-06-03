@@ -9,7 +9,9 @@ interface PartialCancellation {
   refundCents?: number
   refundMethod?: 'mercadopago' | 'coupon' | 'manual'
   couponCode?: string | null
+  adminNote?: string | null
 }
+
 
 interface OrderStatusUpdatedProps {
   recipientName?: string
