@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { adminUpdateServiceOrder } from "@/lib/service-orders-admin.functions";
 import {
   adminGetPilhaData,
+  adminAdjustStackItem,
   type AdminServiceOrder,
   type AdminStack,
   type AdminStackItem,
@@ -67,10 +68,19 @@ function Thumb({ item }: { item: AdminStackItem }) {
   );
 }
 
-function ItemRow({ item }: { item: AdminStackItem }) {
+function ItemRow({
+  item,
+  onAdjust,
+  onRemove,
+}: {
+  item: AdminStackItem;
+  onAdjust?: (newQty: number) => void | Promise<void>;
+  onRemove?: () => void | Promise<void>;
+}) {
   const meta = [item.collection, item.card_number, item.finish, item.language, item.condition]
     .filter(Boolean)
     .join(" · ");
+  const editable = Boolean(onAdjust || onRemove);
   return (
     <li className="flex gap-3 py-2">
       <Thumb item={item} />
@@ -85,6 +95,51 @@ function ItemRow({ item }: { item: AdminStackItem }) {
             <> · {fmtMoney(item.unit_price_cents)} un.</>
           )}
         </p>
+        {editable && (
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            {onAdjust && item.quantity > 1 && (
+              <button
+                onClick={() => onAdjust(item.quantity - 1)}
+                className="rounded-md border border-border bg-background px-2 py-0.5 text-[11px] font-semibold hover:bg-secondary"
+                title="Cliente retirou 1"
+              >
+                −1 (retirou)
+              </button>
+            )}
+            {onAdjust && (
+              <button
+                onClick={() => {
+                  const v = window.prompt(
+                    `Nova quantidade para "${item.card_name}" (0 remove):`,
+                    String(item.quantity),
+                  );
+                  if (v == null) return;
+                  const n = parseInt(v, 10);
+                  if (!Number.isFinite(n) || n < 0) return;
+                  onAdjust(n);
+                }}
+                className="rounded-md border border-border bg-background px-2 py-0.5 text-[11px] font-semibold hover:bg-secondary"
+              >
+                Editar qtd
+              </button>
+            )}
+            {onRemove && (
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Remover "${item.card_name}" (${item.quantity}×) da pilha? Esta ação não pode ser desfeita.`,
+                    )
+                  )
+                    onRemove();
+                }}
+                className="rounded-md border border-destructive/40 text-destructive bg-background px-2 py-0.5 text-[11px] font-semibold hover:bg-destructive/10"
+              >
+                Excluir
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </li>
   );
@@ -102,6 +157,17 @@ function AdminPilhaPage() {
 
   const update = useServerFn(adminUpdateServiceOrder);
   const fetchData = useServerFn(adminGetPilhaData);
+  const adjustStackItem = useServerFn(adminAdjustStackItem);
+
+  async function handleAdjustItem(itemId: string, newQuantity: number, name: string) {
+    try {
+      const res = await adjustStackItem({ data: { itemId, newQuantity } });
+      toast.success(res.removed ? `"${name}" removida da pilha.` : "Quantidade atualizada.");
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao atualizar item.");
+    }
+  }
 
   const load = async () => {
     setLoading(true);
@@ -422,7 +488,12 @@ function AdminPilhaPage() {
                     <div className="border-t border-border bg-secondary/30 px-5 py-3">
                       <ul className="divide-y divide-border">
                         {s.items.map((it) => (
-                          <ItemRow key={it.id} item={it} />
+                          <ItemRow
+                            key={it.id}
+                            item={it}
+                            onAdjust={(q) => handleAdjustItem(it.id, q, it.card_name)}
+                            onRemove={() => handleAdjustItem(it.id, 0, it.card_name)}
+                          />
                         ))}
                       </ul>
                     </div>
