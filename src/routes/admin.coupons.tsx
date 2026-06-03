@@ -746,6 +746,18 @@ function AdminCouponsPage() {
                               <span className="text-muted-foreground">
                                 {c.user_email ?? "—"}
                               </span>
+                              {(() => {
+                                const b = emailStatusBadge(c);
+                                if (!b) return null;
+                                return (
+                                  <span
+                                    title={b.title}
+                                    className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${toneCls[b.tone]}`}
+                                  >
+                                    e-mail: {b.label}
+                                  </span>
+                                );
+                              })()}
                             </span>
                           ) : (
                             <span className="text-xs">📣 divulgação</span>
@@ -786,8 +798,9 @@ function AdminCouponsPage() {
                               <button
                                 onClick={() => handleSend(c.id)}
                                 className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-secondary"
+                                title="Enviar/reenviar o e-mail ao cliente"
                               >
-                                Enviar e-mail
+                                {c.last_email_status ? "Reenviar e-mail" : "Enviar e-mail"}
                               </button>
                             )}
                             <button
@@ -811,6 +824,7 @@ function AdminCouponsPage() {
           )}
         </section>
       </main>
+
 
       {/* ============ Preview / Confirm Modal ============ */}
       {preview?.open && (
