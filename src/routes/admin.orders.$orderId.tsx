@@ -7,9 +7,10 @@ import {
   rejectOrderCancellation,
   adminCancelOrder,
   adminUpdateOrderStatus,
+  adminPartialCancelItem,
 } from "@/utils/orders.functions";
 import { toast } from "sonner";
-import { ArrowLeft, ImageOff } from "lucide-react";
+import { ArrowLeft, ImageOff, X } from "lucide-react";
 import { AdminTrackingEditor, type TrackingInfo } from "@/components/admin/AdminTrackingEditor";
 
 export const Route = createFileRoute("/admin/orders/$orderId")({
