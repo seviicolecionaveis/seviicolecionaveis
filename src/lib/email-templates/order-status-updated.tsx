@@ -3,6 +3,14 @@ import { Heading, Section, Text, Button } from '@react-email/components'
 import type { TemplateEntry } from './registry'
 import { EmailLayout, styles, SITE_URL } from './_shared'
 
+interface PartialCancellation {
+  itemName?: string
+  quantity?: number
+  refundCents?: number
+  refundMethod?: 'mercadopago' | 'coupon' | 'manual'
+  couponCode?: string | null
+}
+
 interface OrderStatusUpdatedProps {
   recipientName?: string
   orderId?: string
@@ -10,6 +18,16 @@ interface OrderStatusUpdatedProps {
   trackingCode?: string | null
   carrier?: 'correios' | 'latam' | 'pickup' | null
   trackingUrl?: string | null
+  partialCancellation?: PartialCancellation | null
+}
+
+const fmtBRL = (cents: number) =>
+  `R$ ${(cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+
+const REFUND_METHOD_LABEL: Record<string, string> = {
+  mercadopago: 'estorno automático no Mercado Pago (cai em até 7 dias úteis)',
+  coupon: 'cupom de desconto para uso futuro',
+  manual: 'estorno manual (entraremos em contato)',
 }
 
 const STATUS_LABEL: Record<string, string> = {
