@@ -111,6 +111,33 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
         )}
       </Section>
 
+      {partialCancellation && (
+        <Section style={{ ...styles.card, borderColor: '#f59e0b', background: '#fff7ed' }}>
+          <Text style={{ ...styles.muted, margin: '0 0 6px', color: '#9a3412' }}>Cancelamento parcial</Text>
+          <Text style={{ ...styles.text, margin: '0 0 8px' }}>
+            Tivemos uma divergência de estoque e precisamos cancelar{' '}
+            <strong>{partialCancellation.quantity}× {partialCancellation.itemName}</strong>{' '}
+            do seu pedido. O restante segue normalmente.
+          </Text>
+          {typeof partialCancellation.refundCents === 'number' && (
+            <Text style={{ ...styles.text, margin: '0 0 6px' }}>
+              Valor a reembolsar: <strong>{fmtBRL(partialCancellation.refundCents)}</strong>
+            </Text>
+          )}
+          {partialCancellation.refundMethod && (
+            <Text style={{ ...styles.muted, margin: 0 }}>
+              Forma do reembolso: {REFUND_METHOD_LABEL[partialCancellation.refundMethod] ?? partialCancellation.refundMethod}
+            </Text>
+          )}
+          {partialCancellation.couponCode && (
+            <Text style={{ ...styles.text, margin: '8px 0 0', fontFamily: 'monospace', fontWeight: 600 }}>
+              Cupom: {partialCancellation.couponCode}
+            </Text>
+          )}
+        </Section>
+      )}
+
+
       <Text style={styles.muted}>
         Acompanhe os detalhes em{' '}
         <a href={`${SITE_URL}/orders/${orderId ?? ''}`} style={{ color: '#111', fontWeight: 600 }}>
