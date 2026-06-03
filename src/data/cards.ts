@@ -169,6 +169,7 @@ export const CARDS: Card[] = finalCards.sort((a, b) => a.name.localeCompare(b.na
 
 // Coleções adicionadas manualmente a pedido (mantidas mesmo sem estoque cadastrado)
 export const EXTRA_COLLECTIONS = [
+  "CES - Tempestade Celestial",
   "MEW - 151",
   "VIV - Voltagem Vívida",
   "ASR - Estrelas Radiantes",
