@@ -179,13 +179,19 @@ function PilhaPage() {
 
                 <ul className="divide-y divide-border">
                   {stack.items.map((i) => (
-                    <li key={i.id}>
-                      <label className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-secondary/30 active:bg-secondary/50">
-                        <Checkbox
-                          checked={selected.has(i.id)}
-                          onCheckedChange={() => toggle(i.id)}
-                        />
-
+                    <li
+                      key={i.id}
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.closest("a")) return;
+                        toggle(i.id);
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-secondary/30 active:bg-secondary/50"
+                    >
+                      <Checkbox
+                        checked={selected.has(i.id)}
+                        onCheckedChange={() => toggle(i.id)}
+                      />
                       {i.cardImage ? (
                         <img
                           src={i.cardImage}
@@ -211,6 +217,7 @@ function PilhaPage() {
                             to="/orders/$orderId"
                             params={{ orderId: i.orderId }}
                             className="font-mono underline"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             #{i.orderId.slice(0, 8)}
                           </Link>
@@ -221,6 +228,7 @@ function PilhaPage() {
                       </div>
                     </li>
                   ))}
+
                 </ul>
 
                 <div className="px-4 py-4 border-t border-border bg-secondary/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
