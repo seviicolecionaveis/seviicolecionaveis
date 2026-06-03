@@ -220,3 +220,42 @@ export async function getPixPayment(paymentId: string | number): Promise<{ statu
   const json: any = await res.json();
   return { status: json.status, external_reference: json.external_reference };
 }
+
+export interface RefundResult {
+  id: number;
+  amount: number;
+  status: string;
+}
+
+/**
+ * Refunds (partial or total) a Mercado Pago payment.
+ * Docs: https://www.mercadopago.com.br/developers/pt/reference/chargebacks/_payments_id_refunds/post
+ * Passa amount em reais (com 2 casas). Omitir = reembolso total.
+ */
+export async function refundMercadoPagoPayment(
+  paymentId: string | number,
+  amountCents: number,
+): Promise<RefundResult> {
+  const token = getAccessToken();
+  const body =
+    amountCents > 0
+      ? { amount: Number((amountCents / 100).toFixed(2)) }
+      : {};
+  const idempotencyKey = `refund-${paymentId}-${amountCents}-${Date.now()}`;
+  const res = await fetchMpWithTimeout(`${MP_API}/v1/payments/${paymentId}/refunds`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "X-Idempotency-Key": idempotencyKey,
+    },
+    body: JSON.stringify(body),
+  });
+  const json: any = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    console.error("MP refund failed", res.status, json);
+    const msg = json?.message || json?.error || `erro ${res.status}`;
+    throw new Error(`Mercado Pago (reembolso): ${String(msg).slice(0, 300)}`);
+  }
+  return { id: json.id, amount: json.amount, status: json.status };
+}
