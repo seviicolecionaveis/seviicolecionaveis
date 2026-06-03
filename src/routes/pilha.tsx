@@ -235,10 +235,13 @@ function PilhaPage() {
                       } catch {}
                       nav({ to: "/pilha/solicitar" });
                     }}
-                    className="rounded-full bg-foreground px-5 py-2 text-xs font-semibold uppercase tracking-wide text-background disabled:bg-foreground/30 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto rounded-full bg-foreground px-5 py-3 text-xs font-semibold uppercase tracking-wide text-background disabled:bg-foreground/30 disabled:cursor-not-allowed"
                   >
-                    Solicitar Retirada / Envio
+                    {selected.size === 0
+                      ? "Selecione cartas para solicitar"
+                      : `Solicitar Retirada / Envio (${selected.size})`}
                   </button>
+
                 </div>
               </section>
             )}
