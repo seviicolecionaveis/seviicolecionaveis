@@ -488,7 +488,12 @@ function AdminPilhaPage() {
                     <div className="border-t border-border bg-secondary/30 px-5 py-3">
                       <ul className="divide-y divide-border">
                         {s.items.map((it) => (
-                          <ItemRow key={it.id} item={it} />
+                          <ItemRow
+                            key={it.id}
+                            item={it}
+                            onAdjust={(q) => handleAdjustItem(it.id, q, it.card_name)}
+                            onRemove={() => handleAdjustItem(it.id, 0, it.card_name)}
+                          />
                         ))}
                       </ul>
                     </div>
