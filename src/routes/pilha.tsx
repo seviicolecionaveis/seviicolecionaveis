@@ -87,7 +87,7 @@ function PilhaPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-5xl px-4 py-8 pb-32 sm:px-6">
         <h1 className="text-2xl font-bold mb-1">🃏 Pilha de Cartas</h1>
         <p className="text-sm text-muted-foreground mb-6">
           Guarde suas cartas por até 30 dias e solicite o envio quando quiser.
@@ -179,7 +179,15 @@ function PilhaPage() {
 
                 <ul className="divide-y divide-border">
                   {stack.items.map((i) => (
-                    <li key={i.id} className="flex items-center gap-3 px-4 py-3">
+                    <li
+                      key={i.id}
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.closest("a")) return;
+                        toggle(i.id);
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-secondary/30 active:bg-secondary/50"
+                    >
                       <Checkbox
                         checked={selected.has(i.id)}
                         onCheckedChange={() => toggle(i.id)}
@@ -209,6 +217,7 @@ function PilhaPage() {
                             to="/orders/$orderId"
                             params={{ orderId: i.orderId }}
                             className="font-mono underline"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             #{i.orderId.slice(0, 8)}
                           </Link>
@@ -219,6 +228,7 @@ function PilhaPage() {
                       </div>
                     </li>
                   ))}
+
                 </ul>
 
                 <div className="px-4 py-4 border-t border-border bg-secondary/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -235,10 +245,13 @@ function PilhaPage() {
                       } catch {}
                       nav({ to: "/pilha/solicitar" });
                     }}
-                    className="rounded-full bg-foreground px-5 py-2 text-xs font-semibold uppercase tracking-wide text-background disabled:bg-foreground/30 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto rounded-full bg-foreground px-5 py-3 text-xs font-semibold uppercase tracking-wide text-background disabled:bg-foreground/30 disabled:cursor-not-allowed"
                   >
-                    Solicitar Retirada / Envio
+                    {selected.size === 0
+                      ? "Selecione cartas para solicitar"
+                      : `Solicitar Retirada / Envio (${selected.size})`}
                   </button>
+
                 </div>
               </section>
             )}
