@@ -34,6 +34,25 @@ interface CouponRow {
   user_email: string | null;
   notes: string | null;
   created_at: string;
+  last_email_status?: string | null;
+  last_email_at?: string | null;
+  last_email_error?: string | null;
+}
+
+function emailStatusBadge(c: CouponRow): { label: string; tone: string; title?: string } | null {
+  if (!c.user_id) return null;
+  const s = c.last_email_status;
+  if (!s) return { label: "não enviado", tone: "muted" };
+  const when = c.last_email_at
+    ? new Date(c.last_email_at).toLocaleString("pt-BR")
+    : "";
+  if (s === "sent") return { label: `enviado`, tone: "ok", title: when };
+  if (s === "pending") return { label: "na fila", tone: "warn", title: when };
+  if (s === "suppressed") return { label: "suprimido", tone: "warn", title: c.last_email_error ?? when };
+  if (s === "bounced") return { label: "rejeitado", tone: "bad", title: c.last_email_error ?? when };
+  if (s === "dlq" || s === "failed")
+    return { label: "falhou", tone: "bad", title: c.last_email_error ?? when };
+  return { label: s, tone: "muted", title: when };
 }
 
 function toIsoOrNull(date: string): string | null {
