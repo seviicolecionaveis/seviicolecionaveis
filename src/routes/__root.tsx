@@ -133,7 +133,9 @@ if (typeof window !== "undefined") {
 }
 
 function RootComponent() {
+  const [queryClient] = useState(() => new QueryClient());
   return (
+    <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <WishlistProvider>
         <CartProvider>
