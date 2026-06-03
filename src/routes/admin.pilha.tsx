@@ -157,6 +157,17 @@ function AdminPilhaPage() {
 
   const update = useServerFn(adminUpdateServiceOrder);
   const fetchData = useServerFn(adminGetPilhaData);
+  const adjustStackItem = useServerFn(adminAdjustStackItem);
+
+  async function handleAdjustItem(itemId: string, newQuantity: number, name: string) {
+    try {
+      const res = await adjustStackItem({ data: { itemId, newQuantity } });
+      toast.success(res.removed ? `"${name}" removida da pilha.` : "Quantidade atualizada.");
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao atualizar item.");
+    }
+  }
 
   const load = async () => {
     setLoading(true);
