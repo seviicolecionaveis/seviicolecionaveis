@@ -156,3 +156,34 @@ export const adminGetPilhaData = createServerFn({ method: "GET" })
       })),
     };
   });
+
+export const adminAdjustStackItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        itemId: z.string().uuid(),
+        newQuantity: z.number().int().min(0).max(999),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await ensureAdmin(supabaseAdmin, context.userId);
+
+    if (data.newQuantity === 0) {
+      const { error } = await supabaseAdmin
+        .from("card_stack_items")
+        .delete()
+        .eq("id", data.itemId);
+      if (error) throw new Error(error.message);
+      return { ok: true, removed: true };
+    }
+
+    const { error } = await supabaseAdmin
+      .from("card_stack_items")
+      .update({ quantity: data.newQuantity })
+      .eq("id", data.itemId);
+    if (error) throw new Error(error.message);
+    return { ok: true, removed: false };
+  });
