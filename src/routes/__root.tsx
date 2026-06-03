@@ -1,4 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
 
 import appCss from "../styles.css?url";
 import pokeballPattern from "@/assets/pokeball-pattern.png";
@@ -131,7 +133,9 @@ if (typeof window !== "undefined") {
 }
 
 function RootComponent() {
+  const [queryClient] = useState(() => new QueryClient());
   return (
+    <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <WishlistProvider>
         <CartProvider>
@@ -153,5 +157,6 @@ function RootComponent() {
         </CartProvider>
       </WishlistProvider>
     </AuthProvider>
+    </QueryClientProvider>
   );
 }
