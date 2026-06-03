@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { adminUpdateServiceOrder } from "@/lib/service-orders-admin.functions";
 import {
   adminGetPilhaData,
+  adminAdjustStackItem,
   type AdminServiceOrder,
   type AdminStack,
   type AdminStackItem,
