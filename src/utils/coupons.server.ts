@@ -81,9 +81,16 @@ export async function listCouponsServer(userId: string): Promise<CouponRow[]> {
   if (error) throw new Response(error.message, { status: 500 });
   const rows: CouponRow[] = [];
   for (const c of data ?? []) {
+    const user_email = await emailForUserId((c as any).user_id);
+    const last = user_email
+      ? await lastEmailFor(user_email, (c as any).created_at)
+      : { status: null, at: null, error: null };
     rows.push({
       ...(c as any),
-      user_email: await emailForUserId((c as any).user_id),
+      user_email,
+      last_email_status: last.status,
+      last_email_at: last.at,
+      last_email_error: last.error,
     });
   }
   return rows;
