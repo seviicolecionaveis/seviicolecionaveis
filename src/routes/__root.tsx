@@ -157,5 +157,6 @@ function RootComponent() {
         </CartProvider>
       </WishlistProvider>
     </AuthProvider>
+    </QueryClientProvider>
   );
 }
