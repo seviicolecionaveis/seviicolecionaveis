@@ -386,9 +386,22 @@ function AdminOrderDetailPage() {
           </div>
         )}
       </main>
+
+      {cancelItem && (
+        <PartialCancelDialog
+          item={cancelItem}
+          order={order}
+          onClose={() => setCancelItem(null)}
+          onDone={async () => {
+            setCancelItem(null);
+            await load();
+          }}
+        />
+      )}
     </div>
   );
 }
+
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
