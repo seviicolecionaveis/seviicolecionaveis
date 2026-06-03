@@ -9,7 +9,9 @@ interface PartialCancellation {
   refundCents?: number
   refundMethod?: 'mercadopago' | 'coupon' | 'manual'
   couponCode?: string | null
+  adminNote?: string | null
 }
+
 
 interface OrderStatusUpdatedProps {
   recipientName?: string
@@ -134,8 +136,15 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
               Cupom: {partialCancellation.couponCode}
             </Text>
           )}
+          {partialCancellation.adminNote && (
+            <Section style={{ marginTop: 12, padding: '10px 12px', background: '#fff', borderRadius: 6, border: '1px solid #fed7aa' }}>
+              <Text style={{ ...styles.muted, margin: '0 0 4px', color: '#9a3412' }}>Mensagem da nossa equipe</Text>
+              <Text style={{ ...styles.text, margin: 0, whiteSpace: 'pre-wrap' }}>{partialCancellation.adminNote}</Text>
+            </Section>
+          )}
         </Section>
       )}
+
 
 
       <Text style={styles.muted}>

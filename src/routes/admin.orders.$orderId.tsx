@@ -582,16 +582,20 @@ function PartialCancelDialog({
 
         <div>
           <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
-            Observações (opcional)
+            Observação para o cliente (opcional)
           </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Ex.: sem estoque físico"
+            placeholder="Ex.: Infelizmente esta carta saiu do estoque antes da separação. Pedimos desculpas pelo transtorno."
             className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-            rows={2}
+            rows={3}
           />
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Esta mensagem será enviada junto ao e-mail de cancelamento parcial.
+          </p>
         </div>
+
 
         <div className="rounded-md bg-secondary/50 p-3 text-sm">
           <div className="flex justify-between">
