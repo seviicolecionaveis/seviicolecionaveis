@@ -65,6 +65,7 @@ function AdminOrderDetailPage() {
   const nav = useNavigate();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [cancelItem, setCancelItem] = useState<any | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAdmin) nav({ to: "/" });
