@@ -2,9 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { ImageOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { adminUpdateServiceOrder } from "@/lib/service-orders-admin.functions";
+import {
+  adminGetPilhaData,
+  type AdminServiceOrder,
+  type AdminStack,
+  type AdminStackItem,
+} from "@/lib/admin-pilha.functions";
 
 export const Route = createFileRoute("/admin/pilha")({
   head: () => ({ meta: [{ title: "Pilha de Cartas — Sevii Admin" }] }),
@@ -26,63 +33,86 @@ const STATUS_LABEL: Record<string, string> = {
   cancelled: "Cancelado",
 };
 
+const STATUS_STYLE: Record<string, string> = {
+  awaiting_payment: "bg-amber-100 text-amber-800",
+  paid: "bg-orange-100 text-orange-800",
+  dispatched: "bg-blue-100 text-blue-800",
+  delivered: "bg-green-100 text-green-800",
+  cancelled: "bg-zinc-200 text-zinc-700",
+};
+
 const STATUS_OPTIONS = ["paid", "dispatched", "delivered", "cancelled"] as const;
 
-function fmtMoney(cents: number) {
-  return `R$ ${(cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+const fmtMoney = (cents: number) =>
+  `R$ ${(cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+
+const daysBetween = (a: Date, b: Date) =>
+  Math.ceil((b.getTime() - a.getTime()) / 86_400_000);
+
+function Thumb({ item }: { item: AdminStackItem }) {
+  if (!item.card_image) {
+    return (
+      <div className="h-16 w-12 rounded-md bg-muted grid place-items-center text-muted-foreground">
+        <ImageOff className="h-4 w-4" />
+      </div>
+    );
+  }
+  return (
+    <img
+      src={item.card_image}
+      alt={item.card_name}
+      loading="lazy"
+      className="h-16 w-12 object-cover rounded-md border border-border bg-muted"
+    />
+  );
 }
 
-function daysBetween(a: Date, b: Date) {
-  return Math.ceil((b.getTime() - a.getTime()) / 86_400_000);
+function ItemRow({ item }: { item: AdminStackItem }) {
+  const meta = [item.collection, item.card_number, item.finish, item.language, item.condition]
+    .filter(Boolean)
+    .join(" · ");
+  return (
+    <li className="flex gap-3 py-2">
+      <Thumb item={item} />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold truncate">
+          {item.quantity}× {item.card_name}
+        </p>
+        {meta && <p className="text-xs text-muted-foreground truncate">{meta}</p>}
+        <p className="text-[11px] text-muted-foreground mt-0.5">
+          Pedido <span className="font-mono">#{item.order_id.slice(0, 8)}</span>
+          {item.unit_price_cents > 0 && (
+            <> · {fmtMoney(item.unit_price_cents)} un.</>
+          )}
+        </p>
+      </div>
+    </li>
+  );
 }
 
 function AdminPilhaPage() {
   const { isAdmin, loading: authLoading } = useAuth();
   const [tab, setTab] = useState<"orders" | "stacks">("orders");
-  const [orders, setOrders] = useState<any[]>([]);
-  const [stacks, setStacks] = useState<any[]>([]);
+  const [data, setData] = useState<{ serviceOrders: AdminServiceOrder[]; stacks: AdminStack[] }>({
+    serviceOrders: [],
+    stacks: [],
+  });
   const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
   const update = useServerFn(adminUpdateServiceOrder);
+  const fetchData = useServerFn(adminGetPilhaData);
 
   const load = async () => {
     setLoading(true);
-    const [{ data: os }, { data: st }] = await Promise.all([
-      supabase
-        .from("service_orders")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("card_stacks")
-        .select("*")
-        .eq("status", "active")
-        .order("expires_at", { ascending: true }),
-    ]);
-    const ordersData = os ?? [];
-    const stacksData = st ?? [];
-
-    // hidrata itens das OS
-    const osIds = ordersData.map((o: any) => o.id);
-    const stackIds = stacksData.map((s: any) => s.id);
-    const [{ data: osItems }, { data: stackItems }] = await Promise.all([
-      osIds.length
-        ? supabase.from("card_stack_items").select("*").in("service_order_id", osIds)
-        : Promise.resolve({ data: [] as any[] }),
-      stackIds.length
-        ? supabase.from("card_stack_items").select("*").in("stack_id", stackIds).eq("status", "stored")
-        : Promise.resolve({ data: [] as any[] }),
-    ]);
-    const byOs: Record<string, any[]> = {};
-    (osItems ?? []).forEach((it: any) => {
-      (byOs[it.service_order_id] ??= []).push(it);
-    });
-    const byStack: Record<string, any[]> = {};
-    (stackItems ?? []).forEach((it: any) => {
-      (byStack[it.stack_id] ??= []).push(it);
-    });
-
-    setOrders(ordersData.map((o: any) => ({ ...o, items: byOs[o.id] ?? [] })));
-    setStacks(stacksData.map((s: any) => ({ ...s, items: byStack[s.id] ?? [] })));
-    setLoading(false);
+    try {
+      const res = await fetchData();
+      setData(res);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao carregar dados.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -94,14 +124,25 @@ function AdminPilhaPage() {
     const ch = supabase
       .channel("admin-service-orders")
       .on("postgres_changes", { event: "*", schema: "public", table: "service_orders" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "card_stacks" }, () => load())
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [isAdmin]);
 
   const pendingCount = useMemo(
-    () => orders.filter((o) => o.status === "paid").length,
-    [orders],
+    () => data.serviceOrders.filter((o) => o.status === "paid").length,
+    [data.serviceOrders],
   );
+
+  const toggle = (id: string) =>
+    setExpanded((s) => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   async function patch(id: string, body: {
     serviceOrderId: string;
@@ -119,8 +160,10 @@ function AdminPilhaPage() {
     }
   }
 
-  if (authLoading) return <div className="min-h-screen grid place-items-center text-sm">Carregando...</div>;
-  if (!isAdmin) return <div className="min-h-screen grid place-items-center text-sm">Acesso negado.</div>;
+  if (authLoading)
+    return <div className="min-h-screen grid place-items-center text-sm">Carregando...</div>;
+  if (!isAdmin)
+    return <div className="min-h-screen grid place-items-center text-sm">Acesso negado.</div>;
 
   return (
     <div className="min-h-screen bg-background">
@@ -129,148 +172,265 @@ function AdminPilhaPage() {
           <Link to="/admin" className="text-sm font-bold uppercase tracking-widest">
             ← Admin · Pilha de Cartas
           </Link>
-          <div className="text-xs text-muted-foreground">
-            {pendingCount > 0 && (
-              <span className="rounded-full bg-orange-500 text-white px-2 py-0.5 font-semibold">
-                {pendingCount} OS para preparar
-              </span>
-            )}
-          </div>
+          {pendingCount > 0 && (
+            <span className="rounded-full bg-orange-500 text-white px-3 py-1 text-xs font-semibold">
+              {pendingCount} OS para preparar
+            </span>
+          )}
         </div>
       </header>
+
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-6">
         <div className="flex gap-2 text-xs">
           <button
             onClick={() => setTab("orders")}
-            className={`px-3 py-1.5 rounded-full font-semibold ${tab === "orders" ? "bg-foreground text-background" : "bg-secondary"}`}
+            className={`px-3 py-1.5 rounded-full font-semibold ${
+              tab === "orders" ? "bg-foreground text-background" : "bg-secondary"
+            }`}
           >
-            Ordens de Serviço ({orders.length})
+            Ordens de Serviço ({data.serviceOrders.length})
           </button>
           <button
             onClick={() => setTab("stacks")}
-            className={`px-3 py-1.5 rounded-full font-semibold ${tab === "stacks" ? "bg-foreground text-background" : "bg-secondary"}`}
+            className={`px-3 py-1.5 rounded-full font-semibold ${
+              tab === "stacks" ? "bg-foreground text-background" : "bg-secondary"
+            }`}
           >
-            Pilhas Ativas ({stacks.length})
+            Pilhas Ativas ({data.stacks.length})
           </button>
         </div>
 
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : tab === "orders" ? (
-          orders.length === 0 ? (
+          data.serviceOrders.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhuma ordem de serviço.</p>
           ) : (
             <div className="space-y-4">
-              {orders.map((o) => (
-                <div key={o.id} className="rounded-xl border border-border bg-card p-5">
-                  <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-                    <div>
-                      <p className="text-xs text-muted-foreground font-mono">OS #{o.code}</p>
-                      <p className="text-sm font-semibold">
-                        {METHOD_LABEL[o.method] ?? o.method} · {STATUS_LABEL[o.status] ?? o.status}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(o.created_at).toLocaleString("pt-BR")} · {fmtMoney(o.amount_cents)}
-                      </p>
-                      {o.arte_em_cards_code && (
-                        <p className="text-xs text-green-700 font-semibold">Código Arte em Cards usado: {o.arte_em_cards_code}</p>
-                      )}
+              {data.serviceOrders.map((o) => {
+                const open = expanded.has(o.id);
+                const totalCards = o.items.reduce((s, i) => s + i.quantity, 0);
+                return (
+                  <div key={o.id} className="rounded-xl border border-border bg-card overflow-hidden">
+                    <div className="p-5">
+                      <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-xs text-muted-foreground font-mono">OS #{o.code}</p>
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${STATUS_STYLE[o.status] ?? "bg-secondary"}`}>
+                              {STATUS_LABEL[o.status] ?? o.status}
+                            </span>
+                          </div>
+                          <p className="text-sm font-semibold mt-1">
+                            {o.customer_name ?? o.recipient_name ?? "Cliente"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {o.customer_email ?? ""} · {METHOD_LABEL[o.method] ?? o.method}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(o.created_at).toLocaleString("pt-BR")} · {fmtMoney(o.amount_cents)} · {totalCards} carta(s)
+                          </p>
+                          {o.arte_em_cards_code && (
+                            <p className="text-xs text-green-700 font-semibold mt-1">
+                              Código Arte em Cards: {o.arte_em_cards_code}
+                            </p>
+                          )}
+                        </div>
+                        <select
+                          value={o.status}
+                          onChange={(e) =>
+                            patch(o.id, { serviceOrderId: o.id, status: e.target.value as any })
+                          }
+                          className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold"
+                        >
+                          {STATUS_OPTIONS.map((s) => (
+                            <option key={s} value={s}>
+                              {STATUS_LABEL[s]}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Thumbnails preview row */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {o.items.slice(0, 8).map((it) => (
+                          <div key={it.id} className="relative">
+                            <Thumb item={it} />
+                            {it.quantity > 1 && (
+                              <span className="absolute -top-1 -right-1 bg-foreground text-background text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 grid place-items-center">
+                                ×{it.quantity}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                        {o.items.length > 8 && (
+                          <div className="h-16 w-12 rounded-md bg-secondary grid place-items-center text-xs font-bold">
+                            +{o.items.length - 8}
+                          </div>
+                        )}
+                      </div>
+
+                      {o.method === "correios" &&
+                        (o.status === "paid" || o.status === "dispatched") && (
+                          <TrackingForm
+                            order={o}
+                            onSave={(carrier, code, url) =>
+                              patch(o.id, {
+                                serviceOrderId: o.id,
+                                status: "dispatched",
+                                carrier,
+                                trackingCode: code,
+                                trackingUrl: url,
+                              })
+                            }
+                          />
+                        )}
+
+                      <button
+                        onClick={() => toggle(o.id)}
+                        className="mt-2 text-xs font-semibold text-foreground/80 hover:underline"
+                      >
+                        {open ? "Ocultar detalhes" : `Ver todas as ${o.items.length} carta(s) e endereço`}
+                      </button>
                     </div>
-                    <select
-                      value={o.status}
-                      onChange={(e) => patch(o.id, { serviceOrderId: o.id, status: e.target.value as any })}
-                      className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold"
-                    >
-                      {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
-                    </select>
-                  </div>
 
-                  {o.method === "correios" && (o.status === "paid" || o.status === "dispatched") && (
-                    <TrackingForm
-                      order={o}
-                      onSave={(carrier, code, url) => patch(o.id, {
-                        serviceOrderId: o.id,
-                        status: "dispatched",
-                        carrier,
-                        trackingCode: code,
-                        trackingUrl: url,
-                      })}
-                    />
-                  )}
-
-                  <div className="grid md:grid-cols-2 gap-4 text-sm mt-2">
-                    {o.method !== "arte_em_cards" && o.recipient_name && (
-                      <div>
-                        <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">
-                          {o.method === "app" ? "Contato" : "Endereço"}
-                        </p>
-                        <p>{o.recipient_name}</p>
-                        {o.phone && <p className="text-xs">{o.phone}</p>}
-                        {o.method === "correios" && (
-                          <>
-                            <p>{o.street}, {o.number}{o.complement ? ` — ${o.complement}` : ""}</p>
-                            <p>{o.neighborhood} · {o.city}/{o.state}</p>
-                            <p>CEP: {o.cep}</p>
-                          </>
+                    {open && (
+                      <div className="border-t border-border bg-secondary/30 px-5 py-4 grid md:grid-cols-2 gap-6">
+                        {o.method !== "arte_em_cards" && o.recipient_name && (
+                          <div>
+                            <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">
+                              {o.method === "app" ? "Contato" : "Endereço"}
+                            </p>
+                            <p className="text-sm">{o.recipient_name}</p>
+                            {o.phone && <p className="text-xs">{o.phone}</p>}
+                            {o.method === "correios" && (
+                              <>
+                                <p className="text-xs">
+                                  {o.street}, {o.number}
+                                  {o.complement ? ` — ${o.complement}` : ""}
+                                </p>
+                                <p className="text-xs">
+                                  {o.neighborhood} · {o.city}/{o.state}
+                                </p>
+                                <p className="text-xs">CEP: {o.cep}</p>
+                              </>
+                            )}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">
+                            Itens ({o.items.length})
+                          </p>
+                          <ul className="divide-y divide-border">
+                            {o.items.map((it) => (
+                              <ItemRow key={it.id} item={it} />
+                            ))}
+                          </ul>
+                        </div>
+                        {o.notes && (
+                          <p className="md:col-span-2 text-xs italic text-muted-foreground">
+                            Obs: {o.notes}
+                          </p>
                         )}
                       </div>
                     )}
-                    <div>
-                      <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">
-                        Itens ({o.items.length})
-                      </p>
-                      <ul className="space-y-0.5">
-                        {o.items.map((it: any) => (
-                          <li key={it.id} className="text-xs">
-                            {it.quantity}× {it.card_name}
-                            {it.card_number ? ` ${it.card_number}` : ""}{" "}
-                            <span className="text-muted-foreground">({it.finish}, {it.language})</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  {o.notes && <p className="mt-3 text-xs italic text-muted-foreground">Obs: {o.notes}</p>}
-                </div>
-              ))}
-            </div>
-          )
-        ) : (
-          stacks.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma pilha ativa.</p>
-          ) : (
-            <div className="space-y-3">
-              {stacks.map((s) => {
-                const now = new Date();
-                const exp = new Date(s.expires_at);
-                const days = daysBetween(now, exp);
-                const crit = days <= 2;
-                const warn = days <= 7;
-                return (
-                  <div
-                    key={s.id}
-                    className={`rounded-xl border p-4 bg-card ${crit ? "border-red-400" : warn ? "border-orange-400" : "border-border"}`}
-                  >
-                    <div className="flex justify-between gap-3 text-sm">
-                      <div>
-                        <p className="font-mono text-xs text-muted-foreground">Pilha {s.id.slice(0, 8)}</p>
-                        <p className="font-semibold">Usuário: {s.user_id.slice(0, 8)}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Iniciada {new Date(s.started_at).toLocaleDateString("pt-BR")} ·
-                          Vence {exp.toLocaleDateString("pt-BR")}
-                        </p>
-                      </div>
-                      <div className={`text-right text-sm font-bold ${crit ? "text-red-600" : warn ? "text-orange-600" : ""}`}>
-                        {days > 0 ? `${days} dia${days === 1 ? "" : "s"} restantes` : "Vencida"}
-                        <div className="text-xs font-normal text-muted-foreground">{s.items.length} carta(s)</div>
-                      </div>
-                    </div>
                   </div>
                 );
               })}
             </div>
           )
+        ) : data.stacks.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhuma pilha ativa.</p>
+        ) : (
+          <div className="space-y-4">
+            {data.stacks.map((s) => {
+              const now = new Date();
+              const exp = new Date(s.expires_at);
+              const days = daysBetween(now, exp);
+              const crit = days <= 2;
+              const warn = days <= 7;
+              const totalCards = s.items.reduce((a, i) => a + i.quantity, 0);
+              const open = expanded.has(s.id);
+              return (
+                <div
+                  key={s.id}
+                  className={`rounded-xl border bg-card overflow-hidden ${
+                    crit ? "border-red-400" : warn ? "border-orange-400" : "border-border"
+                  }`}
+                >
+                  <div className="p-5">
+                    <div className="flex flex-wrap justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-mono text-[11px] text-muted-foreground">
+                          Pilha {s.id.slice(0, 8)}
+                        </p>
+                        <p className="text-base font-semibold">
+                          {s.customer_name ?? "Cliente sem nome"}
+                        </p>
+                        {s.customer_email && (
+                          <p className="text-xs text-muted-foreground">{s.customer_email}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Iniciada {new Date(s.started_at).toLocaleDateString("pt-BR")} · Vence{" "}
+                          {exp.toLocaleDateString("pt-BR")}
+                        </p>
+                      </div>
+                      <div
+                        className={`text-right text-sm font-bold ${
+                          crit ? "text-red-600" : warn ? "text-orange-600" : ""
+                        }`}
+                      >
+                        {days > 0 ? `${days} dia${days === 1 ? "" : "s"} restantes` : "Vencida"}
+                        <div className="text-xs font-normal text-muted-foreground">
+                          {totalCards} carta(s) · {s.items.length} linha(s)
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Thumbnails preview */}
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {s.items.slice(0, 10).map((it) => (
+                        <div key={it.id} className="relative">
+                          <Thumb item={it} />
+                          {it.quantity > 1 && (
+                            <span className="absolute -top-1 -right-1 bg-foreground text-background text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 grid place-items-center">
+                              ×{it.quantity}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                      {s.items.length > 10 && (
+                        <div className="h-16 w-12 rounded-md bg-secondary grid place-items-center text-xs font-bold">
+                          +{s.items.length - 10}
+                        </div>
+                      )}
+                      {s.items.length === 0 && (
+                        <p className="text-xs text-muted-foreground">Nenhuma carta armazenada.</p>
+                      )}
+                    </div>
+
+                    {s.items.length > 0 && (
+                      <button
+                        onClick={() => toggle(s.id)}
+                        className="mt-3 text-xs font-semibold hover:underline"
+                      >
+                        {open ? "Ocultar lista" : "Ver lista completa"}
+                      </button>
+                    )}
+                  </div>
+                  {open && s.items.length > 0 && (
+                    <div className="border-t border-border bg-secondary/30 px-5 py-3">
+                      <ul className="divide-y divide-border">
+                        {s.items.map((it) => (
+                          <ItemRow key={it.id} item={it} />
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
       </main>
     </div>
@@ -281,17 +441,25 @@ function TrackingForm({
   order,
   onSave,
 }: {
-  order: any;
-  onSave: (carrier: "correios" | "latam" | "pickup", code: string | null, url: string | null) => void;
+  order: AdminServiceOrder;
+  onSave: (
+    carrier: "correios" | "latam" | "pickup",
+    code: string | null,
+    url: string | null,
+  ) => void;
 }) {
-  const [carrier, setCarrier] = useState<"correios" | "latam">(order.carrier === "latam" ? "latam" : "correios");
+  const [carrier, setCarrier] = useState<"correios" | "latam">(
+    order.carrier === "latam" ? "latam" : "correios",
+  );
   const [code, setCode] = useState<string>(order.tracking_code ?? "");
   const [url, setUrl] = useState<string>(order.tracking_url ?? "");
 
   return (
     <div className="mt-2 rounded-md border border-border p-3 bg-secondary/40 flex flex-wrap items-end gap-2">
       <label className="text-xs">
-        <span className="block text-[10px] uppercase font-semibold text-muted-foreground">Transportadora</span>
+        <span className="block text-[10px] uppercase font-semibold text-muted-foreground">
+          Transportadora
+        </span>
         <select
           value={carrier}
           onChange={(e) => setCarrier(e.target.value as any)}
@@ -302,7 +470,9 @@ function TrackingForm({
         </select>
       </label>
       <label className="text-xs flex-1 min-w-[160px]">
-        <span className="block text-[10px] uppercase font-semibold text-muted-foreground">Código de rastreio</span>
+        <span className="block text-[10px] uppercase font-semibold text-muted-foreground">
+          Código de rastreio
+        </span>
         <input
           value={code}
           onChange={(e) => setCode(e.target.value)}
@@ -312,7 +482,9 @@ function TrackingForm({
       </label>
       {carrier === "latam" && (
         <label className="text-xs flex-1 min-w-[200px]">
-          <span className="block text-[10px] uppercase font-semibold text-muted-foreground">URL rastreio</span>
+          <span className="block text-[10px] uppercase font-semibold text-muted-foreground">
+            URL rastreio
+          </span>
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
@@ -326,7 +498,9 @@ function TrackingForm({
           onSave(
             carrier,
             code.trim() || null,
-            carrier === "latam" ? (url.trim() || null) : "https://rastreamento.correios.com.br/app/index.php",
+            carrier === "latam"
+              ? url.trim() || null
+              : "https://rastreamento.correios.com.br/app/index.php",
           )
         }
         className="rounded-md bg-foreground text-background px-3 py-1.5 text-xs font-semibold"
