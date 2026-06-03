@@ -87,7 +87,7 @@ function PilhaPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-5xl px-4 py-8 pb-32 sm:px-6">
         <h1 className="text-2xl font-bold mb-1">🃏 Pilha de Cartas</h1>
         <p className="text-sm text-muted-foreground mb-6">
           Guarde suas cartas por até 30 dias e solicite o envio quando quiser.
