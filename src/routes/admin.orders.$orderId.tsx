@@ -7,9 +7,10 @@ import {
   rejectOrderCancellation,
   adminCancelOrder,
   adminUpdateOrderStatus,
+  adminPartialCancelItem,
 } from "@/utils/orders.functions";
 import { toast } from "sonner";
-import { ArrowLeft, ImageOff } from "lucide-react";
+import { ArrowLeft, ImageOff, X } from "lucide-react";
 import { AdminTrackingEditor, type TrackingInfo } from "@/components/admin/AdminTrackingEditor";
 
 export const Route = createFileRoute("/admin/orders/$orderId")({
@@ -64,6 +65,7 @@ function AdminOrderDetailPage() {
   const nav = useNavigate();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [cancelItem, setCancelItem] = useState<any | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAdmin) nav({ to: "/" });
@@ -274,7 +276,13 @@ function AdminOrderDetailPage() {
           </h2>
           <ul className="divide-y divide-border">
             {items.map((it) => {
+              const cancelledQty = it.cancelled_quantity ?? 0;
+              const activeQty = (it.quantity ?? 0) - cancelledQty;
               const lineTotal = (it.unit_price_cents ?? 0) * (it.quantity ?? 0);
+              const refundCents = it.refund_cents ?? 0;
+              const canCancel =
+                activeQty > 0 &&
+                ["paid", "preparing", "shipped", "awaiting_pickup", "delivered"].includes(order.status);
               return (
                 <li key={it.id} className="flex items-start gap-4 p-4">
                   <div className="h-24 w-[68px] shrink-0 rounded-md overflow-hidden bg-secondary border border-border grid place-items-center">
@@ -298,16 +306,35 @@ function AdminOrderDetailPage() {
                       <span className="text-muted-foreground">×</span>{" "}
                       <span className="font-semibold tabular-nums">{fmtBRL(it.unit_price_cents)}</span>
                     </p>
+                    {cancelledQty > 0 && (
+                      <p className="text-xs mt-1 text-orange-700 font-semibold">
+                        {cancelledQty}× cancelado{refundCents > 0 ? ` · reembolso ${fmtBRL(refundCents)}` : ""}
+                        {it.refund_method ? ` (${it.refund_method === "mercadopago" ? "estorno MP" : it.refund_method === "coupon" ? "cupom" : "manual"})` : ""}
+                        {it.refund_coupon_code ? ` · ${it.refund_coupon_code}` : ""}
+                      </p>
+                    )}
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Subtotal</p>
-                    <p className="text-base font-bold tabular-nums">{fmtBRL(lineTotal)}</p>
+                  <div className="text-right shrink-0 flex flex-col items-end gap-2">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Subtotal</p>
+                      <p className="text-base font-bold tabular-nums">{fmtBRL(lineTotal)}</p>
+                    </div>
+                    {canCancel && (
+                      <button
+                        onClick={() => setCancelItem(it)}
+                        className="text-[11px] text-destructive hover:underline font-semibold inline-flex items-center gap-1"
+                        title="Cancelar este item (sem estoque, etc.)"
+                      >
+                        <X className="h-3 w-3" /> Cancelar item
+                      </button>
+                    )}
                   </div>
                 </li>
               );
             })}
           </ul>
         </div>
+
 
         {/* Totais */}
         <div className="rounded-xl border border-border bg-card p-5">
@@ -328,8 +355,16 @@ function AdminOrderDetailPage() {
             <div className="border-t border-border pt-2 mt-2">
               <Row label="Total pago" value={fmtBRL(totalCents)} tone="total" />
             </div>
+            {(order.refunded_cents ?? 0) > 0 && (
+              <Row
+                label="Reembolsado ao cliente"
+                value={`− ${fmtBRL(order.refunded_cents)}`}
+                tone="discount"
+              />
+            )}
           </dl>
         </div>
+
 
         {/* Observações */}
         {order.notes && (
@@ -351,9 +386,22 @@ function AdminOrderDetailPage() {
           </div>
         )}
       </main>
+
+      {cancelItem && (
+        <PartialCancelDialog
+          item={cancelItem}
+          order={order}
+          onClose={() => setCancelItem(null)}
+          onDone={async () => {
+            setCancelItem(null);
+            await load();
+          }}
+        />
+      )}
     </div>
   );
 }
+
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (

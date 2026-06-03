@@ -595,6 +595,8 @@ export type Database = {
       }
       order_items: {
         Row: {
+          cancelled_at: string | null
+          cancelled_quantity: number
           card_id: string
           card_image: string | null
           card_name: string
@@ -607,9 +609,15 @@ export type Database = {
           language: string | null
           order_id: string
           quantity: number
+          refund_cents: number
+          refund_coupon_code: string | null
+          refund_method: string | null
+          refund_notes: string | null
           unit_price_cents: number
         }
         Insert: {
+          cancelled_at?: string | null
+          cancelled_quantity?: number
           card_id: string
           card_image?: string | null
           card_name: string
@@ -622,9 +630,15 @@ export type Database = {
           language?: string | null
           order_id: string
           quantity: number
+          refund_cents?: number
+          refund_coupon_code?: string | null
+          refund_method?: string | null
+          refund_notes?: string | null
           unit_price_cents: number
         }
         Update: {
+          cancelled_at?: string | null
+          cancelled_quantity?: number
           card_id?: string
           card_image?: string | null
           card_name?: string
@@ -637,6 +651,10 @@ export type Database = {
           language?: string | null
           order_id?: string
           quantity?: number
+          refund_cents?: number
+          refund_coupon_code?: string | null
+          refund_method?: string | null
+          refund_notes?: string | null
           unit_price_cents?: number
         }
         Relationships: [
@@ -673,6 +691,7 @@ export type Database = {
           pix_qr_code_base64: string | null
           pre_cancel_status: string | null
           recipient_name: string
+          refunded_cents: number
           shipping_cost_cents: number
           shipping_method: string
           state: string
@@ -717,6 +736,7 @@ export type Database = {
           pix_qr_code_base64?: string | null
           pre_cancel_status?: string | null
           recipient_name: string
+          refunded_cents?: number
           shipping_cost_cents?: number
           shipping_method: string
           state: string
@@ -761,6 +781,7 @@ export type Database = {
           pix_qr_code_base64?: string | null
           pre_cancel_status?: string | null
           recipient_name?: string
+          refunded_cents?: number
           shipping_cost_cents?: number
           shipping_method?: string
           state?: string

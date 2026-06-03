@@ -3,6 +3,14 @@ import { Heading, Section, Text, Button } from '@react-email/components'
 import type { TemplateEntry } from './registry'
 import { EmailLayout, styles, SITE_URL } from './_shared'
 
+interface PartialCancellation {
+  itemName?: string
+  quantity?: number
+  refundCents?: number
+  refundMethod?: 'mercadopago' | 'coupon' | 'manual'
+  couponCode?: string | null
+}
+
 interface OrderStatusUpdatedProps {
   recipientName?: string
   orderId?: string
@@ -10,6 +18,16 @@ interface OrderStatusUpdatedProps {
   trackingCode?: string | null
   carrier?: 'correios' | 'latam' | 'pickup' | null
   trackingUrl?: string | null
+  partialCancellation?: PartialCancellation | null
+}
+
+const fmtBRL = (cents: number) =>
+  `R$ ${(cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+
+const REFUND_METHOD_LABEL: Record<string, string> = {
+  mercadopago: 'estorno automático no Mercado Pago (cai em até 7 dias úteis)',
+  coupon: 'cupom de desconto para uso futuro',
+  manual: 'estorno manual (entraremos em contato)',
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -43,6 +61,7 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
   trackingCode,
   carrier,
   trackingUrl,
+  partialCancellation,
 }) => {
   const shortId = orderId ? `#${orderId.slice(0, 8).toUpperCase()}` : ''
   const label = (status && STATUS_LABEL[status]) || status || 'Atualizado'
@@ -91,6 +110,33 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
           </>
         )}
       </Section>
+
+      {partialCancellation && (
+        <Section style={{ ...styles.card, borderColor: '#f59e0b', background: '#fff7ed' }}>
+          <Text style={{ ...styles.muted, margin: '0 0 6px', color: '#9a3412' }}>Cancelamento parcial</Text>
+          <Text style={{ ...styles.text, margin: '0 0 8px' }}>
+            Tivemos uma divergência de estoque e precisamos cancelar{' '}
+            <strong>{partialCancellation.quantity}× {partialCancellation.itemName}</strong>{' '}
+            do seu pedido. O restante segue normalmente.
+          </Text>
+          {typeof partialCancellation.refundCents === 'number' && (
+            <Text style={{ ...styles.text, margin: '0 0 6px' }}>
+              Valor a reembolsar: <strong>{fmtBRL(partialCancellation.refundCents)}</strong>
+            </Text>
+          )}
+          {partialCancellation.refundMethod && (
+            <Text style={{ ...styles.muted, margin: 0 }}>
+              Forma do reembolso: {REFUND_METHOD_LABEL[partialCancellation.refundMethod] ?? partialCancellation.refundMethod}
+            </Text>
+          )}
+          {partialCancellation.couponCode && (
+            <Text style={{ ...styles.text, margin: '8px 0 0', fontFamily: 'monospace', fontWeight: 600 }}>
+              Cupom: {partialCancellation.couponCode}
+            </Text>
+          )}
+        </Section>
+      )}
+
 
       <Text style={styles.muted}>
         Acompanhe os detalhes em{' '}
