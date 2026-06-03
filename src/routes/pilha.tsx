@@ -179,11 +179,13 @@ function PilhaPage() {
 
                 <ul className="divide-y divide-border">
                   {stack.items.map((i) => (
-                    <li key={i.id} className="flex items-center gap-3 px-4 py-3">
-                      <Checkbox
-                        checked={selected.has(i.id)}
-                        onCheckedChange={() => toggle(i.id)}
-                      />
+                    <li key={i.id}>
+                      <label className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-secondary/30 active:bg-secondary/50">
+                        <Checkbox
+                          checked={selected.has(i.id)}
+                          onCheckedChange={() => toggle(i.id)}
+                        />
+
                       {i.cardImage ? (
                         <img
                           src={i.cardImage}
