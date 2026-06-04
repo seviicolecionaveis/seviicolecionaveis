@@ -197,29 +197,43 @@ export const adminAddOrderToStack = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await ensureAdmin(supabaseAdmin, context.userId);
 
-    const raw = data.orderIdOrPrefix.trim();
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw);
+    const raw = data.orderIdOrPrefix.trim().toLowerCase();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(raw);
     let order: any = null;
     if (isUuid) {
-      const { data: o } = await supabaseAdmin
+      const { data: o, error } = await supabaseAdmin
         .from("orders")
         .select("id, user_id, status")
         .eq("id", raw)
         .maybeSingle();
+      if (error) throw new Error(error.message);
       order = o;
     } else {
-      const { data: list } = await supabaseAdmin
+      // UUID columns não suportam ILIKE — construímos um intervalo de UUID a
+      // partir do prefixo hex (com ou sem hífens) e usamos gte/lte.
+      const hex = raw.replace(/-/g, "");
+      if (!/^[0-9a-f]+$/.test(hex) || hex.length < 4 || hex.length > 32) {
+        throw new Error("Prefixo inválido. Use ao menos 4 caracteres hex do ID.");
+      }
+      const padLow = (hex + "0".repeat(32 - hex.length)).slice(0, 32);
+      const padHigh = (hex + "f".repeat(32 - hex.length)).slice(0, 32);
+      const fmt = (h: string) =>
+        `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`;
+      const { data: list, error } = await supabaseAdmin
         .from("orders")
         .select("id, user_id, status")
-        .ilike("id", `${raw.toLowerCase()}%`)
+        .gte("id", fmt(padLow))
+        .lte("id", fmt(padHigh))
         .limit(2);
+      if (error) throw new Error(error.message);
       if (list && list.length > 1) {
         throw new Error("Mais de um pedido começa com esse prefixo. Use o ID completo.");
       }
       order = list?.[0] ?? null;
     }
     if (!order) throw new Error("Pedido não encontrado.");
-    if (!["paid", "delivered", "dispatched"].includes(order.status)) {
+    const allowed = ["paid", "preparing", "shipped", "awaiting_pickup", "dispatched", "delivered"];
+    if (!allowed.includes(order.status)) {
       throw new Error(`Pedido está com status "${order.status}". Só pedidos pagos podem ir à pilha.`);
     }
 
