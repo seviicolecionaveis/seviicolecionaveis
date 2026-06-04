@@ -218,6 +218,10 @@ function SolicitarPage() {
   const arteApplies = method === "arte_em_cards" && !hasValidArteCode;
   const arteCents = arteApplies ? 500 : 0;
   const totalCents = shippingCents + arteCents;
+  const arteCodeForSubmit =
+    method === "arte_em_cards"
+      ? (arteExisting?.code ?? (arteStatus.state === "valid" ? arteStatus.code : arteCode.trim().toUpperCase()) || null)
+      : null;
 
   const handleSubmit = async () => {
     setErr(null);
@@ -278,7 +282,7 @@ function SolicitarPage() {
                   state: state.toUpperCase(),
                 }
               : null,
-          arteEmCardsCode: method === "arte_em_cards" ? (arteCode || arteExisting?.code || null) : null,
+          arteEmCardsCode: arteCodeForSubmit,
           pickupPoint: method === "presencial" ? pickupPoint : null,
           notes: notes || null,
           cpf: cpf || null,
