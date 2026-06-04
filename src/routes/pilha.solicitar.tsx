@@ -212,7 +212,10 @@ function SolicitarPage() {
 
   const selectedQuote = quotes.find((q) => q.id === selectedQuoteId) ?? null;
   const shippingCents = method === "correios" ? (selectedQuote?.priceCents ?? 0) : 0;
-  const arteApplies = method === "arte_em_cards" && !(arteStatus.state === "valid" && arteStatus.code === arteCode.trim().toUpperCase());
+  const hasValidArteCode =
+    method === "arte_em_cards" &&
+    (!!arteExisting || (arteStatus.state === "valid" && arteStatus.code === arteCode.trim().toUpperCase()));
+  const arteApplies = method === "arte_em_cards" && !hasValidArteCode;
   const arteCents = arteApplies ? 500 : 0;
   const totalCents = shippingCents + arteCents;
 
@@ -281,8 +284,13 @@ function SolicitarPage() {
           cpf: cpf || null,
         },
       });
-      setResult(r as OSResult);
+      const resultData = r as OSResult;
+      setResult(resultData);
       try { sessionStorage.removeItem("pilha:selectedItems"); } catch {}
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (resultData.whatsappUrl) {
+        window.location.href = resultData.whatsappUrl;
+      }
     } catch (e: any) {
       setErr(e?.message ?? "Falha ao criar solicitação.");
     } finally {
