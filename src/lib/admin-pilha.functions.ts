@@ -187,3 +187,83 @@ export const adminAdjustStackItem = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true, removed: false };
   });
+
+export const adminAddOrderToStack = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ orderIdOrPrefix: z.string().trim().min(4).max(64) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await ensureAdmin(supabaseAdmin, context.userId);
+
+    const raw = data.orderIdOrPrefix.trim();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw);
+    let order: any = null;
+    if (isUuid) {
+      const { data: o } = await supabaseAdmin
+        .from("orders")
+        .select("id, user_id, status")
+        .eq("id", raw)
+        .maybeSingle();
+      order = o;
+    } else {
+      const { data: list } = await supabaseAdmin
+        .from("orders")
+        .select("id, user_id, status")
+        .ilike("id", `${raw.toLowerCase()}%`)
+        .limit(2);
+      if (list && list.length > 1) {
+        throw new Error("Mais de um pedido começa com esse prefixo. Use o ID completo.");
+      }
+      order = list?.[0] ?? null;
+    }
+    if (!order) throw new Error("Pedido não encontrado.");
+    if (!["paid", "delivered", "dispatched"].includes(order.status)) {
+      throw new Error(`Pedido está com status "${order.status}". Só pedidos pagos podem ir à pilha.`);
+    }
+
+    const { count } = await supabaseAdmin
+      .from("card_stack_items")
+      .select("id", { count: "exact", head: true })
+      .eq("order_id", order.id);
+    if ((count ?? 0) > 0) {
+      throw new Error("Esse pedido já está na pilha do cliente.");
+    }
+
+    const { ensureActiveStack } = await import("@/lib/card-stack.server");
+    const stack = await ensureActiveStack(order.user_id);
+
+    const { data: items } = await supabaseAdmin
+      .from("order_items")
+      .select(
+        "id, card_id, card_name, card_image, collection, card_number, finish, language, condition, quantity, unit_price_cents",
+      )
+      .eq("order_id", order.id);
+
+    if (!items || items.length === 0) throw new Error("Pedido não possui itens.");
+
+    const rows = items.map((it: any) => ({
+      stack_id: stack.id,
+      user_id: order.user_id,
+      order_id: order.id,
+      order_item_id: it.id,
+      card_id: it.card_id,
+      card_name: it.card_name,
+      card_image: it.card_image,
+      collection: it.collection,
+      card_number: it.card_number,
+      finish: it.finish,
+      language: it.language,
+      condition: it.condition,
+      quantity: it.quantity,
+      unit_price_cents: it.unit_price_cents ?? 0,
+      status: "stored" as const,
+    }));
+
+    const { error } = await supabaseAdmin.from("card_stack_items").insert(rows);
+    if (error) throw new Error(error.message);
+
+    return { ok: true, addedCount: rows.length, orderId: order.id, stackId: stack.id };
+  });
+
