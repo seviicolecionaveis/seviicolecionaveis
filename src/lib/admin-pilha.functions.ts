@@ -296,6 +296,40 @@ export const adminAddOrderToStack = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("card_stack_items").insert(rows);
     if (error) throw new Error(error.message);
 
+    // Notifica o cliente
+    try {
+      const { data: ord } = await supabaseAdmin
+        .from("orders")
+        .select("email, recipient_name")
+        .eq("id", order.id)
+        .maybeSingle();
+      if (ord?.email) {
+        const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
+        await sendTransactionalEmailSafe({
+          templateName: "stack-order-stored",
+          recipientEmail: ord.email,
+          idempotencyKey: `stack-order-stored-${order.id}`,
+          templateData: {
+            recipientName: ord.recipient_name?.split(/\s+/)[0],
+            orderId: order.id,
+            expiresAt: stack.expires_at,
+            items: items.map((it: any) => ({
+              card_name: it.card_name,
+              collection: it.collection,
+              card_number: it.card_number,
+              finish: it.finish,
+              language: it.language,
+              condition: it.condition,
+              quantity: it.quantity,
+              unit_price_cents: it.unit_price_cents ?? 0,
+            })),
+          },
+        });
+      }
+    } catch (e) {
+      console.error("[adminAddOrderToStack] email falhou:", e);
+    }
+
     return { ok: true, addedCount: rows.length, orderId: order.id, stackId: stack.id };
   });
 
