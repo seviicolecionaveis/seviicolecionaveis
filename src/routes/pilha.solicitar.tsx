@@ -45,6 +45,7 @@ interface OSResult {
   method: Method;
   amountCents: number;
   pix?: { qrCode: string; qrCodeBase64: string; expiresAt: string };
+  paymentUrl?: string;
   whatsappUrl?: string;
 }
 
@@ -307,7 +308,9 @@ function SolicitarPage() {
       setResult(resultData);
       try { sessionStorage.removeItem("pilha:selectedItems"); } catch {}
       window.scrollTo({ top: 0, behavior: "smooth" });
-      if (resultData.whatsappUrl) {
+      if (resultData.paymentUrl) {
+        window.location.href = resultData.paymentUrl;
+      } else if (resultData.whatsappUrl) {
         window.location.href = resultData.whatsappUrl;
       }
     } catch (e: any) {
@@ -565,6 +568,14 @@ function SolicitarPage() {
               </button>
             </div>
             <p className="inline-flex items-center gap-1 text-xs text-muted-foreground"><QrCode className="h-3 w-3" /> Total R$ {(result.amountCents / 100).toFixed(2).replace(".", ",")}</p>
+            {result.paymentUrl && (
+              <a
+                href={result.paymentUrl}
+                className="inline-flex items-center justify-center rounded-full bg-foreground px-5 py-2 text-xs font-semibold uppercase tracking-wide text-background"
+              >
+                Abrir página de cobrança
+              </a>
+            )}
           </>
         )}
 

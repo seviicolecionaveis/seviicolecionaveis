@@ -70,6 +70,7 @@ export interface CreateServiceOrderResult {
   method: ServiceOrderMethod;
   amountCents: number;
   pix?: { qrCode: string; qrCodeBase64: string; expiresAt: string };
+  paymentUrl?: string;
   whatsappUrl?: string;
 }
 
@@ -176,6 +177,7 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
     method: input.method,
     amountCents,
     pix: { qrCode: pix.qr_code, qrCodeBase64: pix.qr_code_base64, expiresAt: pix.date_of_expiration },
+    paymentUrl: pix.ticket_url,
   };
 }
 
