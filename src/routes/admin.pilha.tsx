@@ -217,6 +217,7 @@ function AdminPilhaPage() {
       .channel("admin-service-orders")
       .on("postgres_changes", { event: "*", schema: "public", table: "service_orders" }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "card_stacks" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "card_stack_items" }, () => load())
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
