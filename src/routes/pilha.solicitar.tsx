@@ -518,11 +518,15 @@ function SolicitarPage() {
   function ResultView({ result }: { result: OSResult }) {
     return (
       <section className="rounded-xl border border-border bg-card p-6 space-y-4">
-        <h2 className="text-lg font-bold">OS #{result.code} criada ✓</h2>
+        <h2 className="text-lg font-bold">
+          {result.pix ? "Checkout da solicitação" : `OS #${result.code} criada ✓`}
+        </h2>
 
         {result.pix && (
           <>
-            <p className="text-sm">Pague o Pix abaixo para concluir a solicitação. Esta página atualiza sozinha quando o pagamento for confirmado.</p>
+            <p className="text-sm">
+              OS #{result.code} criada. Pague o Pix abaixo para concluir a solicitação. Esta página atualiza sozinha quando o pagamento for confirmado.
+            </p>
             <div className="grid place-items-center">
               <img src={`data:image/png;base64,${result.pix.qrCodeBase64}`} alt="QR Pix" className="h-56 w-56" />
             </div>
