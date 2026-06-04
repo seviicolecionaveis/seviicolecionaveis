@@ -893,12 +893,24 @@ function CheckoutPage() {
           <h2 className="text-sm font-bold uppercase tracking-widest mb-4">Resumo</h2>
           <ul className="space-y-3 text-sm">
             {items.map((i) => (
-              <li key={i.id} className="flex justify-between gap-2">
-                <span className="truncate">
-                  {i.quantity}× {i.name}
-                  <span className="block text-[10px] text-muted-foreground">{i.collection} · #{i.number}</span>
-                  <span className="block text-[10px] text-muted-foreground">{i.finish} · {i.language} · {i.condition}</span>
-                </span>
+              <li key={i.id} className="flex justify-between gap-3">
+                <div className="flex gap-3 min-w-0">
+                  {i.image ? (
+                    <img
+                      src={i.image}
+                      alt={i.name}
+                      className="h-14 w-10 rounded object-cover border border-border shrink-0"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="h-14 w-10 rounded border border-border bg-muted shrink-0" />
+                  )}
+                  <span className="truncate">
+                    {i.quantity}× {i.name}
+                    <span className="block text-[10px] text-muted-foreground">{i.collection} · #{i.number}</span>
+                    <span className="block text-[10px] text-muted-foreground">{i.finish} · {i.language} · {i.condition}</span>
+                  </span>
+                </div>
                 <span className="tabular-nums shrink-0">
                   R$ {(i.unitPrice * i.quantity).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                 </span>
