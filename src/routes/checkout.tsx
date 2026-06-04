@@ -425,6 +425,10 @@ function CheckoutPage() {
     if (ln.length < 2 || !/[A-Za-zÀ-ÿ]/.test(ln)) {
       return "Sobrenome inválido. Informe seu sobrenome completo.";
     }
+    const cpfDigits = (form.cpf || "").replace(/\D/g, "");
+    if (cpfDigits.length !== 11) {
+      return "Informe um CPF válido (11 dígitos).";
+    }
     if (shipping === "fixed" && !selectedQuote) {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
     }
