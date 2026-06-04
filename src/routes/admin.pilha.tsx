@@ -9,6 +9,7 @@ import { adminUpdateServiceOrder } from "@/lib/service-orders-admin.functions";
 import {
   adminGetPilhaData,
   adminAdjustStackItem,
+  adminAddOrderToStack,
   type AdminServiceOrder,
   type AdminStack,
   type AdminStackItem,
@@ -158,6 +159,28 @@ function AdminPilhaPage() {
   const update = useServerFn(adminUpdateServiceOrder);
   const fetchData = useServerFn(adminGetPilhaData);
   const adjustStackItem = useServerFn(adminAdjustStackItem);
+  const addOrderToStack = useServerFn(adminAddOrderToStack);
+  const [orderInput, setOrderInput] = useState("");
+  const [addingOrder, setAddingOrder] = useState(false);
+
+  async function handleAddOrder() {
+    const v = orderInput.trim();
+    if (v.length < 4) {
+      toast.error("Informe pelo menos 4 caracteres do ID do pedido.");
+      return;
+    }
+    setAddingOrder(true);
+    try {
+      const res = await addOrderToStack({ data: { orderIdOrPrefix: v } });
+      toast.success(`${res.addedCount} item(ns) adicionado(s) à pilha.`);
+      setOrderInput("");
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao adicionar pedido à pilha.");
+    } finally {
+      setAddingOrder(false);
+    }
+  }
 
   async function handleAdjustItem(itemId: string, newQuantity: number, name: string) {
     try {
@@ -265,6 +288,38 @@ function AdminPilhaPage() {
             Pilhas Ativas ({data.stacks.length})
           </button>
         </div>
+
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-xs font-bold uppercase tracking-widest mb-1">
+            Adicionar pedido anterior à pilha
+          </p>
+          <p className="text-[11px] text-muted-foreground mb-3">
+            Cole o ID do pedido (UUID completo ou os primeiros 8+ caracteres). O pedido precisa estar
+            pago. Os itens serão lançados na pilha ativa do cliente — se não houver, uma nova será
+            criada com 30 dias.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <input
+              value={orderInput}
+              onChange={(e) => setOrderInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddOrder();
+              }}
+              placeholder="ex.: 3f2a1b9c ou UUID completo"
+              className="flex-1 min-w-[220px] rounded-md border border-border bg-background px-3 py-2 text-sm font-mono"
+              disabled={addingOrder}
+            />
+            <button
+              onClick={handleAddOrder}
+              disabled={addingOrder || orderInput.trim().length < 4}
+              className="rounded-md bg-foreground text-background px-4 py-2 text-xs font-semibold uppercase tracking-wide disabled:opacity-40"
+            >
+              {addingOrder ? "Adicionando..." : "Adicionar à pilha"}
+            </button>
+          </div>
+        </div>
+
+
 
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
