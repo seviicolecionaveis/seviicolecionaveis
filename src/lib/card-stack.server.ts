@@ -12,12 +12,18 @@ export async function ensureActiveStack(userId: string): Promise<{
   started_at: string;
   expires_at: string;
 }> {
-  const { data: existing } = await supabaseAdmin
+  const { data: existing, error: existingError } = await supabaseAdmin
     .from("card_stacks")
     .select("id, started_at, expires_at")
     .eq("user_id", userId)
     .eq("status", "active")
+    .order("expires_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
+
+  if (existingError) {
+    throw new Error(`Falha ao buscar pilha ativa: ${existingError.message}`);
+  }
 
   if (existing) return existing;
 
