@@ -310,15 +310,17 @@ function CheckoutPage() {
   const bundleDiscount = bundleDiscountCents / 100;
   const total = totalCents / 100;
 
+  const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
+
   const persistAddressAndProfile = async () => {
     if (!user) return;
     await supabase
       .from("profiles")
-      .update({ full_name: form.recipientName, cpf: form.cpf, phone: form.phone })
+      .update({ full_name: fullName, cpf: form.cpf, phone: form.phone })
       .eq("user_id", user.id);
     await supabase.from("addresses").insert({
       user_id: user.id,
-      recipient_name: form.recipientName,
+      recipient_name: fullName,
       cep: form.cep,
       street: form.street,
       number: form.number,
@@ -331,7 +333,7 @@ function CheckoutPage() {
   };
 
   const buildAddressPayload = () => ({
-    recipientName: form.recipientName,
+    recipientName: fullName,
     cpf: form.cpf || null,
     phone: form.phone,
     cep: form.cep,
