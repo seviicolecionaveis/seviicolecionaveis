@@ -425,6 +425,10 @@ function CheckoutPage() {
     if (ln.length < 2 || !/[A-Za-zÀ-ÿ]/.test(ln)) {
       return "Sobrenome inválido. Informe seu sobrenome completo.";
     }
+    const cpfDigits = (form.cpf || "").replace(/\D/g, "");
+    if (cpfDigits.length !== 11) {
+      return "Informe um CPF válido (11 dígitos).";
+    }
     if (shipping === "fixed" && !selectedQuote) {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
     }
@@ -574,7 +578,7 @@ function CheckoutPage() {
               />
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="CPF" value={form.cpf} onChange={(v) => setForm({ ...form, cpf: v })} placeholder="000.000.000-00" />
+              <Field label="CPF" required value={form.cpf} onChange={(v) => setForm({ ...form, cpf: v })} placeholder="000.000.000-00" />
               <Field label="Telefone / WhatsApp" required value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(11) 90000-0000" />
             </div>
             <div className="grid sm:grid-cols-[160px_1fr] gap-4">
