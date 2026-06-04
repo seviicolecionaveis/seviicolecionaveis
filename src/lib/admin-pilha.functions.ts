@@ -147,6 +147,12 @@ export const adminGetPilhaData = createServerFn({ method: "GET" })
       (byStack[it.stack_id] ??= []).push(it);
     });
 
+    const exampleOrderIds = (exampleRows ?? []).map((o: any) => o.id);
+    const { data: exampleStackItems } = exampleOrderIds.length
+      ? await supabaseAdmin.from("card_stack_items").select("order_id").in("order_id", exampleOrderIds)
+      : { data: [] as any[] };
+    const itemsByOrderId = new Set((exampleStackItems ?? []).map((it: any) => it.order_id));
+
     return {
       exampleOrderId:
         (exampleRows ?? []).find((o: any) => !itemsByOrderId.has(o.id))?.id ?? null,
