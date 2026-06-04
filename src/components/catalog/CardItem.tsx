@@ -64,21 +64,6 @@ export function CardItem({ card, onClick }: Props) {
               `https://placehold.co/400x560/eeeeee/999999?text=${encodeURIComponent(card.name)}`;
           }}
         />
-        <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
-          <span className="rounded-full bg-background/90 backdrop-blur px-2 py-1 text-[10px] font-bold tracking-tight shadow-sm">
-            #{card.number}
-          </span>
-          {isNew && (
-            <span className="rounded-full bg-brand-gold text-brand-gold-foreground px-2 py-1 text-[10px] font-bold tracking-tight shadow-sm">
-              NOVO
-            </span>
-          )}
-        </div>
-        <div className="absolute bottom-3 right-3">
-          <span className={`rounded-full px-2 py-1 text-[10px] font-bold shadow-sm ${finishBadge[card.finish]}`}>
-            {card.finish.toUpperCase()}
-          </span>
-        </div>
         {out && (
           <div className="absolute inset-0 grid place-items-center bg-foreground/40">
             <span className="rounded bg-foreground px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-background">
@@ -87,7 +72,20 @@ export function CardItem({ card, onClick }: Props) {
           </div>
         )}
       </div>
-      <div className="mt-4 flex justify-between gap-2">
+      <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+        <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold tracking-tight">
+          #{card.number}
+        </span>
+        {isNew && (
+          <span className="rounded-full bg-brand-gold text-brand-gold-foreground px-2 py-0.5 text-[10px] font-bold tracking-tight">
+            NOVO
+          </span>
+        )}
+        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${finishBadge[card.finish]}`}>
+          {card.finish.toUpperCase()}
+        </span>
+      </div>
+      <div className="mt-3 flex justify-between gap-2">
         <div className="min-w-0">
           <h3 className="truncate text-sm font-semibold">{card.name}</h3>
           <p className="truncate text-xs text-muted-foreground uppercase">
