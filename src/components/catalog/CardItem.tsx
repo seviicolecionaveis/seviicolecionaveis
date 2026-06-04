@@ -85,7 +85,7 @@ export function CardItem({ card, onClick }: Props) {
           {card.finish.toUpperCase()}
         </span>
       </div>
-      <div className="mt-4 flex justify-between gap-2">
+      <div className="mt-3 flex justify-between gap-2">
         <div className="min-w-0">
           <h3 className="truncate text-sm font-semibold">{card.name}</h3>
           <p className="truncate text-xs text-muted-foreground uppercase">
