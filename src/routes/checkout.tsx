@@ -179,9 +179,14 @@ function CheckoutPage() {
         .order("is_default", { ascending: false })
         .limit(1)
         .maybeSingle();
+      const sourceName = addr?.recipient_name ?? profile?.full_name ?? "";
+      const parts = sourceName.trim().split(/\s+/);
+      const firstName = parts.shift() ?? "";
+      const lastName = parts.join(" ");
       setForm((f) => ({
         ...f,
-        recipientName: addr?.recipient_name ?? profile?.full_name ?? "",
+        firstName,
+        lastName,
         cpf: profile?.cpf ?? "",
         phone: profile?.phone ?? "",
         cep: addr?.cep ?? "",
