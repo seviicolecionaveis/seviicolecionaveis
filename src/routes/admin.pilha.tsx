@@ -149,9 +149,10 @@ function ItemRow({
 function AdminPilhaPage() {
   const { isAdmin, loading: authLoading } = useAuth();
   const [tab, setTab] = useState<"orders" | "stacks">("orders");
-  const [data, setData] = useState<{ serviceOrders: AdminServiceOrder[]; stacks: AdminStack[] }>({
+  const [data, setData] = useState<{ serviceOrders: AdminServiceOrder[]; stacks: AdminStack[]; exampleOrderId: string | null }>({
     serviceOrders: [],
     stacks: [],
+    exampleOrderId: null,
   });
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -175,6 +176,8 @@ function AdminPilhaPage() {
       toast.success(`${res.addedCount} item(ns) adicionado(s) à pilha.`);
       setOrderInput("");
       await load();
+      setTab("stacks");
+      setExpanded((prev) => new Set(prev).add(res.stackId));
     } catch (e: any) {
       toast.error(e?.message ?? "Falha ao adicionar pedido à pilha.");
     } finally {
@@ -297,6 +300,11 @@ function AdminPilhaPage() {
             Cole o ID do pedido (UUID completo ou os primeiros 8+ caracteres). O pedido precisa estar
             pago. Os itens serão lançados na pilha ativa do cliente — se não houver, uma nova será
             criada com 30 dias.
+            {data.exampleOrderId && (
+              <>
+                {" "}Exemplo: <span className="font-mono font-semibold text-foreground">{data.exampleOrderId}</span>
+              </>
+            )}
           </p>
           <div className="flex flex-wrap gap-2">
             <input
@@ -305,7 +313,7 @@ function AdminPilhaPage() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleAddOrder();
               }}
-              placeholder="ex.: 3f2a1b9c ou UUID completo"
+              placeholder={data.exampleOrderId ? `ex.: ${data.exampleOrderId.slice(0, 8)} ou UUID completo` : "ex.: 3f2a1b9c ou UUID completo"}
               className="flex-1 min-w-[220px] rounded-md border border-border bg-background px-3 py-2 text-sm font-mono"
               disabled={addingOrder}
             />
