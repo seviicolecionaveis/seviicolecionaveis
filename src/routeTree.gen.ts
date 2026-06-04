@@ -15,7 +15,6 @@ import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeladosRouteImport } from './routes/selados'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as PilhaRouteImport } from './routes/pilha'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as ImasRouteImport } from './routes/imas'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
@@ -94,11 +93,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PilhaRoute = PilhaRouteImport.update({
-  id: '/pilha',
-  path: '/pilha',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const OrdersRoute = OrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -165,9 +159,9 @@ const OrdersIndexRoute = OrdersIndexRouteImport.update({
   getParentRoute: () => OrdersRoute,
 } as any)
 const PilhaSolicitarRoute = PilhaSolicitarRouteImport.update({
-  id: '/solicitar',
-  path: '/solicitar',
-  getParentRoute: () => PilhaRoute,
+  id: '/pilha/solicitar',
+  path: '/pilha/solicitar',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PayOrderIdRoute = PayOrderIdRouteImport.update({
   id: '/pay/$orderId',
@@ -358,7 +352,6 @@ export interface FileRoutesByFullPath {
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
   '/orders': typeof OrdersRouteWithChildren
-  '/pilha': typeof PilhaRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -413,7 +406,6 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
-  '/pilha': typeof PilhaRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -470,7 +462,6 @@ export interface FileRoutesById {
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
   '/orders': typeof OrdersRouteWithChildren
-  '/pilha': typeof PilhaRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -528,7 +519,6 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/imas'
     | '/orders'
-    | '/pilha'
     | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
@@ -583,7 +573,6 @@ export interface FileRouteTypes {
     | '/faq'
     | '/favoritos'
     | '/imas'
-    | '/pilha'
     | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
@@ -639,7 +628,6 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/imas'
     | '/orders'
-    | '/pilha'
     | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
@@ -696,7 +684,6 @@ export interface RootRouteChildren {
   FavoritosRoute: typeof FavoritosRoute
   ImasRoute: typeof ImasRoute
   OrdersRoute: typeof OrdersRouteWithChildren
-  PilhaRoute: typeof PilhaRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   SeladosRoute: typeof SeladosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -707,6 +694,7 @@ export interface RootRouteChildren {
   ColecaoSlugRoute: typeof ColecaoSlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   PayOrderIdRoute: typeof PayOrderIdRoute
+  PilhaSolicitarRoute: typeof PilhaSolicitarRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksAutoCancelUnpaidRoute: typeof ApiPublicHooksAutoCancelUnpaidRoute
@@ -765,13 +753,6 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pilha': {
-      id: '/pilha'
-      path: '/pilha'
-      fullPath: '/pilha'
-      preLoaderRoute: typeof PilhaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/orders': {
@@ -867,10 +848,10 @@ declare module '@tanstack/react-router' {
     }
     '/pilha/solicitar': {
       id: '/pilha/solicitar'
-      path: '/solicitar'
+      path: '/pilha/solicitar'
       fullPath: '/pilha/solicitar'
       preLoaderRoute: typeof PilhaSolicitarRouteImport
-      parentRoute: typeof PilhaRoute
+      parentRoute: typeof rootRouteImport
     }
     '/pay/$orderId': {
       id: '/pay/$orderId'
@@ -1165,16 +1146,6 @@ const OrdersRouteChildren: OrdersRouteChildren = {
 const OrdersRouteWithChildren =
   OrdersRoute._addFileChildren(OrdersRouteChildren)
 
-interface PilhaRouteChildren {
-  PilhaSolicitarRoute: typeof PilhaSolicitarRoute
-}
-
-const PilhaRouteChildren: PilhaRouteChildren = {
-  PilhaSolicitarRoute: PilhaSolicitarRoute,
-}
-
-const PilhaRouteWithChildren = PilhaRoute._addFileChildren(PilhaRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcessoriosRoute: AcessoriosRoute,
@@ -1188,7 +1159,6 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritosRoute: FavoritosRoute,
   ImasRoute: ImasRoute,
   OrdersRoute: OrdersRouteWithChildren,
-  PilhaRoute: PilhaRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   SeladosRoute: SeladosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
@@ -1199,6 +1169,7 @@ const rootRouteChildren: RootRouteChildren = {
   ColecaoSlugRoute: ColecaoSlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   PayOrderIdRoute: PayOrderIdRoute,
+  PilhaSolicitarRoute: PilhaSolicitarRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksAutoCancelUnpaidRoute: ApiPublicHooksAutoCancelUnpaidRoute,
