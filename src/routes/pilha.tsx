@@ -183,7 +183,7 @@ function PilhaPage() {
                       key={i.id}
                       onClick={(e) => {
                         const target = e.target as HTMLElement;
-                        if (target.closest("a")) return;
+                        if (target.closest("a, button, input, [role='checkbox']")) return;
                         toggle(i.id);
                       }}
                       className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-secondary/30 active:bg-secondary/50"
@@ -191,6 +191,7 @@ function PilhaPage() {
                       <Checkbox
                         checked={selected.has(i.id)}
                         onCheckedChange={() => toggle(i.id)}
+                        onClick={(e) => e.stopPropagation()}
                       />
                       {i.cardImage ? (
                         <img
