@@ -36,7 +36,8 @@ export const Route = createFileRoute("/checkout")({
 
 
 interface Form {
-  recipientName: string;
+  firstName: string;
+  lastName: string;
   cpf: string;
   phone: string;
   cep: string;
@@ -54,7 +55,8 @@ interface Form {
 }
 
 const empty: Form = {
-  recipientName: "",
+  firstName: "",
+  lastName: "",
   cpf: "",
   phone: "",
   cep: "",
