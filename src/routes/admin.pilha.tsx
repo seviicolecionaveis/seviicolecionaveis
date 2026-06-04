@@ -9,6 +9,7 @@ import { adminUpdateServiceOrder } from "@/lib/service-orders-admin.functions";
 import {
   adminGetPilhaData,
   adminAdjustStackItem,
+  adminAddOrderToStack,
   type AdminServiceOrder,
   type AdminStack,
   type AdminStackItem,
