@@ -70,11 +70,11 @@ async function ensureAdmin(supabaseAdmin: any, userId: string) {
 
 export const adminGetPilhaData = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<{ serviceOrders: AdminServiceOrder[]; stacks: AdminStack[] }> => {
+  .handler(async ({ context }): Promise<{ serviceOrders: AdminServiceOrder[]; stacks: AdminStack[]; exampleOrderId: string | null }> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await ensureAdmin(supabaseAdmin, context.userId);
 
-    const [{ data: osRows }, { data: stackRows }] = await Promise.all([
+    const [{ data: osRows }, { data: stackRows }, { data: exampleRows }] = await Promise.all([
       supabaseAdmin
         .from("service_orders")
         .select("*")
@@ -84,6 +84,12 @@ export const adminGetPilhaData = createServerFn({ method: "GET" })
         .select("*")
         .eq("status", "active")
         .order("expires_at", { ascending: true }),
+      supabaseAdmin
+        .from("orders")
+        .select("id, status, created_at, order_items!inner(id)")
+        .in("status", ["paid", "preparing", "shipped", "awaiting_pickup", "dispatched", "delivered"])
+        .order("created_at", { ascending: false })
+        .limit(20),
     ]);
 
     const orders = osRows ?? [];
@@ -142,6 +148,8 @@ export const adminGetPilhaData = createServerFn({ method: "GET" })
     });
 
     return {
+      exampleOrderId:
+        (exampleRows ?? []).find((o: any) => !itemsByOrderId.has(o.id))?.id ?? null,
       serviceOrders: orders.map((o: any) => ({
         ...o,
         customer_name: profileMap.get(o.user_id)?.name ?? null,
