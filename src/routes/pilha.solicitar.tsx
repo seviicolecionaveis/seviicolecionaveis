@@ -16,6 +16,9 @@ import { copyToClipboard } from "@/lib/clipboard";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/pilha/solicitar")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    items: typeof search.items === "string" ? search.items : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Solicitar envio — Pilha de Cartas" },
@@ -46,6 +49,7 @@ interface OSResult {
 }
 
 function SolicitarPage() {
+  const search = Route.useSearch();
   const { user, loading } = useAuth();
   const nav = useNavigate();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -86,13 +90,21 @@ function SolicitarPage() {
   // Carrega seleção do sessionStorage
   useEffect(() => {
     try {
+      const fromSearch = search.items
+        ?.split(",")
+        .map((id) => id.trim())
+        .filter(Boolean);
+      if (fromSearch?.length) {
+        setSelectedIds(fromSearch);
+        return;
+      }
       const raw = sessionStorage.getItem("pilha:selectedItems");
       if (raw) {
         const arr = JSON.parse(raw) as string[];
         if (Array.isArray(arr) && arr.length > 0) setSelectedIds(arr);
       }
     } catch {}
-  }, []);
+  }, [search.items]);
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/auth" });
