@@ -55,7 +55,7 @@ export async function ensureActiveStack(userId: string): Promise<{
 export async function addOrderToStack(orderId: string): Promise<void> {
   const { data: order } = await supabaseAdmin
     .from("orders")
-    .select("id, user_id, shipping_method")
+    .select("id, user_id, email, recipient_name, shipping_method")
     .eq("id", orderId)
     .maybeSingle();
 
@@ -99,4 +99,32 @@ export async function addOrderToStack(orderId: string): Promise<void> {
 
   const { error } = await supabaseAdmin.from("card_stack_items").insert(rows);
   if (error) throw new Error(`Falha ao adicionar itens à pilha: ${error.message}`);
+
+  if (order.email) {
+    try {
+      const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
+      await sendTransactionalEmailSafe({
+        templateName: "stack-order-stored",
+        recipientEmail: order.email,
+        idempotencyKey: `stack-order-stored-${orderId}`,
+        templateData: {
+          recipientName: order.recipient_name?.split(/\s+/)[0],
+          orderId,
+          expiresAt: stack.expires_at,
+          items: items.map((it) => ({
+            card_name: it.card_name,
+            collection: it.collection,
+            card_number: it.card_number,
+            finish: it.finish,
+            language: it.language,
+            condition: it.condition,
+            quantity: it.quantity,
+            unit_price_cents: it.unit_price_cents ?? 0,
+          })),
+        },
+      });
+    } catch (e) {
+      console.error("[addOrderToStack] email falhou:", e);
+    }
+  }
 }
