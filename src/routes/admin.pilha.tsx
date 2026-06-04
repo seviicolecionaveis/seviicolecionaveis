@@ -289,6 +289,38 @@ function AdminPilhaPage() {
           </button>
         </div>
 
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-xs font-bold uppercase tracking-widest mb-1">
+            Adicionar pedido anterior à pilha
+          </p>
+          <p className="text-[11px] text-muted-foreground mb-3">
+            Cole o ID do pedido (UUID completo ou os primeiros 8+ caracteres). O pedido precisa estar
+            pago. Os itens serão lançados na pilha ativa do cliente — se não houver, uma nova será
+            criada com 30 dias.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <input
+              value={orderInput}
+              onChange={(e) => setOrderInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddOrder();
+              }}
+              placeholder="ex.: 3f2a1b9c ou UUID completo"
+              className="flex-1 min-w-[220px] rounded-md border border-border bg-background px-3 py-2 text-sm font-mono"
+              disabled={addingOrder}
+            />
+            <button
+              onClick={handleAddOrder}
+              disabled={addingOrder || orderInput.trim().length < 4}
+              className="rounded-md bg-foreground text-background px-4 py-2 text-xs font-semibold uppercase tracking-wide disabled:opacity-40"
+            >
+              {addingOrder ? "Adicionando..." : "Adicionar à pilha"}
+            </button>
+          </div>
+        </div>
+
+
+
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : tab === "orders" ? (
