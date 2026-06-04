@@ -744,10 +744,10 @@ function CheckoutPage() {
                 className="mt-1"
               />
               <div className="flex-1">
-                <p className="text-sm font-semibold flex items-center gap-2">
-                  🃏 Pilha de Cartas
+                <p className="text-sm font-semibold flex items-center gap-2 flex-wrap">
+                  🃏 Pilha de Cartas (escolha depois como retirar/enviar)
                   <span className="ml-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
-                    Grátis
+                    Armazenamento gratuito por 30 dias
                   </span>
                 </p>
                 <p className="text-xs text-muted-foreground">
