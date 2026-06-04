@@ -230,10 +230,13 @@ function SolicitarPage() {
   const arteApplies = method === "arte_em_cards" && !hasValidArteCode;
   const arteCents = arteApplies ? 500 : 0;
   const totalCents = shippingCents + arteCents;
-  const arteCodeForSubmit =
-    method === "arte_em_cards"
-      ? ((arteExisting?.code ?? (arteStatus.state === "valid" ? arteStatus.code : arteCode.trim().toUpperCase())) || null)
-      : null;
+  let arteCodeForSubmit: string | null = null;
+  if (method === "arte_em_cards") {
+    const existing = arteExisting?.code;
+    const validated = arteStatus.state === "valid" ? arteStatus.code : arteCode.trim().toUpperCase();
+    const resolved = existing ?? validated;
+    arteCodeForSubmit = resolved ? resolved : null;
+  }
 
   const handleSubmit = async () => {
     setErr(null);
