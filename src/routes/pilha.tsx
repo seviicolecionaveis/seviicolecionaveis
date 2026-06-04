@@ -244,7 +244,7 @@ function PilhaPage() {
                       try {
                         sessionStorage.setItem("pilha:selectedItems", JSON.stringify(ids));
                       } catch {}
-                      nav({ to: "/pilha/solicitar" });
+                      nav({ to: "/pilha/solicitar", search: { items: ids.join(",") } });
                     }}
                     className="w-full sm:w-auto rounded-full bg-foreground px-5 py-3 text-xs font-semibold uppercase tracking-wide text-background disabled:bg-foreground/30 disabled:cursor-not-allowed"
                   >
