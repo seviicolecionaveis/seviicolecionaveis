@@ -159,6 +159,28 @@ function AdminPilhaPage() {
   const update = useServerFn(adminUpdateServiceOrder);
   const fetchData = useServerFn(adminGetPilhaData);
   const adjustStackItem = useServerFn(adminAdjustStackItem);
+  const addOrderToStack = useServerFn(adminAddOrderToStack);
+  const [orderInput, setOrderInput] = useState("");
+  const [addingOrder, setAddingOrder] = useState(false);
+
+  async function handleAddOrder() {
+    const v = orderInput.trim();
+    if (v.length < 4) {
+      toast.error("Informe pelo menos 4 caracteres do ID do pedido.");
+      return;
+    }
+    setAddingOrder(true);
+    try {
+      const res = await addOrderToStack({ data: { orderIdOrPrefix: v } });
+      toast.success(`${res.addedCount} item(ns) adicionado(s) à pilha.`);
+      setOrderInput("");
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao adicionar pedido à pilha.");
+    } finally {
+      setAddingOrder(false);
+    }
+  }
 
   async function handleAdjustItem(itemId: string, newQuantity: number, name: string) {
     try {
