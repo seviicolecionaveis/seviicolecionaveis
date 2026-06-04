@@ -417,6 +417,14 @@ function CheckoutPage() {
   };
 
   const validateShippingChoice = (): string | null => {
+    const fn = form.firstName.trim();
+    const ln = form.lastName.trim();
+    if (!fn || !ln) {
+      return "Informe primeiro nome e sobrenome do destinatário.";
+    }
+    if (ln.length < 2 || !/[A-Za-zÀ-ÿ]/.test(ln)) {
+      return "Sobrenome inválido. Informe seu sobrenome completo.";
+    }
     if (shipping === "fixed" && !selectedQuote) {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
     }
