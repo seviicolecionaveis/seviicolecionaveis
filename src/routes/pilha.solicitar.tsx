@@ -92,7 +92,7 @@ function SolicitarPage() {
     try {
       const fromSearch = search.items
         ?.split(",")
-        .map((id) => id.trim())
+        .map((id: string) => id.trim())
         .filter(Boolean);
       if (fromSearch?.length) {
         setSelectedIds(fromSearch);
