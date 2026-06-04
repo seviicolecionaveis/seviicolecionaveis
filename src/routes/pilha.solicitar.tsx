@@ -16,6 +16,9 @@ import { copyToClipboard } from "@/lib/clipboard";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/pilha/solicitar")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    items: typeof search.items === "string" ? search.items : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Solicitar envio — Pilha de Cartas" },
@@ -46,6 +49,7 @@ interface OSResult {
 }
 
 function SolicitarPage() {
+  const search = Route.useSearch();
   const { user, loading } = useAuth();
   const nav = useNavigate();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -86,13 +90,21 @@ function SolicitarPage() {
   // Carrega seleção do sessionStorage
   useEffect(() => {
     try {
+      const fromSearch = search.items
+        ?.split(",")
+        .map((id: string) => id.trim())
+        .filter(Boolean);
+      if (fromSearch?.length) {
+        setSelectedIds(fromSearch);
+        return;
+      }
       const raw = sessionStorage.getItem("pilha:selectedItems");
       if (raw) {
         const arr = JSON.parse(raw) as string[];
         if (Array.isArray(arr) && arr.length > 0) setSelectedIds(arr);
       }
     } catch {}
-  }, []);
+  }, [search.items]);
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/auth" });
@@ -212,9 +224,16 @@ function SolicitarPage() {
 
   const selectedQuote = quotes.find((q) => q.id === selectedQuoteId) ?? null;
   const shippingCents = method === "correios" ? (selectedQuote?.priceCents ?? 0) : 0;
-  const arteApplies = method === "arte_em_cards" && !(arteStatus.state === "valid" && arteStatus.code === arteCode.trim().toUpperCase());
+  const hasValidArteCode =
+    method === "arte_em_cards" &&
+    (!!arteExisting || (arteStatus.state === "valid" && arteStatus.code === arteCode.trim().toUpperCase()));
+  const arteApplies = method === "arte_em_cards" && !hasValidArteCode;
   const arteCents = arteApplies ? 500 : 0;
   const totalCents = shippingCents + arteCents;
+  const arteCodeForSubmit =
+    method === "arte_em_cards"
+      ? ((arteExisting?.code ?? (arteStatus.state === "valid" ? arteStatus.code : arteCode.trim().toUpperCase())) || null)
+      : null;
 
   const handleSubmit = async () => {
     setErr(null);
@@ -275,14 +294,19 @@ function SolicitarPage() {
                   state: state.toUpperCase(),
                 }
               : null,
-          arteEmCardsCode: method === "arte_em_cards" ? (arteCode || arteExisting?.code || null) : null,
+          arteEmCardsCode: arteCodeForSubmit,
           pickupPoint: method === "presencial" ? pickupPoint : null,
           notes: notes || null,
           cpf: cpf || null,
         },
       });
-      setResult(r as OSResult);
+      const resultData = r as OSResult;
+      setResult(resultData);
       try { sessionStorage.removeItem("pilha:selectedItems"); } catch {}
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (resultData.whatsappUrl) {
+        window.location.href = resultData.whatsappUrl;
+      }
     } catch (e: any) {
       setErr(e?.message ?? "Falha ao criar solicitação.");
     } finally {
@@ -510,11 +534,15 @@ function SolicitarPage() {
   function ResultView({ result }: { result: OSResult }) {
     return (
       <section className="rounded-xl border border-border bg-card p-6 space-y-4">
-        <h2 className="text-lg font-bold">OS #{result.code} criada ✓</h2>
+        <h2 className="text-lg font-bold">
+          {result.pix ? "Checkout da solicitação" : `OS #${result.code} criada ✓`}
+        </h2>
 
         {result.pix && (
           <>
-            <p className="text-sm">Pague o Pix abaixo para concluir a solicitação. Esta página atualiza sozinha quando o pagamento for confirmado.</p>
+            <p className="text-sm">
+              OS #{result.code} criada. Pague o Pix abaixo para concluir a solicitação. Esta página atualiza sozinha quando o pagamento for confirmado.
+            </p>
             <div className="grid place-items-center">
               <img src={`data:image/png;base64,${result.pix.qrCodeBase64}`} alt="QR Pix" className="h-56 w-56" />
             </div>
