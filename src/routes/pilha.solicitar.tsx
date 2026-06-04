@@ -236,6 +236,16 @@ function SolicitarPage() {
       setErr("Selecione o ponto de retirada (Aruana ou Aeroporto).");
       return;
     }
+    if (method === "arte_em_cards" && arteApplies) {
+      if (!recipientName.trim()) {
+        setErr("Informe o nome completo para gerar o Pix.");
+        return;
+      }
+      if (cpf.replace(/\D/g, "").length !== 11) {
+        setErr("Informe um CPF válido (11 dígitos) para gerar o Pix de R$ 5,00.");
+        return;
+      }
+    }
     setSubmitting(true);
     try {
       const r = await createServiceOrderRequest({
@@ -417,6 +427,16 @@ function SolicitarPage() {
                 </div>
                 {arteStatus.state === "valid" && <p className="text-xs text-emerald-700">✓ Código válido — taxa isenta</p>}
                 {arteStatus.state === "invalid" && <p className="text-xs text-red-700">{arteStatus.reason}</p>}
+
+                {arteApplies && (
+                  <div className="pt-3 border-t border-border space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-widest">Dados para o Pix (R$ 5,00)</p>
+                    <div className="grid sm:grid-cols-2 gap-2">
+                      <input className="border rounded-md px-3 py-2 text-sm" placeholder="Nome completo" value={recipientName} onChange={(e) => setRecipientName(e.target.value)} />
+                      <input className="border rounded-md px-3 py-2 text-sm" placeholder="CPF (obrigatório p/ Pix)" value={cpf} onChange={(e) => setCpf(e.target.value)} />
+                    </div>
+                  </div>
+                )}
               </section>
             )}
 
