@@ -236,6 +236,16 @@ function SolicitarPage() {
       setErr("Selecione o ponto de retirada (Aruana ou Aeroporto).");
       return;
     }
+    if (method === "arte_em_cards" && arteApplies) {
+      if (!recipientName.trim()) {
+        setErr("Informe o nome completo para gerar o Pix.");
+        return;
+      }
+      if (cpf.replace(/\D/g, "").length !== 11) {
+        setErr("Informe um CPF válido (11 dígitos) para gerar o Pix de R$ 5,00.");
+        return;
+      }
+    }
     setSubmitting(true);
     try {
       const r = await createServiceOrderRequest({
