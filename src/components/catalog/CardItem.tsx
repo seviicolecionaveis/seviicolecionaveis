@@ -72,16 +72,16 @@ export function CardItem({ card, onClick }: Props) {
           </div>
         )}
       </div>
-      <div className="mt-3 flex items-center gap-1.5 flex-wrap">
-        <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold tracking-tight">
+      <div className="mt-3 flex items-center gap-1 flex-nowrap overflow-hidden">
+        <span className="shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[9px] font-bold tracking-tight">
           #{card.number}
         </span>
         {isNew && (
-          <span className="rounded-full bg-brand-gold text-brand-gold-foreground px-2 py-0.5 text-[10px] font-bold tracking-tight">
+          <span className="shrink-0 rounded-full bg-brand-gold text-brand-gold-foreground px-1.5 py-0.5 text-[9px] font-bold tracking-tight">
             NOVO
           </span>
         )}
-        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${finishBadge[card.finish]}`}>
+        <span className={`min-w-0 truncate rounded-full px-1.5 py-0.5 text-[9px] font-bold ${finishBadge[card.finish]}`}>
           {card.finish.toUpperCase()}
         </span>
       </div>
