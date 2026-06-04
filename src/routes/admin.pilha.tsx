@@ -524,7 +524,6 @@ function AdminPilhaPage() {
                           <ItemRow
                             key={it.id}
                             item={it}
-                            onAdjust={(q) => handleAdjustItem(it.id, q, it.card_name)}
                             onRemove={() => handleAdjustItem(it.id, 0, it.card_name)}
                           />
                         ))}
