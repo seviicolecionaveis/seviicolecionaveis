@@ -549,7 +549,22 @@ function CheckoutPage() {
           <h1 className="text-2xl font-bold">Endereço de entrega</h1>
 
           <div className="grid gap-4">
-            <Field label="Nome completo do destinatário" required value={form.recipientName} onChange={(v) => setForm({ ...form, recipientName: v })} />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field
+                label="Primeiro nome"
+                required
+                value={form.firstName}
+                onChange={(v) => setForm({ ...form, firstName: v })}
+                placeholder="Ex.: Joao"
+              />
+              <Field
+                label="Sobrenome"
+                required
+                value={form.lastName}
+                onChange={(v) => setForm({ ...form, lastName: v })}
+                placeholder="Ex.: Mura"
+              />
+            </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="CPF" value={form.cpf} onChange={(v) => setForm({ ...form, cpf: v })} placeholder="000.000.000-00" />
               <Field label="Telefone / WhatsApp" required value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(11) 90000-0000" />
