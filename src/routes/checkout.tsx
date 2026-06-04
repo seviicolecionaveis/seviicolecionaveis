@@ -36,7 +36,8 @@ export const Route = createFileRoute("/checkout")({
 
 
 interface Form {
-  recipientName: string;
+  firstName: string;
+  lastName: string;
   cpf: string;
   phone: string;
   cep: string;
@@ -54,7 +55,8 @@ interface Form {
 }
 
 const empty: Form = {
-  recipientName: "",
+  firstName: "",
+  lastName: "",
   cpf: "",
   phone: "",
   cep: "",
@@ -177,9 +179,14 @@ function CheckoutPage() {
         .order("is_default", { ascending: false })
         .limit(1)
         .maybeSingle();
+      const sourceName = addr?.recipient_name ?? profile?.full_name ?? "";
+      const parts = sourceName.trim().split(/\s+/);
+      const firstName = parts.shift() ?? "";
+      const lastName = parts.join(" ");
       setForm((f) => ({
         ...f,
-        recipientName: addr?.recipient_name ?? profile?.full_name ?? "",
+        firstName,
+        lastName,
         cpf: profile?.cpf ?? "",
         phone: profile?.phone ?? "",
         cep: addr?.cep ?? "",
@@ -303,15 +310,17 @@ function CheckoutPage() {
   const bundleDiscount = bundleDiscountCents / 100;
   const total = totalCents / 100;
 
+  const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
+
   const persistAddressAndProfile = async () => {
     if (!user) return;
     await supabase
       .from("profiles")
-      .update({ full_name: form.recipientName, cpf: form.cpf, phone: form.phone })
+      .update({ full_name: fullName, cpf: form.cpf, phone: form.phone })
       .eq("user_id", user.id);
     await supabase.from("addresses").insert({
       user_id: user.id,
-      recipient_name: form.recipientName,
+      recipient_name: fullName,
       cep: form.cep,
       street: form.street,
       number: form.number,
@@ -324,7 +333,7 @@ function CheckoutPage() {
   };
 
   const buildAddressPayload = () => ({
-    recipientName: form.recipientName,
+    recipientName: fullName,
     cpf: form.cpf || null,
     phone: form.phone,
     cep: form.cep,
@@ -408,6 +417,14 @@ function CheckoutPage() {
   };
 
   const validateShippingChoice = (): string | null => {
+    const fn = form.firstName.trim();
+    const ln = form.lastName.trim();
+    if (!fn || !ln) {
+      return "Informe primeiro nome e sobrenome do destinatário.";
+    }
+    if (ln.length < 2 || !/[A-Za-zÀ-ÿ]/.test(ln)) {
+      return "Sobrenome inválido. Informe seu sobrenome completo.";
+    }
     if (shipping === "fixed" && !selectedQuote) {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
     }
@@ -540,7 +557,22 @@ function CheckoutPage() {
           <h1 className="text-2xl font-bold">Endereço de entrega</h1>
 
           <div className="grid gap-4">
-            <Field label="Nome completo do destinatário" required value={form.recipientName} onChange={(v) => setForm({ ...form, recipientName: v })} />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field
+                label="Primeiro nome"
+                required
+                value={form.firstName}
+                onChange={(v) => setForm({ ...form, firstName: v })}
+                placeholder="Ex.: Joao"
+              />
+              <Field
+                label="Sobrenome"
+                required
+                value={form.lastName}
+                onChange={(v) => setForm({ ...form, lastName: v })}
+                placeholder="Ex.: Mura"
+              />
+            </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="CPF" value={form.cpf} onChange={(v) => setForm({ ...form, cpf: v })} placeholder="000.000.000-00" />
               <Field label="Telefone / WhatsApp" required value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(11) 90000-0000" />
