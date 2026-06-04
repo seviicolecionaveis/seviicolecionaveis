@@ -220,7 +220,7 @@ function SolicitarPage() {
   const totalCents = shippingCents + arteCents;
   const arteCodeForSubmit =
     method === "arte_em_cards"
-      ? (arteExisting?.code ?? (arteStatus.state === "valid" ? arteStatus.code : arteCode.trim().toUpperCase()) || null)
+      ? ((arteExisting?.code ?? (arteStatus.state === "valid" ? arteStatus.code : arteCode.trim().toUpperCase())) || null)
       : null;
 
   const handleSubmit = async () => {
