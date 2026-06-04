@@ -19,6 +19,7 @@ import { template as giftVoucher } from './gift-voucher'
 import { template as couponBroadcast } from './coupon-broadcast'
 import { template as arteEmCardsCode } from './arte-em-cards-code'
 import { template as stackReminder } from './stack-reminder'
+import { template as stackOrderStored } from './stack-order-stored'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'order-received': orderReceived,
@@ -31,4 +32,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'coupon-broadcast': couponBroadcast,
   'arte-em-cards-code': arteEmCardsCode,
   'stack-reminder': stackReminder,
+  'stack-order-stored': stackOrderStored,
 }
