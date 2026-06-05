@@ -333,6 +333,10 @@ function isSealedItem(it: { cardId?: string }) {
   return typeof it.cardId === "string" && it.cardId.startsWith("sealed:");
 }
 
+function isAccessoryItem(it: { cardId?: string }) {
+  return typeof it.cardId === "string" && it.cardId.startsWith("accessory:");
+}
+
 async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]> {
   const resolved: T[] = [];
   for (const raw of items) {
