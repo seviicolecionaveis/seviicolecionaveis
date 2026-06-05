@@ -76,7 +76,7 @@ const empty: Form = {
 };
 
 type Step = "address" | "pix" | "card";
-type PaymentMethod = "pix" | "card";
+type PaymentMethod = "pix" | "card" | "admin_test";
 
 interface PixState {
   orderId: string;
