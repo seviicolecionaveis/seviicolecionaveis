@@ -7,17 +7,19 @@ import {
   createPixOrder,
   checkPixOrderStatus,
   createCardOrder,
+  createAdminTestOrder,
   getMercadoPagoPublicKey,
   previewCoupon,
 } from "@/utils/payments.functions";
 import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
-import { Copy, Check, QrCode, CreditCard, Loader2 } from "lucide-react";
+import { Copy, Check, QrCode, CreditCard, Loader2, ShieldCheck } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 import { computeBundleDiscount } from "@/lib/bundles";
 import { copyToClipboard } from "@/lib/clipboard";
 import { CardStackTermsDialog } from "@/components/CardStackTermsDialog";
+import { cartIsAllTestCard } from "@/lib/test-card";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
