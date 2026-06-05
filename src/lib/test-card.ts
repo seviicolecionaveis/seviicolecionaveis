@@ -29,8 +29,22 @@ export function isTestCardCatalogEntry(c: {
   );
 }
 
-/** Detecta se o carrinho contém EXCLUSIVAMENTE o item de teste admin. */
-export function cartIsAllTestCard(items: Array<{ cardId: string }>): boolean {
+/**
+ * Detecta se o carrinho contém EXCLUSIVAMENTE o item de teste admin.
+ * O carrinho usa um id sintético do catálogo (name__collection__number),
+ * não o uuid da tabela `cards`. Por isso comparamos por name/collection/number.
+ */
+export function cartIsAllTestCard(
+  items: Array<{ cardId: string; name?: string; collection?: string | null; number?: string | null }>,
+): boolean {
   if (items.length === 0) return false;
-  return items.every((i) => isTestCardId(i.cardId));
+  return items.every((i) => {
+    if (isTestCardId(i.cardId)) return true;
+    if (!i.name || !i.collection || !i.number) return false;
+    return isTestCardCatalogEntry({
+      name: i.name,
+      collection: i.collection,
+      number: i.number,
+    });
+  });
 }
