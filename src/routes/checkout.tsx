@@ -304,6 +304,11 @@ function CheckoutPage() {
           Math.max(0, nonBundleSubtotalCents - couponDiscountCents) * (PIX_DISCOUNT_PERCENT / 100),
         )
       : 0;
+  const isAdminTestCart = isAdmin && cartIsAllTestCard(items);
+  // Se o carrinho deixar de ser elegível, reverte o método selecionado.
+  useEffect(() => {
+    if (paymentMethod === "admin_test" && !isAdminTestCart) setPaymentMethod("pix");
+  }, [paymentMethod, isAdminTestCart]);
   const totalCents =
     subtotalCents - bundleDiscountCents - couponDiscountCents - pixDiscountCents + shippingCents;
 
