@@ -915,6 +915,27 @@ function CheckoutPage() {
                   <p className="text-xs text-muted-foreground">Visa, Master, Elo, Hipercard, Amex — em até 12x (via Mercado Pago).</p>
                 </div>
               </label>
+              {isAdminTestCart && (
+                <label className="flex items-start gap-3 rounded-lg border-2 border-amber-400 bg-amber-50 p-4 cursor-pointer hover:bg-amber-100">
+                  <input
+                    type="radio"
+                    name="pm"
+                    checked={paymentMethod === "admin_test"}
+                    onChange={() => setPaymentMethod("admin_test")}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold flex items-center gap-2 text-amber-900">
+                      <ShieldCheck className="h-4 w-4" /> Aprovação Admin (teste — sem cobrança)
+                    </p>
+                    <p className="text-xs text-amber-800">
+                      Modo teste exclusivo para administradores no cartão interno "Test Admin". O pedido é
+                      marcado como pago imediatamente e percorre todo o fluxo pós-pagamento (estoque, e-mails,
+                      etiqueta/pilha) sem qualquer cobrança real.
+                    </p>
+                  </div>
+                </label>
+              )}
             </div>
           </div>
 
@@ -927,9 +948,11 @@ function CheckoutPage() {
           >
             {loading
               ? "Carregando..."
-              : paymentMethod === "pix"
-                ? `Pagar com Pix — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
-                : `Pagar com cartão — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+              : paymentMethod === "admin_test"
+                ? `Aprovar pedido de teste — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                : paymentMethod === "pix"
+                  ? `Pagar com Pix — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                  : `Pagar com cartão — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
           </button>
         </form>
 
