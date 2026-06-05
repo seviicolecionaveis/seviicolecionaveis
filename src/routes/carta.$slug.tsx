@@ -77,8 +77,12 @@ export const Route = createFileRoute("/carta/$slug")({
 function CardDetailPage() {
   const { slug } = Route.useParams();
   const { cards, loading } = useCardsCatalog();
+  const { isAdmin, loading: authLoading } = useAuth();
   const nav = useNavigate();
   const [closed, setClosed] = useState(false);
+
+  const isTestCardRoute = slug === TEST_ADMIN_CARD_SLUG;
+  const blockedTestCard = isTestCardRoute && !authLoading && !isAdmin;
 
   const card = useMemo(
     () => cards.find((c) => cardSlug(c.name, c.collection, c.number) === slug) ?? null,
