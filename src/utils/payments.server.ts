@@ -2,9 +2,10 @@ import { type StripeEnv, createStripeClient } from "@/lib/stripe.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { createPixPayment, getPixPayment, createCardPaymentMP } from "@/lib/mercadopago.server";
 import { markOrderPaid, cancelOrder } from "@/lib/orders.server";
-import type { CardInput, PixInput, StripeInput } from "./payments.schemas";
+import type { AdminTestInput, CardInput, PixInput, StripeInput } from "./payments.schemas";
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
 import { computeBundleDiscount } from "@/lib/bundles";
+import { TEST_ADMIN_CARD_ID } from "@/lib/test-card";
 
 async function sendOrderReceivedEmail(orderId: string) {
   const { data: order } = await supabaseAdmin
