@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { CardInputSchema, PixInputSchema, StripeInputSchema } from "./payments.schemas";
+import { AdminTestInputSchema, CardInputSchema, PixInputSchema, StripeInputSchema } from "./payments.schemas";
 
 export const createOrderCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
