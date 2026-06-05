@@ -402,10 +402,43 @@ function CheckoutPage() {
         quantity: i.quantity,
       })),
     });
-    if (paymentMethod === "card") {
+    if (paymentMethod === "admin_test") {
+      await startAdminTest();
+    } else if (paymentMethod === "card") {
       await startCard();
     } else {
       await startPix();
+    }
+  };
+
+  const startAdminTest = async () => {
+    if (!user || items.length === 0) return;
+    const shipErr = validateShippingChoice();
+    if (shipErr) { setErr(shipErr); return; }
+    setLoading(true);
+    setErr(null);
+    try {
+      try { await persistAddressAndProfile(); } catch (e) { console.warn(e); }
+      const token = session?.access_token;
+      if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+      const result = await createAdminTestOrder({
+        headers: { Authorization: `Bearer ${token}` },
+        data: {
+          items: buildItemsPayload(),
+          shippingMethod: shipping,
+          shippingQuote: shippingQuoteForApi(),
+          address: buildAddressPayload(),
+          notes: buildNotes(),
+          arteEmCardsCode: null,
+        },
+      });
+      clear();
+      nav({ to: "/orders/$orderId", params: { orderId: result.orderId } });
+    } catch (e: any) {
+      console.error("startAdminTest error:", e);
+      setErr(e?.message ?? "Erro ao aprovar pedido de teste.");
+    } finally {
+      setLoading(false);
     }
   };
 
