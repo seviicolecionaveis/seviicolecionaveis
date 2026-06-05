@@ -1083,3 +1083,104 @@ export async function resendPendingOrderEmailsServer() {
   }
   return { sent, total: orders?.length ?? 0 };
 }
+
+// =========================================================================
+// Admin test order: bypass real payment for the internal "Test Admin" card.
+// Goes through the full pipeline (stock check, order/items insert, emails,
+// shipping label / card stack hooks) but is marked paid immediately.
+// =========================================================================
+
+export async function createAdminTestOrderServer(data: AdminTestInput, userId: string) {
+  // 1) Confirma admin
+  const { data: roleRow, error: roleErr } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (roleErr) throw new Error(roleErr.message);
+  if (!roleRow) throw new Error("Apenas administradores podem usar este método.");
+
+  // 2) Confirma que o carrinho contém SOMENTE o cartão de teste admin
+  const onlyTestCard = data.items.every((i) => i.cardId === TEST_ADMIN_CARD_ID);
+  if (!onlyTestCard) {
+    throw new Error("Aprovação Admin só pode ser usada com o cartão de teste.");
+  }
+
+  await cancelOtherPendingOrdersForUser(userId);
+
+  const items = await resolveCardIds(data.items);
+  await ensureAvailableStock(items);
+
+  const subtotalCents = items.reduce(
+    (s, i) => s + Math.round(i.unitPrice * 100) * i.quantity,
+    0,
+  );
+  const baseShippingCents = computeShippingCents(data);
+  const arte = data.shippingMethod === "arte_em_cards"
+    ? await resolveArteEmCardsFee(userId, data.arteEmCardsCode)
+    : { feeCents: 0, codeUsed: null as string | null };
+  const shippingCents = baseShippingCents + arte.feeCents;
+
+  const totalCents = subtotalCents + shippingCents;
+
+  const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
+  const email = userData?.user?.email ?? "";
+
+  const { data: order, error: orderErr } = await supabaseAdmin
+    .from("orders")
+    .insert({
+      user_id: userId,
+      status: "pending",
+      payment_method: "admin_test",
+      shipping_method: data.shippingMethod,
+      shipping_cost_cents: shippingCents,
+      subtotal_cents: subtotalCents,
+      discount_cents: 0,
+      coupon_code: null,
+      total_cents: totalCents,
+      recipient_name: data.address.recipientName,
+      cpf: data.address.cpf,
+      phone: data.address.phone,
+      email,
+      cep: data.address.cep,
+      street: data.address.street,
+      number: data.address.number,
+      complement: data.address.complement,
+      neighborhood: data.address.neighborhood,
+      city: data.address.city,
+      state: data.address.state,
+      notes: [data.notes, "[Pedido de teste admin — aprovado sem cobrança]"]
+        .filter(Boolean)
+        .join("\n\n"),
+      arte_em_cards_code: arte.codeUsed,
+      superfrete_service_id: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceId ?? null : null,
+      superfrete_service_name: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceName ?? null : null,
+    })
+    .select("id")
+    .single();
+  if (orderErr || !order) throw new Error(orderErr?.message ?? "Falha ao criar pedido");
+
+  const orderItems = items.map((i) => ({
+    order_id: order.id,
+    card_id: i.cardId,
+    card_name: i.name,
+    card_image: i.image ?? null,
+    collection: i.collection ?? null,
+    card_number: i.number ?? null,
+    finish: i.finish,
+    language: i.language,
+    condition: i.condition ?? null,
+    quantity: i.quantity,
+    unit_price_cents: Math.round(i.unitPrice * 100),
+  }));
+  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
+  if (itemsErr) throw new Error(itemsErr.message);
+
+  await sendOrderReceivedEmail(order.id);
+
+  // Aprovação imediata — percorre todo o pipeline pós-pagamento.
+  await markOrderPaid(order.id);
+
+  return { orderId: order.id, status: "approved" as const };
+}
