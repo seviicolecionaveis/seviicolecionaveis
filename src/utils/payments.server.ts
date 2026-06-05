@@ -377,6 +377,24 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
       resolved.push({ ...it, unitPrice: cents / 100 });
       continue;
     }
+    if (isAccessoryItem(it)) {
+      const accessoryId = it.cardId.slice("accessory:".length);
+      const { data: accessory, error: aErr } = await supabaseAdmin
+        .from("accessories")
+        .select("price_cents, active")
+        .eq("id", accessoryId)
+        .maybeSingle();
+      if (aErr) throw new Error(aErr.message);
+      if (!accessory || accessory.active === false) {
+        throw new Error(`Acessório não encontrado ou indisponível: "${it.name}".`);
+      }
+      const cents = Number(accessory.price_cents ?? 0);
+      if (cents <= 0) {
+        throw new Error(`Preço indisponível para o acessório "${it.name}".`);
+      }
+      resolved.push({ ...it, unitPrice: cents / 100 });
+      continue;
+    }
     let query = supabaseAdmin
       .from("cards")
       .select("id, base_price_cents")
