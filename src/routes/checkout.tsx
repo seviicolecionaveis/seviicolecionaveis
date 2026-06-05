@@ -121,7 +121,7 @@ interface CardState {
 }
 
 function CheckoutPage() {
-  const { user, session, loading: authLoading } = useAuth();
+  const { user, session, isAdmin, loading: authLoading } = useAuth();
   const { items, subtotal, clear } = useCart();
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
