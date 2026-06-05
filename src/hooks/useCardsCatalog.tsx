@@ -131,6 +131,7 @@ function refresh(): Promise<Card[]> {
 export function useCardsCatalog() {
   const [cards, setCards] = useState<Card[]>(cache ?? []);
   const [loading, setLoading] = useState(!cache);
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     let mounted = true;
@@ -144,7 +145,13 @@ export function useCardsCatalog() {
     return () => { mounted = false; listeners.delete(listener); };
   }, []);
 
-  return { cards, loading, refresh: async () => { const c = await refresh(); setCards(c); } };
+  // O cartão "Test Admin" é interno: visível apenas para administradores.
+  const visibleCards = useMemo(
+    () => (isAdmin ? cards : cards.filter((c) => !isTestCardCatalogEntry(c))),
+    [cards, isAdmin],
+  );
+
+  return { cards: visibleCards, loading, refresh: async () => { const c = await refresh(); setCards(c); } };
 }
 
 export function invalidateCardsCache() { cache = null; }
