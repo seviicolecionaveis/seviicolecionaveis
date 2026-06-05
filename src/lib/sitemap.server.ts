@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { TEST_ADMIN_CARD_ID } from "@/lib/test-card";
 
 function slugify(s: string): string {
   return s
