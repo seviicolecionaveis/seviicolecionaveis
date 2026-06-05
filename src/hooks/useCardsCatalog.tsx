@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Card, CardCategory, Condition, Finish, FinishVariant, Language, LanguageVariant, RawCard } from "@/data/cards";
 import { CONDITIONS } from "@/data/cards";
+import { useAuth } from "@/hooks/useAuth";
+import { isTestCardCatalogEntry } from "@/lib/test-card";
 
 const FINISH_PRIORITY: Finish[] = ["Promo", "Masterball", "Rocket", "Pokebola", "Energia", "Foil", "Reverse Foil", "Normal"];
 const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Masterball", "Rocket", "Energia", "Promo"];
