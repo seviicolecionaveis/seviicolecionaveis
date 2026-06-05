@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { cardSlug, collectionSlug } from "@/lib/slug";
+import { TEST_ADMIN_CARD_SLUG } from "@/lib/test-card";
 
 
 const SlugInput = z.object({ slug: z.string().min(1).max(200) });
@@ -8,6 +9,8 @@ const SlugInput = z.object({ slug: z.string().min(1).max(200) });
 export const getCardMetaBySlug = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => SlugInput.parse(d))
   .handler(async ({ data }) => {
+    // Cartão interno de teste admin: nunca expor meta pública.
+    if (data.slug === TEST_ADMIN_CARD_SLUG) return null;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows } = await supabaseAdmin
       .from("cards")

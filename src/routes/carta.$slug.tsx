@@ -4,6 +4,8 @@ import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { CardModal } from "@/components/catalog/CardModal";
 import { cardSlug } from "@/lib/slug";
 import { trackEvent } from "@/lib/analytics";
+import { useAuth } from "@/hooks/useAuth";
+import { TEST_ADMIN_CARD_SLUG } from "@/lib/test-card";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/carta/$slug")({
@@ -75,8 +77,12 @@ export const Route = createFileRoute("/carta/$slug")({
 function CardDetailPage() {
   const { slug } = Route.useParams();
   const { cards, loading } = useCardsCatalog();
+  const { isAdmin, loading: authLoading } = useAuth();
   const nav = useNavigate();
   const [closed, setClosed] = useState(false);
+
+  const isTestCardRoute = slug === TEST_ADMIN_CARD_SLUG;
+  const blockedTestCard = isTestCardRoute && !authLoading && !isAdmin;
 
   const card = useMemo(
     () => cards.find((c) => cardSlug(c.name, c.collection, c.number) === slug) ?? null,
@@ -121,7 +127,14 @@ function CardDetailPage() {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-12 text-center">
-        {loading ? (
+        {blockedTestCard ? (
+          <>
+            <h1 className="text-2xl font-bold">Carta não encontrada</h1>
+            <Link to="/" className="mt-4 inline-block text-sm underline">
+              Voltar para o catálogo
+            </Link>
+          </>
+        ) : loading || authLoading ? (
           <p className="text-sm text-muted-foreground">Carregando carta...</p>
         ) : card ? (
           <>
@@ -129,6 +142,11 @@ function CardDetailPage() {
             <p className="mt-2 text-sm text-muted-foreground">
               {card.collection} · #{card.number}
             </p>
+            {isTestCardRoute && isAdmin && (
+              <p className="mt-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-800">
+                Somente admin · cartão de teste
+              </p>
+            )}
             <p className="mt-6 text-xs text-muted-foreground">
               Carregando detalhes...
             </p>
@@ -143,7 +161,9 @@ function CardDetailPage() {
         )}
       </main>
 
-      <CardModal card={card} onClose={() => setClosed(true)} />
+      {!blockedTestCard && (
+        <CardModal card={card} onClose={() => setClosed(true)} />
+      )}
     </div>
   );
 }

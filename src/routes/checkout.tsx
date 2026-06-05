@@ -7,17 +7,19 @@ import {
   createPixOrder,
   checkPixOrderStatus,
   createCardOrder,
+  createAdminTestOrder,
   getMercadoPagoPublicKey,
   previewCoupon,
 } from "@/utils/payments.functions";
 import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
-import { Copy, Check, QrCode, CreditCard, Loader2 } from "lucide-react";
+import { Copy, Check, QrCode, CreditCard, Loader2, ShieldCheck } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 import { computeBundleDiscount } from "@/lib/bundles";
 import { copyToClipboard } from "@/lib/clipboard";
 import { CardStackTermsDialog } from "@/components/CardStackTermsDialog";
+import { cartIsAllTestCard } from "@/lib/test-card";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -74,7 +76,7 @@ const empty: Form = {
 };
 
 type Step = "address" | "pix" | "card";
-type PaymentMethod = "pix" | "card";
+type PaymentMethod = "pix" | "card" | "admin_test";
 
 interface PixState {
   orderId: string;
@@ -119,7 +121,7 @@ interface CardState {
 }
 
 function CheckoutPage() {
-  const { user, session, loading: authLoading } = useAuth();
+  const { user, session, isAdmin, loading: authLoading } = useAuth();
   const { items, subtotal, clear } = useCart();
   const nav = useNavigate();
   const [form, setForm] = useState<Form>(empty);
@@ -302,6 +304,11 @@ function CheckoutPage() {
           Math.max(0, nonBundleSubtotalCents - couponDiscountCents) * (PIX_DISCOUNT_PERCENT / 100),
         )
       : 0;
+  const isAdminTestCart = isAdmin && cartIsAllTestCard(items);
+  // Se o carrinho deixar de ser elegível, reverte o método selecionado.
+  useEffect(() => {
+    if (paymentMethod === "admin_test" && !isAdminTestCart) setPaymentMethod("pix");
+  }, [paymentMethod, isAdminTestCart]);
   const totalCents =
     subtotalCents - bundleDiscountCents - couponDiscountCents - pixDiscountCents + shippingCents;
 
@@ -395,10 +402,43 @@ function CheckoutPage() {
         quantity: i.quantity,
       })),
     });
-    if (paymentMethod === "card") {
+    if (paymentMethod === "admin_test") {
+      await startAdminTest();
+    } else if (paymentMethod === "card") {
       await startCard();
     } else {
       await startPix();
+    }
+  };
+
+  const startAdminTest = async () => {
+    if (!user || items.length === 0) return;
+    const shipErr = validateShippingChoice();
+    if (shipErr) { setErr(shipErr); return; }
+    setLoading(true);
+    setErr(null);
+    try {
+      try { await persistAddressAndProfile(); } catch (e) { console.warn(e); }
+      const token = session?.access_token;
+      if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+      const result = await createAdminTestOrder({
+        headers: { Authorization: `Bearer ${token}` },
+        data: {
+          items: buildItemsPayload(),
+          shippingMethod: shipping,
+          shippingQuote: shippingQuoteForApi(),
+          address: buildAddressPayload(),
+          notes: buildNotes(),
+          arteEmCardsCode: null,
+        },
+      });
+      clear();
+      nav({ to: "/orders/$orderId", params: { orderId: result.orderId } });
+    } catch (e: any) {
+      console.error("startAdminTest error:", e);
+      setErr(e?.message ?? "Erro ao aprovar pedido de teste.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -875,6 +915,27 @@ function CheckoutPage() {
                   <p className="text-xs text-muted-foreground">Visa, Master, Elo, Hipercard, Amex — em até 12x (via Mercado Pago).</p>
                 </div>
               </label>
+              {isAdminTestCart && (
+                <label className="flex items-start gap-3 rounded-lg border-2 border-amber-400 bg-amber-50 p-4 cursor-pointer hover:bg-amber-100">
+                  <input
+                    type="radio"
+                    name="pm"
+                    checked={paymentMethod === "admin_test"}
+                    onChange={() => setPaymentMethod("admin_test")}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold flex items-center gap-2 text-amber-900">
+                      <ShieldCheck className="h-4 w-4" /> Aprovação Admin (teste — sem cobrança)
+                    </p>
+                    <p className="text-xs text-amber-800">
+                      Modo teste exclusivo para administradores no cartão interno "Test Admin". O pedido é
+                      marcado como pago imediatamente e percorre todo o fluxo pós-pagamento (estoque, e-mails,
+                      etiqueta/pilha) sem qualquer cobrança real.
+                    </p>
+                  </div>
+                </label>
+              )}
             </div>
           </div>
 
@@ -887,9 +948,11 @@ function CheckoutPage() {
           >
             {loading
               ? "Carregando..."
-              : paymentMethod === "pix"
-                ? `Pagar com Pix — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
-                : `Pagar com cartão — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+              : paymentMethod === "admin_test"
+                ? `Aprovar pedido de teste — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                : paymentMethod === "pix"
+                  ? `Pagar com Pix — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                  : `Pagar com cartão — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
           </button>
         </form>
 

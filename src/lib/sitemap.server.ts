@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { TEST_ADMIN_CARD_ID } from "@/lib/test-card";
 
 function slugify(s: string): string {
   return s
@@ -30,7 +31,8 @@ export async function buildSitemapXml(origin: string): Promise<string> {
   while (true) {
     const { data, error } = await supabaseAdmin
       .from("cards")
-      .select("name, collection, card_number, updated_at")
+      .select("id, name, collection, card_number, updated_at")
+      .neq("id", TEST_ADMIN_CARD_ID)
       .range(from, from + CHUNK - 1);
     if (error) break;
     const batch = data ?? [];

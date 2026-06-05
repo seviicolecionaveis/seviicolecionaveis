@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Card, CardCategory, Condition, Finish, FinishVariant, Language, LanguageVariant, RawCard } from "@/data/cards";
 import { CONDITIONS } from "@/data/cards";
+import { useAuth } from "@/hooks/useAuth";
+import { isTestCardCatalogEntry } from "@/lib/test-card";
 
 const FINISH_PRIORITY: Finish[] = ["Promo", "Masterball", "Rocket", "Pokebola", "Energia", "Foil", "Reverse Foil", "Normal"];
 const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Masterball", "Rocket", "Energia", "Promo"];
@@ -129,6 +131,7 @@ function refresh(): Promise<Card[]> {
 export function useCardsCatalog() {
   const [cards, setCards] = useState<Card[]>(cache ?? []);
   const [loading, setLoading] = useState(!cache);
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     let mounted = true;
@@ -142,7 +145,13 @@ export function useCardsCatalog() {
     return () => { mounted = false; listeners.delete(listener); };
   }, []);
 
-  return { cards, loading, refresh: async () => { const c = await refresh(); setCards(c); } };
+  // O cartão "Test Admin" é interno: visível apenas para administradores.
+  const visibleCards = useMemo(
+    () => (isAdmin ? cards : cards.filter((c) => !isTestCardCatalogEntry(c))),
+    [cards, isAdmin],
+  );
+
+  return { cards: visibleCards, loading, refresh: async () => { const c = await refresh(); setCards(c); } };
 }
 
 export function invalidateCardsCache() { cache = null; }

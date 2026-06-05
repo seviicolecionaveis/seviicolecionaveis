@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { CardInputSchema, PixInputSchema, StripeInputSchema } from "./payments.schemas";
+import { AdminTestInputSchema, CardInputSchema, PixInputSchema, StripeInputSchema } from "./payments.schemas";
 
 export const createOrderCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -97,5 +97,13 @@ export const previewCoupon = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { previewCouponServer } = await import("./payments.server");
     return previewCouponServer(context.userId, data.code, data.subtotalCents);
+  });
+
+export const createAdminTestOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => AdminTestInputSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    const { createAdminTestOrderServer } = await import("./payments.server");
+    return createAdminTestOrderServer(data, context.userId);
   });
 
