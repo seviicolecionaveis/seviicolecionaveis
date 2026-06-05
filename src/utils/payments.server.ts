@@ -1101,15 +1101,17 @@ export async function createAdminTestOrderServer(data: AdminTestInput, userId: s
   if (roleErr) throw new Error(roleErr.message);
   if (!roleRow) throw new Error("Apenas administradores podem usar este método.");
 
+  await cancelOtherPendingOrdersForUser(userId);
+
+  const items = await resolveCardIds(data.items);
+
   // 2) Confirma que o carrinho contém SOMENTE o cartão de teste admin
-  const onlyTestCard = data.items.every((i) => i.cardId === TEST_ADMIN_CARD_ID);
+  // (validado após resolução porque o cliente envia id sintético do catálogo).
+  const onlyTestCard = items.every((i) => i.cardId === TEST_ADMIN_CARD_ID);
   if (!onlyTestCard) {
     throw new Error("Aprovação Admin só pode ser usada com o cartão de teste.");
   }
 
-  await cancelOtherPendingOrdersForUser(userId);
-
-  const items = await resolveCardIds(data.items);
   await ensureAvailableStock(items);
 
   const subtotalCents = items.reduce(
