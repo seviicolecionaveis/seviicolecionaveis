@@ -75,7 +75,17 @@ export const CardInputSchema = z.object({
   }),
 });
 
+export const AdminTestInputSchema = z.object({
+  items: z.array(ItemSchema).min(1).max(50),
+  shippingMethod: ShippingMethodEnum,
+  shippingQuote: ShippingQuoteSchema.optional().nullable(),
+  address: AddressSchema,
+  notes: z.string().max(500).optional().nullable(),
+  arteEmCardsCode: z.string().trim().max(40).optional().nullable(),
+});
+
 export type ShippingMethod = z.infer<typeof ShippingMethodEnum>;
 export type StripeInput = z.infer<typeof StripeInputSchema>;
 export type PixInput = z.infer<typeof PixInputSchema>;
 export type CardInput = z.infer<typeof CardInputSchema>;
+export type AdminTestInput = z.infer<typeof AdminTestInputSchema>;
