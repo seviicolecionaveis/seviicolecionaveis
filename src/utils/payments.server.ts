@@ -472,6 +472,21 @@ async function ensureAvailableStock(
       }
       continue;
     }
+    if (isAccessoryItem(it)) {
+      const accessoryId = it.cardId.slice("accessory:".length);
+      const { data } = await supabaseAdmin
+        .from("accessories")
+        .select("stock")
+        .eq("id", accessoryId)
+        .maybeSingle();
+      const available = Number(data?.stock ?? 0);
+      if (available < it.quantity) {
+        throw new Error(
+          `Estoque insuficiente para "${it.name}". Disponível: ${available}, solicitado: ${it.quantity}.`,
+        );
+      }
+      continue;
+    }
     if (isVirtualItem(it)) continue;
     const { data, error } = await supabaseAdmin
       .from("cards")
