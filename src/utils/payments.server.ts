@@ -333,6 +333,10 @@ function isSealedItem(it: { cardId?: string }) {
   return typeof it.cardId === "string" && it.cardId.startsWith("sealed:");
 }
 
+function isAccessoryItem(it: { cardId?: string }) {
+  return typeof it.cardId === "string" && it.cardId.startsWith("accessory:");
+}
+
 async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]> {
   const resolved: T[] = [];
   for (const raw of items) {
@@ -369,6 +373,24 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
       const cents = Number(sealed.price_cents ?? 0);
       if (cents <= 0) {
         throw new Error(`Preço indisponível para o produto selado "${it.name}".`);
+      }
+      resolved.push({ ...it, unitPrice: cents / 100 });
+      continue;
+    }
+    if (isAccessoryItem(it)) {
+      const accessoryId = it.cardId.slice("accessory:".length);
+      const { data: accessory, error: aErr } = await supabaseAdmin
+        .from("accessories")
+        .select("price_cents, active")
+        .eq("id", accessoryId)
+        .maybeSingle();
+      if (aErr) throw new Error(aErr.message);
+      if (!accessory || accessory.active === false) {
+        throw new Error(`Acessório não encontrado ou indisponível: "${it.name}".`);
+      }
+      const cents = Number(accessory.price_cents ?? 0);
+      if (cents <= 0) {
+        throw new Error(`Preço indisponível para o acessório "${it.name}".`);
       }
       resolved.push({ ...it, unitPrice: cents / 100 });
       continue;
@@ -441,6 +463,21 @@ async function ensureAvailableStock(
         .from("sealed_products")
         .select("stock")
         .eq("id", sealedId)
+        .maybeSingle();
+      const available = Number(data?.stock ?? 0);
+      if (available < it.quantity) {
+        throw new Error(
+          `Estoque insuficiente para "${it.name}". Disponível: ${available}, solicitado: ${it.quantity}.`,
+        );
+      }
+      continue;
+    }
+    if (isAccessoryItem(it)) {
+      const accessoryId = it.cardId.slice("accessory:".length);
+      const { data } = await supabaseAdmin
+        .from("accessories")
+        .select("stock")
+        .eq("id", accessoryId)
         .maybeSingle();
       const available = Number(data?.stock ?? 0);
       if (available < it.quantity) {
