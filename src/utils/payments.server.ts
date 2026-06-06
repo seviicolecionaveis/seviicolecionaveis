@@ -643,6 +643,14 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
   if (itemsErr) throw new Error(itemsErr.message);
   await sendOrderReceivedEmail(order.id);
 
+  // Vale-presente cobre o pedido inteiro: marca pago direto, sem gateway.
+  if (totalCents === 0) {
+    await markOrderPaid(order.id);
+    return { clientSecret: null, orderId: order.id, status: "paid" as const };
+  }
+
+
+
   const discountMultiplier =
     discountCents > 0 ? (subtotalCents - discountCents) / subtotalCents : 1;
   const lineItems = items.map((i) => {
