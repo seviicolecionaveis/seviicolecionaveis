@@ -20,6 +20,7 @@ export interface CouponRow {
   code: string;
   percent: number | null;
   amount_cents: number | null;
+  balance_cents: number | null;
   max_uses: number;
   used_count: number;
   expires_at: string | null;
