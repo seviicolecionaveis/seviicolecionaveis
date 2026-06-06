@@ -26,6 +26,17 @@ const STATUS_LABEL: Record<string, string> = {
   cancellation_requested: "Cancelamento solicitado",
 };
 
+const SHIPPING_METHODS = ["fixed", "arrange", "card_stack", "arte_em_cards", "presencial", "superfrete", "delivery_app"] as const;
+const SHIPPING_METHOD_LABEL: Record<string, string> = {
+  fixed: "Frete fixo",
+  superfrete: "SuperFrete",
+  arte_em_cards: "Retirada na Arte em Cards",
+  card_stack: "Pilha de Cartas",
+  presencial: "Retirada presencial",
+  arrange: "Envio a combinar",
+  delivery_app: "Aplicativo de entrega",
+};
+
 function AdminPage() {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const nav = useNavigate();
@@ -46,14 +57,37 @@ function AdminPage() {
     return [...ALL_STATUSES];
   });
 
+  const [selectedShippingMethods, setSelectedShippingMethods] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [...SHIPPING_METHODS];
+    const raw = localStorage.getItem("admin-orders-shipping-filter");
+    if (!raw) return [...SHIPPING_METHODS];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    return [...SHIPPING_METHODS];
+  });
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("admin-orders-filter-v2", JSON.stringify(selectedStatuses));
     }
   }, [selectedStatuses]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("admin-orders-shipping-filter", JSON.stringify(selectedShippingMethods));
+    }
+  }, [selectedShippingMethods]);
+
   const toggleStatus = (s: string) => {
     setSelectedStatuses((curr) =>
+      curr.includes(s) ? curr.filter((x) => x !== s) : [...curr, s],
+    );
+  };
+
+  const toggleShippingMethod = (s: string) => {
+    setSelectedShippingMethods((curr) =>
       curr.includes(s) ? curr.filter((x) => x !== s) : [...curr, s],
     );
   };
@@ -122,6 +156,7 @@ function AdminPage() {
   const query = searchQuery.trim().toLowerCase();
   const filtered = orders.filter((o) => {
     if (!selectedStatuses.includes(o.status)) return false;
+    if (!selectedShippingMethods.includes(o.shipping_method ?? "")) return false;
     if (!query) return true;
     const items: any[] = o.order_items ?? [];
     const matchId = o.id.toLowerCase().includes(query) || o.id.slice(0, 8).toLowerCase().includes(query);
@@ -160,37 +195,72 @@ function AdminPage() {
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
           <h1 className="text-2xl font-bold">Pedidos ({filtered.length})</h1>
-          <div className="rounded-lg border border-border bg-card p-3">
-            <div className="flex items-center justify-between gap-3 mb-2">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Filtrar por status</p>
-              <div className="flex gap-2 text-[10px]">
-                <button
-                  onClick={() => setSelectedStatuses([...ALL_STATUSES])}
-                  className="text-foreground hover:underline font-semibold"
-                >
-                  Todos
-                </button>
-                <span className="text-muted-foreground">·</span>
-                <button
-                  onClick={() => setSelectedStatuses([])}
-                  className="text-foreground hover:underline font-semibold"
-                >
-                  Nenhum
-                </button>
+          <div className="flex flex-wrap gap-3">
+            <div className="rounded-lg border border-border bg-card p-3">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Filtrar por status</p>
+                <div className="flex gap-2 text-[10px]">
+                  <button
+                    onClick={() => setSelectedStatuses([...ALL_STATUSES])}
+                    className="text-foreground hover:underline font-semibold"
+                  >
+                    Todos
+                  </button>
+                  <span className="text-muted-foreground">·</span>
+                  <button
+                    onClick={() => setSelectedStatuses([])}
+                    className="text-foreground hover:underline font-semibold"
+                  >
+                    Nenhum
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                {ALL_STATUSES.map((s) => (
+                  <label key={s} className="flex items-center gap-2 text-xs cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={selectedStatuses.includes(s)}
+                      onChange={() => toggleStatus(s)}
+                      className="h-4 w-4 rounded border-border accent-foreground"
+                    />
+                    {STATUS_LABEL[s]}
+                  </label>
+                ))}
               </div>
             </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-              {ALL_STATUSES.map((s) => (
-                <label key={s} className="flex items-center gap-2 text-xs cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={selectedStatuses.includes(s)}
-                    onChange={() => toggleStatus(s)}
-                    className="h-4 w-4 rounded border-border accent-foreground"
-                  />
-                  {STATUS_LABEL[s]}
-                </label>
-              ))}
+            <div className="rounded-lg border border-border bg-card p-3">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Filtrar por entrega</p>
+                <div className="flex gap-2 text-[10px]">
+                  <button
+                    onClick={() => setSelectedShippingMethods([...SHIPPING_METHODS])}
+                    className="text-foreground hover:underline font-semibold"
+                  >
+                    Todos
+                  </button>
+                  <span className="text-muted-foreground">·</span>
+                  <button
+                    onClick={() => setSelectedShippingMethods([])}
+                    className="text-foreground hover:underline font-semibold"
+                  >
+                    Nenhum
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                {SHIPPING_METHODS.map((s) => (
+                  <label key={s} className="flex items-center gap-2 text-xs cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={selectedShippingMethods.includes(s)}
+                      onChange={() => toggleShippingMethod(s)}
+                      className="h-4 w-4 rounded border-border accent-foreground"
+                    />
+                    {SHIPPING_METHOD_LABEL[s]}
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
         </div>
