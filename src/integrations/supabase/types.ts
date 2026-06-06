@@ -426,6 +426,7 @@ export type Database = {
         Row: {
           active: boolean
           amount_cents: number | null
+          balance_cents: number | null
           code: string
           created_at: string
           expires_at: string | null
@@ -441,6 +442,7 @@ export type Database = {
         Insert: {
           active?: boolean
           amount_cents?: number | null
+          balance_cents?: number | null
           code: string
           created_at?: string
           expires_at?: string | null
@@ -456,6 +458,7 @@ export type Database = {
         Update: {
           active?: boolean
           amount_cents?: number | null
+          balance_cents?: number | null
           code?: string
           created_at?: string
           expires_at?: string | null
