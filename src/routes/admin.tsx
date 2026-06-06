@@ -158,7 +158,7 @@ function AdminPage() {
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8">
-        <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
           <h1 className="text-2xl font-bold">Pedidos ({filtered.length})</h1>
           <div className="rounded-lg border border-border bg-card p-3">
             <div className="flex items-center justify-between gap-3 mb-2">
@@ -193,6 +193,17 @@ function AdminPage() {
               ))}
             </div>
           </div>
+        </div>
+
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar por nº do pedido, nome do cliente ou nome da carta..."
+            className="w-full rounded-lg border border-border bg-card py-2.5 pl-9 pr-4 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          />
         </div>
 
         {loading ? (
