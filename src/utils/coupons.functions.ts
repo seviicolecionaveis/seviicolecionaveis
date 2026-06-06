@@ -92,6 +92,44 @@ export const setCouponActive = createServerFn({ method: "POST" })
     return setCouponActiveServer(context.userId, data.coupon_id, data.active);
   });
 
+export const updateCoupon = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z
+      .object({
+        coupon_id: z.string().uuid(),
+        code: codeSchema.optional(),
+        percent: z.number().int().min(1).max(100).nullable().optional(),
+        amount_cents: z.number().int().min(0).max(10_000_000).nullable().optional(),
+        balance_cents: z.number().int().min(0).max(10_000_000).nullable().optional(),
+        max_uses: z.number().int().min(1).max(1_000_000).optional(),
+        expires_at: z.string().datetime().nullable().optional(),
+        notes: z.string().trim().max(500).nullable().optional(),
+        active: z.boolean().optional(),
+      })
+      .parse(d),
+  )
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context, data }) => {
+    const { updateCouponServer } = await import("./coupons.server");
+    const { coupon_id, ...patch } = data;
+    return updateCouponServer(context.userId, coupon_id, patch);
+  });
+
+export const incrementCouponMaxUses = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z
+      .object({
+        coupon_id: z.string().uuid(),
+        delta: z.number().int().min(1).max(100_000),
+      })
+      .parse(d),
+  )
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context, data }) => {
+    const { incrementCouponMaxUsesServer } = await import("./coupons.server");
+    return incrementCouponMaxUsesServer(context.userId, data.coupon_id, data.delta);
+  });
+
 export const countBroadcastRecipients = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
