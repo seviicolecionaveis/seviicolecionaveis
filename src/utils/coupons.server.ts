@@ -301,7 +301,7 @@ export async function updateCouponServer(
 
   const { error } = await supabaseAdmin
     .from("coupons")
-    .update(updates)
+    .update(updates as any)
     .eq("id", couponId);
   if (error) throw new Response(error.message, { status: 500 });
   return { ok: true };
