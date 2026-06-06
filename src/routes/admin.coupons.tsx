@@ -28,6 +28,7 @@ interface CouponRow {
   code: string;
   percent: number | null;
   amount_cents: number | null;
+  balance_cents: number | null;
   max_uses: number;
   used_count: number;
   expires_at: string | null;
@@ -39,6 +40,14 @@ interface CouponRow {
   last_email_status?: string | null;
   last_email_at?: string | null;
   last_email_error?: string | null;
+}
+
+function isWalletVoucher(c: CouponRow): boolean {
+  return !!c.user_id && (c.amount_cents ?? 0) > 0 && c.balance_cents != null;
+}
+
+function fmtBRL(cents: number): string {
+  return `R$ ${(cents / 100).toFixed(2).replace(".", ",")}`;
 }
 
 function emailStatusBadge(c: CouponRow): { label: string; tone: string; title?: string } | null {
