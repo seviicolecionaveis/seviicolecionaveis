@@ -823,7 +823,18 @@ function AdminCouponsPage() {
                           )}
                         </td>
                         <td className="p-3 tabular-nums text-xs">
-                          {c.used_count}/{c.max_uses}
+                          {isWalletVoucher(c) ? (
+                            <span title="Saldo restante / valor inicial">
+                              {fmtBRL(c.balance_cents ?? 0)}
+                              <span className="text-muted-foreground">
+                                {" "}/ {fmtBRL(c.amount_cents ?? 0)}
+                              </span>
+                            </span>
+                          ) : (
+                            <>
+                              {c.used_count}/{c.max_uses}
+                            </>
+                          )}
                         </td>
                         <td className="p-3">
                           <span
