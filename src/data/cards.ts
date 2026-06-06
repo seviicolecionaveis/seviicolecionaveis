@@ -190,6 +190,7 @@ export const EXTRA_COLLECTIONS = [
   "UPR - Ultraprisma",
   "FST - Golpe Fusão",
   "TK6B - XY Trainer Kit - Sylveon",
+  "ROS - Céus Estrondosos",
 ];
 
 export const COLLECTIONS = Array.from(
