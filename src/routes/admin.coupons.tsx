@@ -10,6 +10,8 @@ import {
   setCouponActive,
   countBroadcastRecipients,
   previewCouponEmail,
+  updateCoupon,
+  incrementCouponMaxUses,
 } from "@/utils/coupons.functions";
 import { toast } from "sonner";
 
