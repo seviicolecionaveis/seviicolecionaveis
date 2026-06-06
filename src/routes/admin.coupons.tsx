@@ -87,6 +87,10 @@ function couponStatus(c: CouponRow): {
   if (!c.active) return { label: "inativo", tone: "muted" };
   if (c.expires_at && new Date(c.expires_at) < new Date())
     return { label: "expirado", tone: "bad" };
+  if (isWalletVoucher(c)) {
+    if ((c.balance_cents ?? 0) <= 0) return { label: "saldo esgotado", tone: "warn" };
+    return { label: "ativo", tone: "ok" };
+  }
   if (c.used_count >= c.max_uses) return { label: "esgotado", tone: "warn" };
   return { label: "ativo", tone: "ok" };
 }
