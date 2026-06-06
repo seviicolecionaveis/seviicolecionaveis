@@ -26,6 +26,17 @@ const STATUS_LABEL: Record<string, string> = {
   cancellation_requested: "Cancelamento solicitado",
 };
 
+const SHIPPING_METHODS = ["fixed", "arrange", "card_stack", "arte_em_cards", "presencial", "superfrete", "delivery_app"] as const;
+const SHIPPING_METHOD_LABEL: Record<string, string> = {
+  fixed: "Frete fixo",
+  superfrete: "SuperFrete",
+  arte_em_cards: "Retirada na Arte em Cards",
+  card_stack: "Pilha de Cartas",
+  presencial: "Retirada presencial",
+  arrange: "Envio a combinar",
+  delivery_app: "Aplicativo de entrega",
+};
+
 function AdminPage() {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const nav = useNavigate();
