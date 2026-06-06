@@ -156,6 +156,7 @@ function AdminPage() {
   const query = searchQuery.trim().toLowerCase();
   const filtered = orders.filter((o) => {
     if (!selectedStatuses.includes(o.status)) return false;
+    if (!selectedShippingMethods.includes(o.shipping_method ?? "")) return false;
     if (!query) return true;
     const items: any[] = o.order_items ?? [];
     const matchId = o.id.toLowerCase().includes(query) || o.id.slice(0, 8).toLowerCase().includes(query);
