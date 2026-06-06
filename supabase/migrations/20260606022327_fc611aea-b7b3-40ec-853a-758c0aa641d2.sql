@@ -1,0 +1,1 @@
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS wallet_deduction_cents integer NOT NULL DEFAULT 0;

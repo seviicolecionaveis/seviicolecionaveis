@@ -542,9 +542,15 @@ function CheckoutPage() {
           arteEmCardsCode: null,
         },
       });
+      if ((result as any).status === "paid") {
+        clear();
+        nav({ to: "/orders/$orderId", params: { orderId: result.orderId } });
+        return;
+      }
       setPix(result);
       setStep("pix");
       clear();
+
     } catch (e: any) {
       console.error("startPix error:", e);
       setErr(e?.message ?? "Erro ao gerar Pix. Tente novamente em alguns segundos.");

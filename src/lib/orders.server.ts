@@ -1,6 +1,52 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
 
+/**
+ * Debita o saldo de vale-presente carteira reservado em wallet_deduction_cents.
+ * Idempotente: zera o campo após debitar para evitar débito duplo se chamado de novo.
+ */
+async function applyWalletDeductionForOrder(orderId: string) {
+  const { data: order } = await supabaseAdmin
+    .from("orders")
+    .select("id, user_id, coupon_code, wallet_deduction_cents")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (!order || !order.coupon_code) return;
+  const amount = order.wallet_deduction_cents ?? 0;
+  if (amount <= 0) return;
+
+  // Marca como debitado antes de tentar — evita débito duplo se markOrderPaid
+  // for chamado novamente (webhook + retorno do front, por exemplo).
+  const { data: claimed } = await supabaseAdmin
+    .from("orders")
+    .update({ wallet_deduction_cents: 0 })
+    .eq("id", orderId)
+    .eq("wallet_deduction_cents", amount)
+    .select("id")
+    .maybeSingle();
+  if (!claimed) return;
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const { data: c } = await supabaseAdmin
+      .from("coupons")
+      .select("id, balance_cents, used_count, user_id")
+      .eq("code", order.coupon_code)
+      .maybeSingle();
+    if (!c || c.balance_cents == null) return;
+    if (c.user_id && c.user_id !== order.user_id) return;
+    const newBalance = Math.max(0, c.balance_cents - amount);
+    const { data: upd } = await supabaseAdmin
+      .from("coupons")
+      .update({ balance_cents: newBalance, used_count: c.used_count + 1 })
+      .eq("id", c.id)
+      .eq("balance_cents", c.balance_cents)
+      .select("id")
+      .maybeSingle();
+    if (upd) return;
+  }
+}
+
+
 export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymentIntent?: string; mercadopagoPaymentId?: string }) {
   const { data: order } = await supabaseAdmin
     .from("orders")
@@ -121,6 +167,14 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
         : {}),
     })
     .eq("id", orderId);
+
+  // Débito de vale-presente carteira (só agora, quando o pagamento confirma).
+  try {
+    await applyWalletDeductionForOrder(orderId);
+  } catch (e) {
+    console.error("[markOrderPaid] applyWalletDeductionForOrder falhou:", e);
+  }
+
 
   // Lookup do pedido (necessário para decidir Superfrete x Pilha)
   const { data: full } = await supabaseAdmin

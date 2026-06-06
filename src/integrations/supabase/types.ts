@@ -715,6 +715,7 @@ export type Database = {
           tracking_url: string | null
           updated_at: string
           user_id: string
+          wallet_deduction_cents: number
         }
         Insert: {
           arte_em_cards_code?: string | null
@@ -760,6 +761,7 @@ export type Database = {
           tracking_url?: string | null
           updated_at?: string
           user_id: string
+          wallet_deduction_cents?: number
         }
         Update: {
           arte_em_cards_code?: string | null
@@ -805,6 +807,7 @@ export type Database = {
           tracking_url?: string | null
           updated_at?: string
           user_id?: string
+          wallet_deduction_cents?: number
         }
         Relationships: []
       }
