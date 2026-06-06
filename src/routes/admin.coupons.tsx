@@ -124,6 +124,8 @@ function AdminCouponsPage() {
   const toggleActive = useServerFn(setCouponActive);
   const countRecipients = useServerFn(countBroadcastRecipients);
   const previewEmail = useServerFn(previewCouponEmail);
+  const editCoupon = useServerFn(updateCoupon);
+  const bumpMaxUses = useServerFn(incrementCouponMaxUses);
 
   const [coupons, setCoupons] = useState<CouponRow[]>([]);
   const [loading, setLoading] = useState(true);
