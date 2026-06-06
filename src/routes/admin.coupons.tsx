@@ -410,6 +410,47 @@ function AdminCouponsPage() {
     }
   };
 
+  const handleBumpUses = async (c: CouponRow) => {
+    const raw = prompt(
+      `Quantos usos adicionar a ${c.code}? (atual: ${c.used_count}/${c.max_uses})`,
+      "10",
+    );
+    if (!raw) return;
+    const delta = Math.floor(Number(raw));
+    if (!Number.isFinite(delta) || delta < 1) {
+      toast.error("Informe um número positivo.");
+      return;
+    }
+    try {
+      const res: any = await bumpMaxUses({ data: { coupon_id: c.id, delta } });
+      toast.success(`Limite aumentado para ${res.max_uses}.`);
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao aumentar usos.");
+    }
+  };
+
+  const handleSaveEdit = async (patch: {
+    code: string;
+    percent: number | null;
+    amount_cents: number | null;
+    balance_cents: number | null;
+    max_uses: number;
+    expires_at: string | null;
+    notes: string | null;
+    active: boolean;
+  }) => {
+    if (!editing) return;
+    try {
+      await editCoupon({ data: { coupon_id: editing.id, ...patch } });
+      toast.success("Cupom atualizado.");
+      setEditing(null);
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao salvar.");
+    }
+  };
+
   if (authLoading || !isAdmin) {
     return (
       <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">
