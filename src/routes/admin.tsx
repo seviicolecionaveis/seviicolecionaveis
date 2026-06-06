@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminCancellationBell } from "@/components/AdminCancellationBell";
-import { ChevronRight, ImageOff } from "lucide-react";
+import { ChevronRight, ImageOff, Search } from "lucide-react";
 
 
 export const Route = createFileRoute("/admin")({
@@ -33,6 +33,7 @@ function AdminPage() {
   const search = Route.useSearch();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const ALL_STATUSES = [...STATUSES, "cancellation_requested"] as const;
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>(() => {
     if (typeof window === "undefined") return [...ALL_STATUSES];
@@ -118,7 +119,17 @@ function AdminPage() {
     return <Outlet />;
   }
 
-  const filtered = orders.filter((o) => selectedStatuses.includes(o.status));
+  const query = searchQuery.trim().toLowerCase();
+  const filtered = orders.filter((o) => {
+    if (!selectedStatuses.includes(o.status)) return false;
+    if (!query) return true;
+    const items: any[] = o.order_items ?? [];
+    const matchId = o.id.toLowerCase().includes(query) || o.id.slice(0, 8).toLowerCase().includes(query);
+    const matchName = (o.recipient_name ?? "").toLowerCase().includes(query);
+    const matchEmail = (o.email ?? "").toLowerCase().includes(query);
+    const matchItem = items.some((it) => (it.card_name ?? "").toLowerCase().includes(query));
+    return matchId || matchName || matchEmail || matchItem;
+  });
 
   return (
     <div className="min-h-screen bg-background">
