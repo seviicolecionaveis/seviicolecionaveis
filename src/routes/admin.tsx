@@ -57,14 +57,37 @@ function AdminPage() {
     return [...ALL_STATUSES];
   });
 
+  const [selectedShippingMethods, setSelectedShippingMethods] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [...SHIPPING_METHODS];
+    const raw = localStorage.getItem("admin-orders-shipping-filter");
+    if (!raw) return [...SHIPPING_METHODS];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    return [...SHIPPING_METHODS];
+  });
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("admin-orders-filter-v2", JSON.stringify(selectedStatuses));
     }
   }, [selectedStatuses]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("admin-orders-shipping-filter", JSON.stringify(selectedShippingMethods));
+    }
+  }, [selectedShippingMethods]);
+
   const toggleStatus = (s: string) => {
     setSelectedStatuses((curr) =>
+      curr.includes(s) ? curr.filter((x) => x !== s) : [...curr, s],
+    );
+  };
+
+  const toggleShippingMethod = (s: string) => {
+    setSelectedShippingMethods((curr) =>
       curr.includes(s) ? curr.filter((x) => x !== s) : [...curr, s],
     );
   };
