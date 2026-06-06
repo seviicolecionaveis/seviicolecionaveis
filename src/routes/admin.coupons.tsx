@@ -874,6 +874,22 @@ function AdminCouponsPage() {
                               </button>
                             )}
                             <button
+                              onClick={() => setEditing(c)}
+                              className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-secondary"
+                              title="Editar todos os campos"
+                            >
+                              Editar
+                            </button>
+                            {!isWalletVoucher(c) && (
+                              <button
+                                onClick={() => handleBumpUses(c)}
+                                className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-secondary"
+                                title="Aumentar limite de usos"
+                              >
+                                + usos
+                              </button>
+                            )}
+                            <button
                               onClick={() => handleToggle(c)}
                               className={`rounded-md border border-border px-2 py-1 text-[11px] font-semibold ${
                                 c.active
