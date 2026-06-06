@@ -264,7 +264,7 @@ export async function previewCouponServer(
 
     const { data: coupon } = await supabaseAdmin
       .from("coupons")
-      .select("id, code, user_id, percent, amount_cents, max_discount_cents, max_uses, used_count, expires_at, active")
+      .select("id, code, user_id, percent, amount_cents, balance_cents, max_discount_cents, max_uses, used_count, expires_at, active")
       .eq("code", code)
       .maybeSingle();
     if (!coupon || !coupon.active) return { valid: false, error: "Cupom inválido" };
@@ -272,6 +272,28 @@ export async function previewCouponServer(
       return { valid: false, error: "Cupom expirado" };
     if (coupon.user_id && coupon.user_id !== userId)
       return { valid: false, error: "Este cupom não está disponível para sua conta" };
+
+    const isWallet =
+      !!coupon.user_id &&
+      coupon.amount_cents != null &&
+      coupon.amount_cents > 0 &&
+      coupon.balance_cents != null;
+
+    if (isWallet) {
+      const balance = coupon.balance_cents ?? 0;
+      if (balance <= 0) return { valid: false, error: "Saldo do vale-presente esgotado" };
+      const discountCents = Math.min(balance, subtotalCents);
+      return {
+        valid: true,
+        discountCents,
+        code: coupon.code,
+        label: `${coupon.code} − vale-presente (saldo R$ ${(balance / 100).toFixed(2).replace(".", ",")})`,
+        kind: "amount",
+        percent: null,
+        amountCents: balance,
+      };
+    }
+
     if (coupon.used_count >= coupon.max_uses)
       return { valid: false, error: "Cupom já foi utilizado" };
 
