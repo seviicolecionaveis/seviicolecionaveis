@@ -579,14 +579,15 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
   const bundleDiscountCents = bundle.bundleDiscountCents;
   const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundle.bundleSubtotalCents);
 
-  const { discountCents: couponDiscountCents, code: appliedCoupon } = await validateCoupon(
+  const { discountCents: couponDiscountCents, code: appliedCoupon, walletDeductionCents } = await validateCoupon(
     userId,
     data.couponCode,
     nonBundleSubtotalCents,
   );
   const discountCents = bundleDiscountCents + couponDiscountCents;
 
-  const totalCents = subtotalCents - discountCents + shippingCents;
+  const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents);
+
 
   const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
   const email = userData?.user?.email ?? "";
