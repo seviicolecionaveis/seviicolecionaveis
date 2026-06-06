@@ -957,6 +957,12 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
   if (itemsErr) throw new Error(itemsErr.message);
   await sendOrderReceivedEmail(order.id);
 
+  // Vale-presente cobre o pedido inteiro: marca pago direto, sem cobrança no cartão.
+  if (totalCents === 0) {
+    await markOrderPaid(order.id);
+    return { orderId: order.id, status: "approved" as const };
+  }
+
   const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
   const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
 
