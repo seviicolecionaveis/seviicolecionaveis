@@ -144,7 +144,7 @@ async function validateCoupon(
   // Fallback: cupons gerenciáveis na tabela public.coupons
   const { data: coupon, error: couponErr } = await supabaseAdmin
     .from("coupons")
-    .select("id, code, user_id, percent, amount_cents, max_discount_cents, max_uses, used_count, expires_at, active")
+    .select("id, code, user_id, percent, amount_cents, balance_cents, max_discount_cents, max_uses, used_count, expires_at, active")
     .eq("code", code)
     .maybeSingle();
   if (couponErr) throw new Error(couponErr.message);
@@ -155,6 +155,35 @@ async function validateCoupon(
   if (coupon.user_id && coupon.user_id !== userId) {
     throw new Error("Este cupom não está disponível para sua conta");
   }
+
+  // Vale-presente carteira: usa balance_cents (multi-uso até zerar saldo)
+  const isWallet =
+    !!coupon.user_id &&
+    coupon.amount_cents != null &&
+    coupon.amount_cents > 0 &&
+    coupon.balance_cents != null;
+
+  if (isWallet) {
+    const balance = coupon.balance_cents ?? 0;
+    if (balance <= 0) throw new Error("Saldo do vale-presente esgotado");
+    const discountCents = Math.min(balance, subtotalCents);
+    const { data: claimed, error: claimErr } = await supabaseAdmin
+      .from("coupons")
+      .update({ balance_cents: balance - discountCents })
+      .eq("id", coupon.id)
+      .eq("balance_cents", balance)
+      .select("id")
+      .maybeSingle();
+    if (claimErr) throw new Error(claimErr.message);
+    if (!claimed) throw new Error("Saldo do vale-presente em uso. Tente novamente.");
+    // Também incrementa used_count (informativo)
+    await supabaseAdmin
+      .from("coupons")
+      .update({ used_count: coupon.used_count + 1 })
+      .eq("id", coupon.id);
+    return { discountCents, code: coupon.code };
+  }
+
   if (coupon.used_count >= coupon.max_uses) {
     throw new Error("Cupom já foi utilizado");
   }
@@ -172,7 +201,7 @@ async function validateCoupon(
 
   let discountCents: number;
   if (coupon.amount_cents && coupon.amount_cents > 0) {
-    // Vale-presente de valor fixo
+    // Vale-presente de valor fixo (single-use legado)
     discountCents = Math.min(coupon.amount_cents, subtotalCents);
   } else {
     const percent = coupon.percent ?? 0;
