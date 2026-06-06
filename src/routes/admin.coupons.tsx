@@ -10,6 +10,8 @@ import {
   setCouponActive,
   countBroadcastRecipients,
   previewCouponEmail,
+  updateCoupon,
+  incrementCouponMaxUses,
 } from "@/utils/coupons.functions";
 import { toast } from "sonner";
 
@@ -26,6 +28,7 @@ interface CouponRow {
   code: string;
   percent: number | null;
   amount_cents: number | null;
+  balance_cents: number | null;
   max_uses: number;
   used_count: number;
   expires_at: string | null;
@@ -37,6 +40,14 @@ interface CouponRow {
   last_email_status?: string | null;
   last_email_at?: string | null;
   last_email_error?: string | null;
+}
+
+function isWalletVoucher(c: CouponRow): boolean {
+  return !!c.user_id && (c.amount_cents ?? 0) > 0 && c.balance_cents != null;
+}
+
+function fmtBRL(cents: number): string {
+  return `R$ ${(cents / 100).toFixed(2).replace(".", ",")}`;
 }
 
 function emailStatusBadge(c: CouponRow): { label: string; tone: string; title?: string } | null {
@@ -76,6 +87,10 @@ function couponStatus(c: CouponRow): {
   if (!c.active) return { label: "inativo", tone: "muted" };
   if (c.expires_at && new Date(c.expires_at) < new Date())
     return { label: "expirado", tone: "bad" };
+  if (isWalletVoucher(c)) {
+    if ((c.balance_cents ?? 0) <= 0) return { label: "saldo esgotado", tone: "warn" };
+    return { label: "ativo", tone: "ok" };
+  }
   if (c.used_count >= c.max_uses) return { label: "esgotado", tone: "warn" };
   return { label: "ativo", tone: "ok" };
 }
@@ -109,6 +124,8 @@ function AdminCouponsPage() {
   const toggleActive = useServerFn(setCouponActive);
   const countRecipients = useServerFn(countBroadcastRecipients);
   const previewEmail = useServerFn(previewCouponEmail);
+  const editCoupon = useServerFn(updateCoupon);
+  const bumpMaxUses = useServerFn(incrementCouponMaxUses);
 
   const [coupons, setCoupons] = useState<CouponRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,6 +155,7 @@ function AdminCouponsPage() {
   const [vNotes, setVNotes] = useState("");
 
   const [preview, setPreview] = useState<PreviewState | null>(null);
+  const [editing, setEditing] = useState<CouponRow | null>(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -389,6 +407,47 @@ function AdminCouponsPage() {
       toast.error(e?.message ?? "Erro ao gerar prévia.");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleBumpUses = async (c: CouponRow) => {
+    const raw = prompt(
+      `Quantos usos adicionar a ${c.code}? (atual: ${c.used_count}/${c.max_uses})`,
+      "10",
+    );
+    if (!raw) return;
+    const delta = Math.floor(Number(raw));
+    if (!Number.isFinite(delta) || delta < 1) {
+      toast.error("Informe um número positivo.");
+      return;
+    }
+    try {
+      const res: any = await bumpMaxUses({ data: { coupon_id: c.id, delta } });
+      toast.success(`Limite aumentado para ${res.max_uses}.`);
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao aumentar usos.");
+    }
+  };
+
+  const handleSaveEdit = async (patch: {
+    code: string;
+    percent: number | null;
+    amount_cents: number | null;
+    balance_cents: number | null;
+    max_uses: number;
+    expires_at: string | null;
+    notes: string | null;
+    active: boolean;
+  }) => {
+    if (!editing) return;
+    try {
+      await editCoupon({ data: { coupon_id: editing.id, ...patch } });
+      toast.success("Cupom atualizado.");
+      setEditing(null);
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao salvar.");
     }
   };
 
@@ -764,7 +823,18 @@ function AdminCouponsPage() {
                           )}
                         </td>
                         <td className="p-3 tabular-nums text-xs">
-                          {c.used_count}/{c.max_uses}
+                          {isWalletVoucher(c) ? (
+                            <span title="Saldo restante / valor inicial">
+                              {fmtBRL(c.balance_cents ?? 0)}
+                              <span className="text-muted-foreground">
+                                {" "}/ {fmtBRL(c.amount_cents ?? 0)}
+                              </span>
+                            </span>
+                          ) : (
+                            <>
+                              {c.used_count}/{c.max_uses}
+                            </>
+                          )}
                         </td>
                         <td className="p-3">
                           <span
@@ -801,6 +871,22 @@ function AdminCouponsPage() {
                                 title="Enviar/reenviar o e-mail ao cliente"
                               >
                                 {c.last_email_status ? "Reenviar e-mail" : "Enviar e-mail"}
+                              </button>
+                            )}
+                            <button
+                              onClick={() => setEditing(c)}
+                              className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-secondary"
+                              title="Editar todos os campos"
+                            >
+                              Editar
+                            </button>
+                            {!isWalletVoucher(c) && (
+                              <button
+                                onClick={() => handleBumpUses(c)}
+                                className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-secondary"
+                                title="Aumentar limite de usos"
+                              >
+                                + usos
                               </button>
                             )}
                             <button
@@ -928,6 +1014,272 @@ function AdminCouponsPage() {
           </div>
         </div>
       )}
+
+      {editing && (
+        <EditCouponModal
+          coupon={editing}
+          onCancel={() => setEditing(null)}
+          onSave={handleSaveEdit}
+        />
+      )}
+    </div>
+  );
+}
+
+interface EditModalProps {
+  coupon: CouponRow;
+  onCancel: () => void;
+  onSave: (patch: {
+    code: string;
+    percent: number | null;
+    amount_cents: number | null;
+    balance_cents: number | null;
+    max_uses: number;
+    expires_at: string | null;
+    notes: string | null;
+    active: boolean;
+  }) => void | Promise<void>;
+}
+
+function EditCouponModal({ coupon, onCancel, onSave }: EditModalProps) {
+  const wallet = isWalletVoucher(coupon);
+  const initialKind: DiscountKind = (coupon.amount_cents ?? 0) > 0 ? "amount" : "percent";
+  const [code, setCode] = useState(coupon.code);
+  const [kind, setKind] = useState<DiscountKind>(initialKind);
+  const [percent, setPercent] = useState(coupon.percent ? String(coupon.percent) : "10");
+  const [amount, setAmount] = useState(
+    coupon.amount_cents ? (coupon.amount_cents / 100).toFixed(2).replace(".", ",") : "",
+  );
+  const [balance, setBalance] = useState(
+    coupon.balance_cents != null
+      ? (coupon.balance_cents / 100).toFixed(2).replace(".", ",")
+      : "",
+  );
+  const [maxUses, setMaxUses] = useState(String(coupon.max_uses));
+  const [expires, setExpires] = useState(
+    coupon.expires_at
+      ? new Date(coupon.expires_at).toISOString().slice(0, 16)
+      : "",
+  );
+  const [notes, setNotes] = useState(coupon.notes ?? "");
+  const [active, setActive] = useState(coupon.active);
+  const [saving, setSaving] = useState(false);
+
+  const inputCls =
+    "w-full rounded-md border border-border bg-background px-3 py-2 text-sm";
+  const labelCls =
+    "block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1";
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const amount_cents =
+        kind === "amount"
+          ? Math.round(Number(amount.replace(",", ".")) * 100)
+          : null;
+      const balance_cents =
+        kind === "amount" && balance.trim()
+          ? Math.round(Number(balance.replace(",", ".")) * 100)
+          : kind === "amount"
+            ? amount_cents
+            : null;
+      const expires_at = expires
+        ? (() => {
+            const d = new Date(expires);
+            return isNaN(d.getTime()) ? null : d.toISOString();
+          })()
+        : null;
+      await onSave({
+        code,
+        percent: kind === "percent" ? Number(percent) : null,
+        amount_cents,
+        balance_cents,
+        max_uses: Math.max(1, Number(maxUses) || 1),
+        expires_at,
+        notes: notes.trim() || null,
+        active,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={() => !saving && onCancel()}
+    >
+      <form
+        onSubmit={submit}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-background rounded-xl border border-border w-full max-w-2xl max-h-[90vh] overflow-auto"
+      >
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <h3 className="font-bold text-sm uppercase tracking-wider">
+            Editar cupom {coupon.code}
+          </h3>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={saving}
+            className="text-muted-foreground hover:text-foreground text-sm"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="p-4 grid md:grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Código</label>
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              required
+              minLength={3}
+              maxLength={40}
+              pattern="[A-Za-z0-9_\-]+"
+              className={`${inputCls} font-mono uppercase`}
+            />
+          </div>
+
+          <div>
+            <label className={labelCls}>Tipo</label>
+            <div className="flex gap-4 text-sm pt-2">
+              <label className="flex items-center gap-1.5">
+                <input
+                  type="radio"
+                  checked={kind === "percent"}
+                  onChange={() => setKind("percent")}
+                />
+                Percentual
+              </label>
+              <label className="flex items-center gap-1.5">
+                <input
+                  type="radio"
+                  checked={kind === "amount"}
+                  onChange={() => setKind("amount")}
+                />
+                Valor (R$)
+              </label>
+            </div>
+          </div>
+
+          {kind === "percent" ? (
+            <div>
+              <label className={labelCls}>Percentual (%)</label>
+              <input
+                type="number"
+                min={1}
+                max={100}
+                value={percent}
+                onChange={(e) => setPercent(e.target.value)}
+                required
+                className={inputCls}
+              />
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className={labelCls}>Valor inicial (R$)</label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  required
+                  className={inputCls}
+                />
+              </div>
+              {wallet || coupon.user_id ? (
+                <div>
+                  <label className={labelCls}>Saldo atual (R$)</label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={balance}
+                    onChange={(e) => setBalance(e.target.value)}
+                    placeholder="igual ao valor inicial"
+                    className={inputCls}
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Vale-presente carteira: cliente usa até o saldo zerar.
+                  </p>
+                </div>
+              ) : null}
+            </>
+          )}
+
+          {!wallet && (
+            <div>
+              <label className={labelCls}>Máx. de usos</label>
+              <input
+                type="number"
+                min={1}
+                value={maxUses}
+                onChange={(e) => setMaxUses(e.target.value)}
+                required
+                className={inputCls}
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Usos atuais: {coupon.used_count}
+              </p>
+            </div>
+          )}
+
+          <div>
+            <label className={labelCls}>Validade</label>
+            <input
+              type="datetime-local"
+              value={expires}
+              onChange={(e) => setExpires(e.target.value)}
+              className={inputCls}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className={labelCls}>Notas</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={2}
+              maxLength={500}
+              className={`${inputCls} resize-none`}
+            />
+          </div>
+
+          <div className="md:col-span-2 flex items-center gap-2">
+            <input
+              id="edit-active"
+              type="checkbox"
+              checked={active}
+              onChange={(e) => setActive(e.target.checked)}
+              className="h-4 w-4 accent-foreground"
+            />
+            <label htmlFor="edit-active" className="text-sm">
+              Cupom ativo
+            </label>
+          </div>
+        </div>
+
+        <div className="p-4 border-t border-border flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={saving}
+            className="rounded-md border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-secondary"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-md bg-foreground text-background px-4 py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-40"
+          >
+            {saving ? "Salvando..." : "Salvar"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

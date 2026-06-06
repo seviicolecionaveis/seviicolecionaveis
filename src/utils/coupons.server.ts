@@ -20,6 +20,7 @@ export interface CouponRow {
   code: string;
   percent: number | null;
   amount_cents: number | null;
+  balance_cents: number | null;
   max_uses: number;
   used_count: number;
   expires_at: string | null;
@@ -224,7 +225,9 @@ export async function createGiftVoucherServer(
       code,
       percent: input.percent,
       amount_cents: input.amount_cents,
-      max_uses: 1,
+      balance_cents:
+        input.amount_cents && input.amount_cents > 0 ? input.amount_cents : null,
+      max_uses: input.amount_cents && input.amount_cents > 0 ? 100_000 : 1,
       expires_at: input.expires_at,
       user_id: targetId,
       active: true,
@@ -234,6 +237,96 @@ export async function createGiftVoucherServer(
     .single();
   if (error) throw new Response(error.message, { status: 500 });
   return { coupon: { ...inserted, user_email: email } };
+}
+
+export interface UpdateCouponInput {
+  code?: string;
+  percent?: number | null;
+  amount_cents?: number | null;
+  balance_cents?: number | null;
+  max_uses?: number;
+  expires_at?: string | null;
+  notes?: string | null;
+  active?: boolean;
+}
+
+export async function updateCouponServer(
+  userId: string,
+  couponId: string,
+  patch: UpdateCouponInput,
+) {
+  await assertAdmin(userId);
+  const { data: existing, error: getErr } = await supabaseAdmin
+    .from("coupons")
+    .select("*")
+    .eq("id", couponId)
+    .maybeSingle();
+  if (getErr) throw new Response(getErr.message, { status: 500 });
+  if (!existing) throw new Response("Cupom não encontrado.", { status: 404 });
+
+  const updates: Record<string, any> = {};
+
+  if (patch.code !== undefined) {
+    const code = patch.code.trim().toUpperCase();
+    if (code !== existing.code) {
+      const { data: dup } = await supabaseAdmin
+        .from("coupons")
+        .select("id")
+        .eq("code", code)
+        .maybeSingle();
+      if (dup) throw new Response("Já existe um cupom com esse código.", { status: 400 });
+      updates.code = code;
+    }
+  }
+  if (patch.percent !== undefined) updates.percent = patch.percent;
+  if (patch.amount_cents !== undefined) updates.amount_cents = patch.amount_cents;
+  if (patch.balance_cents !== undefined) updates.balance_cents = patch.balance_cents;
+  if (patch.max_uses !== undefined) updates.max_uses = patch.max_uses;
+  if (patch.expires_at !== undefined) updates.expires_at = patch.expires_at;
+  if (patch.notes !== undefined) updates.notes = patch.notes;
+  if (patch.active !== undefined) updates.active = patch.active;
+
+  // Sanity: exatamente um tipo de desconto
+  const finalPercent = updates.percent !== undefined ? updates.percent : existing.percent;
+  const finalAmount =
+    updates.amount_cents !== undefined ? updates.amount_cents : existing.amount_cents;
+  if ((finalPercent && finalAmount) || (!finalPercent && !finalAmount)) {
+    throw new Response(
+      "Informe percentual OU valor (exatamente um).",
+      { status: 400 },
+    );
+  }
+
+  if (Object.keys(updates).length === 0) return { ok: true };
+
+  const { error } = await supabaseAdmin
+    .from("coupons")
+    .update(updates as any)
+    .eq("id", couponId);
+  if (error) throw new Response(error.message, { status: 500 });
+  return { ok: true };
+}
+
+export async function incrementCouponMaxUsesServer(
+  userId: string,
+  couponId: string,
+  delta: number,
+) {
+  await assertAdmin(userId);
+  const { data: existing, error: getErr } = await supabaseAdmin
+    .from("coupons")
+    .select("max_uses")
+    .eq("id", couponId)
+    .maybeSingle();
+  if (getErr) throw new Response(getErr.message, { status: 500 });
+  if (!existing) throw new Response("Cupom não encontrado.", { status: 404 });
+  const next = Math.max(1, (existing.max_uses ?? 1) + delta);
+  const { error } = await supabaseAdmin
+    .from("coupons")
+    .update({ max_uses: next, active: true })
+    .eq("id", couponId);
+  if (error) throw new Response(error.message, { status: 500 });
+  return { ok: true, max_uses: next };
 }
 
 export async function sendGiftVoucherEmailServer(
