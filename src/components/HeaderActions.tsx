@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, User as UserIcon, LogOut, LayoutDashboard, Heart, UserCog } from "lucide-react";
+import { ShoppingBag, User as UserIcon, LogOut, LayoutDashboard, Heart, UserCog, Layers } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
@@ -66,6 +66,13 @@ export function HeaderActions({ onCartOpen }: Props) {
                   className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
                 >
                   <ShoppingBag className="h-4 w-4" /> Meus pedidos
+                </Link>
+                <Link
+                  to="/pilha"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
+                >
+                  <Layers className="h-4 w-4" /> Pilha de cartas
                 </Link>
                 {isAdmin && (
                   <>
