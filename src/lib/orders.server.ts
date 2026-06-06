@@ -122,6 +122,14 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
     })
     .eq("id", orderId);
 
+  // Débito de vale-presente carteira (só agora, quando o pagamento confirma).
+  try {
+    await applyWalletDeductionForOrder(orderId);
+  } catch (e) {
+    console.error("[markOrderPaid] applyWalletDeductionForOrder falhou:", e);
+  }
+
+
   // Lookup do pedido (necessário para decidir Superfrete x Pilha)
   const { data: full } = await supabaseAdmin
     .from("orders")
