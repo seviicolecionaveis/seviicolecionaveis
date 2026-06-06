@@ -105,9 +105,9 @@ async function validateCoupon(
   userId: string,
   rawCode: string | null | undefined,
   subtotalCents: number,
-): Promise<{ discountCents: number; code: string | null }> {
+): Promise<{ discountCents: number; code: string | null; walletCouponId: string | null; walletDeductionCents: number }> {
   const code = (rawCode ?? "").trim().toUpperCase();
-  if (!code) return { discountCents: 0, code: null };
+  if (!code) return { discountCents: 0, code: null, walletCouponId: null, walletDeductionCents: 0 };
 
   if (code === ADMIN_COUPON_CODE) {
     const { data: roleRow, error } = await supabaseAdmin
@@ -121,6 +121,8 @@ async function validateCoupon(
     return {
       discountCents: Math.round((subtotalCents * ADMIN_COUPON_PERCENT) / 100),
       code: ADMIN_COUPON_CODE,
+      walletCouponId: null,
+      walletDeductionCents: 0,
     };
   }
 
@@ -138,6 +140,8 @@ async function validateCoupon(
     return {
       discountCents: Math.min(raw, FIRST_PURCHASE_MAX_DISCOUNT_CENTS),
       code: FIRST_PURCHASE_COUPON,
+      walletCouponId: null,
+      walletDeductionCents: 0,
     };
   }
 
@@ -156,7 +160,10 @@ async function validateCoupon(
     throw new Error("Este cupom não está disponível para sua conta");
   }
 
-  // Vale-presente carteira: usa balance_cents (multi-uso até zerar saldo)
+  // Vale-presente carteira: usa balance_cents (multi-uso até zerar saldo).
+  // IMPORTANTE: NÃO debita o saldo aqui — apenas valida e retorna o valor.
+  // O débito real acontece em markOrderPaid() para evitar perder saldo em
+  // tentativas de pagamento que não se concretizam.
   const isWallet =
     !!coupon.user_id &&
     coupon.amount_cents != null &&
@@ -167,21 +174,12 @@ async function validateCoupon(
     const balance = coupon.balance_cents ?? 0;
     if (balance <= 0) throw new Error("Saldo do vale-presente esgotado");
     const discountCents = Math.min(balance, subtotalCents);
-    const { data: claimed, error: claimErr } = await supabaseAdmin
-      .from("coupons")
-      .update({ balance_cents: balance - discountCents })
-      .eq("id", coupon.id)
-      .eq("balance_cents", balance)
-      .select("id")
-      .maybeSingle();
-    if (claimErr) throw new Error(claimErr.message);
-    if (!claimed) throw new Error("Saldo do vale-presente em uso. Tente novamente.");
-    // Também incrementa used_count (informativo)
-    await supabaseAdmin
-      .from("coupons")
-      .update({ used_count: coupon.used_count + 1 })
-      .eq("id", coupon.id);
-    return { discountCents, code: coupon.code };
+    return {
+      discountCents,
+      code: coupon.code,
+      walletCouponId: coupon.id,
+      walletDeductionCents: discountCents,
+    };
   }
 
   if (coupon.used_count >= coupon.max_uses) {
@@ -211,8 +209,9 @@ async function validateCoupon(
         ? Math.min(raw, coupon.max_discount_cents)
         : raw;
   }
-  return { discountCents, code: coupon.code };
+  return { discountCents, code: coupon.code, walletCouponId: null, walletDeductionCents: 0 };
 }
+
 
 export async function previewCouponServer(
   userId: string,
