@@ -931,9 +931,11 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
       state: data.address.state,
       notes: data.notes,
       arte_em_cards_code: arte.codeUsed,
+      wallet_deduction_cents: walletDeductionCents,
       superfrete_service_id: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceId ?? null : null,
       superfrete_service_name: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceName ?? null : null,
     })
+
     .select("id")
     .single();
   if (orderErr || !order) throw new Error(orderErr?.message ?? "Falha ao criar pedido");
