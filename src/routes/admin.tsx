@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminCancellationBell } from "@/components/AdminCancellationBell";
-import { ChevronRight, ImageOff } from "lucide-react";
+import { ChevronRight, ImageOff, Search } from "lucide-react";
 
 
 export const Route = createFileRoute("/admin")({
@@ -33,6 +33,7 @@ function AdminPage() {
   const search = Route.useSearch();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const ALL_STATUSES = [...STATUSES, "cancellation_requested"] as const;
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>(() => {
     if (typeof window === "undefined") return [...ALL_STATUSES];
@@ -118,7 +119,17 @@ function AdminPage() {
     return <Outlet />;
   }
 
-  const filtered = orders.filter((o) => selectedStatuses.includes(o.status));
+  const query = searchQuery.trim().toLowerCase();
+  const filtered = orders.filter((o) => {
+    if (!selectedStatuses.includes(o.status)) return false;
+    if (!query) return true;
+    const items: any[] = o.order_items ?? [];
+    const matchId = o.id.toLowerCase().includes(query) || o.id.slice(0, 8).toLowerCase().includes(query);
+    const matchName = (o.recipient_name ?? "").toLowerCase().includes(query);
+    const matchEmail = (o.email ?? "").toLowerCase().includes(query);
+    const matchItem = items.some((it) => (it.card_name ?? "").toLowerCase().includes(query));
+    return matchId || matchName || matchEmail || matchItem;
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -147,7 +158,7 @@ function AdminPage() {
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8">
-        <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
           <h1 className="text-2xl font-bold">Pedidos ({filtered.length})</h1>
           <div className="rounded-lg border border-border bg-card p-3">
             <div className="flex items-center justify-between gap-3 mb-2">
@@ -182,6 +193,17 @@ function AdminPage() {
               ))}
             </div>
           </div>
+        </div>
+
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar por nº do pedido, nome do cliente ou nome da carta..."
+            className="w-full rounded-lg border border-border bg-card py-2.5 pl-9 pr-4 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          />
         </div>
 
         {loading ? (
