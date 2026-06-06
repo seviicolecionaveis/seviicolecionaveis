@@ -724,7 +724,7 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
   const bundleDiscountCents = bundle.bundleDiscountCents;
   const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundle.bundleSubtotalCents);
 
-  const { discountCents: couponDiscountCents, code: appliedCoupon } = await validateCoupon(
+  const { discountCents: couponDiscountCents, code: appliedCoupon, walletDeductionCents } = await validateCoupon(
     userId,
     data.couponCode,
     nonBundleSubtotalCents,
@@ -737,8 +737,8 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
   );
   const discountCents = bundleDiscountCents + couponDiscountCents + pixDiscountCents;
 
-  const totalCents = subtotalCents - discountCents + shippingCents;
-  if (totalCents < 100) throw new Error("Valor mínimo para Pix: R$ 1,00");
+  const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents);
+
 
   const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
   const email = userData?.user?.email ?? "";
