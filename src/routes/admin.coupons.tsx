@@ -155,6 +155,7 @@ function AdminCouponsPage() {
   const [vNotes, setVNotes] = useState("");
 
   const [preview, setPreview] = useState<PreviewState | null>(null);
+  const [editing, setEditing] = useState<CouponRow | null>(null);
 
   useEffect(() => {
     if (!authLoading) {
