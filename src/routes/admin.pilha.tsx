@@ -10,10 +10,12 @@ import {
   adminGetPilhaData,
   adminAdjustStackItem,
   adminAddOrderToStack,
+  adminCreateManualServiceOrder,
   type AdminServiceOrder,
   type AdminStack,
   type AdminStackItem,
 } from "@/lib/admin-pilha.functions";
+
 
 export const Route = createFileRoute("/admin/pilha")({
   head: () => ({ meta: [{ title: "Pilha de Cartas — Sevii Admin" }] }),
