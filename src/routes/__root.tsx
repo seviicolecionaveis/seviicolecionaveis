@@ -154,6 +154,7 @@ function RootComponent() {
           <AnalyticsTracker />
             <Outlet />
             <GlobalHeaderActions />
+            <WhatsAppGroupDialog />
             <WhatsAppButton />
         </CartProvider>
       </WishlistProvider>
