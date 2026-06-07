@@ -240,6 +240,9 @@ export async function findPaymentByExternalReference(
   const approved = results.find((r) => r.status === "approved");
   const chosen = approved ?? results[0];
   return { id: chosen.id, status: chosen.status, status_detail: chosen.status_detail };
+}
+
+
 
 
 export interface RefundResult {
