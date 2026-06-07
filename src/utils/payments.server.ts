@@ -127,14 +127,17 @@ async function validateCoupon(
   }
 
   if (code === FIRST_PURCHASE_COUPON) {
+    // Uso único por conta: bloqueia se já existir QUALQUER pedido do usuário
+    // com este cupom que não tenha sido cancelado (pago ou pendente vale).
     const { count, error } = await supabaseAdmin
       .from("orders")
       .select("id", { count: "exact", head: true })
       .eq("user_id", userId)
-      .eq("status", "paid");
+      .eq("coupon_code", FIRST_PURCHASE_COUPON)
+      .neq("status", "cancelled");
     if (error) throw new Error(error.message);
     if ((count ?? 0) > 0) {
-      throw new Error("Cupom PRIMEIRACOMPRA10 válido apenas para a primeira compra");
+      throw new Error("Cupom PRIMEIRACOMPRA10 já foi utilizado nesta conta");
     }
     const raw = Math.round((subtotalCents * FIRST_PURCHASE_PERCENT) / 100);
     return {
@@ -247,8 +250,9 @@ export async function previewCouponServer(
         .from("orders")
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId)
-        .eq("status", "paid");
-      if ((count ?? 0) > 0) return { valid: false, error: "Cupom válido apenas para a primeira compra" };
+        .eq("coupon_code", FIRST_PURCHASE_COUPON)
+        .neq("status", "cancelled");
+      if ((count ?? 0) > 0) return { valid: false, error: "Cupom PRIMEIRACOMPRA10 já foi utilizado nesta conta" };
       const raw = Math.round((subtotalCents * FIRST_PURCHASE_PERCENT) / 100);
       return {
         valid: true,
