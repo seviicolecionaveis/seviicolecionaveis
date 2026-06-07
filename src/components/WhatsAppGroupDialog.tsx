@@ -7,7 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Users, MessageCircle, X } from "lucide-react";
+import { MessageCircle, X } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const STORAGE_KEY = "whatsapp-group-dismissed-at";
 const GROUP_LINK = "https://chat.whatsapp.com/LfG18YtcQMJ8PBjNz5IogS";
