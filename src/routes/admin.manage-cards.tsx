@@ -834,7 +834,6 @@ function RecentlyAddedPanel({ rows }: { rows: CardRow[] }) {
                   <th className="py-2 pr-3 font-semibold">Coleção</th>
                   <th className="py-2 pr-3 font-semibold">Variante</th>
                   <th className="py-2 pr-3 font-semibold">Estoque</th>
-                  <th className="py-2 pr-3 font-semibold">Adicionado por</th>
                 </tr>
               </thead>
               <tbody>
@@ -854,9 +853,6 @@ function RecentlyAddedPanel({ rows }: { rows: CardRow[] }) {
                         {r.finish} · {r.language} · {r.condition ?? "NM"}
                       </td>
                       <td className="py-2 pr-3 tabular-nums">{r.stock}</td>
-                      <td className="py-2 pr-3 text-muted-foreground">
-                        {r.created_by_email ?? <span className="italic">não registrado</span>}
-                      </td>
                     </tr>
                   );
                 })}
