@@ -229,6 +229,8 @@ export type Database = {
       }
       card_stack_items: {
         Row: {
+          auction_date: string | null
+          auction_name: string | null
           card_id: string
           card_image: string | null
           card_name: string
@@ -239,7 +241,7 @@ export type Database = {
           finish: string | null
           id: string
           language: string | null
-          order_id: string
+          order_id: string | null
           order_item_id: string | null
           quantity: number
           service_order_id: string | null
@@ -250,6 +252,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auction_date?: string | null
+          auction_name?: string | null
           card_id: string
           card_image?: string | null
           card_name: string
@@ -260,7 +264,7 @@ export type Database = {
           finish?: string | null
           id?: string
           language?: string | null
-          order_id: string
+          order_id?: string | null
           order_item_id?: string | null
           quantity: number
           service_order_id?: string | null
@@ -271,6 +275,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auction_date?: string | null
+          auction_name?: string | null
           card_id?: string
           card_image?: string | null
           card_name?: string
@@ -281,7 +287,7 @@ export type Database = {
           finish?: string | null
           id?: string
           language?: string | null
-          order_id?: string
+          order_id?: string | null
           order_item_id?: string | null
           quantity?: number
           service_order_id?: string | null
