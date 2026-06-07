@@ -147,6 +147,21 @@ function ItemRow({
                 Excluir
               </button>
             )}
+            {onRestore && (
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Devolver "${item.card_name}" (${item.quantity}×) para a pilha do cliente? O item sairá desta ordem de serviço.`,
+                    )
+                  )
+                    onRestore();
+                }}
+                className="rounded-md border border-primary/40 text-primary bg-background px-2 py-0.5 text-[11px] font-semibold hover:bg-primary/10"
+              >
+                ↩ Devolver à pilha
+              </button>
+            )}
           </div>
         )}
       </div>
