@@ -599,19 +599,103 @@ function AdminPilhaPage() {
                     )}
                   </div>
                   {open && s.items.length > 0 && (
-                    <div className="border-t border-border bg-secondary/30 px-5 py-3">
+                    <div className="border-t border-border bg-secondary/30 px-5 py-3 space-y-3">
+                      {(() => {
+                        const ids = s.items.map((i) => i.id);
+                        const sel = stackSelected[s.id] ?? new Set<string>();
+                        const allOn = ids.length > 0 && ids.every((id) => sel.has(id));
+                        return (
+                          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={allOn}
+                              onChange={() => toggleAllStackItems(s.id, ids)}
+                            />
+                            Selecionar todas ({sel.size}/{ids.length})
+                          </label>
+                        );
+                      })()}
                       <ul className="divide-y divide-border">
-                        {s.items.map((it) => (
-                          <ItemRow
-                            key={it.id}
-                            item={it}
-                            onAdjust={(q) => handleAdjustItem(it.id, q, it.card_name)}
-                            onRemove={() => handleAdjustItem(it.id, 0, it.card_name)}
-                          />
-                        ))}
+                        {s.items.map((it) => {
+                          const sel = stackSelected[s.id]?.has(it.id) ?? false;
+                          return (
+                            <li key={it.id} className="flex items-start gap-2">
+                              <input
+                                type="checkbox"
+                                checked={sel}
+                                onChange={() => toggleStackItem(s.id, it.id)}
+                                className="mt-4"
+                              />
+                              <div className="flex-1">
+                                <ItemRow
+                                  item={it}
+                                  onAdjust={(q) => handleAdjustItem(it.id, q, it.card_name)}
+                                  onRemove={() => handleAdjustItem(it.id, 0, it.card_name)}
+                                />
+                              </div>
+                            </li>
+                          );
+                        })}
                       </ul>
+
+                      <div className="rounded-md border border-border bg-background p-3">
+                        <p className="text-[11px] uppercase font-bold tracking-widest mb-2">
+                          Criar OS manual (WhatsApp / atendimento)
+                        </p>
+                        <p className="text-[11px] text-muted-foreground mb-2">
+                          Se nenhum item estiver selecionado, todos serão incluídos.
+                        </p>
+                        <div className="flex flex-wrap items-end gap-2">
+                          <label className="text-xs">
+                            <span className="block text-[10px] uppercase font-semibold text-muted-foreground">
+                              Método
+                            </span>
+                            <select
+                              value={stackMethod[s.id] ?? "presencial"}
+                              onChange={(e) =>
+                                setStackMethod((p) => ({ ...p, [s.id]: e.target.value as any }))
+                              }
+                              className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                            >
+                              <option value="presencial">Retirada Presencial</option>
+                              <option value="arte_em_cards">Retirada Arte em Cards</option>
+                              <option value="app">Envio por App</option>
+                              <option value="correios">Envio Correios</option>
+                            </select>
+                          </label>
+                          <label className="text-xs">
+                            <span className="block text-[10px] uppercase font-semibold text-muted-foreground">
+                              Status
+                            </span>
+                            <select
+                              value={stackStatus[s.id] ?? "delivered"}
+                              onChange={(e) =>
+                                setStackStatus((p) => ({ ...p, [s.id]: e.target.value as any }))
+                              }
+                              className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                            >
+                              <option value="delivered">Entregue</option>
+                              <option value="dispatched">Despachado</option>
+                              <option value="paid">Pago — preparar</option>
+                            </select>
+                          </label>
+                          <button
+                            disabled={stackBusy === s.id}
+                            onClick={() =>
+                              handleCreateManualOS(
+                                s.id,
+                                s.items.map((i) => i.id),
+                              )
+                            }
+                            className="rounded-md bg-foreground text-background px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
+                          >
+                            {stackBusy === s.id ? "Criando..." : "Criar OS"}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
+
                 </div>
               );
             })}
