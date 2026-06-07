@@ -58,3 +58,48 @@ export const adminUpdateServiceOrder = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
+const RestoreSchema = z.object({
+  itemId: z.string().uuid(),
+});
+
+/**
+ * Devolve um item específico (que foi finalizado em uma OS) de volta para a pilha do cliente.
+ * Útil quando o admin moveu por engano um item para uma ordem de serviço.
+ */
+export const adminRestoreItemToStack = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => RestoreSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: roleRow } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!roleRow) throw new Error("Apenas administradores.");
+
+    const { data: item, error: itemErr } = await supabaseAdmin
+      .from("card_stack_items")
+      .select("id, service_order_id, stack_id")
+      .eq("id", data.itemId)
+      .maybeSingle();
+    if (itemErr) throw new Error(itemErr.message);
+    if (!item) throw new Error("Item não encontrado.");
+    if (!item.service_order_id) throw new Error("Este item não está vinculado a uma ordem de serviço.");
+
+    const { error: updErr } = await supabaseAdmin
+      .from("card_stack_items")
+      .update({
+        status: "stored",
+        service_order_id: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", data.itemId);
+    if (updErr) throw new Error(updErr.message);
+
+    return { ok: true };
+  });
+
