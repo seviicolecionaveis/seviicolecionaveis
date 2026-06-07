@@ -12,8 +12,10 @@ export interface StackItemDTO {
   language: string | null;
   condition: string | null;
   quantity: number;
-  orderId: string;
+  orderId: string | null;
   orderCreatedAt: string | null;
+  auctionName: string | null;
+  auctionDate: string | null;
   status: string;
   createdAt: string;
 }
@@ -46,7 +48,7 @@ export const getMyStack = createServerFn({ method: "GET" })
     const { data: items, error: itemsErr } = await supabase
       .from("card_stack_items")
       .select(
-        "id, card_id, card_name, card_image, collection, card_number, finish, language, condition, quantity, order_id, status, created_at",
+        "id, card_id, card_name, card_image, collection, card_number, finish, language, condition, quantity, order_id, status, created_at, auction_name, auction_date",
       )
       .eq("stack_id", stack.id)
       .eq("status", "stored")
@@ -54,7 +56,9 @@ export const getMyStack = createServerFn({ method: "GET" })
 
     if (itemsErr) throw new Error(itemsErr.message);
 
-    const orderIds = Array.from(new Set((items ?? []).map((i) => i.order_id)));
+    const orderIds = Array.from(
+      new Set((items ?? []).map((i) => i.order_id).filter((v): v is string => !!v)),
+    );
     let createdAtByOrder = new Map<string, string>();
     if (orderIds.length > 0) {
       const { data: orders } = await supabase
@@ -76,12 +80,15 @@ export const getMyStack = createServerFn({ method: "GET" })
       condition: i.condition,
       quantity: i.quantity,
       orderId: i.order_id,
-      orderCreatedAt: createdAtByOrder.get(i.order_id) ?? null,
+      orderCreatedAt: i.order_id ? (createdAtByOrder.get(i.order_id) ?? null) : null,
+      auctionName: (i as any).auction_name ?? null,
+      auctionDate: (i as any).auction_date ?? null,
       status: i.status,
       createdAt: i.created_at,
     }));
 
     const totalCards = dtoItems.reduce((s, i) => s + i.quantity, 0);
+    const auctionCount = dtoItems.filter((i) => i.auctionName).length;
 
     return {
       id: stack.id,
@@ -89,7 +96,7 @@ export const getMyStack = createServerFn({ method: "GET" })
       expiresAt: stack.expires_at,
       status: stack.status,
       totalCards,
-      totalOrders: orderIds.length,
+      totalOrders: orderIds.length + auctionCount,
       items: dtoItems,
     };
   });

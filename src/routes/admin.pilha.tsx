@@ -93,7 +93,11 @@ function ItemRow({
         </p>
         {meta && <p className="text-xs text-muted-foreground truncate">{meta}</p>}
         <p className="text-[11px] text-muted-foreground mt-0.5">
-          Pedido <span className="font-mono">#{item.order_id.slice(0, 8)}</span>
+          {item.auction_name
+            ? <>🔨 Leilão: {item.auction_name}{item.auction_date ? ` · ${new Date(item.auction_date + "T00:00:00").toLocaleDateString("pt-BR")}` : ""}</>
+            : item.order_id
+              ? <>Pedido <span className="font-mono">#{item.order_id.slice(0, 8)}</span></>
+              : null}
           {item.unit_price_cents > 0 && (
             <> · {fmtMoney(item.unit_price_cents)} un.</>
           )}
