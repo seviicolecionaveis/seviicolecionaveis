@@ -14,9 +14,11 @@ export interface AdminStackItem {
   condition: string | null;
   quantity: number;
   unit_price_cents: number;
-  order_id: string;
+  order_id: string | null;
   status: string;
   service_order_id: string | null;
+  auction_name: string | null;
+  auction_date: string | null;
 }
 
 export interface AdminServiceOrder {
