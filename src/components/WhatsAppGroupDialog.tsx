@@ -10,7 +10,7 @@ import {
 import { Users, MessageCircle, X } from "lucide-react";
 
 const STORAGE_KEY = "whatsapp-group-dismissed-at";
-const GROUP_LINK = "https://chat.whatsapp.com/SeViiColecionaveis"; // substitua pelo link real do grupo
+const GROUP_LINK = "https://chat.whatsapp.com/LfG18YtcQMJ8PBjNz5IogS";
 const DISMISS_DAYS = 7;
 
 function shouldShow() {
