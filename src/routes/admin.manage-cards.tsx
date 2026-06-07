@@ -58,7 +58,7 @@ interface CardRow {
   updated_at: string;
   created_at?: string;
   created_by?: string | null;
-  created_by_email?: string | null;
+  // (created_by_email removed for security; admin email no longer exposed via cards)
 }
 
 interface FormState {
