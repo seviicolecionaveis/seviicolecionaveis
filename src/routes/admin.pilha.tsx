@@ -163,8 +163,56 @@ function AdminPilhaPage() {
   const fetchData = useServerFn(adminGetPilhaData);
   const adjustStackItem = useServerFn(adminAdjustStackItem);
   const addOrderToStack = useServerFn(adminAddOrderToStack);
+  const createManualOS = useServerFn(adminCreateManualServiceOrder);
   const [orderInput, setOrderInput] = useState("");
   const [addingOrder, setAddingOrder] = useState(false);
+  const [stackSelected, setStackSelected] = useState<Record<string, Set<string>>>({});
+  const [stackMethod, setStackMethod] = useState<Record<string, "correios" | "app" | "arte_em_cards" | "presencial">>({});
+  const [stackStatus, setStackStatus] = useState<Record<string, "paid" | "dispatched" | "delivered">>({});
+  const [stackBusy, setStackBusy] = useState<string | null>(null);
+
+  function toggleStackItem(stackId: string, itemId: string) {
+    setStackSelected((prev) => {
+      const cur = new Set(prev[stackId] ?? []);
+      if (cur.has(itemId)) cur.delete(itemId);
+      else cur.add(itemId);
+      return { ...prev, [stackId]: cur };
+    });
+  }
+
+  function toggleAllStackItems(stackId: string, ids: string[]) {
+    setStackSelected((prev) => {
+      const cur = prev[stackId] ?? new Set<string>();
+      const allOn = ids.every((id) => cur.has(id));
+      return { ...prev, [stackId]: allOn ? new Set() : new Set(ids) };
+    });
+  }
+
+  async function handleCreateManualOS(stackId: string, allIds: string[]) {
+    const selected = stackSelected[stackId];
+    const ids = selected && selected.size > 0 ? Array.from(selected) : allIds;
+    if (ids.length === 0) {
+      toast.error("Nenhum item selecionado.");
+      return;
+    }
+    const method = stackMethod[stackId] ?? "presencial";
+    const status = stackStatus[stackId] ?? "delivered";
+    const label =
+      status === "delivered" ? "marcar como entregue" : status === "dispatched" ? "marcar como despachado" : "marcar como pago";
+    if (!window.confirm(`Criar OS manual (${METHOD_LABEL[method]}) e ${label} para ${ids.length} item(ns)?`)) return;
+    setStackBusy(stackId);
+    try {
+      const res = await createManualOS({ data: { stackId, itemIds: ids, method, status } });
+      toast.success(`OS #${res.code} criada.`);
+      setStackSelected((p) => ({ ...p, [stackId]: new Set() }));
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao criar OS.");
+    } finally {
+      setStackBusy(null);
+    }
+  }
+
 
   async function handleAddOrder() {
     const v = orderInput.trim();
