@@ -109,6 +109,7 @@ export const adminGetPilhaData = createServerFn({ method: "GET" })
             .select("*")
             .in("stack_id", stackIds)
             .eq("status", "stored")
+            .order("created_at", { ascending: false })
         : Promise.resolve({ data: [] as any[] }),
     ]);
 
