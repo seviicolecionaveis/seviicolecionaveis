@@ -250,8 +250,9 @@ export async function previewCouponServer(
         .from("orders")
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId)
-        .eq("status", "paid");
-      if ((count ?? 0) > 0) return { valid: false, error: "Cupom válido apenas para a primeira compra" };
+        .eq("coupon_code", FIRST_PURCHASE_COUPON)
+        .neq("status", "cancelled");
+      if ((count ?? 0) > 0) return { valid: false, error: "Cupom PRIMEIRACOMPRA10 já foi utilizado nesta conta" };
       const raw = Math.round((subtotalCents * FIRST_PURCHASE_PERCENT) / 100);
       return {
         valid: true,
