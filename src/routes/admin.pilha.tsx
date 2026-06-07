@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { ImageOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { adminUpdateServiceOrder } from "@/lib/service-orders-admin.functions";
+import { adminUpdateServiceOrder, adminRestoreItemToStack } from "@/lib/service-orders-admin.functions";
 import {
   adminGetPilhaData,
   adminAdjustStackItem,
@@ -75,15 +75,17 @@ function ItemRow({
   item,
   onAdjust,
   onRemove,
+  onRestore,
 }: {
   item: AdminStackItem;
   onAdjust?: (newQty: number) => void | Promise<void>;
   onRemove?: () => void | Promise<void>;
+  onRestore?: () => void | Promise<void>;
 }) {
   const meta = [item.collection, item.card_number, item.finish, item.language, item.condition]
     .filter(Boolean)
     .join(" · ");
-  const editable = Boolean(onAdjust || onRemove);
+  const editable = Boolean(onAdjust || onRemove || onRestore);
   return (
     <li className="flex gap-3 py-2">
       <Thumb item={item} />
@@ -145,6 +147,21 @@ function ItemRow({
                 Excluir
               </button>
             )}
+            {onRestore && (
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Devolver "${item.card_name}" (${item.quantity}×) para a pilha do cliente? O item sairá desta ordem de serviço.`,
+                    )
+                  )
+                    onRestore();
+                }}
+                className="rounded-md border border-primary/40 text-primary bg-background px-2 py-0.5 text-[11px] font-semibold hover:bg-primary/10"
+              >
+                ↩ Devolver à pilha
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -164,6 +181,7 @@ function AdminPilhaPage() {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const update = useServerFn(adminUpdateServiceOrder);
+  const restoreItem = useServerFn(adminRestoreItemToStack);
   const fetchData = useServerFn(adminGetPilhaData);
   const adjustStackItem = useServerFn(adminAdjustStackItem);
   const addOrderToStack = useServerFn(adminAddOrderToStack);
@@ -507,7 +525,19 @@ function AdminPilhaPage() {
                           </p>
                           <ul className="divide-y divide-border">
                             {o.items.map((it) => (
-                              <ItemRow key={it.id} item={it} />
+                              <ItemRow
+                                key={it.id}
+                                item={it}
+                                onRestore={async () => {
+                                  try {
+                                    await restoreItem({ data: { itemId: it.id } });
+                                    toast.success("Item devolvido à pilha do cliente.");
+                                    await load();
+                                  } catch (e: any) {
+                                    toast.error(e?.message ?? "Falha ao devolver item.");
+                                  }
+                                }}
+                              />
                             ))}
                           </ul>
                         </div>
