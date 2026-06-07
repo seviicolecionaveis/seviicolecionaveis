@@ -113,12 +113,36 @@ export async function sendTransactionalEmailServer(
       ? template.subject(templateData)
       : template.subject
 
-  // 4. Log pending + enqueue
+  // 4. Idempotency guard: if an email with this idempotency_key has already
+  // been enqueued/sent/suppressed, skip. Prevents duplicate sends from
+  // webhook retries, concurrent invocations, etc.
+  if (params.idempotencyKey) {
+    const { data: existing } = await supabase
+      .from('email_send_log')
+      .select('id')
+      .eq('template_name', templateName)
+      .eq('recipient_email', effectiveRecipient)
+      .contains('metadata', { idempotency_key: idempotencyKey })
+      .in('status', ['pending', 'sent', 'suppressed', 'bounced'])
+      .limit(1)
+      .maybeSingle()
+    if (existing) {
+      console.log('[email] Skipped duplicate', {
+        templateName,
+        recipient: redactEmail(effectiveRecipient),
+        idempotencyKey,
+      })
+      return { success: true, reason: 'duplicate_skipped' }
+    }
+  }
+
+  // 5. Log pending + enqueue
   await supabase.from('email_send_log').insert({
     message_id: messageId,
     template_name: templateName,
     recipient_email: effectiveRecipient,
     status: 'pending',
+    metadata: { idempotency_key: idempotencyKey },
   })
 
   const { error: enqueueError } = await supabase.rpc('enqueue_email', {
