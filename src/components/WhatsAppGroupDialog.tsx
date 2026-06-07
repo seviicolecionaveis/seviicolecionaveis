@@ -50,8 +50,8 @@ export function WhatsAppGroupDialog() {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366]/15 text-[#25D366] shadow-sm">
-            <Users className="h-7 w-7" />
+          <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-border">
+            <img src={logo} alt="Sevii Colecionáveis" className="h-full w-full object-contain" />
           </div>
           <DialogTitle className="text-center text-xl">
             Junte-se à nossa comunidade!
