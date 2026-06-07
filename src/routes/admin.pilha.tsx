@@ -75,10 +75,12 @@ function ItemRow({
   item,
   onAdjust,
   onRemove,
+  onRestore,
 }: {
   item: AdminStackItem;
   onAdjust?: (newQty: number) => void | Promise<void>;
   onRemove?: () => void | Promise<void>;
+  onRestore?: () => void | Promise<void>;
 }) {
   const meta = [item.collection, item.card_number, item.finish, item.language, item.condition]
     .filter(Boolean)
