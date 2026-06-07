@@ -419,4 +419,131 @@ export const adminCreateManualServiceOrder = createServerFn({ method: "POST" })
     return { ok: true, serviceOrderId: created.id, code: created.code };
   });
 
+const auctionItemSchema = z.object({
+  card_id: z.string().trim().min(1).max(200),
+  card_name: z.string().trim().min(1).max(200),
+  card_image: z.string().trim().max(2000).nullable().optional(),
+  collection: z.string().trim().max(200).nullable().optional(),
+  card_number: z.string().trim().max(50).nullable().optional(),
+  finish: z.string().trim().max(50).nullable().optional(),
+  language: z.string().trim().max(20).nullable().optional(),
+  condition: z.string().trim().max(20).nullable().optional(),
+  quantity: z.number().int().min(1).max(999),
+  unit_price_cents: z.number().int().min(0).max(99999999),
+});
+
+export const adminAddAuctionCardsToStack = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        customerEmail: z.string().trim().email().max(255),
+        auctionName: z.string().trim().min(1).max(200),
+        auctionDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida (YYYY-MM-DD)"),
+        items: z.array(auctionItemSchema).min(1).max(200),
+        sendEmail: z.boolean().default(true),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await ensureAdmin(supabaseAdmin, context.userId);
+
+    const emailLower = data.customerEmail.toLowerCase();
+
+    // Encontra usuário por email via auth admin (lista paginada — simples)
+    let foundUserId: string | null = null;
+    let foundUserName: string | null = null;
+    let page = 1;
+    while (page <= 20 && !foundUserId) {
+      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage: 200,
+      });
+      if (error) throw new Error(`Falha ao buscar usuários: ${error.message}`);
+      const match = (list?.users ?? []).find(
+        (u: any) => (u.email ?? "").toLowerCase() === emailLower,
+      );
+      if (match) {
+        foundUserId = match.id;
+        break;
+      }
+      if (!list || list.users.length < 200) break;
+      page++;
+    }
+    if (!foundUserId) {
+      throw new Error(`Nenhum cliente cadastrado com o email "${data.customerEmail}".`);
+    }
+
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("full_name")
+      .eq("user_id", foundUserId)
+      .maybeSingle();
+    foundUserName = profile?.full_name ?? null;
+
+    const { ensureActiveStack } = await import("@/lib/card-stack.server");
+    const stack = await ensureActiveStack(foundUserId);
+
+    const rows = data.items.map((it) => ({
+      stack_id: stack.id,
+      user_id: foundUserId!,
+      order_id: null,
+      order_item_id: null,
+      card_id: it.card_id,
+      card_name: it.card_name,
+      card_image: it.card_image ?? null,
+      collection: it.collection ?? null,
+      card_number: it.card_number ?? null,
+      finish: it.finish ?? null,
+      language: it.language ?? null,
+      condition: it.condition ?? null,
+      quantity: it.quantity,
+      unit_price_cents: it.unit_price_cents,
+      status: "stored" as const,
+      auction_name: data.auctionName,
+      auction_date: data.auctionDate,
+    }));
+
+    const { error } = await supabaseAdmin.from("card_stack_items").insert(rows);
+    if (error) throw new Error(error.message);
+
+    if (data.sendEmail) {
+      try {
+        const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
+        await sendTransactionalEmailSafe({
+          templateName: "stack-auction-stored",
+          recipientEmail: data.customerEmail,
+          idempotencyKey: `stack-auction-${stack.id}-${data.auctionName}-${data.auctionDate}-${Date.now()}`,
+          templateData: {
+            recipientName: foundUserName?.split(/\s+/)[0],
+            auctionName: data.auctionName,
+            auctionDate: data.auctionDate,
+            expiresAt: stack.expires_at,
+            items: data.items.map((it) => ({
+              card_name: it.card_name,
+              collection: it.collection,
+              card_number: it.card_number,
+              finish: it.finish,
+              language: it.language,
+              condition: it.condition,
+              quantity: it.quantity,
+              unit_price_cents: it.unit_price_cents,
+            })),
+          },
+        });
+      } catch (e) {
+        console.error("[adminAddAuctionCardsToStack] email falhou:", e);
+      }
+    }
+
+    return {
+      ok: true,
+      addedCount: rows.length,
+      stackId: stack.id,
+      userId: foundUserId,
+      userName: foundUserName,
+    };
+  });
+
 
