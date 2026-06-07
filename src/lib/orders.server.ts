@@ -183,11 +183,20 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
     .eq("id", orderId)
     .maybeSingle();
 
-  if (full?.shipping_method === "card_stack") {
-    // Pilha de Cartas: não compra etiqueta; armazena os itens na pilha do cliente.
+  if (full?.shipping_method === "card_stack" || full?.shipping_method === "arrange") {
+    // Pilha de Cartas (ou entrega "a combinar"): não compra etiqueta;
+    // armazena os itens na pilha do cliente para combinar depois.
     try {
       const { addOrderToStack } = await import("@/lib/card-stack.server");
       await addOrderToStack(orderId);
+      // Se entrou via "arrange", padroniza o método para card_stack para
+      // refletir o destino real do pedido nas listagens.
+      if (full.shipping_method === "arrange") {
+        await supabaseAdmin
+          .from("orders")
+          .update({ shipping_method: "card_stack", updated_at: new Date().toISOString() })
+          .eq("id", orderId);
+      }
     } catch (e) {
       console.error("[markOrderPaid] addOrderToStack falhou:", e);
     }
