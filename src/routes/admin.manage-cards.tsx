@@ -219,7 +219,6 @@ function AdminCardsManagePage() {
     };
     if (!editingId) {
       payload.created_by = user?.id ?? null;
-      payload.created_by_email = user?.email ?? null;
     }
     const { error } = editingId
       ? await supabase.from("cards").update(payload).eq("id", editingId)
