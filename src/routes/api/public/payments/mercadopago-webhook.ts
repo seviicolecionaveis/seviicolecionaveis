@@ -68,19 +68,15 @@ export const Route = createFileRoute("/api/public/payments/mercadopago-webhook")
             }
           }
 
-          // Signature verification (Mercado Pago x-signature header).
-          // Gated on MERCADOPAGO_WEBHOOK_SECRET being configured — until then
-          // the handler still re-verifies the payment with MP's API below.
+          // Signature verification (Mercado Pago x-signature header) — required.
           const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
-          if (secret) {
-            const ok = verifyMpSignature(request, url, secret, paymentId);
-            if (!ok) {
-              return new Response("Invalid signature", { status: 401 });
-            }
-          } else {
-            console.warn(
-              "[MP webhook] MERCADOPAGO_WEBHOOK_SECRET not configured — accepting without signature verification.",
-            );
+          if (!secret) {
+            console.error("[MP webhook] MERCADOPAGO_WEBHOOK_SECRET not configured.");
+            return new Response("Server misconfigured", { status: 500 });
+          }
+          const ok = verifyMpSignature(request, url, secret, paymentId);
+          if (!ok) {
+            return new Response("Invalid signature", { status: 401 });
           }
 
           if (!paymentId) {
