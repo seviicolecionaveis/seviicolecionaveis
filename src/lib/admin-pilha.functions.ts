@@ -333,3 +333,88 @@ export const adminAddOrderToStack = createServerFn({ method: "POST" })
     return { ok: true, addedCount: rows.length, orderId: order.id, stackId: stack.id };
   });
 
+export const adminCreateManualServiceOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        stackId: z.string().uuid(),
+        itemIds: z.array(z.string().uuid()).min(1).max(500),
+        method: z.enum(["correios", "app", "arte_em_cards", "presencial"]),
+        status: z.enum(["paid", "dispatched", "delivered"]).default("delivered"),
+        notes: z.string().trim().max(500).optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await ensureAdmin(supabaseAdmin, context.userId);
+
+    const { data: stack, error: stackErr } = await supabaseAdmin
+      .from("card_stacks")
+      .select("id, user_id, status")
+      .eq("id", data.stackId)
+      .maybeSingle();
+    if (stackErr) throw new Error(stackErr.message);
+    if (!stack) throw new Error("Pilha não encontrada.");
+
+    const { data: items, error: itemsErr } = await supabaseAdmin
+      .from("card_stack_items")
+      .select("id, status, stack_id, service_order_id")
+      .in("id", data.itemIds)
+      .eq("stack_id", data.stackId);
+    if (itemsErr) throw new Error(itemsErr.message);
+    if (!items || items.length === 0) throw new Error("Nenhum item válido selecionado.");
+    const invalid = items.find((i: any) => i.status !== "stored" || i.service_order_id);
+    if (invalid) throw new Error("Há itens já vinculados a outra ordem de serviço.");
+
+    const { data: created, error: createErr } = await supabaseAdmin
+      .from("service_orders")
+      .insert({
+        user_id: stack.user_id,
+        stack_id: stack.id,
+        method: data.method,
+        status: data.status,
+        amount_cents: 0,
+        shipping_cost_cents: 0,
+        notes: data.notes
+          ? `[Criada manualmente pelo admin]\n${data.notes}`
+          : "[Criada manualmente pelo admin]",
+      })
+      .select("id, code")
+      .single();
+    if (createErr || !created) throw new Error(createErr?.message ?? "Falha ao criar OS.");
+
+    const itemStatus =
+      data.status === "delivered"
+        ? "delivered"
+        : data.status === "dispatched"
+          ? "dispatched"
+          : "requested";
+
+    const { error: updErr } = await supabaseAdmin
+      .from("card_stack_items")
+      .update({
+        status: itemStatus,
+        service_order_id: created.id,
+        updated_at: new Date().toISOString(),
+      })
+      .in("id", data.itemIds);
+    if (updErr) throw new Error(updErr.message);
+
+    const { count: remaining } = await supabaseAdmin
+      .from("card_stack_items")
+      .select("id", { count: "exact", head: true })
+      .eq("stack_id", stack.id)
+      .eq("status", "stored");
+    if ((remaining ?? 0) === 0) {
+      await supabaseAdmin
+        .from("card_stacks")
+        .update({ status: "completed", updated_at: new Date().toISOString() })
+        .eq("id", stack.id);
+    }
+
+    return { ok: true, serviceOrderId: created.id, code: created.code };
+  });
+
+

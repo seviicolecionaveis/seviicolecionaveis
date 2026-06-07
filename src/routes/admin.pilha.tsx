@@ -10,10 +10,12 @@ import {
   adminGetPilhaData,
   adminAdjustStackItem,
   adminAddOrderToStack,
+  adminCreateManualServiceOrder,
   type AdminServiceOrder,
   type AdminStack,
   type AdminStackItem,
 } from "@/lib/admin-pilha.functions";
+
 
 export const Route = createFileRoute("/admin/pilha")({
   head: () => ({ meta: [{ title: "Pilha de Cartas — Sevii Admin" }] }),
@@ -161,8 +163,56 @@ function AdminPilhaPage() {
   const fetchData = useServerFn(adminGetPilhaData);
   const adjustStackItem = useServerFn(adminAdjustStackItem);
   const addOrderToStack = useServerFn(adminAddOrderToStack);
+  const createManualOS = useServerFn(adminCreateManualServiceOrder);
   const [orderInput, setOrderInput] = useState("");
   const [addingOrder, setAddingOrder] = useState(false);
+  const [stackSelected, setStackSelected] = useState<Record<string, Set<string>>>({});
+  const [stackMethod, setStackMethod] = useState<Record<string, "correios" | "app" | "arte_em_cards" | "presencial">>({});
+  const [stackStatus, setStackStatus] = useState<Record<string, "paid" | "dispatched" | "delivered">>({});
+  const [stackBusy, setStackBusy] = useState<string | null>(null);
+
+  function toggleStackItem(stackId: string, itemId: string) {
+    setStackSelected((prev) => {
+      const cur = new Set(prev[stackId] ?? []);
+      if (cur.has(itemId)) cur.delete(itemId);
+      else cur.add(itemId);
+      return { ...prev, [stackId]: cur };
+    });
+  }
+
+  function toggleAllStackItems(stackId: string, ids: string[]) {
+    setStackSelected((prev) => {
+      const cur = prev[stackId] ?? new Set<string>();
+      const allOn = ids.every((id) => cur.has(id));
+      return { ...prev, [stackId]: allOn ? new Set() : new Set(ids) };
+    });
+  }
+
+  async function handleCreateManualOS(stackId: string, allIds: string[]) {
+    const selected = stackSelected[stackId];
+    const ids = selected && selected.size > 0 ? Array.from(selected) : allIds;
+    if (ids.length === 0) {
+      toast.error("Nenhum item selecionado.");
+      return;
+    }
+    const method = stackMethod[stackId] ?? "presencial";
+    const status = stackStatus[stackId] ?? "delivered";
+    const label =
+      status === "delivered" ? "marcar como entregue" : status === "dispatched" ? "marcar como despachado" : "marcar como pago";
+    if (!window.confirm(`Criar OS manual (${METHOD_LABEL[method]}) e ${label} para ${ids.length} item(ns)?`)) return;
+    setStackBusy(stackId);
+    try {
+      const res = await createManualOS({ data: { stackId, itemIds: ids, method, status } });
+      toast.success(`OS #${res.code} criada.`);
+      setStackSelected((p) => ({ ...p, [stackId]: new Set() }));
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao criar OS.");
+    } finally {
+      setStackBusy(null);
+    }
+  }
+
 
   async function handleAddOrder() {
     const v = orderInput.trim();
@@ -549,19 +599,103 @@ function AdminPilhaPage() {
                     )}
                   </div>
                   {open && s.items.length > 0 && (
-                    <div className="border-t border-border bg-secondary/30 px-5 py-3">
+                    <div className="border-t border-border bg-secondary/30 px-5 py-3 space-y-3">
+                      {(() => {
+                        const ids = s.items.map((i) => i.id);
+                        const sel = stackSelected[s.id] ?? new Set<string>();
+                        const allOn = ids.length > 0 && ids.every((id) => sel.has(id));
+                        return (
+                          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={allOn}
+                              onChange={() => toggleAllStackItems(s.id, ids)}
+                            />
+                            Selecionar todas ({sel.size}/{ids.length})
+                          </label>
+                        );
+                      })()}
                       <ul className="divide-y divide-border">
-                        {s.items.map((it) => (
-                          <ItemRow
-                            key={it.id}
-                            item={it}
-                            onAdjust={(q) => handleAdjustItem(it.id, q, it.card_name)}
-                            onRemove={() => handleAdjustItem(it.id, 0, it.card_name)}
-                          />
-                        ))}
+                        {s.items.map((it) => {
+                          const sel = stackSelected[s.id]?.has(it.id) ?? false;
+                          return (
+                            <li key={it.id} className="flex items-start gap-2">
+                              <input
+                                type="checkbox"
+                                checked={sel}
+                                onChange={() => toggleStackItem(s.id, it.id)}
+                                className="mt-4"
+                              />
+                              <div className="flex-1">
+                                <ItemRow
+                                  item={it}
+                                  onAdjust={(q) => handleAdjustItem(it.id, q, it.card_name)}
+                                  onRemove={() => handleAdjustItem(it.id, 0, it.card_name)}
+                                />
+                              </div>
+                            </li>
+                          );
+                        })}
                       </ul>
+
+                      <div className="rounded-md border border-border bg-background p-3">
+                        <p className="text-[11px] uppercase font-bold tracking-widest mb-2">
+                          Criar OS manual (WhatsApp / atendimento)
+                        </p>
+                        <p className="text-[11px] text-muted-foreground mb-2">
+                          Se nenhum item estiver selecionado, todos serão incluídos.
+                        </p>
+                        <div className="flex flex-wrap items-end gap-2">
+                          <label className="text-xs">
+                            <span className="block text-[10px] uppercase font-semibold text-muted-foreground">
+                              Método
+                            </span>
+                            <select
+                              value={stackMethod[s.id] ?? "presencial"}
+                              onChange={(e) =>
+                                setStackMethod((p) => ({ ...p, [s.id]: e.target.value as any }))
+                              }
+                              className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                            >
+                              <option value="presencial">Retirada Presencial</option>
+                              <option value="arte_em_cards">Retirada Arte em Cards</option>
+                              <option value="app">Envio por App</option>
+                              <option value="correios">Envio Correios</option>
+                            </select>
+                          </label>
+                          <label className="text-xs">
+                            <span className="block text-[10px] uppercase font-semibold text-muted-foreground">
+                              Status
+                            </span>
+                            <select
+                              value={stackStatus[s.id] ?? "delivered"}
+                              onChange={(e) =>
+                                setStackStatus((p) => ({ ...p, [s.id]: e.target.value as any }))
+                              }
+                              className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                            >
+                              <option value="delivered">Entregue</option>
+                              <option value="dispatched">Despachado</option>
+                              <option value="paid">Pago — preparar</option>
+                            </select>
+                          </label>
+                          <button
+                            disabled={stackBusy === s.id}
+                            onClick={() =>
+                              handleCreateManualOS(
+                                s.id,
+                                s.items.map((i) => i.id),
+                              )
+                            }
+                            className="rounded-md bg-foreground text-background px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
+                          >
+                            {stackBusy === s.id ? "Criando..." : "Criar OS"}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
+
                 </div>
               );
             })}
