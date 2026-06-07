@@ -1,0 +1,1 @@
+ALTER TABLE public.cards DROP COLUMN IF EXISTS created_by_email;
