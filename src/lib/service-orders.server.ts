@@ -212,8 +212,18 @@ export async function checkServiceOrderStatusServer(serviceOrderId: string, user
     return { status: "paid" as const };
   }
 
-  // Tenta puxar do MP via external_reference
-  // Não temos payment_id salvo aqui — usamos search por external_reference seria mais robusto,
-  // mas o webhook é a fonte primária. Retorna status atual.
+  // Consulta Mercado Pago por external_reference (so:<id>) — confirma pagamento mesmo se o webhook atrasar
+  try {
+    const { findPaymentByExternalReference } = await import("@/lib/mercadopago.server");
+    const payment = await findPaymentByExternalReference(`so:${serviceOrderId}`);
+    if (payment?.status === "approved") {
+      await markServiceOrderPaid(serviceOrderId);
+      return { status: "paid" as const };
+    }
+  } catch (e) {
+    console.error("[checkServiceOrderStatusServer] MP lookup falhou:", e);
+  }
+
   return { status: so.status as string };
 }
+
