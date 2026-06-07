@@ -212,20 +212,29 @@ function PilhaPage() {
                             .filter(Boolean)
                             .join(" · ")}
                         </p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">
-                          Pedido{" "}
-                          <Link
-                            to="/orders/$orderId"
-                            params={{ orderId: i.orderId }}
-                            className="font-mono underline"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            #{i.orderId.slice(0, 8)}
-                          </Link>
-                          {i.orderCreatedAt
-                            ? ` · ${new Date(i.orderCreatedAt).toLocaleDateString("pt-BR")}`
-                            : ""}
-                        </p>
+                        {i.auctionName ? (
+                          <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5">
+                            🔨 Leilão: {i.auctionName}
+                            {i.auctionDate
+                              ? ` · ${new Date(i.auctionDate + "T00:00:00").toLocaleDateString("pt-BR")}`
+                              : ""}
+                          </p>
+                        ) : i.orderId ? (
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            Pedido{" "}
+                            <Link
+                              to="/orders/$orderId"
+                              params={{ orderId: i.orderId }}
+                              className="font-mono underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              #{i.orderId.slice(0, 8)}
+                            </Link>
+                            {i.orderCreatedAt
+                              ? ` · ${new Date(i.orderCreatedAt).toLocaleDateString("pt-BR")}`
+                              : ""}
+                          </p>
+                        ) : null}
                       </div>
                     </li>
                   ))}
