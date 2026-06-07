@@ -525,7 +525,19 @@ function AdminPilhaPage() {
                           </p>
                           <ul className="divide-y divide-border">
                             {o.items.map((it) => (
-                              <ItemRow key={it.id} item={it} />
+                              <ItemRow
+                                key={it.id}
+                                item={it}
+                                onRestore={async () => {
+                                  try {
+                                    await restoreItem({ data: { itemId: it.id } });
+                                    toast.success("Item devolvido à pilha do cliente.");
+                                    await load();
+                                  } catch (e: any) {
+                                    toast.error(e?.message ?? "Falha ao devolver item.");
+                                  }
+                                }}
+                              />
                             ))}
                           </ul>
                         </div>
