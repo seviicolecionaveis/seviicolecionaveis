@@ -221,6 +221,27 @@ export async function getPixPayment(paymentId: string | number): Promise<{ statu
   return { status: json.status, external_reference: json.external_reference };
 }
 
+export async function findPaymentByExternalReference(
+  externalReference: string,
+): Promise<{ id: number; status: string; status_detail?: string } | null> {
+  const token = getAccessToken();
+  const url = `${MP_API}/v1/payments/search?sort=date_created&criteria=desc&external_reference=${encodeURIComponent(externalReference)}`;
+  const res = await fetchMpWithTimeout(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`MP search ${res.status}: ${text.slice(0, 200)}`);
+  }
+  const json: any = await res.json();
+  const results: any[] = json?.results ?? [];
+  if (results.length === 0) return null;
+  // Prioriza pagamento aprovado, senão o mais recente
+  const approved = results.find((r) => r.status === "approved");
+  const chosen = approved ?? results[0];
+  return { id: chosen.id, status: chosen.status, status_detail: chosen.status_detail };
+
+
 export interface RefundResult {
   id: number;
   amount: number;
