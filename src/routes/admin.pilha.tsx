@@ -181,6 +181,7 @@ function AdminPilhaPage() {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const update = useServerFn(adminUpdateServiceOrder);
+  const restoreItem = useServerFn(adminRestoreItemToStack);
   const fetchData = useServerFn(adminGetPilhaData);
   const adjustStackItem = useServerFn(adminAdjustStackItem);
   const addOrderToStack = useServerFn(adminAddOrderToStack);
