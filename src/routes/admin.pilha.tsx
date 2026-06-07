@@ -85,7 +85,7 @@ function ItemRow({
   const meta = [item.collection, item.card_number, item.finish, item.language, item.condition]
     .filter(Boolean)
     .join(" · ");
-  const editable = Boolean(onAdjust || onRemove);
+  const editable = Boolean(onAdjust || onRemove || onRestore);
   return (
     <li className="flex gap-3 py-2">
       <Thumb item={item} />
