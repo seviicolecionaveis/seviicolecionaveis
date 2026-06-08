@@ -547,6 +547,27 @@ function AdminCardsManagePage() {
             </div>
           )}
 
+          <div className="mb-4 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-3 py-2">
+            <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={noPriceOnly}
+                onChange={(e) => setNoPriceOnly(e.target.checked)}
+                className="rounded border-border accent-foreground"
+              />
+              <span className="font-semibold">Sem preço</span>
+              <span className="text-muted-foreground">({rows.filter((r) => r.base_price_cents == null).length})</span>
+            </label>
+            {noPriceOnly && (
+              <button
+                onClick={() => setNoPriceOnly(false)}
+                className="ml-auto text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              >
+                Limpar
+              </button>
+            )}
+          </div>
+
           </form>
         </section>
 
