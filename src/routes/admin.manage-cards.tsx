@@ -163,6 +163,7 @@ function AdminCardsManagePage() {
     const q = search.trim().toLowerCase();
     return rows.filter((r) => {
       if (categoryFilter.length > 0 && !categoryFilter.includes(r.category)) return false;
+      if (noPriceOnly && r.base_price_cents != null) return false;
       if (!q) return true;
       return (
         r.name.toLowerCase().includes(q) ||
@@ -170,7 +171,7 @@ function AdminCardsManagePage() {
         r.card_number.toLowerCase().includes(q)
       );
     });
-  }, [rows, search, categoryFilter]);
+  }, [rows, search, categoryFilter, noPriceOnly]);
 
   useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter]);
 
