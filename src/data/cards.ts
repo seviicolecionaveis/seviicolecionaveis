@@ -192,6 +192,7 @@ export const EXTRA_COLLECTIONS = [
   "TK6B - XY Trainer Kit - Sylveon",
   "ROS - Céus Estrondosos",
   "DRX - Dragões Enaltecidos",
+  "BKP - Turbo Colisão",
 ];
 
 export const COLLECTIONS = Array.from(
