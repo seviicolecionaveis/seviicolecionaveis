@@ -94,6 +94,7 @@ function AdminCardsManagePage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CardCategory[]>([]);
+  const [noPriceOnly, setNoPriceOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -162,6 +163,7 @@ function AdminCardsManagePage() {
     const q = search.trim().toLowerCase();
     return rows.filter((r) => {
       if (categoryFilter.length > 0 && !categoryFilter.includes(r.category)) return false;
+      if (noPriceOnly && r.base_price_cents != null) return false;
       if (!q) return true;
       return (
         r.name.toLowerCase().includes(q) ||
@@ -169,9 +171,9 @@ function AdminCardsManagePage() {
         r.card_number.toLowerCase().includes(q)
       );
     });
-  }, [rows, search, categoryFilter]);
+  }, [rows, search, categoryFilter, noPriceOnly]);
 
-  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter]);
+  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, noPriceOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredAll.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -544,6 +546,27 @@ function AdminCardsManagePage() {
               )}
             </div>
           )}
+
+          <div className="mb-4 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-3 py-2">
+            <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={noPriceOnly}
+                onChange={(e) => setNoPriceOnly(e.target.checked)}
+                className="rounded border-border accent-foreground"
+              />
+              <span className="font-semibold">Sem preço</span>
+              <span className="text-muted-foreground">({rows.filter((r) => r.base_price_cents == null).length})</span>
+            </label>
+            {noPriceOnly && (
+              <button
+                onClick={() => setNoPriceOnly(false)}
+                className="ml-auto text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              >
+                Limpar
+              </button>
+            )}
+          </div>
 
           </form>
         </section>
