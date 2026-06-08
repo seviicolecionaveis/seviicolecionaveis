@@ -173,7 +173,7 @@ function AdminCardsManagePage() {
     });
   }, [rows, search, categoryFilter, noPriceOnly]);
 
-  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter]);
+  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, noPriceOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredAll.length / pageSize));
   const currentPage = Math.min(page, totalPages);
