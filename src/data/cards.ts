@@ -193,6 +193,7 @@ export const EXTRA_COLLECTIONS = [
   "ROS - Céus Estrondosos",
   "DRX - Dragões Enaltecidos",
   "BKP - Turbo Colisão",
+  "PPPS6 - Play! Pokémon Prize Pack Series Six",
 ];
 
 export const COLLECTIONS = Array.from(
