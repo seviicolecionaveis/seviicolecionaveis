@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PersonalDataForm } from "@/components/account/PersonalDataForm";
 import { PreferencesForm } from "@/components/account/PreferencesForm";
 import { AddressesManager } from "@/components/account/AddressesManager";
-import { ShoppingBag, Heart, Layers } from "lucide-react";
+import { LoyaltyPointsCard } from "@/components/account/LoyaltyPointsCard";
+import { ShoppingBag, Heart, Layers, Sparkles } from "lucide-react";
 import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/conta")({
