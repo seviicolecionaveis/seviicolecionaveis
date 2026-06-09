@@ -271,9 +271,12 @@ function AdminOrderDetailPage() {
 
         {/* Itens */}
         <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <h2 className="px-5 py-3 text-xs font-bold uppercase tracking-widest border-b border-border">
-            Itens vendidos ({items.length})
-          </h2>
+          <div className="px-5 py-3 border-b border-border flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xs font-bold uppercase tracking-widest">
+              Itens vendidos ({items.length})
+            </h2>
+            <PickingSummary items={items} />
+          </div>
           <ul className="divide-y divide-border">
             {items.map((it) => {
               const cancelledQty = it.cancelled_quantity ?? 0;
@@ -693,6 +696,35 @@ function PickedByControl({ item, onChanged }: { item: any; onChanged: () => void
         <span className="text-[10px] text-muted-foreground">
           em {new Date(item.picked_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
         </span>
+      )}
+    </div>
+  );
+}
+
+function PickingSummary({ items }: { items: any[] }) {
+  const total = items.length;
+  const lucaPicked = items.filter((it) => it.picked_by === "Luca").length;
+  const juliaPicked = items.filter((it) => it.picked_by === "Julia").length;
+  const done = lucaPicked + juliaPicked;
+  const allDone = done === total && total > 0;
+
+  return (
+    <div className="flex items-center gap-3 flex-wrap">
+      <span className="text-[11px] text-muted-foreground">
+        Separado: <span className="font-semibold text-foreground">{done}/{total}</span>
+      </span>
+      {lucaPicked > 0 && (
+        <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-[11px] font-semibold">
+          Luca {lucaPicked}/{total} {lucaPicked === total && <span className="text-[10px]">✓</span>}
+        </span>
+      )}
+      {juliaPicked > 0 && (
+        <span className="inline-flex items-center gap-1 rounded-full bg-pink-100 text-pink-800 px-2 py-0.5 text-[11px] font-semibold">
+          Julia {juliaPicked}/{total} {juliaPicked === total && <span className="text-[10px]">✓</span>}
+        </span>
+      )}
+      {allDone && (
+        <span className="text-[11px] font-bold text-green-700">Tudo separado ✓</span>
       )}
     </div>
   );
