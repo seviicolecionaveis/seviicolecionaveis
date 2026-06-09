@@ -101,6 +101,20 @@ function computeShippingCents(input: {
   return input.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
 }
 
+async function resolvePointsRedemption(
+  userId: string,
+  desired: number | null | undefined,
+  maxDiscountableCents: number,
+): Promise<{ points: number; discountCents: number }> {
+  const want = Math.max(0, Math.floor(desired ?? 0));
+  if (want <= 0 || maxDiscountableCents <= 0) return { points: 0, discountCents: 0 };
+  const { normalizeRedeemPoints, pointsToDiscountCents } = await import("@/lib/loyalty");
+  const { data: balRow } = await supabaseAdmin.rpc("user_points_balance", { _user_id: userId });
+  const balance = Number(balRow ?? 0);
+  const points = normalizeRedeemPoints(want, balance, maxDiscountableCents);
+  return { points, discountCents: pointsToDiscountCents(points) };
+}
+
 async function validateCoupon(
   userId: string,
   rawCode: string | null | undefined,
@@ -588,7 +602,10 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
     data.couponCode,
     nonBundleSubtotalCents,
   );
-  const discountCents = bundleDiscountCents + couponDiscountCents;
+  const pointsBase = Math.max(0, subtotalCents - bundleDiscountCents - couponDiscountCents);
+  const { points: pointsRedeemed, discountCents: pointsDiscountCents } =
+    await resolvePointsRedemption(userId, data.pointsToRedeem, pointsBase);
+  const discountCents = bundleDiscountCents + couponDiscountCents + pointsDiscountCents;
 
   const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents);
 
@@ -622,6 +639,8 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
       notes: data.notes,
       arte_em_cards_code: arte.codeUsed,
       wallet_deduction_cents: walletDeductionCents,
+      points_redeemed: pointsRedeemed,
+      points_discount_cents: pointsDiscountCents,
       superfrete_service_id: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceId ?? null : null,
       superfrete_service_name: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceName ?? null : null,
     })
@@ -734,12 +753,14 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     nonBundleSubtotalCents,
   );
 
-  // Pix 5% incide apenas sobre o que sobra fora do combo (após cupom)
-  const pixDiscountCents = computePixDiscountCents(
-    nonBundleSubtotalCents,
-    couponDiscountCents,
-  );
-  const discountCents = bundleDiscountCents + couponDiscountCents + pixDiscountCents;
+  const pointsBase = Math.max(0, subtotalCents - bundleDiscountCents - couponDiscountCents);
+  const { points: pointsRedeemed, discountCents: pointsDiscountCents } =
+    await resolvePointsRedemption(userId, data.pointsToRedeem, pointsBase);
+
+  // Pix 5% incide apenas sobre o que sobra fora do combo (após cupom e pontos)
+  const pixBase = Math.max(0, nonBundleSubtotalCents - couponDiscountCents - pointsDiscountCents);
+  const pixDiscountCents = Math.round((pixBase * PIX_DISCOUNT_PERCENT) / 100);
+  const discountCents = bundleDiscountCents + couponDiscountCents + pointsDiscountCents + pixDiscountCents;
 
   const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents);
 
@@ -775,8 +796,11 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
       notes: data.notes,
       arte_em_cards_code: arte.codeUsed,
       wallet_deduction_cents: walletDeductionCents,
+      points_redeemed: pointsRedeemed,
+      points_discount_cents: pointsDiscountCents,
       pix_expires_at: pixExpires.toISOString(),
       superfrete_service_id: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceId ?? null : null,
+
 
       superfrete_service_name: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceName ?? null : null,
     })
@@ -902,7 +926,10 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
     data.couponCode,
     nonBundleSubtotalCents,
   );
-  const discountCents = bundleDiscountCents + couponDiscountCents;
+  const pointsBase = Math.max(0, subtotalCents - bundleDiscountCents - couponDiscountCents);
+  const { points: pointsRedeemed, discountCents: pointsDiscountCents } =
+    await resolvePointsRedemption(userId, data.pointsToRedeem, pointsBase);
+  const discountCents = bundleDiscountCents + couponDiscountCents + pointsDiscountCents;
 
   const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents);
 
@@ -936,6 +963,8 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
       notes: data.notes,
       arte_em_cards_code: arte.codeUsed,
       wallet_deduction_cents: walletDeductionCents,
+      points_redeemed: pointsRedeemed,
+      points_discount_cents: pointsDiscountCents,
       superfrete_service_id: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceId ?? null : null,
       superfrete_service_name: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceName ?? null : null,
     })

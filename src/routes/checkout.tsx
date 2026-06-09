@@ -13,13 +13,21 @@ import {
 } from "@/utils/payments.functions";
 import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
-import { Copy, Check, QrCode, CreditCard, Loader2, ShieldCheck } from "lucide-react";
+import { Copy, Check, QrCode, CreditCard, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 import { computeBundleDiscount } from "@/lib/bundles";
 import { copyToClipboard } from "@/lib/clipboard";
 import { CardStackTermsDialog } from "@/components/CardStackTermsDialog";
 import { cartIsAllTestCard } from "@/lib/test-card";
+import { getMyLoyaltyStatus } from "@/lib/loyalty.functions";
+import {
+  POINTS_PER_REDEEM_BLOCK,
+  CENTS_PER_REDEEM_BLOCK,
+  normalizeRedeemPoints,
+  pointsToDiscountCents,
+  formatPoints,
+} from "@/lib/loyalty";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -117,6 +125,7 @@ interface CardState {
   address: AddressPayload;
   notes: string | null;
   couponCode: string | null;
+  pointsToRedeem: number;
   arteEmCardsCode: string | null;
 }
 
@@ -145,6 +154,23 @@ function CheckoutPage() {
     | null
   >(null);
   const [couponChecking, setCouponChecking] = useState(false);
+  const [pointsBalance, setPointsBalance] = useState<number>(0);
+  const [pointsInput, setPointsInput] = useState<number>(0);
+
+  // Carrega saldo de pontos do usuário
+  useEffect(() => {
+    let cancelled = false;
+    if (!user) { setPointsBalance(0); return; }
+    (async () => {
+      try {
+        const status = await getMyLoyaltyStatus();
+        if (!cancelled) setPointsBalance(status?.balance ?? 0);
+      } catch (e) {
+        if (!cancelled) setPointsBalance(0);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   const selectedQuote = quotes.find((q) => q.id === selectedQuoteId) ?? null;
 
@@ -298,10 +324,18 @@ function CheckoutPage() {
       ? Math.min(couponPreview.discountCents, nonBundleSubtotalCents)
       : 0;
 
+  // Pontos resgatados — base = subtotal − combo − cupom
+  const pointsMaxDiscountableCents = Math.max(
+    0,
+    subtotalCents - bundleDiscountCents - couponDiscountCents,
+  );
+  const pointsRedeemed = normalizeRedeemPoints(pointsInput, pointsBalance, pointsMaxDiscountableCents);
+  const pointsDiscountCents = pointsToDiscountCents(pointsRedeemed);
+
   const pixDiscountCents =
     paymentMethod === "pix"
       ? Math.round(
-          Math.max(0, nonBundleSubtotalCents - couponDiscountCents) * (PIX_DISCOUNT_PERCENT / 100),
+          Math.max(0, nonBundleSubtotalCents - couponDiscountCents - pointsDiscountCents) * (PIX_DISCOUNT_PERCENT / 100),
         )
       : 0;
   const isAdminTestCart = isAdmin && cartIsAllTestCard(items);
@@ -310,12 +344,14 @@ function CheckoutPage() {
     if (paymentMethod === "admin_test" && !isAdminTestCart) setPaymentMethod("pix");
   }, [paymentMethod, isAdminTestCart]);
   const totalCents =
-    subtotalCents - bundleDiscountCents - couponDiscountCents - pixDiscountCents + shippingCents;
+    subtotalCents - bundleDiscountCents - couponDiscountCents - pointsDiscountCents - pixDiscountCents + shippingCents;
 
   const discount = couponDiscountCents / 100;
   const pixDiscount = pixDiscountCents / 100;
   const bundleDiscount = bundleDiscountCents / 100;
+  const pointsDiscount = pointsDiscountCents / 100;
   const total = totalCents / 100;
+
 
   const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
 
@@ -505,6 +541,7 @@ function CheckoutPage() {
         address: buildAddressPayload(),
         notes: buildNotes(),
         couponCode: couponNormalized || null,
+        pointsToRedeem: pointsRedeemed,
         arteEmCardsCode: null,
       });
       setStep("card");
@@ -539,6 +576,7 @@ function CheckoutPage() {
           address: buildAddressPayload(),
           notes: buildNotes(),
           couponCode: couponNormalized || null,
+          pointsToRedeem: pointsRedeemed,
           arteEmCardsCode: null,
         },
       });
@@ -877,6 +915,42 @@ function CheckoutPage() {
             )}
           </div>
 
+          {user && pointsBalance >= POINTS_PER_REDEEM_BLOCK && (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 p-3">
+              <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide mb-2 text-amber-800 dark:text-amber-200">
+                <Sparkles className="h-3.5 w-3.5" /> Usar pontos Sevii (saldo: {formatPoints(pointsBalance)})
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={0}
+                  step={POINTS_PER_REDEEM_BLOCK}
+                  max={Math.min(pointsBalance, Math.floor(pointsMaxDiscountableCents / CENTS_PER_REDEEM_BLOCK) * POINTS_PER_REDEEM_BLOCK)}
+                  value={pointsInput || ""}
+                  onChange={(e) => setPointsInput(Math.max(0, Number(e.target.value) || 0))}
+                  placeholder={`Mín. ${POINTS_PER_REDEEM_BLOCK}`}
+                  className="w-32 rounded-md border border-border bg-background px-3 py-2 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setPointsInput(Math.min(pointsBalance, Math.floor(pointsMaxDiscountableCents / CENTS_PER_REDEEM_BLOCK) * POINTS_PER_REDEEM_BLOCK))}
+                  className="text-xs font-semibold uppercase tracking-wide px-3 py-2 rounded-md border border-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40"
+                >
+                  Usar máx
+                </button>
+                {pointsRedeemed > 0 && (
+                  <span className="text-xs font-semibold text-green-700 dark:text-green-400">
+                    −R$ {(pointsDiscountCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-[11px] text-amber-700 dark:text-amber-300">
+                {POINTS_PER_REDEEM_BLOCK} pts = R$ {(CENTS_PER_REDEEM_BLOCK / 100).toFixed(2)} · use em múltiplos de {POINTS_PER_REDEEM_BLOCK}
+              </p>
+            </div>
+          )}
+
+
           <div>
             <label className="block text-xs font-medium uppercase tracking-wide mb-1">Observações (opcional)</label>
             <textarea
@@ -1011,6 +1085,12 @@ function CheckoutPage() {
                     : `Desconto ${couponPreview.code} −${couponPreview.percent}%`}
                 </span>
                 <span className="tabular-nums">− R$ {discount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+              </div>
+            )}
+            {pointsDiscountCents > 0 && (
+              <div className="flex justify-between text-amber-700 dark:text-amber-300">
+                <span>⭐ Pontos resgatados ({formatPoints(pointsRedeemed)} pts)</span>
+                <span className="tabular-nums">− R$ {pointsDiscount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
             )}
             {pixDiscount > 0 && (
@@ -1304,6 +1384,7 @@ function CardScreen({
                     address: card.address,
                     notes: card.notes,
                     couponCode: card.couponCode,
+                    pointsToRedeem: card.pointsToRedeem,
                     arteEmCardsCode: card.arteEmCardsCode,
                     card: {
                       token: cardFormData.token,
