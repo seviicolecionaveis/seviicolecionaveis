@@ -206,3 +206,62 @@ export async function getLoyaltyStats(adminId: string) {
     totalLedgerEntries: rows.length,
   };
 }
+
+export async function listAllLoyaltyUsers(adminId: string) {
+  await assertAdmin(adminId);
+
+  const { data: ledger } = await supabaseAdmin
+    .from("loyalty_points_ledger")
+    .select("user_id, delta, reason");
+
+  const balanceByUser = new Map<string, number>();
+  const lifetimeByUser = new Map<string, number>();
+  for (const r of ledger ?? []) {
+    balanceByUser.set(r.user_id, (balanceByUser.get(r.user_id) ?? 0) + r.delta);
+    if (r.delta > 0 && ["order_earned", "signup", "birthday"].includes(r.reason)) {
+      lifetimeByUser.set(r.user_id, (lifetimeByUser.get(r.user_id) ?? 0) + r.delta);
+    }
+  }
+
+  const userIds = Array.from(balanceByUser.entries())
+    .filter(([, v]) => v > 0)
+    .map(([uid]) => uid);
+
+  if (userIds.length === 0) return [] as LoyaltyUserSummary[];
+
+  const { data: profs } = await supabaseAdmin
+    .from("profiles")
+    .select("user_id, full_name, birth_date")
+    .in("user_id", userIds);
+  const profMap = new Map((profs ?? []).map((p) => [p.user_id, p]));
+
+  const emailMap = new Map<string, string | null>();
+  let page = 1;
+  while (page < 20) {
+    const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) break;
+    for (const u of list.users) emailMap.set(u.id, u.email ?? null);
+    if (!list.users.length || list.users.length < 1000) break;
+    page++;
+  }
+
+  const results: LoyaltyUserSummary[] = userIds.map((uid) => {
+    const lifetime = lifetimeByUser.get(uid) ?? 0;
+    const tier = lifetime >= 20000 ? "gold" : lifetime >= 5000 ? "silver" : "bronze";
+    const mult = tier === "gold" ? 15000 : tier === "silver" ? 12500 : 10000;
+    const p = profMap.get(uid);
+    return {
+      user_id: uid,
+      email: emailMap.get(uid) ?? null,
+      full_name: p?.full_name ?? null,
+      birth_date: p?.birth_date ?? null,
+      balance: balanceByUser.get(uid) ?? 0,
+      lifetime_earned: lifetime,
+      tier,
+      multiplier_bp: mult,
+    };
+  });
+
+  results.sort((a, b) => b.balance - a.balance);
+  return results;
+}
