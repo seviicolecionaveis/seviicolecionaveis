@@ -234,6 +234,7 @@ function AdminPilhaPage() {
       toast.error(e?.message ?? "Falha ao criar OS.");
     } finally {
       setStackBusy(null);
+    }
   }
 
   async function handleBulkDelete(stackId: string) {
@@ -260,7 +261,6 @@ function AdminPilhaPage() {
     } finally {
       setStackBusy(null);
     }
-  }
   }
 
 
