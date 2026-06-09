@@ -155,6 +155,14 @@ export function SiteFooter() {
               </li>
             </ul>
           </div>
+
+          {/* Coluna 4 — Newsletter */}
+          <div>
+            <SectionTitle>Newsletter</SectionTitle>
+            <div className="mt-4">
+              <NewsletterForm />
+            </div>
+          </div>
         </div>
 
         <p className="mt-10 pt-6 border-t border-border text-center text-xs text-neutral-500">
