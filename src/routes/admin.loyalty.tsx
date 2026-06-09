@@ -278,6 +278,82 @@ function AdminLoyaltyPage() {
           </div>
         )}
 
+        {!detail && results.length === 0 && (
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide">
+                  Todos os clientes com pontos {allUsers ? `(${allUsers.length})` : ""}
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Ordenado por saldo (maior → menor).
+                </p>
+              </div>
+              <button
+                onClick={loadAll}
+                disabled={loadingAll}
+                className="rounded-md border border-border px-3 py-1.5 text-xs font-semibold hover:bg-secondary disabled:opacity-50"
+              >
+                {loadingAll ? "Atualizando..." : "Atualizar"}
+              </button>
+            </div>
+            {loadingAll && !allUsers ? (
+              <p className="px-5 py-6 text-sm text-muted-foreground">Carregando clientes...</p>
+            ) : !allUsers || allUsers.length === 0 ? (
+              <p className="px-5 py-6 text-sm text-muted-foreground">
+                Nenhum cliente com saldo de pontos no momento.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-secondary text-[10px] uppercase tracking-wide">
+                    <tr>
+                      <th className="text-left px-4 py-2">Cliente</th>
+                      <th className="text-left px-4 py-2">E-mail</th>
+                      <th className="text-left px-4 py-2">Tier</th>
+                      <th className="text-right px-4 py-2">Saldo</th>
+                      <th className="text-right px-4 py-2">Vida toda</th>
+                      <th className="px-4 py-2" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {allUsers.map((r) => (
+                      <tr key={r.user_id} className="hover:bg-secondary/40">
+                        <td className="px-4 py-2 text-sm font-medium truncate max-w-[220px]">
+                          {r.full_name || "(sem nome)"}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-muted-foreground truncate max-w-[260px]">
+                          {r.email ?? "—"}
+                        </td>
+                        <td className="px-4 py-2 text-xs">
+                          {tierLabel(r.tier)}{" "}
+                          <span className="text-muted-foreground">
+                            ({multiplierLabel(r.multiplier_bp)})
+                          </span>
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums font-semibold">
+                          {formatPoints(r.balance)}
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums text-muted-foreground">
+                          {formatPoints(r.lifetime_earned)}
+                        </td>
+                        <td className="px-4 py-2 text-right">
+                          <button
+                            onClick={() => openDetail(r.user_id)}
+                            className="rounded-md border border-border px-3 py-1 text-xs font-semibold hover:bg-secondary"
+                          >
+                            Abrir
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
         {loadingDetail && (
           <p className="text-sm text-muted-foreground">Carregando detalhes...</p>
         )}
