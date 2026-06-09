@@ -60,6 +60,7 @@ function AdminLoyaltyPage() {
   const detailFn = useServerFn(adminGetUserLoyaltyDetail);
   const adjustFn = useServerFn(adminAdjustUserPoints);
   const statsFn = useServerFn(adminGetLoyaltyStats);
+  const listAllFn = useServerFn(adminListAllLoyaltyUsers);
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<UserRow[]>([]);
