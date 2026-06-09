@@ -963,6 +963,8 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
       notes: data.notes,
       arte_em_cards_code: arte.codeUsed,
       wallet_deduction_cents: walletDeductionCents,
+      points_redeemed: pointsRedeemed,
+      points_discount_cents: pointsDiscountCents,
       superfrete_service_id: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceId ?? null : null,
       superfrete_service_name: data.shippingMethod === "fixed" ? data.shippingQuote?.serviceName ?? null : null,
     })
