@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { render } from '@react-email/components'
+import { renderAsync } from '@react-email/components'
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
 import { TEMPLATES } from '@/lib/email-templates/registry'
@@ -57,17 +57,6 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
 
         if (authError || !user) {
           return Response.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        // Restrict to admin users only (prevents email abuse / phishing vector)
-        const { data: adminRole } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .maybeSingle()
-        if (!adminRole) {
-          return Response.json({ error: 'Forbidden' }, { status: 403 })
         }
 
         // Parse request body
@@ -264,8 +253,8 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
 
         // 4. Render React Email template to HTML and plain text
         const element = React.createElement(template.component, templateData)
-        const html = await render(element)
-        const plainText = await render(element, { plainText: true })
+        const html = await renderAsync(element)
+        const plainText = await renderAsync(element, { plainText: true })
 
         // Resolve subject — supports static string or dynamic function
         const resolvedSubject =
