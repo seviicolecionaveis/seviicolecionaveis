@@ -915,6 +915,42 @@ function CheckoutPage() {
             )}
           </div>
 
+          {user && pointsBalance >= POINTS_PER_REDEEM_BLOCK && (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 p-3">
+              <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide mb-2 text-amber-800 dark:text-amber-200">
+                <Sparkles className="h-3.5 w-3.5" /> Usar pontos Sevii (saldo: {formatPoints(pointsBalance)})
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={0}
+                  step={POINTS_PER_REDEEM_BLOCK}
+                  max={Math.min(pointsBalance, Math.floor(pointsMaxDiscountableCents / CENTS_PER_REDEEM_BLOCK) * POINTS_PER_REDEEM_BLOCK)}
+                  value={pointsInput || ""}
+                  onChange={(e) => setPointsInput(Math.max(0, Number(e.target.value) || 0))}
+                  placeholder={`Mín. ${POINTS_PER_REDEEM_BLOCK}`}
+                  className="w-32 rounded-md border border-border bg-background px-3 py-2 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setPointsInput(Math.min(pointsBalance, Math.floor(pointsMaxDiscountableCents / CENTS_PER_REDEEM_BLOCK) * POINTS_PER_REDEEM_BLOCK))}
+                  className="text-xs font-semibold uppercase tracking-wide px-3 py-2 rounded-md border border-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40"
+                >
+                  Usar máx
+                </button>
+                {pointsRedeemed > 0 && (
+                  <span className="text-xs font-semibold text-green-700 dark:text-green-400">
+                    −R$ {(pointsDiscountCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-[11px] text-amber-700 dark:text-amber-300">
+                {POINTS_PER_REDEEM_BLOCK} pts = R$ {(CENTS_PER_REDEEM_BLOCK / 100).toFixed(2)} · use em múltiplos de {POINTS_PER_REDEEM_BLOCK}
+              </p>
+            </div>
+          )}
+
+
           <div>
             <label className="block text-xs font-medium uppercase tracking-wide mb-1">Observações (opcional)</label>
             <textarea
