@@ -97,7 +97,10 @@ export async function addOrderToStack(orderId: string): Promise<void> {
     status: "stored" as const,
   }));
 
-  const { error } = await supabaseAdmin.from("card_stack_items").insert(rows);
+  // upsert com ignoreDuplicates evita corrida quando o webhook é chamado em paralelo
+  const { error } = await supabaseAdmin
+    .from("card_stack_items")
+    .upsert(rows, { onConflict: "order_item_id", ignoreDuplicates: true });
   if (error) throw new Error(`Falha ao adicionar itens à pilha: ${error.message}`);
 
   if (order.email) {
