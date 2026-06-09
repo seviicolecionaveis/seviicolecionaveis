@@ -52,6 +52,8 @@ export function pointsEarnedFromCents(baseAfterDiscountCents: number, multiplier
   // R$ 1 = 1 pt → centavos/100 = pts (base). Multiplicador via bp.
   const base = baseAfterDiscountCents / 100;
   return Math.floor((base * multiplierBp) / 10000);
+}
+
 
 /** Converte pontos resgatados em desconto (centavos). */
 export function pointsToDiscountCents(points: number): number {
