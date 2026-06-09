@@ -541,6 +541,7 @@ function CheckoutPage() {
         address: buildAddressPayload(),
         notes: buildNotes(),
         couponCode: couponNormalized || null,
+        pointsToRedeem: pointsRedeemed,
         arteEmCardsCode: null,
       });
       setStep("card");
