@@ -11,6 +11,7 @@ import {
   adminAdjustStackItem,
   adminAddOrderToStack,
   adminCreateManualServiceOrder,
+  adminBulkDeleteStackItems,
   type AdminServiceOrder,
   type AdminStack,
   type AdminStackItem,
