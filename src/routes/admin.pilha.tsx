@@ -234,7 +234,33 @@ function AdminPilhaPage() {
       toast.error(e?.message ?? "Falha ao criar OS.");
     } finally {
       setStackBusy(null);
+  }
+
+  async function handleBulkDelete(stackId: string) {
+    const selected = stackSelected[stackId];
+    const ids = selected ? Array.from(selected) : [];
+    if (ids.length === 0) {
+      toast.error("Selecione ao menos 1 item para excluir.");
+      return;
     }
+    if (
+      !window.confirm(
+        `Excluir definitivamente ${ids.length} item(ns) da pilha? Esta ação não pode ser desfeita.`,
+      )
+    )
+      return;
+    setStackBusy(stackId);
+    try {
+      const res = await bulkDeleteStackItems({ data: { stackId, itemIds: ids } });
+      toast.success(`${res.deleted} item(ns) excluído(s) da pilha.`);
+      setStackSelected((p) => ({ ...p, [stackId]: new Set() }));
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao excluir itens.");
+    } finally {
+      setStackBusy(null);
+    }
+  }
   }
 
 
