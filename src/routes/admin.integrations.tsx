@@ -210,7 +210,188 @@ function IntegrationsPage() {
             </>
           )}
         </section>
+
+        <BrevoSection />
       </main>
     </div>
+  );
+}
+
+function BrevoSection() {
+  const fetchBrevoStatus = useServerFn(getBrevoStatus);
+  const doSync = useServerFn(syncExistingCustomers);
+  const doSendCampaign = useServerFn(sendLoyaltyLaunchCampaign);
+
+  const [status, setStatus] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState<null | "sync" | "campaign">(null);
+  const [senderName, setSenderName] = useState("Sevii Colecionáveis");
+  const [senderEmail, setSenderEmail] = useState("seviicolecionaveis@gmail.com");
+  const [subject, setSubject] = useState("🎉 Novidade: Programa de Pontos Sevii");
+
+  const reload = async () => {
+    try {
+      const s = await fetchBrevoStatus();
+      setStatus(s);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao carregar status Brevo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    reload();
+  }, []);
+
+  async function onSync() {
+    setBusy("sync");
+    try {
+      const r = await doSync();
+      toast.success(`Sincronizados ${r.synced}/${r.total} clientes (${r.failed} falhas).`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao sincronizar.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function onSendCampaign() {
+    if (
+      !confirm(
+        "Enviar a campanha de lançamento do Programa de Pontos para as listas Newsletter + Clientes na Brevo?"
+      )
+    )
+      return;
+    setBusy("campaign");
+    try {
+      const r = await doSendCampaign({
+        data: { senderName, senderEmail, subject },
+      });
+      if (r.ok) {
+        toast.success("Campanha enviada! 🎉");
+      } else {
+        toast.error(r.reason ?? "Falha ao enviar.");
+      }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao enviar campanha.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <section className="rounded-xl border border-border bg-card p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+        <div>
+          <h2 className="font-bold text-lg">Brevo · Newsletter</h2>
+          <p className="text-xs text-muted-foreground">
+            Captação de inscrições no rodapé, sincronização automática de clientes após
+            compra e disparo de campanhas.
+          </p>
+        </div>
+        <span
+          className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
+            status?.connected
+              ? "bg-emerald-100 text-emerald-800"
+              : "bg-amber-100 text-amber-800"
+          }`}
+        >
+          {status?.connected ? "Conectado" : "Desconectado"}
+        </span>
+      </div>
+
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Carregando...</p>
+      ) : !status?.configured ? (
+        <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          Conector Brevo não configurado. Vá em <strong>Conectores</strong> e conecte a
+          Brevo.
+        </div>
+      ) : !status?.connected ? (
+        <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          <p className="font-semibold mb-1">Falha ao conectar à Brevo</p>
+          <p>{status?.error}</p>
+        </div>
+      ) : (
+        <>
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-5">
+            <div>
+              <dt className="text-muted-foreground uppercase tracking-wider text-[10px]">
+                Conta Brevo
+              </dt>
+              <dd className="font-mono">{status.accountEmail}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground uppercase tracking-wider text-[10px]">
+                Listas
+              </dt>
+              <dd className="font-mono">
+                Newsletter #{status.newsletterListId} · Clientes #{status.customersListId}
+              </dd>
+            </div>
+          </dl>
+
+          <div className="space-y-4">
+            <div className="rounded-md border border-border p-3">
+              <h3 className="text-sm font-bold mb-1">Sincronizar clientes existentes</h3>
+              <p className="text-xs text-muted-foreground mb-3">
+                Adiciona todos os usuários cadastrados às listas Newsletter + Clientes na
+                Brevo. Seguro de rodar várias vezes (idempotente).
+              </p>
+              <button
+                onClick={onSync}
+                disabled={busy !== null}
+                className="rounded-md bg-foreground text-background px-4 py-2 text-xs font-bold uppercase tracking-wider hover:opacity-90 disabled:opacity-40"
+              >
+                {busy === "sync" ? "Sincronizando..." : "Sincronizar agora"}
+              </button>
+            </div>
+
+            <div className="rounded-md border border-border p-3 space-y-2">
+              <h3 className="text-sm font-bold">Campanha de lançamento — Programa de Pontos</h3>
+              <p className="text-xs text-muted-foreground">
+                Envia o e-mail oficial para Newsletter + Clientes. O remetente precisa
+                estar verificado na Brevo (cheque a caixa do e-mail informado).
+              </p>
+              <div className="grid sm:grid-cols-2 gap-2">
+                <label className="text-xs">
+                  <span className="block mb-1 text-muted-foreground">Nome do remetente</span>
+                  <input
+                    value={senderName}
+                    onChange={(e) => setSenderName(e.target.value)}
+                    className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+                  />
+                </label>
+                <label className="text-xs">
+                  <span className="block mb-1 text-muted-foreground">E-mail do remetente</span>
+                  <input
+                    type="email"
+                    value={senderEmail}
+                    onChange={(e) => setSenderEmail(e.target.value)}
+                    className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+                  />
+                </label>
+                <label className="text-xs sm:col-span-2">
+                  <span className="block mb-1 text-muted-foreground">Assunto</span>
+                  <input
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+                  />
+                </label>
+              </div>
+              <button
+                onClick={onSendCampaign}
+                disabled={busy !== null}
+                className="rounded-md bg-[#20a5c9] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:opacity-90 disabled:opacity-40"
+              >
+                {busy === "campaign" ? "Enviando..." : "Enviar campanha agora"}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </section>
   );
 }
