@@ -563,6 +563,50 @@ export type Database = {
         }
         Relationships: []
       }
+      loyalty_points_ledger: {
+        Row: {
+          created_at: string
+          delta: number
+          description: string | null
+          id: string
+          metadata: Json
+          order_id: string | null
+          reason: string
+          user_id: string
+          year_bucket: number | null
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          description?: string | null
+          id?: string
+          metadata?: Json
+          order_id?: string | null
+          reason: string
+          user_id: string
+          year_bucket?: number | null
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          description?: string | null
+          id?: string
+          metadata?: Json
+          order_id?: string | null
+          reason?: string
+          user_id?: string
+          year_bucket?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_points_ledger_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       melhorenvio_tokens: {
         Row: {
           access_token: string
@@ -701,6 +745,9 @@ export type Database = {
           pix_expires_at: string | null
           pix_qr_code: string | null
           pix_qr_code_base64: string | null
+          points_discount_cents: number
+          points_earned: number
+          points_redeemed: number
           pre_cancel_status: string | null
           recipient_name: string
           refunded_cents: number
@@ -747,6 +794,9 @@ export type Database = {
           pix_expires_at?: string | null
           pix_qr_code?: string | null
           pix_qr_code_base64?: string | null
+          points_discount_cents?: number
+          points_earned?: number
+          points_redeemed?: number
           pre_cancel_status?: string | null
           recipient_name: string
           refunded_cents?: number
@@ -793,6 +843,9 @@ export type Database = {
           pix_expires_at?: string | null
           pix_qr_code?: string | null
           pix_qr_code_base64?: string | null
+          points_discount_cents?: number
+          points_earned?: number
+          points_redeemed?: number
           pre_cancel_status?: string | null
           recipient_name?: string
           refunded_cents?: number
@@ -1257,6 +1310,7 @@ export type Database = {
     }
     Functions: {
       available_stock: { Args: { _card_id: string }; Returns: number }
+      award_birthday_points_today: { Args: never; Returns: number }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1291,6 +1345,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      user_points_balance: { Args: { _user_id: string }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "user"
