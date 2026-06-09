@@ -701,3 +701,32 @@ function PickedByControl({ item, onChanged }: { item: any; onChanged: () => void
   );
 }
 
+function PickingSummary({ items }: { items: any[] }) {
+  const total = items.length;
+  const lucaPicked = items.filter((it) => it.picked_by === "Luca").length;
+  const juliaPicked = items.filter((it) => it.picked_by === "Julia").length;
+  const done = lucaPicked + juliaPicked;
+  const allDone = done === total && total > 0;
+
+  return (
+    <div className="flex items-center gap-3 flex-wrap">
+      <span className="text-[11px] text-muted-foreground">
+        Separado: <span className="font-semibold text-foreground">{done}/{total}</span>
+      </span>
+      {lucaPicked > 0 && (
+        <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-[11px] font-semibold">
+          Luca {lucaPicked}/{total} {lucaPicked === total && <span className="text-[10px]">✓</span>}
+        </span>
+      )}
+      {juliaPicked > 0 && (
+        <span className="inline-flex items-center gap-1 rounded-full bg-pink-100 text-pink-800 px-2 py-0.5 text-[11px] font-semibold">
+          Julia {juliaPicked}/{total} {juliaPicked === total && <span className="text-[10px]">✓</span>}
+        </span>
+      )}
+      {allDone && (
+        <span className="text-[11px] font-bold text-green-700">Tudo separado ✓</span>
+      )}
+    </div>
+  );
+}
+
