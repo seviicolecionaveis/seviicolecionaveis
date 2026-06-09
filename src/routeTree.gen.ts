@@ -43,6 +43,7 @@ import { Route as AdminSealedRouteImport } from './routes/admin.sealed'
 import { Route as AdminPilhaRouteImport } from './routes/admin.pilha'
 import { Route as AdminPanelsRouteImport } from './routes/admin.panels'
 import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-cards'
+import { Route as AdminLoyaltyRouteImport } from './routes/admin.loyalty'
 import { Route as AdminLeiloesRouteImport } from './routes/admin.leiloes'
 import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
 import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
@@ -237,6 +238,11 @@ const AdminManageCardsRoute = AdminManageCardsRouteImport.update({
   path: '/manage-cards',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminLoyaltyRoute = AdminLoyaltyRouteImport.update({
+  id: '/loyalty',
+  path: '/loyalty',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLeiloesRoute = AdminLeiloesRouteImport.update({
   id: '/leiloes',
   path: '/leiloes',
@@ -391,6 +397,7 @@ export interface FileRoutesByFullPath {
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/leiloes': typeof AdminLeiloesRoute
+  '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
@@ -448,6 +455,7 @@ export interface FileRoutesByTo {
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/leiloes': typeof AdminLeiloesRoute
+  '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
@@ -508,6 +516,7 @@ export interface FileRoutesById {
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/leiloes': typeof AdminLeiloesRoute
+  '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
@@ -569,6 +578,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/integrations'
     | '/admin/leiloes'
+    | '/admin/loyalty'
     | '/admin/manage-cards'
     | '/admin/panels'
     | '/admin/pilha'
@@ -626,6 +636,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/integrations'
     | '/admin/leiloes'
+    | '/admin/loyalty'
     | '/admin/manage-cards'
     | '/admin/panels'
     | '/admin/pilha'
@@ -685,6 +696,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/integrations'
     | '/admin/leiloes'
+    | '/admin/loyalty'
     | '/admin/manage-cards'
     | '/admin/panels'
     | '/admin/pilha'
@@ -999,6 +1011,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminManageCardsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/loyalty': {
+      id: '/admin/loyalty'
+      path: '/loyalty'
+      fullPath: '/admin/loyalty'
+      preLoaderRoute: typeof AdminLoyaltyRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/leiloes': {
       id: '/admin/leiloes'
       path: '/leiloes'
@@ -1171,6 +1190,7 @@ interface AdminRouteChildren {
   AdminEmailsRoute: typeof AdminEmailsRoute
   AdminIntegrationsRoute: typeof AdminIntegrationsRoute
   AdminLeiloesRoute: typeof AdminLeiloesRoute
+  AdminLoyaltyRoute: typeof AdminLoyaltyRoute
   AdminManageCardsRoute: typeof AdminManageCardsRoute
   AdminPanelsRoute: typeof AdminPanelsRoute
   AdminPilhaRoute: typeof AdminPilhaRoute
@@ -1188,6 +1208,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminEmailsRoute: AdminEmailsRoute,
   AdminIntegrationsRoute: AdminIntegrationsRoute,
   AdminLeiloesRoute: AdminLeiloesRoute,
+  AdminLoyaltyRoute: AdminLoyaltyRoute,
   AdminManageCardsRoute: AdminManageCardsRoute,
   AdminPanelsRoute: AdminPanelsRoute,
   AdminPilhaRoute: AdminPilhaRoute,
