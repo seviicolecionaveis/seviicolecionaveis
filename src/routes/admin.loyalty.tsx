@@ -7,6 +7,7 @@ import {
   adminGetUserLoyaltyDetail,
   adminAdjustUserPoints,
   adminGetLoyaltyStats,
+  adminListAllLoyaltyUsers,
 } from "@/lib/admin-loyalty.functions";
 import { formatPoints, REASON_LABEL, TIERS, multiplierLabel, type LoyaltyReason } from "@/lib/loyalty";
 
