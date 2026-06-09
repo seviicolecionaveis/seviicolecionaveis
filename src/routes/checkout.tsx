@@ -153,6 +153,23 @@ function CheckoutPage() {
     | null
   >(null);
   const [couponChecking, setCouponChecking] = useState(false);
+  const [pointsBalance, setPointsBalance] = useState<number>(0);
+  const [pointsInput, setPointsInput] = useState<number>(0);
+
+  // Carrega saldo de pontos do usuário
+  useEffect(() => {
+    let cancelled = false;
+    if (!user) { setPointsBalance(0); return; }
+    (async () => {
+      try {
+        const status = await getMyLoyaltyStatus();
+        if (!cancelled) setPointsBalance(status?.balance ?? 0);
+      } catch (e) {
+        if (!cancelled) setPointsBalance(0);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   const selectedQuote = quotes.find((q) => q.id === selectedQuoteId) ?? null;
 
