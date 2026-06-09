@@ -8,6 +8,11 @@ import {
   getMelhorEnvioStatus,
   disconnectMelhorEnvio,
 } from "@/utils/melhorenvio.functions";
+import {
+  getBrevoStatus,
+  syncExistingCustomers,
+  sendLoyaltyLaunchCampaign,
+} from "@/lib/newsletter.functions";
 
 export const Route = createFileRoute("/admin/integrations")({
   head: () => ({ meta: [{ title: "Integrações — Sevii Admin" }] }),
