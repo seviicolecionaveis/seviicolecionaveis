@@ -614,6 +614,8 @@ export type Database = {
           id: string
           language: string | null
           order_id: string
+          picked_at: string | null
+          picked_by: string | null
           quantity: number
           refund_cents: number
           refund_coupon_code: string | null
@@ -635,6 +637,8 @@ export type Database = {
           id?: string
           language?: string | null
           order_id: string
+          picked_at?: string | null
+          picked_by?: string | null
           quantity: number
           refund_cents?: number
           refund_coupon_code?: string | null
@@ -656,6 +660,8 @@ export type Database = {
           id?: string
           language?: string | null
           order_id?: string
+          picked_at?: string | null
+          picked_by?: string | null
           quantity?: number
           refund_cents?: number
           refund_coupon_code?: string | null
