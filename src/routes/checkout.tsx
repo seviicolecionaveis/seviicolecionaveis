@@ -13,13 +13,21 @@ import {
 } from "@/utils/payments.functions";
 import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
-import { Copy, Check, QrCode, CreditCard, Loader2, ShieldCheck } from "lucide-react";
+import { Copy, Check, QrCode, CreditCard, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 import { computeBundleDiscount } from "@/lib/bundles";
 import { copyToClipboard } from "@/lib/clipboard";
 import { CardStackTermsDialog } from "@/components/CardStackTermsDialog";
 import { cartIsAllTestCard } from "@/lib/test-card";
+import { getMyLoyaltyStatus } from "@/lib/loyalty.functions";
+import {
+  POINTS_PER_REDEEM_BLOCK,
+  CENTS_PER_REDEEM_BLOCK,
+  normalizeRedeemPoints,
+  pointsToDiscountCents,
+  formatPoints,
+} from "@/lib/loyalty";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
