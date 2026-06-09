@@ -162,6 +162,7 @@ function AdminLoyaltyPage() {
         curr.map((r) => (r.user_id === detail.user_id ? { ...r, balance: r.balance + delta } : r)),
       );
       statsFn().then(setStats).catch(() => {});
+      loadAll();
     } catch (e: any) {
       const text = e?.message || (await e?.text?.()) || "Erro ao ajustar pontos.";
       setMsg({ kind: "err", text: typeof text === "string" ? text : "Erro ao ajustar pontos." });
