@@ -22,7 +22,7 @@ const TIER_VISUAL: Record<LoyaltyTier, { icon: typeof Trophy; bg: string; text: 
   gold:   { icon: Crown,  bg: "from-yellow-100 to-amber-200 dark:from-yellow-900/40 dark:to-amber-800/40", text: "text-yellow-800 dark:text-yellow-200", border: "border-yellow-500/60", badgeBg: "bg-yellow-500/15 text-yellow-800 dark:text-yellow-200" },
 };
 
-export function LoyaltyPointsCard() {
+export function LoyaltyPointsCard({ onGoToProfile }: { onGoToProfile?: () => void }) {
   const fetchStatus = useServerFn(getMyLoyaltyStatus);
   const { data, isLoading } = useQuery({
     queryKey: ["loyalty-status"],
@@ -48,6 +48,7 @@ export function LoyaltyPointsCard() {
   const missingToNext = next ? Math.max(0, next.threshold - lifetime) : 0;
 
   const expDate = data?.nextExpirationAt ? new Date(data.nextExpirationAt) : null;
+  const hasBirthDate = !!data?.birthDate;
 
   return (
     <div className="space-y-4">
