@@ -51,6 +51,7 @@ function AccountPage() {
         <Tabs defaultValue="dados" className="w-full">
           <TabsList className="flex w-full flex-wrap h-auto justify-start gap-1">
             <TabsTrigger value="dados">Dados</TabsTrigger>
+            <TabsTrigger value="pontos"><Sparkles className="h-3.5 w-3.5 mr-1" />Pontos</TabsTrigger>
             <TabsTrigger value="preferencias">Preferências</TabsTrigger>
             <TabsTrigger value="enderecos">Endereços</TabsTrigger>
             <TabsTrigger value="atalhos">Pedidos & Favoritos</TabsTrigger>
@@ -59,6 +60,11 @@ function AccountPage() {
           <TabsContent value="dados" className="mt-6">
             <PersonalDataForm />
           </TabsContent>
+
+          <TabsContent value="pontos" className="mt-6">
+            <LoyaltyPointsCard />
+          </TabsContent>
+
 
           <TabsContent value="preferencias" className="mt-6">
             <PreferencesForm />
