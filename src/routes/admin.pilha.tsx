@@ -187,6 +187,7 @@ function AdminPilhaPage() {
   const adjustStackItem = useServerFn(adminAdjustStackItem);
   const addOrderToStack = useServerFn(adminAddOrderToStack);
   const createManualOS = useServerFn(adminCreateManualServiceOrder);
+  const bulkDeleteStackItems = useServerFn(adminBulkDeleteStackItems);
   const [orderInput, setOrderInput] = useState("");
   const [addingOrder, setAddingOrder] = useState(false);
   const [stackSelected, setStackSelected] = useState<Record<string, Set<string>>>({});
