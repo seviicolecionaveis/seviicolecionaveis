@@ -313,7 +313,9 @@ function AdminOrderDetailPage() {
                         {it.refund_coupon_code ? ` · ${it.refund_coupon_code}` : ""}
                       </p>
                     )}
+                    <PickedByControl item={it} onChanged={load} />
                   </div>
+
                   <div className="text-right shrink-0 flex flex-col items-end gap-2">
                     <div>
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Subtotal</p>
