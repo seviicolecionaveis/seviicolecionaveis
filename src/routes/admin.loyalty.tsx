@@ -84,11 +84,25 @@ function AdminLoyaltyPage() {
     }
   }, [authLoading, user, isAdmin, nav]);
 
+  const loadAll = async () => {
+    setLoadingAll(true);
+    try {
+      const data = await listAllFn();
+      setAllUsers(data as UserRow[]);
+    } catch {
+      setAllUsers([]);
+    } finally {
+      setLoadingAll(false);
+    }
+  };
+
   useEffect(() => {
     if (isAdmin) {
       statsFn().then(setStats).catch(() => {});
+      loadAll();
     }
-  }, [isAdmin, statsFn]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
