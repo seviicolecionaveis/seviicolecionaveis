@@ -1087,6 +1087,12 @@ function CheckoutPage() {
                 <span className="tabular-nums">− R$ {discount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
             )}
+            {pointsDiscountCents > 0 && (
+              <div className="flex justify-between text-amber-700 dark:text-amber-300">
+                <span>⭐ Pontos resgatados ({formatPoints(pointsRedeemed)} pts)</span>
+                <span className="tabular-nums">− R$ {pointsDiscount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+              </div>
+            )}
             {pixDiscount > 0 && (
               <div className="flex justify-between text-green-600">
                 <span>Desconto Pix −{PIX_DISCOUNT_PERCENT}%</span>
