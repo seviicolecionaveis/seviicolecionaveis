@@ -101,6 +101,20 @@ function computeShippingCents(input: {
   return input.shippingMethod === "fixed" ? SHIPPING_FIXED_CENTS : 0;
 }
 
+async function resolvePointsRedemption(
+  userId: string,
+  desired: number | null | undefined,
+  maxDiscountableCents: number,
+): Promise<{ points: number; discountCents: number }> {
+  const want = Math.max(0, Math.floor(desired ?? 0));
+  if (want <= 0 || maxDiscountableCents <= 0) return { points: 0, discountCents: 0 };
+  const { normalizeRedeemPoints, pointsToDiscountCents } = await import("@/lib/loyalty");
+  const { data: balRow } = await supabaseAdmin.rpc("user_points_balance", { _user_id: userId });
+  const balance = Number(balRow ?? 0);
+  const points = normalizeRedeemPoints(want, balance, maxDiscountableCents);
+  return { points, discountCents: pointsToDiscountCents(points) };
+}
+
 async function validateCoupon(
   userId: string,
   rawCode: string | null | undefined,
