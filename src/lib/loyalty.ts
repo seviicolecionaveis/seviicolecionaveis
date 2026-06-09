@@ -22,9 +22,9 @@ export interface TierConfig {
 }
 
 export const TIERS: TierConfig[] = [
-  { key: "bronze", label: "Bronze", threshold: 0,     multiplierBp: 10000, color: "amber-700" },
-  { key: "silver", label: "Prata",  threshold: 5000,  multiplierBp: 12500, color: "slate-400" },
-  { key: "gold",   label: "Ouro",   threshold: 20000, multiplierBp: 15000, color: "yellow-500" },
+  { key: "bronze", label: "Bronze", threshold: 0,    multiplierBp: 10000, color: "amber-700" },
+  { key: "silver", label: "Prata",  threshold: 500,  multiplierBp: 12500, color: "slate-400" },
+  { key: "gold",   label: "Ouro",   threshold: 2000, multiplierBp: 15000, color: "yellow-500" },
 ];
 
 export function tierFromLifetime(lifetimeEarned: number): TierConfig {
