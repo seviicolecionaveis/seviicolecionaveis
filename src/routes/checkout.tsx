@@ -323,10 +323,18 @@ function CheckoutPage() {
       ? Math.min(couponPreview.discountCents, nonBundleSubtotalCents)
       : 0;
 
+  // Pontos resgatados — base = subtotal − combo − cupom
+  const pointsMaxDiscountableCents = Math.max(
+    0,
+    subtotalCents - bundleDiscountCents - couponDiscountCents,
+  );
+  const pointsRedeemed = normalizeRedeemPoints(pointsInput, pointsBalance, pointsMaxDiscountableCents);
+  const pointsDiscountCents = pointsToDiscountCents(pointsRedeemed);
+
   const pixDiscountCents =
     paymentMethod === "pix"
       ? Math.round(
-          Math.max(0, nonBundleSubtotalCents - couponDiscountCents) * (PIX_DISCOUNT_PERCENT / 100),
+          Math.max(0, nonBundleSubtotalCents - couponDiscountCents - pointsDiscountCents) * (PIX_DISCOUNT_PERCENT / 100),
         )
       : 0;
   const isAdminTestCart = isAdmin && cartIsAllTestCard(items);
@@ -335,12 +343,14 @@ function CheckoutPage() {
     if (paymentMethod === "admin_test" && !isAdminTestCart) setPaymentMethod("pix");
   }, [paymentMethod, isAdminTestCart]);
   const totalCents =
-    subtotalCents - bundleDiscountCents - couponDiscountCents - pixDiscountCents + shippingCents;
+    subtotalCents - bundleDiscountCents - couponDiscountCents - pointsDiscountCents - pixDiscountCents + shippingCents;
 
   const discount = couponDiscountCents / 100;
   const pixDiscount = pixDiscountCents / 100;
   const bundleDiscount = bundleDiscountCents / 100;
+  const pointsDiscount = pointsDiscountCents / 100;
   const total = totalCents / 100;
+
 
   const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
 
