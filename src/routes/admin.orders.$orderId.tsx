@@ -313,7 +313,9 @@ function AdminOrderDetailPage() {
                         {it.refund_coupon_code ? ` · ${it.refund_coupon_code}` : ""}
                       </p>
                     )}
+                    <PickedByControl item={it} onChanged={load} />
                   </div>
+
                   <div className="text-right shrink-0 flex flex-col items-end gap-2">
                     <div>
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Subtotal</p>
@@ -629,3 +631,70 @@ function PartialCancelDialog({
     </div>
   );
 }
+
+const PICKERS = ["Luca", "Julia"] as const;
+type Picker = (typeof PICKERS)[number];
+
+function PickedByControl({ item, onChanged }: { item: any; onChanged: () => void | Promise<void> }) {
+  const [saving, setSaving] = useState<Picker | "clear" | null>(null);
+  const current: Picker | null = item.picked_by ?? null;
+
+  const setPicked = async (value: Picker | null) => {
+    setSaving(value ?? "clear");
+    try {
+      const { error } = await supabase
+        .from("order_items")
+        .update({ picked_by: value, picked_at: value ? new Date().toISOString() : null })
+        .eq("id", item.id);
+      if (error) throw error;
+      await onChanged();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao marcar separação.");
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  return (
+    <div className="mt-2 flex items-center gap-2 flex-wrap">
+      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Separado por:</span>
+      {PICKERS.map((p) => {
+        const active = current === p;
+        const isSaving = saving === p;
+        return (
+          <button
+            key={p}
+            type="button"
+            disabled={!!saving}
+            onClick={() => setPicked(active ? null : p)}
+            className={
+              "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-semibold transition-colors " +
+              (active
+                ? p === "Luca"
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-pink-600 text-white border-pink-600"
+                : "bg-background hover:bg-secondary border-border text-foreground")
+            }
+            title={active ? `Desmarcar ${p}` : `Marcar como separado por ${p}`}
+          >
+            <span
+              className={
+                "inline-block h-3 w-3 rounded-sm border " +
+                (active ? "bg-white/90 border-white/90" : "border-muted-foreground")
+              }
+            >
+              {active && <span className="block text-[10px] leading-3 text-black text-center">✓</span>}
+            </span>
+            {isSaving ? "..." : p}
+          </button>
+        );
+      })}
+      {current && item.picked_at && (
+        <span className="text-[10px] text-muted-foreground">
+          em {new Date(item.picked_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+        </span>
+      )}
+    </div>
+  );
+}
+
