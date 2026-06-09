@@ -271,9 +271,12 @@ function AdminOrderDetailPage() {
 
         {/* Itens */}
         <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <h2 className="px-5 py-3 text-xs font-bold uppercase tracking-widest border-b border-border">
-            Itens vendidos ({items.length})
-          </h2>
+          <div className="px-5 py-3 border-b border-border flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xs font-bold uppercase tracking-widest">
+              Itens vendidos ({items.length})
+            </h2>
+            <PickingSummary items={items} />
+          </div>
           <ul className="divide-y divide-border">
             {items.map((it) => {
               const cancelledQty = it.cancelled_quantity ?? 0;
