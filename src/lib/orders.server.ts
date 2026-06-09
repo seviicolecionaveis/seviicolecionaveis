@@ -218,6 +218,14 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
     console.error("[markOrderPaid] applyWalletDeductionForOrder falhou:", e);
   }
 
+  // Programa de Pontos: credita pontos ganhos e debita pontos resgatados.
+  try {
+    await applyLoyaltyForOrder(orderId);
+  } catch (e) {
+    console.error("[markOrderPaid] applyLoyaltyForOrder falhou:", e);
+  }
+
+
 
   // Lookup do pedido (necessário para decidir Superfrete x Pilha)
   const { data: full } = await supabaseAdmin
