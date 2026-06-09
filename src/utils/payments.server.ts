@@ -602,7 +602,10 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
     data.couponCode,
     nonBundleSubtotalCents,
   );
-  const discountCents = bundleDiscountCents + couponDiscountCents;
+  const pointsBase = Math.max(0, subtotalCents - bundleDiscountCents - couponDiscountCents);
+  const { points: pointsRedeemed, discountCents: pointsDiscountCents } =
+    await resolvePointsRedemption(userId, data.pointsToRedeem, pointsBase);
+  const discountCents = bundleDiscountCents + couponDiscountCents + pointsDiscountCents;
 
   const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents);
 
