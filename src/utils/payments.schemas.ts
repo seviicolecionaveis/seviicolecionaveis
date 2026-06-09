@@ -42,6 +42,7 @@ export const StripeInputSchema = z.object({
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
   couponCode: z.string().max(50).optional().nullable(),
+  pointsToRedeem: z.number().int().min(0).max(10_000_000).optional().nullable(),
   arteEmCardsCode: z.string().trim().max(40).optional().nullable(),
   returnUrl: z.string().url(),
   environment: z.enum(["sandbox", "live"]),
@@ -54,6 +55,7 @@ export const PixInputSchema = z.object({
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
   couponCode: z.string().max(50).optional().nullable(),
+  pointsToRedeem: z.number().int().min(0).max(10_000_000).optional().nullable(),
   arteEmCardsCode: z.string().trim().max(40).optional().nullable(),
 });
 
@@ -64,6 +66,7 @@ export const CardInputSchema = z.object({
   address: AddressSchema,
   notes: z.string().max(500).optional().nullable(),
   couponCode: z.string().max(50).optional().nullable(),
+  pointsToRedeem: z.number().int().min(0).max(10_000_000).optional().nullable(),
   arteEmCardsCode: z.string().trim().max(40).optional().nullable(),
   card: z.object({
     token: z.string().min(5).max(200),
