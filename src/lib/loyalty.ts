@@ -1,6 +1,6 @@
 // Loyalty / Programa de Pontos Sevii — constantes e helpers puros (isomórficos).
 
-export const POINTS_PER_REAL = 10;          // R$ 1 = 10 pontos (base Bronze)
+export const POINTS_PER_REAL = 1;           // R$ 1 = 1 ponto (base Bronze) — 100 pts = R$5 → 5% retorno
 export const POINTS_PER_REDEEM_BLOCK = 100; // múltiplos de 100 pontos
 export const CENTS_PER_REDEEM_BLOCK = 500;  // 100 pontos = R$ 5,00
 export const MIN_REDEEM_POINTS = 100;
