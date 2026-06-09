@@ -248,23 +248,18 @@ function AdminPage() {
           <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis · Admin</Link>
           <div className="flex items-center gap-3">
             <AdminCancellationBell />
-          <div className="flex gap-3 text-xs flex-wrap">
-            <Link to="/admin/dashboard" className="font-semibold text-foreground hover:underline">Dashboard</Link>
-           <Link to="/admin/manage-cards" className="font-semibold text-foreground hover:underline">Gerenciar cartas</Link>
-           <Link to="/admin/panels" className="font-semibold text-foreground hover:underline">Painéis</Link>
-           <Link to="/admin/sealed" className="font-semibold text-foreground hover:underline">Selados</Link>
-           <Link to="/admin/accessories" className="font-semibold text-foreground hover:underline">Acessórios</Link>
-            <Link to="/admin/banners" className="font-semibold text-foreground hover:underline">Banners</Link>
-            
-            <Link to="/admin/shipping" className="font-semibold text-foreground hover:underline">Expedição</Link>
-            <Link to="/admin/pilha" className="font-semibold text-foreground hover:underline">Pilha</Link>
-            <Link to="/admin/leiloes" className="font-semibold text-foreground hover:underline">Leilões</Link>
-            <Link to="/admin/integrations" className="font-semibold text-foreground hover:underline">Integrações</Link>
-            <Link to="/admin/users" className="font-semibold text-foreground hover:underline">Administradores</Link>
-            <Link to="/admin/loyalty" className="font-semibold text-foreground hover:underline">Pontos</Link>
-            <Link to="/admin/emails" className="font-semibold text-foreground hover:underline">E-mails</Link>
-            <Link to="/admin/coupons" className="font-semibold text-foreground hover:underline">Cupons</Link>
-            <Link to="/" className="text-muted-foreground hover:text-foreground">← Catálogo</Link>
+          <div className="flex items-center gap-1 flex-wrap">
+            <Link
+              to="/admin/dashboard"
+              className="rounded-md px-2.5 py-1.5 text-xs font-semibold text-foreground transition hover:bg-secondary"
+              activeProps={{ className: "bg-foreground text-background hover:bg-foreground" }}
+            >
+              Dashboard
+            </Link>
+            {NAV_GROUPS.map((g) => (
+              <AdminNavMenu key={g.label} group={g} currentPath={location.pathname} />
+            ))}
+            <Link to="/" className="ml-2 text-xs text-muted-foreground hover:text-foreground">← Catálogo</Link>
           </div>
           </div>
         </div>
