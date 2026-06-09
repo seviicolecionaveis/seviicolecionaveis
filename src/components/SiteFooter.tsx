@@ -1,8 +1,73 @@
 import { Link } from "@tanstack/react-router";
-import { Mail, MapPin, MessageCircle } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import logoUrl from "@/assets/logo.png";
+import { subscribeNewsletter } from "@/lib/newsletter.functions";
 
 const BRAND = "#20a5c9";
+
+function NewsletterForm() {
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+  const subscribe = useServerFn(subscribeNewsletter);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const value = email.trim();
+    if (!value) return;
+    setBusy(true);
+    try {
+      await subscribe({ data: { email: value } });
+      setDone(true);
+      setEmail("");
+      toast.success("Inscrição confirmada! Bem-vindo(a) à Sevii. 🎉");
+    } catch (err: any) {
+      toast.error(err?.message ?? "Não foi possível inscrever agora. Tente novamente.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (done) {
+    return (
+      <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
+        Pronto! Você receberá novidades, lançamentos e promoções da Sevii.
+      </p>
+    );
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="flex flex-col gap-2">
+      <p className="text-xs text-neutral-600 leading-relaxed">
+        Receba lançamentos, promoções exclusivas e novidades direto no seu e-mail.
+      </p>
+      <div className="flex gap-2">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="seu@email.com"
+          className="flex-1 min-w-0 rounded-md border border-border bg-white px-3 py-2 text-sm outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20"
+          style={{ ["--brand" as never]: BRAND }}
+          disabled={busy}
+        />
+        <button
+          type="submit"
+          disabled={busy}
+          className="rounded-md px-3 py-2 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-50 flex items-center gap-1.5"
+          style={{ background: BRAND }}
+        >
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+          Inscrever
+        </button>
+      </div>
+    </form>
+  );
+}
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
