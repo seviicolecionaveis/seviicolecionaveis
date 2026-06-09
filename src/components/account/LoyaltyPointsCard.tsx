@@ -114,6 +114,29 @@ export function LoyaltyPointsCard({ onGoToProfile }: { onGoToProfile?: () => voi
         )}
       </div>
 
+      {/* Incentivo aniversário */}
+      {!hasBirthDate && (
+        <div className="rounded-xl border border-pink-300/60 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 p-5 flex items-start gap-4">
+          <div className="rounded-full bg-pink-100 dark:bg-pink-900/40 p-2.5 shrink-0">
+            <Cake className="h-5 w-5 text-pink-600 dark:text-pink-300" />
+          </div>
+          <div className="flex-1">
+            <h4 className="text-sm font-bold text-pink-800 dark:text-pink-200">Cadastre sua data de nascimento</h4>
+            <p className="mt-1 text-sm text-pink-700/80 dark:text-pink-300/80">
+              No dia do seu aniversário você ganha <strong className="text-pink-800 dark:text-pink-200">100 pontos</strong> de presente! 🎂
+            </p>
+            {onGoToProfile && (
+              <button
+                onClick={onGoToProfile}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-pink-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-700 transition"
+              >
+                Cadastrar agora <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Como funciona */}
       <div className="rounded-xl border border-border bg-card p-5">
         <h3 className="text-sm font-bold uppercase tracking-widest mb-3">Como funciona</h3>
