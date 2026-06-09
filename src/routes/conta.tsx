@@ -22,6 +22,7 @@ export const Route = createFileRoute("/conta")({
 function AccountPage() {
   const { user, loading } = useAuth();
   const nav = useNavigate();
+  const [tab, setTab] = useState("dados");
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/auth" });
@@ -48,7 +49,7 @@ function AccountPage() {
         <h1 className="text-2xl font-bold mb-1">Minha conta</h1>
         <p className="text-sm text-muted-foreground mb-6 truncate">{user.email}</p>
 
-        <Tabs defaultValue="dados" className="w-full">
+        <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList className="flex w-full flex-wrap h-auto justify-start gap-1">
             <TabsTrigger value="dados">Dados</TabsTrigger>
             <TabsTrigger value="pontos"><Sparkles className="h-3.5 w-3.5 mr-1" />Pontos</TabsTrigger>
@@ -62,7 +63,7 @@ function AccountPage() {
           </TabsContent>
 
           <TabsContent value="pontos" className="mt-6">
-            <LoyaltyPointsCard />
+            <LoyaltyPointsCard onGoToProfile={() => setTab("dados")} />
           </TabsContent>
 
 
