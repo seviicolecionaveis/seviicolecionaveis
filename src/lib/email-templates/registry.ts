@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import { template as loyaltyProgramLaunchTemplate } from './loyalty-program-launch'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -18,5 +19,5 @@ export interface TemplateEntry {
  *   // then add to TEMPLATES: 'welcome': welcomeTemplate
  */
 export const TEMPLATES: Record<string, TemplateEntry> = {
-  'loyalty-program-launch': (await import('./loyalty-program-launch')).template,
+  'loyalty-program-launch': loyaltyProgramLaunchTemplate,
 }
