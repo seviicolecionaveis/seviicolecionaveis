@@ -296,7 +296,9 @@ export const adminAddOrderToStack = createServerFn({ method: "POST" })
       status: "stored" as const,
     }));
 
-    const { error } = await supabaseAdmin.from("card_stack_items").insert(rows);
+    const { error } = await supabaseAdmin
+      .from("card_stack_items")
+      .upsert(rows, { onConflict: "order_item_id", ignoreDuplicates: true });
     if (error) throw new Error(error.message);
 
     // Notifica o cliente
@@ -548,3 +550,50 @@ export const adminAddAuctionCardsToStack = createServerFn({ method: "POST" })
   });
 
 
+
+export const adminBulkDeleteStackItems = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        stackId: z.string().uuid(),
+        itemIds: z.array(z.string().uuid()).min(1).max(500),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await ensureAdmin(supabaseAdmin, context.userId);
+
+    // Garante que todos os itens pertencem à pilha informada e ainda estão armazenados
+    const { data: items, error: itemsErr } = await supabaseAdmin
+      .from("card_stack_items")
+      .select("id, status, service_order_id, stack_id")
+      .in("id", data.itemIds)
+      .eq("stack_id", data.stackId);
+    if (itemsErr) throw new Error(itemsErr.message);
+    if (!items || items.length === 0) throw new Error("Nenhum item válido selecionado.");
+    const invalid = items.find((i: any) => i.status !== "stored" || i.service_order_id);
+    if (invalid) throw new Error("Há itens já vinculados a uma ordem de serviço — não podem ser excluídos diretamente.");
+
+    const { error: delErr } = await supabaseAdmin
+      .from("card_stack_items")
+      .delete()
+      .in("id", items.map((i: any) => i.id));
+    if (delErr) throw new Error(delErr.message);
+
+    // Se a pilha ficou vazia, marca como concluída
+    const { count: remaining } = await supabaseAdmin
+      .from("card_stack_items")
+      .select("id", { count: "exact", head: true })
+      .eq("stack_id", data.stackId)
+      .eq("status", "stored");
+    if ((remaining ?? 0) === 0) {
+      await supabaseAdmin
+        .from("card_stacks")
+        .update({ status: "completed", updated_at: new Date().toISOString() })
+        .eq("id", data.stackId);
+    }
+
+    return { ok: true, deleted: items.length };
+  });

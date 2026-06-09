@@ -11,6 +11,7 @@ import {
   adminAdjustStackItem,
   adminAddOrderToStack,
   adminCreateManualServiceOrder,
+  adminBulkDeleteStackItems,
   type AdminServiceOrder,
   type AdminStack,
   type AdminStackItem,
@@ -186,6 +187,7 @@ function AdminPilhaPage() {
   const adjustStackItem = useServerFn(adminAdjustStackItem);
   const addOrderToStack = useServerFn(adminAddOrderToStack);
   const createManualOS = useServerFn(adminCreateManualServiceOrder);
+  const bulkDeleteStackItems = useServerFn(adminBulkDeleteStackItems);
   const [orderInput, setOrderInput] = useState("");
   const [addingOrder, setAddingOrder] = useState(false);
   const [stackSelected, setStackSelected] = useState<Record<string, Set<string>>>({});
@@ -230,6 +232,32 @@ function AdminPilhaPage() {
       await load();
     } catch (e: any) {
       toast.error(e?.message ?? "Falha ao criar OS.");
+    } finally {
+      setStackBusy(null);
+    }
+  }
+
+  async function handleBulkDelete(stackId: string) {
+    const selected = stackSelected[stackId];
+    const ids = selected ? Array.from(selected) : [];
+    if (ids.length === 0) {
+      toast.error("Selecione ao menos 1 item para excluir.");
+      return;
+    }
+    if (
+      !window.confirm(
+        `Excluir definitivamente ${ids.length} item(ns) da pilha? Esta ação não pode ser desfeita.`,
+      )
+    )
+      return;
+    setStackBusy(stackId);
+    try {
+      const res = await bulkDeleteStackItems({ data: { stackId, itemIds: ids } });
+      toast.success(`${res.deleted} item(ns) excluído(s) da pilha.`);
+      setStackSelected((p) => ({ ...p, [stackId]: new Set() }));
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao excluir itens.");
     } finally {
       setStackBusy(null);
     }
@@ -639,14 +667,25 @@ function AdminPilhaPage() {
                         const sel = stackSelected[s.id] ?? new Set<string>();
                         const allOn = ids.length > 0 && ids.every((id) => sel.has(id));
                         return (
-                          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={allOn}
-                              onChange={() => toggleAllStackItems(s.id, ids)}
-                            />
-                            Selecionar todas ({sel.size}/{ids.length})
-                          </label>
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={allOn}
+                                onChange={() => toggleAllStackItems(s.id, ids)}
+                              />
+                              Selecionar todas ({sel.size}/{ids.length})
+                            </label>
+                            {sel.size > 0 && (
+                              <button
+                                disabled={stackBusy === s.id}
+                                onClick={() => handleBulkDelete(s.id)}
+                                className="rounded-md border border-destructive/40 text-destructive bg-background px-3 py-1 text-xs font-semibold hover:bg-destructive/10 disabled:opacity-40"
+                              >
+                                Excluir {sel.size} selecionado{sel.size > 1 ? "s" : ""} da pilha
+                              </button>
+                            )}
+                          </div>
                         );
                       })()}
                       <ul className="divide-y divide-border">
