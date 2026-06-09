@@ -8,9 +8,17 @@ export const getMyLoyaltyStatus = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const userId = context.userId;
 
-    const { data: balRow } = await supabaseAdmin
-      .rpc("user_points_balance", { _user_id: userId });
-    const balance = typeof balRow === "number" ? balRow : Number(balRow ?? 0);
+    const [balRes, lifeRes, tierRes, multRes] = await Promise.all([
+      supabaseAdmin.rpc("user_points_balance", { _user_id: userId }),
+      supabaseAdmin.rpc("user_lifetime_earned", { _user_id: userId }),
+      supabaseAdmin.rpc("user_tier", { _user_id: userId }),
+      supabaseAdmin.rpc("user_tier_multiplier_bp", { _user_id: userId }),
+    ]);
+
+    const balance = Number(balRes.data ?? 0) || 0;
+    const lifetimeEarned = Number(lifeRes.data ?? 0) || 0;
+    const tier = (tierRes.data as string) || "bronze";
+    const multiplierBp = Number(multRes.data ?? 10000) || 10000;
 
     const { data: history } = await supabaseAdmin
       .from("loyalty_points_ledger")
@@ -19,7 +27,34 @@ export const getMyLoyaltyStatus = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(30);
 
-    return { balance: balance || 0, history: history ?? [] };
+    // Próxima expiração: crédito mais antigo ainda "não consumido" por débitos.
+    // Aproximação: data do crédito positivo mais antigo + 12 meses, se houver saldo > 0.
+    let nextExpirationAt: string | null = null;
+    if (balance > 0) {
+      const { data: oldest } = await supabaseAdmin
+        .from("loyalty_points_ledger")
+        .select("created_at")
+        .eq("user_id", userId)
+        .gt("delta", 0)
+        .in("reason", ["signup", "birthday", "order_earned", "admin_adjust", "refund"])
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (oldest) {
+        const d = new Date(oldest.created_at);
+        d.setMonth(d.getMonth() + 12);
+        nextExpirationAt = d.toISOString();
+      }
+    }
+
+    return {
+      balance,
+      lifetimeEarned,
+      tier,
+      multiplierBp,
+      nextExpirationAt,
+      history: history ?? [],
+    };
   });
 
 export const previewPointsRedemption = createServerFn({ method: "POST" })
@@ -28,7 +63,6 @@ export const previewPointsRedemption = createServerFn({ method: "POST" })
     z
       .object({
         points: z.number().int().min(0).max(10_000_000),
-        // Base de centavos sobre a qual o desconto pode incidir (subtotal − cupom etc.).
         maxDiscountableCents: z.number().int().min(0).max(100_000_000),
       })
       .parse(data),

@@ -1,17 +1,57 @@
 // Loyalty / Programa de Pontos Sevii — constantes e helpers puros (isomórficos).
 
-export const POINTS_PER_REAL = 10;          // R$ 1 = 10 pontos
+export const POINTS_PER_REAL = 10;          // R$ 1 = 10 pontos (base Bronze)
 export const POINTS_PER_REDEEM_BLOCK = 100; // múltiplos de 100 pontos
 export const CENTS_PER_REDEEM_BLOCK = 500;  // 100 pontos = R$ 5,00
 export const MIN_REDEEM_POINTS = 100;
 export const SIGNUP_BONUS_POINTS = 50;
 export const BIRTHDAY_BONUS_POINTS = 100;
+export const EXPIRATION_MONTHS = 12;        // pontos expiram após 12 meses
 
-/** Pontos ganhos em um pedido pago (base = subtotal − descontos, em centavos). */
-export function pointsEarnedFromCents(baseAfterDiscountCents: number): number {
+// ---------------- Tiers ----------------
+export type LoyaltyTier = "bronze" | "silver" | "gold";
+
+export interface TierConfig {
+  key: LoyaltyTier;
+  label: string;
+  /** Pontos ganhos ao longo da vida para entrar nesse tier. */
+  threshold: number;
+  /** Multiplicador em basis points (10000 = 1.00x). */
+  multiplierBp: number;
+  color: string; // tailwind class fragment
+}
+
+export const TIERS: TierConfig[] = [
+  { key: "bronze", label: "Bronze", threshold: 0,     multiplierBp: 10000, color: "amber-700" },
+  { key: "silver", label: "Prata",  threshold: 5000,  multiplierBp: 12500, color: "slate-400" },
+  { key: "gold",   label: "Ouro",   threshold: 20000, multiplierBp: 15000, color: "yellow-500" },
+];
+
+export function tierFromLifetime(lifetimeEarned: number): TierConfig {
+  let current = TIERS[0];
+  for (const t of TIERS) if (lifetimeEarned >= t.threshold) current = t;
+  return current;
+}
+
+export function nextTier(currentKey: LoyaltyTier): TierConfig | null {
+  const idx = TIERS.findIndex((t) => t.key === currentKey);
+  return idx >= 0 && idx < TIERS.length - 1 ? TIERS[idx + 1] : null;
+}
+
+export function multiplierLabel(bp: number): string {
+  const v = bp / 10000;
+  return v.toLocaleString("pt-BR", { minimumFractionDigits: v % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 }) + "x";
+}
+
+/**
+ * Pontos ganhos em um pedido pago (base = subtotal − descontos, em centavos),
+ * aplicando o multiplicador de tier (em basis points; 10000 = 1.00x).
+ */
+export function pointsEarnedFromCents(baseAfterDiscountCents: number, multiplierBp: number = 10000): number {
   if (!baseAfterDiscountCents || baseAfterDiscountCents <= 0) return 0;
-  // R$ 1 = 10 pts → 100 centavos = 10 pts → centavos/10 = pts
-  return Math.floor(baseAfterDiscountCents / 10);
+  // R$ 1 = 10 pts → centavos/10 = pts (base). Multiplicador via bp.
+  const base = baseAfterDiscountCents / 10;
+  return Math.floor((base * multiplierBp) / 10000);
 }
 
 /** Converte pontos resgatados em desconto (centavos). */
@@ -45,7 +85,8 @@ export type LoyaltyReason =
   | "order_earned"
   | "order_redeemed"
   | "admin_adjust"
-  | "refund";
+  | "refund"
+  | "expiration";
 
 export const REASON_LABEL: Record<LoyaltyReason, string> = {
   signup: "Bônus de boas-vindas",
@@ -54,4 +95,5 @@ export const REASON_LABEL: Record<LoyaltyReason, string> = {
   order_redeemed: "Resgate em pedido",
   admin_adjust: "Ajuste manual",
   refund: "Estorno",
+  expiration: "Pontos expirados",
 };

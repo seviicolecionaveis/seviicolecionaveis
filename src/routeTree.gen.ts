@@ -64,6 +64,7 @@ import { Route as ApiPublicMelhorenvioCallbackRouteImport } from './routes/api/p
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
 import { Route as ApiPublicHooksStackRemindersRouteImport } from './routes/api/public/hooks/stack-reminders'
 import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/public/hooks/price-drop-check'
+import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
 import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api/public/hooks/auto-cancel-unpaid'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -350,6 +351,12 @@ const ApiPublicHooksPriceDropCheckRoute =
     path: '/api/public/hooks/price-drop-check',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksExpireLoyaltyPointsRoute =
+  ApiPublicHooksExpireLoyaltyPointsRouteImport.update({
+    id: '/api/public/hooks/expire-loyalty-points',
+    path: '/api/public/hooks/expire-loyalty-points',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksAutoCancelUnpaidRoute =
   ApiPublicHooksAutoCancelUnpaidRouteImport.update({
     id: '/api/public/hooks/auto-cancel-unpaid',
@@ -403,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
+  '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
@@ -459,6 +467,7 @@ export interface FileRoutesByTo {
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
+  '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
@@ -518,6 +527,7 @@ export interface FileRoutesById {
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
+  '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
@@ -578,6 +588,7 @@ export interface FileRouteTypes {
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
+    | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/stack-reminders'
     | '/api/public/hooks/update-prices'
@@ -634,6 +645,7 @@ export interface FileRouteTypes {
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
+    | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/stack-reminders'
     | '/api/public/hooks/update-prices'
@@ -692,6 +704,7 @@ export interface FileRouteTypes {
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
+    | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/stack-reminders'
     | '/api/public/hooks/update-prices'
@@ -732,6 +745,7 @@ export interface RootRouteChildren {
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksAutoCancelUnpaidRoute: typeof ApiPublicHooksAutoCancelUnpaidRoute
+  ApiPublicHooksExpireLoyaltyPointsRoute: typeof ApiPublicHooksExpireLoyaltyPointsRoute
   ApiPublicHooksPriceDropCheckRoute: typeof ApiPublicHooksPriceDropCheckRoute
   ApiPublicHooksStackRemindersRoute: typeof ApiPublicHooksStackRemindersRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
@@ -1132,6 +1146,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksPriceDropCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/expire-loyalty-points': {
+      id: '/api/public/hooks/expire-loyalty-points'
+      path: '/api/public/hooks/expire-loyalty-points'
+      fullPath: '/api/public/hooks/expire-loyalty-points'
+      preLoaderRoute: typeof ApiPublicHooksExpireLoyaltyPointsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/auto-cancel-unpaid': {
       id: '/api/public/hooks/auto-cancel-unpaid'
       path: '/api/public/hooks/auto-cancel-unpaid'
@@ -1242,6 +1263,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksAutoCancelUnpaidRoute: ApiPublicHooksAutoCancelUnpaidRoute,
+  ApiPublicHooksExpireLoyaltyPointsRoute:
+    ApiPublicHooksExpireLoyaltyPointsRoute,
   ApiPublicHooksPriceDropCheckRoute: ApiPublicHooksPriceDropCheckRoute,
   ApiPublicHooksStackRemindersRoute: ApiPublicHooksStackRemindersRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,

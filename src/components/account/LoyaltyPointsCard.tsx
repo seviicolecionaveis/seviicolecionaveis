@@ -1,8 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyLoyaltyStatus } from "@/lib/loyalty.functions";
-import { REASON_LABEL, formatPoints, POINTS_PER_REAL, CENTS_PER_REDEEM_BLOCK, POINTS_PER_REDEEM_BLOCK } from "@/lib/loyalty";
-import { Sparkles, Gift, Cake, ShoppingBag, Minus, Settings, Undo2 } from "lucide-react";
+import {
+  REASON_LABEL,
+  formatPoints,
+  POINTS_PER_REAL,
+  CENTS_PER_REDEEM_BLOCK,
+  POINTS_PER_REDEEM_BLOCK,
+  EXPIRATION_MONTHS,
+  TIERS,
+  tierFromLifetime,
+  nextTier,
+  multiplierLabel,
+  type LoyaltyTier,
+} from "@/lib/loyalty";
+import { Sparkles, Gift, Cake, ShoppingBag, Minus, Settings, Undo2, Trophy, Clock, Crown, Medal, Award } from "lucide-react";
+
+const TIER_VISUAL: Record<LoyaltyTier, { icon: typeof Trophy; bg: string; text: string; border: string; badgeBg: string }> = {
+  bronze: { icon: Medal,  bg: "from-amber-50 to-orange-100 dark:from-amber-950/40 dark:to-orange-900/30", text: "text-amber-800 dark:text-amber-200", border: "border-amber-300/60", badgeBg: "bg-amber-700/10 text-amber-800 dark:text-amber-200" },
+  silver: { icon: Award,  bg: "from-slate-100 to-zinc-200 dark:from-slate-800/40 dark:to-zinc-900/40",     text: "text-slate-700 dark:text-slate-200", border: "border-slate-400/60", badgeBg: "bg-slate-500/15 text-slate-800 dark:text-slate-200" },
+  gold:   { icon: Crown,  bg: "from-yellow-100 to-amber-200 dark:from-yellow-900/40 dark:to-amber-800/40", text: "text-yellow-800 dark:text-yellow-200", border: "border-yellow-500/60", badgeBg: "bg-yellow-500/15 text-yellow-800 dark:text-yellow-200" },
+};
 
 export function LoyaltyPointsCard() {
   const fetchStatus = useServerFn(getMyLoyaltyStatus);
@@ -17,40 +35,123 @@ export function LoyaltyPointsCard() {
   }
 
   const balance = data?.balance ?? 0;
+  const lifetime = data?.lifetimeEarned ?? 0;
   const history = data?.history ?? [];
   const reaisEquivalent = (Math.floor(balance / POINTS_PER_REDEEM_BLOCK) * CENTS_PER_REDEEM_BLOCK) / 100;
 
+  const tierKey = (data?.tier as LoyaltyTier) || tierFromLifetime(lifetime).key;
+  const tierCfg = TIERS.find((t) => t.key === tierKey) ?? tierFromLifetime(lifetime);
+  const visual = TIER_VISUAL[tierKey];
+  const TierIcon = visual.icon;
+  const next = nextTier(tierKey);
+  const progressPct = next ? Math.min(100, Math.round(((lifetime - tierCfg.threshold) / (next.threshold - tierCfg.threshold)) * 100)) : 100;
+  const missingToNext = next ? Math.max(0, next.threshold - lifetime) : 0;
+
+  const expDate = data?.nextExpirationAt ? new Date(data.nextExpirationAt) : null;
+
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-border bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-950/40 dark:to-yellow-900/30 p-6 shadow-sm">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">
-          <Sparkles className="h-4 w-4" /> Pontos Sevii
+      {/* Saldo + Tier */}
+      <div className={`rounded-xl border ${visual.border} bg-gradient-to-br ${visual.bg} p-6 shadow-sm`}>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <div className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-widest ${visual.text}`}>
+              <Sparkles className="h-4 w-4" /> Pontos Sevii
+            </div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-4xl font-extrabold tabular-nums">{formatPoints(balance)}</span>
+              <span className="text-sm text-muted-foreground">pontos</span>
+            </div>
+            {balance >= POINTS_PER_REDEEM_BLOCK ? (
+              <p className={`mt-1 text-sm ${visual.text}`}>
+                Vale até <strong>R$ {reaisEquivalent.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</strong> no próximo pedido.
+              </p>
+            ) : (
+              <p className="mt-1 text-sm text-muted-foreground">
+                Faltam {POINTS_PER_REDEEM_BLOCK - balance} pontos para resgatar (mínimo {POINTS_PER_REDEEM_BLOCK} pts).
+              </p>
+            )}
+          </div>
+
+          <div className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-widest ${visual.badgeBg}`}>
+            <TierIcon className="h-4 w-4" />
+            {tierCfg.label} · {multiplierLabel(tierCfg.multiplierBp)}
+          </div>
         </div>
-        <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-4xl font-extrabold tabular-nums">{formatPoints(balance)}</span>
-          <span className="text-sm text-muted-foreground">pontos</span>
-        </div>
-        {balance >= POINTS_PER_REDEEM_BLOCK ? (
-          <p className="mt-1 text-sm text-amber-900 dark:text-amber-200">
-            Vale até <strong>R$ {reaisEquivalent.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</strong> de desconto no próximo pedido.
-          </p>
+
+        {/* Progresso para próximo tier */}
+        {next ? (
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-xs mb-1.5">
+              <span className="text-muted-foreground">
+                {formatPoints(lifetime)} / {formatPoints(next.threshold)} pts para <strong>{next.label}</strong>
+              </span>
+              <span className="text-muted-foreground">{progressPct}%</span>
+            </div>
+            <div className="h-2 w-full rounded-full bg-foreground/10 overflow-hidden">
+              <div className="h-full bg-foreground/70 transition-all" style={{ width: `${progressPct}%` }} />
+            </div>
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              Faltam <strong>{formatPoints(missingToNext)}</strong> pontos para virar {next.label} ({multiplierLabel(next.multiplierBp)} pontos por R$).
+            </p>
+          </div>
         ) : (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Faltam {POINTS_PER_REDEEM_BLOCK - balance} pontos para resgatar (mínimo {POINTS_PER_REDEEM_BLOCK} pts).
+          <p className="mt-4 text-xs text-muted-foreground flex items-center gap-1.5">
+            <Trophy className="h-3.5 w-3.5" /> Você está no nível máximo. Ganha sempre {multiplierLabel(tierCfg.multiplierBp)} pontos.
+          </p>
+        )}
+
+        {/* Expiração */}
+        {expDate && balance > 0 && (
+          <p className="mt-3 text-xs text-muted-foreground flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5" /> Primeiros pontos vencem em{" "}
+            <strong>
+              {expDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+            </strong>
+            .
           </p>
         )}
       </div>
 
+      {/* Como funciona */}
       <div className="rounded-xl border border-border bg-card p-5">
         <h3 className="text-sm font-bold uppercase tracking-widest mb-3">Como funciona</h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
-          <li className="flex gap-2"><ShoppingBag className="h-4 w-4 mt-0.5 shrink-0" /> Ganhe <strong className="text-foreground">{POINTS_PER_REAL} pontos por R$ 1,00</strong> em cada pedido pago.</li>
+          <li className="flex gap-2"><ShoppingBag className="h-4 w-4 mt-0.5 shrink-0" /> Ganhe <strong className="text-foreground">{POINTS_PER_REAL} pontos por R$ 1,00</strong> em cada pedido pago (× multiplicador do seu nível).</li>
           <li className="flex gap-2"><Gift className="h-4 w-4 mt-0.5 shrink-0" /> {POINTS_PER_REDEEM_BLOCK} pontos = <strong className="text-foreground">R$ {(CENTS_PER_REDEEM_BLOCK / 100).toFixed(2)}</strong> de desconto.</li>
           <li className="flex gap-2"><Sparkles className="h-4 w-4 mt-0.5 shrink-0" /> Use no checkout em múltiplos de {POINTS_PER_REDEEM_BLOCK}.</li>
           <li className="flex gap-2"><Cake className="h-4 w-4 mt-0.5 shrink-0" /> 100 pontos extras no seu aniversário.</li>
+          <li className="flex gap-2"><Clock className="h-4 w-4 mt-0.5 shrink-0" /> Pontos expiram após <strong className="text-foreground">{EXPIRATION_MONTHS} meses</strong>.</li>
         </ul>
       </div>
 
+      {/* Níveis */}
+      <div className="rounded-xl border border-border bg-card p-5">
+        <h3 className="text-sm font-bold uppercase tracking-widest mb-3 flex items-center gap-2"><Trophy className="h-4 w-4" /> Níveis</h3>
+        <div className="grid sm:grid-cols-3 gap-3">
+          {TIERS.map((t) => {
+            const v = TIER_VISUAL[t.key];
+            const Icon = v.icon;
+            const isCurrent = t.key === tierKey;
+            return (
+              <div key={t.key} className={`rounded-lg border p-3 ${isCurrent ? `${v.border} bg-gradient-to-br ${v.bg}` : "border-border"}`}>
+                <div className="flex items-center gap-2 font-bold">
+                  <Icon className="h-4 w-4" /> {t.label}
+                  {isCurrent && <span className="ml-auto text-[10px] uppercase tracking-widest text-muted-foreground">Atual</span>}
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  A partir de {formatPoints(t.threshold)} pts acumulados
+                </div>
+                <div className="mt-1 text-xs font-semibold">
+                  Ganha {multiplierLabel(t.multiplierBp)} pontos por R$
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Histórico */}
       <div className="rounded-xl border border-border bg-card p-5">
         <h3 className="text-sm font-bold uppercase tracking-widest mb-3">Histórico</h3>
         {history.length === 0 ? (
@@ -63,6 +164,7 @@ export function LoyaltyPointsCard() {
                 : h.reason === "order_earned" ? ShoppingBag
                 : h.reason === "order_redeemed" ? Minus
                 : h.reason === "refund" ? Undo2
+                : h.reason === "expiration" ? Clock
                 : Settings;
               const positive = h.delta > 0;
               return (

@@ -1319,6 +1319,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      expire_old_loyalty_points: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1345,7 +1346,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      user_lifetime_earned: { Args: { _user_id: string }; Returns: number }
       user_points_balance: { Args: { _user_id: string }; Returns: number }
+      user_tier: { Args: { _user_id: string }; Returns: string }
+      user_tier_multiplier_bp: { Args: { _user_id: string }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "user"
