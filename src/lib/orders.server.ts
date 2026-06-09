@@ -312,6 +312,30 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
         totalCents: full.total_cents,
       },
     });
+
+    // Brevo: best-effort upsert do cliente na lista "Clientes" (não bloqueia o fluxo).
+    try {
+      if (process.env.BREVO_API_KEY) {
+        const { upsertContact, ensureCustomersListId, ensureNewsletterListId } =
+          await import("./brevo.server");
+        const [customersListId, newsletterListId] = await Promise.all([
+          ensureCustomersListId(),
+          ensureNewsletterListId(),
+        ]);
+        const firstName = full.recipient_name?.split(/\s+/)[0] ?? null;
+        const lastName =
+          full.recipient_name?.split(/\s+/).slice(1).join(" ") || null;
+        await upsertContact({
+          email: full.email,
+          firstName,
+          lastName,
+          listIds: [customersListId, newsletterListId],
+          attributes: { SOURCE: "purchase", LAST_ORDER_AT: new Date().toISOString() },
+        });
+      }
+    } catch (e) {
+      console.error("[markOrderPaid] brevo upsertContact falhou:", e);
+    }
   }
 }
 
