@@ -68,6 +68,8 @@ function AdminLoyaltyPage() {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [allUsers, setAllUsers] = useState<UserRow[] | null>(null);
+  const [loadingAll, setLoadingAll] = useState(false);
 
   const [adjustDelta, setAdjustDelta] = useState<string>("");
   const [adjustDirection, setAdjustDirection] = useState<"add" | "remove">("add");
