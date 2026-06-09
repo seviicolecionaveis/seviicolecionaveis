@@ -47,12 +47,19 @@ export const getMyLoyaltyStatus = createServerFn({ method: "GET" })
       }
     }
 
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("birth_date")
+      .eq("user_id", userId)
+      .maybeSingle();
+
     return {
       balance,
       lifetimeEarned,
       tier,
       multiplierBp,
       nextExpirationAt,
+      birthDate: profile?.birth_date ?? null,
       history: history ?? [],
     };
   });

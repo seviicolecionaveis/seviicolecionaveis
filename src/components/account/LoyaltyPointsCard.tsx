@@ -14,7 +14,7 @@ import {
   multiplierLabel,
   type LoyaltyTier,
 } from "@/lib/loyalty";
-import { Sparkles, Gift, Cake, ShoppingBag, Minus, Settings, Undo2, Trophy, Clock, Crown, Medal, Award } from "lucide-react";
+import { Sparkles, Gift, Cake, ShoppingBag, Minus, Settings, Undo2, Trophy, Clock, Crown, Medal, Award, ArrowRight } from "lucide-react";
 
 const TIER_VISUAL: Record<LoyaltyTier, { icon: typeof Trophy; bg: string; text: string; border: string; badgeBg: string }> = {
   bronze: { icon: Medal,  bg: "from-amber-50 to-orange-100 dark:from-amber-950/40 dark:to-orange-900/30", text: "text-amber-800 dark:text-amber-200", border: "border-amber-300/60", badgeBg: "bg-amber-700/10 text-amber-800 dark:text-amber-200" },
@@ -22,7 +22,7 @@ const TIER_VISUAL: Record<LoyaltyTier, { icon: typeof Trophy; bg: string; text: 
   gold:   { icon: Crown,  bg: "from-yellow-100 to-amber-200 dark:from-yellow-900/40 dark:to-amber-800/40", text: "text-yellow-800 dark:text-yellow-200", border: "border-yellow-500/60", badgeBg: "bg-yellow-500/15 text-yellow-800 dark:text-yellow-200" },
 };
 
-export function LoyaltyPointsCard() {
+export function LoyaltyPointsCard({ onGoToProfile }: { onGoToProfile?: () => void }) {
   const fetchStatus = useServerFn(getMyLoyaltyStatus);
   const { data, isLoading } = useQuery({
     queryKey: ["loyalty-status"],
@@ -48,6 +48,7 @@ export function LoyaltyPointsCard() {
   const missingToNext = next ? Math.max(0, next.threshold - lifetime) : 0;
 
   const expDate = data?.nextExpirationAt ? new Date(data.nextExpirationAt) : null;
+  const hasBirthDate = !!data?.birthDate;
 
   return (
     <div className="space-y-4">
@@ -112,6 +113,29 @@ export function LoyaltyPointsCard() {
           </p>
         )}
       </div>
+
+      {/* Incentivo aniversário */}
+      {!hasBirthDate && (
+        <div className="rounded-xl border border-pink-300/60 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 p-5 flex items-start gap-4">
+          <div className="rounded-full bg-pink-100 dark:bg-pink-900/40 p-2.5 shrink-0">
+            <Cake className="h-5 w-5 text-pink-600 dark:text-pink-300" />
+          </div>
+          <div className="flex-1">
+            <h4 className="text-sm font-bold text-pink-800 dark:text-pink-200">Cadastre sua data de nascimento</h4>
+            <p className="mt-1 text-sm text-pink-700/80 dark:text-pink-300/80">
+              No dia do seu aniversário você ganha <strong className="text-pink-800 dark:text-pink-200">100 pontos</strong> de presente! 🎂
+            </p>
+            {onGoToProfile && (
+              <button
+                onClick={onGoToProfile}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-pink-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-700 transition"
+              >
+                Cadastrar agora <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Como funciona */}
       <div className="rounded-xl border border-border bg-card p-5">
