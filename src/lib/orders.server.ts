@@ -46,6 +46,49 @@ async function applyWalletDeductionForOrder(orderId: string) {
   }
 }
 
+/**
+ * Credita e debita pontos do programa de fidelidade quando um pedido é pago.
+ * - Crédito: 10 pontos por R$ 1,00 sobre o subtotal após descontos
+ * - Débito: pontos resgatados no checkout (lançados como entrada negativa)
+ * Idempotente via índice único (order_id, reason).
+ */
+async function applyLoyaltyForOrder(orderId: string) {
+  const { data: order } = await supabaseAdmin
+    .from("orders")
+    .select("id, user_id, subtotal_cents, discount_cents, points_redeemed, points_discount_cents, points_earned")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (!order || !order.user_id) return;
+
+  const { pointsEarnedFromCents } = await import("@/lib/loyalty");
+  const base = Math.max(0, (order.subtotal_cents ?? 0) - (order.discount_cents ?? 0));
+  const earned = pointsEarnedFromCents(base);
+
+  if (earned > 0 && (order.points_earned ?? 0) === 0) {
+    const { error } = await supabaseAdmin.from("loyalty_points_ledger").insert({
+      user_id: order.user_id,
+      delta: earned,
+      reason: "order_earned",
+      order_id: order.id,
+      description: `Pontos do pedido #${order.id.slice(0, 8)}`,
+    });
+    if (!error) {
+      await supabaseAdmin.from("orders").update({ points_earned: earned }).eq("id", order.id);
+    }
+  }
+
+  const redeemed = order.points_redeemed ?? 0;
+  if (redeemed > 0) {
+    await supabaseAdmin.from("loyalty_points_ledger").insert({
+      user_id: order.user_id,
+      delta: -redeemed,
+      reason: "order_redeemed",
+      order_id: order.id,
+      description: `Resgate no pedido #${order.id.slice(0, 8)}`,
+    });
+    // duplicado é silenciosamente bloqueado pelo índice único
+  }
+}
 
 export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymentIntent?: string; mercadopagoPaymentId?: string }) {
   const { data: order } = await supabaseAdmin
