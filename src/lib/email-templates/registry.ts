@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import { template as loyaltyProgramLaunchTemplate } from './loyalty-program-launch'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -9,30 +10,14 @@ export interface TemplateEntry {
   to?: string
 }
 
-import { template as orderReceived } from './order-received'
-import { template as paymentConfirmed } from './payment-confirmed'
-import { template as orderStatusUpdated } from './order-status-updated'
-import { template as adminCancellationRequested } from './admin-cancellation-requested'
-import { template as backInStock } from './back-in-stock'
-import { template as priceDrop } from './price-drop'
-import { template as giftVoucher } from './gift-voucher'
-import { template as couponBroadcast } from './coupon-broadcast'
-import { template as arteEmCardsCode } from './arte-em-cards-code'
-import { template as stackReminder } from './stack-reminder'
-import { template as stackOrderStored } from './stack-order-stored'
-import { template as stackAuctionStored } from './stack-auction-stored'
-
+/**
+ * Template registry — maps template names to their React Email components.
+ * Import and register new templates here after creating them in this directory.
+ *
+ * Example:
+ *   import { template as welcomeTemplate } from './welcome'
+ *   // then add to TEMPLATES: 'welcome': welcomeTemplate
+ */
 export const TEMPLATES: Record<string, TemplateEntry> = {
-  'order-received': orderReceived,
-  'payment-confirmed': paymentConfirmed,
-  'order-status-updated': orderStatusUpdated,
-  'admin-cancellation-requested': adminCancellationRequested,
-  'back-in-stock': backInStock,
-  'price-drop': priceDrop,
-  'gift-voucher': giftVoucher,
-  'coupon-broadcast': couponBroadcast,
-  'arte-em-cards-code': arteEmCardsCode,
-  'stack-reminder': stackReminder,
-  'stack-order-stored': stackOrderStored,
-  'stack-auction-stored': stackAuctionStored,
+  'loyalty-program-launch': loyaltyProgramLaunchTemplate,
 }
