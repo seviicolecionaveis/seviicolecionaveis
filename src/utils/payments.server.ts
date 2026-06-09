@@ -753,12 +753,14 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     nonBundleSubtotalCents,
   );
 
-  // Pix 5% incide apenas sobre o que sobra fora do combo (após cupom)
-  const pixDiscountCents = computePixDiscountCents(
-    nonBundleSubtotalCents,
-    couponDiscountCents,
-  );
-  const discountCents = bundleDiscountCents + couponDiscountCents + pixDiscountCents;
+  const pointsBase = Math.max(0, subtotalCents - bundleDiscountCents - couponDiscountCents);
+  const { points: pointsRedeemed, discountCents: pointsDiscountCents } =
+    await resolvePointsRedemption(userId, data.pointsToRedeem, pointsBase);
+
+  // Pix 5% incide apenas sobre o que sobra fora do combo (após cupom e pontos)
+  const pixBase = Math.max(0, nonBundleSubtotalCents - couponDiscountCents - pointsDiscountCents);
+  const pixDiscountCents = Math.round((pixBase * PIX_DISCOUNT_PERCENT) / 100);
+  const discountCents = bundleDiscountCents + couponDiscountCents + pointsDiscountCents + pixDiscountCents;
 
   const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents);
 
