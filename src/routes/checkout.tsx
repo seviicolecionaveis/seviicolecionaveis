@@ -125,6 +125,7 @@ interface CardState {
   address: AddressPayload;
   notes: string | null;
   couponCode: string | null;
+  pointsToRedeem: number;
   arteEmCardsCode: string | null;
 }
 
