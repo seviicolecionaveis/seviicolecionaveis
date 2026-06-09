@@ -1311,6 +1311,13 @@ export type Database = {
     Functions: {
       available_stock: { Args: { _card_id: string }; Returns: number }
       award_birthday_points_today: { Args: never; Returns: number }
+      backfill_loyalty_points_for_orders: {
+        Args: never
+        Returns: {
+          orders_processed: number
+          points_credited: number
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
