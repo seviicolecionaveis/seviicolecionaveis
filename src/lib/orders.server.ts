@@ -62,7 +62,13 @@ async function applyLoyaltyForOrder(orderId: string) {
 
   const { pointsEarnedFromCents } = await import("@/lib/loyalty");
   const base = Math.max(0, (order.subtotal_cents ?? 0) - (order.discount_cents ?? 0));
-  const earned = pointsEarnedFromCents(base);
+
+  // Multiplicador por tier do usuário (10000 = 1.00x).
+  let multiplierBp = 10000;
+  const { data: mp } = await supabaseAdmin.rpc("user_tier_multiplier_bp", { _user_id: order.user_id });
+  if (typeof mp === "number" && mp > 0) multiplierBp = mp;
+
+  const earned = pointsEarnedFromCents(base, multiplierBp);
 
   if (earned > 0 && (order.points_earned ?? 0) === 0) {
     const { error } = await supabaseAdmin.from("loyalty_points_ledger").insert({
@@ -71,11 +77,13 @@ async function applyLoyaltyForOrder(orderId: string) {
       reason: "order_earned",
       order_id: order.id,
       description: `Pontos do pedido #${order.id.slice(0, 8)}`,
+      metadata: { multiplier_bp: multiplierBp },
     });
     if (!error) {
       await supabaseAdmin.from("orders").update({ points_earned: earned }).eq("id", order.id);
     }
   }
+
 
   const redeemed = order.points_redeemed ?? 0;
   if (redeemed > 0) {
