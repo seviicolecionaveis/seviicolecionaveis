@@ -1342,6 +1342,7 @@ function CardScreen({
                     address: card.address,
                     notes: card.notes,
                     couponCode: card.couponCode,
+                    pointsToRedeem: card.pointsToRedeem,
                     arteEmCardsCode: card.arteEmCardsCode,
                     card: {
                       token: cardFormData.token,
