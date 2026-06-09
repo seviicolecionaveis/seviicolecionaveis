@@ -40,3 +40,10 @@ export const adminGetLoyaltyStats = createServerFn({ method: "GET" })
     const { getLoyaltyStats } = await import("./admin-loyalty.server");
     return getLoyaltyStats(context.userId);
   });
+
+export const adminListAllLoyaltyUsers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { listAllLoyaltyUsers } = await import("./admin-loyalty.server");
+    return listAllLoyaltyUsers(context.userId);
+  });

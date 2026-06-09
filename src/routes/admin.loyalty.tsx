@@ -7,6 +7,7 @@ import {
   adminGetUserLoyaltyDetail,
   adminAdjustUserPoints,
   adminGetLoyaltyStats,
+  adminListAllLoyaltyUsers,
 } from "@/lib/admin-loyalty.functions";
 import { formatPoints, REASON_LABEL, TIERS, multiplierLabel, type LoyaltyReason } from "@/lib/loyalty";
 
@@ -59,6 +60,7 @@ function AdminLoyaltyPage() {
   const detailFn = useServerFn(adminGetUserLoyaltyDetail);
   const adjustFn = useServerFn(adminAdjustUserPoints);
   const statsFn = useServerFn(adminGetLoyaltyStats);
+  const listAllFn = useServerFn(adminListAllLoyaltyUsers);
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<UserRow[]>([]);
@@ -66,6 +68,8 @@ function AdminLoyaltyPage() {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [allUsers, setAllUsers] = useState<UserRow[] | null>(null);
+  const [loadingAll, setLoadingAll] = useState(false);
 
   const [adjustDelta, setAdjustDelta] = useState<string>("");
   const [adjustDirection, setAdjustDirection] = useState<"add" | "remove">("add");
@@ -80,11 +84,25 @@ function AdminLoyaltyPage() {
     }
   }, [authLoading, user, isAdmin, nav]);
 
+  const loadAll = async () => {
+    setLoadingAll(true);
+    try {
+      const data = await listAllFn();
+      setAllUsers(data as UserRow[]);
+    } catch {
+      setAllUsers([]);
+    } finally {
+      setLoadingAll(false);
+    }
+  };
+
   useEffect(() => {
     if (isAdmin) {
       statsFn().then(setStats).catch(() => {});
+      loadAll();
     }
-  }, [isAdmin, statsFn]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,6 +162,7 @@ function AdminLoyaltyPage() {
         curr.map((r) => (r.user_id === detail.user_id ? { ...r, balance: r.balance + delta } : r)),
       );
       statsFn().then(setStats).catch(() => {});
+      loadAll();
     } catch (e: any) {
       const text = e?.message || (await e?.text?.()) || "Erro ao ajustar pontos.";
       setMsg({ kind: "err", text: typeof text === "string" ? text : "Erro ao ajustar pontos." });
@@ -256,6 +275,82 @@ function AdminLoyaltyPage() {
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {!detail && results.length === 0 && (
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide">
+                  Todos os clientes com pontos {allUsers ? `(${allUsers.length})` : ""}
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Ordenado por saldo (maior → menor).
+                </p>
+              </div>
+              <button
+                onClick={loadAll}
+                disabled={loadingAll}
+                className="rounded-md border border-border px-3 py-1.5 text-xs font-semibold hover:bg-secondary disabled:opacity-50"
+              >
+                {loadingAll ? "Atualizando..." : "Atualizar"}
+              </button>
+            </div>
+            {loadingAll && !allUsers ? (
+              <p className="px-5 py-6 text-sm text-muted-foreground">Carregando clientes...</p>
+            ) : !allUsers || allUsers.length === 0 ? (
+              <p className="px-5 py-6 text-sm text-muted-foreground">
+                Nenhum cliente com saldo de pontos no momento.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-secondary text-[10px] uppercase tracking-wide">
+                    <tr>
+                      <th className="text-left px-4 py-2">Cliente</th>
+                      <th className="text-left px-4 py-2">E-mail</th>
+                      <th className="text-left px-4 py-2">Tier</th>
+                      <th className="text-right px-4 py-2">Saldo</th>
+                      <th className="text-right px-4 py-2">Vida toda</th>
+                      <th className="px-4 py-2" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {allUsers.map((r) => (
+                      <tr key={r.user_id} className="hover:bg-secondary/40">
+                        <td className="px-4 py-2 text-sm font-medium truncate max-w-[220px]">
+                          {r.full_name || "(sem nome)"}
+                        </td>
+                        <td className="px-4 py-2 text-xs text-muted-foreground truncate max-w-[260px]">
+                          {r.email ?? "—"}
+                        </td>
+                        <td className="px-4 py-2 text-xs">
+                          {tierLabel(r.tier)}{" "}
+                          <span className="text-muted-foreground">
+                            ({multiplierLabel(r.multiplier_bp)})
+                          </span>
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums font-semibold">
+                          {formatPoints(r.balance)}
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums text-muted-foreground">
+                          {formatPoints(r.lifetime_earned)}
+                        </td>
+                        <td className="px-4 py-2 text-right">
+                          <button
+                            onClick={() => openDetail(r.user_id)}
+                            className="rounded-md border border-border px-3 py-1 text-xs font-semibold hover:bg-secondary"
+                          >
+                            Abrir
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
