@@ -20,7 +20,7 @@ const LoyaltyProgramLaunchEmail: React.FC<LoyaltyProgramLaunchProps> = ({
       </Text>
 
       <Section style={{ backgroundColor: '#fff7ed', borderRadius: '12px', padding: '20px', margin: '24px 0', border: '1px solid #fed7aa' }}>
-        <Heading as="h2" style={{ ...styles.h2, color: '#9a3412', marginTop: 0 }}>
+        <Heading as="h2" style={{ fontSize: '18px', fontWeight: 700, color: '#9a3412', marginTop: 0, marginBottom: '12px' }}>
           Como funciona
         </Heading>
         <ul style={{ paddingLeft: '20px', margin: '0', color: '#431407', fontSize: '14px', lineHeight: '1.7' }}>
