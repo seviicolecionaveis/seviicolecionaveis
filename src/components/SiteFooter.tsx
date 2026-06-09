@@ -90,8 +90,7 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-white mt-16 text-neutral-700">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
-        <div className="grid sm:grid-cols-3 gap-10">
-          {/* Coluna 1 — Marca */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="flex flex-col items-center text-center">
             <img
               src={logoUrl}
