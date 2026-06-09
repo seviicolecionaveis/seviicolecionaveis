@@ -14,7 +14,7 @@ import {
   multiplierLabel,
   type LoyaltyTier,
 } from "@/lib/loyalty";
-import { Sparkles, Gift, Cake, ShoppingBag, Minus, Settings, Undo2, Trophy, Clock, Crown, Medal, Award } from "lucide-react";
+import { Sparkles, Gift, Cake, ShoppingBag, Minus, Settings, Undo2, Trophy, Clock, Crown, Medal, Award, ArrowRight } from "lucide-react";
 
 const TIER_VISUAL: Record<LoyaltyTier, { icon: typeof Trophy; bg: string; text: string; border: string; badgeBg: string }> = {
   bronze: { icon: Medal,  bg: "from-amber-50 to-orange-100 dark:from-amber-950/40 dark:to-orange-900/30", text: "text-amber-800 dark:text-amber-200", border: "border-amber-300/60", badgeBg: "bg-amber-700/10 text-amber-800 dark:text-amber-200" },
