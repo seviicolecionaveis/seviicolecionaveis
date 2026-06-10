@@ -198,6 +198,7 @@ export const EXTRA_COLLECTIONS = [
   "SIT - Tempestade Prateada",
   "XY - XY",
   "UNB - Elos Inquebráveis",
+  "LOT - Trovões Perdidos",
 ];
 
 export const COLLECTIONS = Array.from(

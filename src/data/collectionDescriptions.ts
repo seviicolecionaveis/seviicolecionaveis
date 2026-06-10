@@ -26,6 +26,8 @@ export const COLLECTION_DESCRIPTIONS: Record<string, string> = {
     "Coleção base da era XY (Kalos), lançada em 2014. Introduziu as Mega Evoluções ao TCG Pokémon e cartas EX de Kalos como Xerneas e Yveltal.",
   "UNB - Elos Inquebráveis":
     "Unbroken Bonds (2019) — expansão da era Sun & Moon com 234 cartas. Famosa pelas cartas de Reshiram & Charizard-GX e Dedenne-GX, uma das coleções mais populares da era SM.",
+  "LOT - Trovões Perdidos":
+    "Lost Thunder (2018) — expansão da era Sun & Moon com 236 cartas. Destaca-se pelas cartas de Lugia-GX e Tyranitar-GX, além de introduzir o conceito de Prism Star. Uma das maiores coleções da era SM.",
 };
 
 export function getCollectionDescription(name: string): string | undefined {
