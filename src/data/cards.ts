@@ -196,6 +196,7 @@ export const EXTRA_COLLECTIONS = [
   "PPPS6 - Play! Pokémon Prize Pack Series Six",
   "XYPR - XY Promos",
   "SIT - Tempestade Prateada",
+  "XY - XY",
 ];
 
 export const COLLECTIONS = Array.from(
