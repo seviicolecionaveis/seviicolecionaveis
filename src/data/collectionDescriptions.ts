@@ -24,6 +24,8 @@ export const COLLECTION_DESCRIPTIONS: Record<string, string> = {
     "Geração Kalos (2014–2016) com Mega Evoluções e cartas EX. Marco moderno do TCG.",
   "XY - XY":
     "Coleção base da era XY (Kalos), lançada em 2014. Introduziu as Mega Evoluções ao TCG Pokémon e cartas EX de Kalos como Xerneas e Yveltal.",
+  "UNB - Elos Inquebráveis":
+    "Unbroken Bonds (2019) — expansão da era Sun & Moon com 234 cartas. Famosa pelas cartas de Reshiram & Charizard-GX e Dedenne-GX, uma das coleções mais populares da era SM.",
 };
 
 export function getCollectionDescription(name: string): string | undefined {
