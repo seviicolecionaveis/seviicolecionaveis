@@ -22,6 +22,8 @@ export const COLLECTION_DESCRIPTIONS: Record<string, string> = {
     "Geração de Alola (2017–2019) — introduziu Pokémon GX e arte alternativa Full Art. Coleção rica para colecionadores.",
   "XY":
     "Geração Kalos (2014–2016) com Mega Evoluções e cartas EX. Marco moderno do TCG.",
+  "XY - XY":
+    "Coleção base da era XY (Kalos), lançada em 2014. Introduziu as Mega Evoluções ao TCG Pokémon e cartas EX de Kalos como Xerneas e Yveltal.",
 };
 
 export function getCollectionDescription(name: string): string | undefined {
