@@ -197,6 +197,7 @@ export const EXTRA_COLLECTIONS = [
   "XYPR - XY Promos",
   "SIT - Tempestade Prateada",
   "XY - XY",
+  "UNB - Elos Inquebráveis",
 ];
 
 export const COLLECTIONS = Array.from(
