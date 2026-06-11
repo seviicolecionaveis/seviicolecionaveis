@@ -13,6 +13,23 @@ export const Route = createFileRoute("/selados")({
       { name: "description", content: "Booster boxes, ETBs e produtos selados Pokémon disponíveis na Sevii Colecionáveis." },
       { property: "og:title", content: "Produtos Selados Pokémon | Sevii Colecionáveis" },
       { property: "og:description", content: "Booster boxes, ETBs e produtos selados Pokémon disponíveis na Sevii Colecionáveis." },
+      { property: "og:url", content: "https://seviicolecionaveis.com.br/selados" },
+      { property: "og:type", content: "website" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://seviicolecionaveis.com.br/selados" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Produtos Selados Pokémon",
+          url: "https://seviicolecionaveis.com.br/selados",
+          inLanguage: "pt-BR",
+        }),
+      },
     ],
   }),
   component: SeladosPage,
