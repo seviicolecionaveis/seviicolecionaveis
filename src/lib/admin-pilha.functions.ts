@@ -338,6 +338,131 @@ export const adminAddOrderToStack = createServerFn({ method: "POST" })
     return { ok: true, addedCount: rows.length, orderId: order.id, stackId: stack.id };
   });
 
+export const adminAddOrderItemsToStack = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        orderId: z.string().uuid(),
+        items: z
+          .array(
+            z.object({
+              orderItemId: z.string().uuid(),
+              quantity: z.number().int().min(1).max(999),
+            }),
+          )
+          .min(1)
+          .max(200),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await ensureAdmin(supabaseAdmin, context.userId);
+
+    const { data: order, error: orderErr } = await supabaseAdmin
+      .from("orders")
+      .select("id, user_id, status, email, recipient_name")
+      .eq("id", data.orderId)
+      .maybeSingle();
+    if (orderErr) throw new Error(orderErr.message);
+    if (!order) throw new Error("Pedido não encontrado.");
+    const allowed = ["paid", "preparing", "shipped", "awaiting_pickup", "dispatched", "delivered"];
+    if (!allowed.includes(order.status)) {
+      throw new Error(`Pedido está com status "${order.status}". Só pedidos pagos podem ir à pilha.`);
+    }
+
+    const itemIds = data.items.map((i) => i.orderItemId);
+    const { data: orderItems, error: itemsErr } = await supabaseAdmin
+      .from("order_items")
+      .select(
+        "id, card_id, card_name, card_image, collection, card_number, finish, language, condition, quantity, cancelled_quantity, unit_price_cents, order_id",
+      )
+      .in("id", itemIds)
+      .eq("order_id", order.id);
+    if (itemsErr) throw new Error(itemsErr.message);
+    if (!orderItems || orderItems.length !== itemIds.length) {
+      throw new Error("Algum item selecionado não pertence a esse pedido.");
+    }
+
+    // Filtra itens já presentes na pilha (unique constraint em order_item_id)
+    const { data: existing } = await supabaseAdmin
+      .from("card_stack_items")
+      .select("order_item_id")
+      .in("order_item_id", itemIds);
+    const existingSet = new Set((existing ?? []).map((r: any) => r.order_item_id));
+
+    const { ensureActiveStack } = await import("@/lib/card-stack.server");
+    const stack = await ensureActiveStack(order.user_id);
+
+    const qtyMap = new Map(data.items.map((i) => [i.orderItemId, i.quantity]));
+    const rows: any[] = [];
+    for (const it of orderItems) {
+      if (existingSet.has(it.id)) continue;
+      const available = (it.quantity ?? 0) - (it.cancelled_quantity ?? 0);
+      const qty = Math.min(qtyMap.get(it.id) ?? available, available);
+      if (qty < 1) continue;
+      rows.push({
+        stack_id: stack.id,
+        user_id: order.user_id,
+        order_id: order.id,
+        order_item_id: it.id,
+        card_id: it.card_id,
+        card_name: it.card_name,
+        card_image: it.card_image,
+        collection: it.collection,
+        card_number: it.card_number,
+        finish: it.finish,
+        language: it.language,
+        condition: it.condition,
+        quantity: qty,
+        unit_price_cents: it.unit_price_cents ?? 0,
+        status: "stored" as const,
+      });
+    }
+
+    if (rows.length === 0) {
+      throw new Error("Nada para enviar: itens já estavam na pilha ou sem quantidade disponível.");
+    }
+
+    const { error: insErr } = await supabaseAdmin
+      .from("card_stack_items")
+      .upsert(rows, { onConflict: "order_item_id", ignoreDuplicates: true });
+    if (insErr) throw new Error(insErr.message);
+
+    // Notifica o cliente
+    try {
+      if (order.email) {
+        const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
+        await sendTransactionalEmailSafe({
+          templateName: "stack-order-stored",
+          recipientEmail: order.email,
+          idempotencyKey: `stack-order-items-${order.id}-${Date.now()}`,
+          templateData: {
+            recipientName: order.recipient_name?.split(/\s+/)[0],
+            orderId: order.id,
+            expiresAt: stack.expires_at,
+            items: rows.map((r: any) => ({
+              card_name: r.card_name,
+              collection: r.collection,
+              card_number: r.card_number,
+              finish: r.finish,
+              language: r.language,
+              condition: r.condition,
+              quantity: r.quantity,
+              unit_price_cents: r.unit_price_cents ?? 0,
+            })),
+          },
+        });
+      }
+    } catch (e) {
+      console.error("[adminAddOrderItemsToStack] email falhou:", e);
+    }
+
+    return { ok: true, addedCount: rows.length, stackId: stack.id };
+  });
+
+
 export const adminCreateManualServiceOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
