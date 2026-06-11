@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -9,8 +9,10 @@ import {
   adminUpdateOrderStatus,
   adminPartialCancelItem,
 } from "@/utils/orders.functions";
+import { adminAddOrderItemsToStack } from "@/lib/admin-pilha.functions";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, ImageOff, X } from "lucide-react";
+import { ArrowLeft, ImageOff, Layers, X } from "lucide-react";
 import { AdminTrackingEditor, type TrackingInfo } from "@/components/admin/AdminTrackingEditor";
 
 export const Route = createFileRoute("/admin/orders/$orderId")({
