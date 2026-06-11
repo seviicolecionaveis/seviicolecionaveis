@@ -25,6 +25,22 @@ export const Route = createFileRoute("/acessorios")({
       { name: "description", content: "Sleeves, dados, marcadores, playmats, binders, top loaders, deck boxes e mais acessórios para Pokémon TCG." },
       { property: "og:title", content: "Acessórios para Pokémon TCG | Sevii Colecionáveis" },
       { property: "og:description", content: "Acessórios essenciais para jogadores e colecionadores de Pokémon TCG." },
+      { property: "og:url", content: "https://seviicolecionaveis.com.br/acessorios" },
+      { property: "og:type", content: "website" },
+    ],
+    links: [{ rel: "canonical", href: "https://seviicolecionaveis.com.br/acessorios" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Acessórios para Pokémon TCG",
+          url: "https://seviicolecionaveis.com.br/acessorios",
+          inLanguage: "pt-BR",
+          isPartOf: { "@type": "WebSite", name: "Sevii Colecionáveis", url: "https://seviicolecionaveis.com.br" },
+        }),
+      },
     ],
   }),
   component: AcessoriosPage,

@@ -20,10 +20,10 @@ export const Route = createFileRoute("/faq")({
       },
       {
         property: "og:url",
-        content: "https://seviicolecionaveis.lovable.app/faq",
+        content: "https://seviicolecionaveis.com.br/faq",
       },
     ],
-    links: [{ rel: "canonical", href: "https://seviicolecionaveis.lovable.app/faq" }],
+    links: [{ rel: "canonical", href: "https://seviicolecionaveis.com.br/faq" }],
     scripts: [
       {
         type: "application/ld+json",
