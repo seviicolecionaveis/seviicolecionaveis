@@ -28,7 +28,7 @@ function SeladosPage() {
     (async () => {
       const { data } = await supabase
         .from("sealed_products")
-        .select("id, title, description, price_cents, stock, images")
+        .select("id, title, description, price_cents, stock, images, is_preorder, release_date")
         .eq("active", true)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
