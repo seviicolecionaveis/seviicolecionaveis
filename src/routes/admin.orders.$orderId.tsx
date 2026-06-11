@@ -68,6 +68,10 @@ function AdminOrderDetailPage() {
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [cancelItem, setCancelItem] = useState<any | null>(null);
+  const [stackedItemIds, setStackedItemIds] = useState<Set<string>>(new Set());
+  const [selectedForStack, setSelectedForStack] = useState<Record<string, number>>({});
+  const [sendingToStack, setSendingToStack] = useState(false);
+  const addItemsToStackFn = useServerFn(adminAddOrderItemsToStack);
 
   useEffect(() => {
     if (!authLoading && !isAdmin) nav({ to: "/" });
@@ -80,6 +84,16 @@ function AdminOrderDetailPage() {
       .eq("id", orderId)
       .maybeSingle();
     setOrder(data);
+    const itemIds = (data?.order_items ?? []).map((it: any) => it.id);
+    if (itemIds.length) {
+      const { data: stackRows } = await supabase
+        .from("card_stack_items")
+        .select("order_item_id")
+        .in("order_item_id", itemIds);
+      setStackedItemIds(new Set((stackRows ?? []).map((r: any) => r.order_item_id)));
+    } else {
+      setStackedItemIds(new Set());
+    }
     setLoading(false);
   };
 
