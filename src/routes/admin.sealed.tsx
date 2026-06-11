@@ -51,7 +51,7 @@ function SealedAdmin() {
   const createNew = async () => {
     const { data, error } = await supabase
       .from("sealed_products")
-      .insert({ title: "Novo painel", price_cents: 0, stock: 0, images: [], active: false })
+      .insert({ title: "Novo selado", price_cents: 0, stock: 0, images: [], active: false })
       .select("*")
       .single();
     if (error) { toast.error(error.message); return; }
