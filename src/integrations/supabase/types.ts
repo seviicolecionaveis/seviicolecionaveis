@@ -1030,7 +1030,9 @@ export type Database = {
           description: string | null
           id: string
           images: string[]
+          is_preorder: boolean
           price_cents: number
+          release_date: string | null
           sort_order: number
           stock: number
           title: string
@@ -1042,7 +1044,9 @@ export type Database = {
           description?: string | null
           id?: string
           images?: string[]
+          is_preorder?: boolean
           price_cents?: number
+          release_date?: string | null
           sort_order?: number
           stock?: number
           title: string
@@ -1054,7 +1058,9 @@ export type Database = {
           description?: string | null
           id?: string
           images?: string[]
+          is_preorder?: boolean
           price_cents?: number
+          release_date?: string | null
           sort_order?: number
           stock?: number
           title?: string

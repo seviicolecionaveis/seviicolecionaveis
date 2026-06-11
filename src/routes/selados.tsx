@@ -28,7 +28,7 @@ function SeladosPage() {
     (async () => {
       const { data } = await supabase
         .from("sealed_products")
-        .select("id, title, description, price_cents, stock, images")
+        .select("id, title, description, price_cents, stock, images, is_preorder, release_date")
         .eq("active", true)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
@@ -81,11 +81,16 @@ function SeladosPage() {
                   onClick={() => setActive(p)}
                   className="group text-left"
                 >
-                  <div className="aspect-square overflow-hidden rounded-lg bg-secondary">
+                  <div className="relative aspect-square overflow-hidden rounded-lg bg-secondary">
                     {cover ? (
                       <img src={cover} alt={p.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
                     ) : (
                       <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">Sem imagem</div>
+                    )}
+                    {p.is_preorder && (
+                      <span className="absolute left-2 top-2 rounded bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow">
+                        Pré-venda
+                      </span>
                     )}
                   </div>
                   <p className="mt-2 text-sm font-semibold line-clamp-2">{p.title}</p>
@@ -93,6 +98,11 @@ function SeladosPage() {
                     R$ {(p.price_cents / 100).toFixed(2).replace(".", ",")}
                     {p.images.length > 1 && <span className="ml-2 text-xs">· {p.images.length} fotos</span>}
                   </p>
+                  {p.is_preorder && p.release_date && (
+                    <p className="text-[11px] text-primary font-semibold">
+                      Envio a partir de {new Date(p.release_date + "T00:00:00").toLocaleDateString("pt-BR")}
+                    </p>
+                  )}
                 </button>
               );
             })}

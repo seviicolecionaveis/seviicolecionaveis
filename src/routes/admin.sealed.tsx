@@ -19,6 +19,8 @@ type Sealed = {
   images: string[];
   active: boolean;
   sort_order: number;
+  is_preorder: boolean;
+  release_date: string | null;
 };
 
 function SealedAdmin() {
@@ -114,7 +116,14 @@ function SealedAdmin() {
                   className="h-20 w-20 rounded-md object-cover bg-secondary"
                 />
                 <div className="flex-1 min-w-[200px]">
-                  <p className="font-semibold">{p.title}</p>
+                  <p className="font-semibold">
+                    {p.title}
+                    {p.is_preorder && (
+                      <span className="ml-2 rounded bg-primary/15 text-primary px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                        Pré-venda{p.release_date ? ` · ${new Date(p.release_date + "T00:00:00").toLocaleDateString("pt-BR")}` : ""}
+                      </span>
+                    )}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     R$ {(p.price_cents / 100).toFixed(2)} · Estoque: {p.stock} · {p.images.length} foto(s)
                     {!p.active && " · Inativo"}
@@ -157,6 +166,8 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
   const [price, setPrice] = useState((item.price_cents / 100).toFixed(2));
   const [stock, setStock] = useState(String(item.stock));
   const [active, setActive] = useState(item.active);
+  const [isPreorder, setIsPreorder] = useState(item.is_preorder ?? false);
+  const [releaseDate, setReleaseDate] = useState(item.release_date ?? "");
   const [images, setImages] = useState<string[]>(item.images ?? []);
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -205,6 +216,7 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
     if (!title.trim()) { toast.error("Título obrigatório"); return; }
     if (!Number.isFinite(priceCents) || priceCents < 0) { toast.error("Preço inválido"); return; }
     if (!Number.isInteger(stockN) || stockN < 0) { toast.error("Estoque inválido"); return; }
+    if (isPreorder && !releaseDate) { toast.error("Informe a data de lançamento da pré-venda"); return; }
     setSaving(true);
     const { error } = await supabase
       .from("sealed_products")
@@ -215,6 +227,8 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
         stock: stockN,
         active,
         images,
+        is_preorder: isPreorder,
+        release_date: isPreorder ? releaseDate : null,
       })
       .eq("id", item.id);
     setSaving(false);
@@ -252,6 +266,31 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
             <label className="flex items-end gap-2 text-sm pb-2">
               <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> Ativo
             </label>
+          </div>
+
+          <div className="rounded-md border border-border p-3 space-y-3">
+            <label className="flex items-center gap-2 text-sm font-semibold">
+              <input
+                type="checkbox"
+                checked={isPreorder}
+                onChange={(e) => setIsPreorder(e.target.checked)}
+              />
+              Pré-venda
+            </label>
+            {isPreorder && (
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-widest">Data de lançamento</label>
+                <input
+                  type="date"
+                  value={releaseDate}
+                  onChange={(e) => setReleaseDate(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  O cliente poderá comprar mesmo com estoque zero. Avisaremos que o envio ocorre a partir desta data.
+                </p>
+              </div>
+            )}
           </div>
 
           <div>

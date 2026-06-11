@@ -10,6 +10,8 @@ export type Sealed = {
   price_cents: number;
   stock: number;
   images: string[];
+  is_preorder?: boolean;
+  release_date?: string | null;
 };
 
 interface Props {
@@ -27,16 +29,24 @@ export function SealedModal({ item, onClose }: Props) {
   if (!item) return null;
 
   const imgs = item.images.length ? item.images : [""];
-  const inStock = item.stock > 0;
+  const isPreorder = !!item.is_preorder;
+  const releaseDateLabel = item.release_date
+    ? new Date(item.release_date + "T00:00:00").toLocaleDateString("pt-BR")
+    : null;
+  const canBuy = isPreorder ? true : item.stock > 0;
+  const maxQty = isPreorder ? 99 : item.stock;
   const price = item.price_cents / 100;
 
   const handleAdd = () => {
-    if (!inStock) return;
+    if (!canBuy) return;
+    const namePrefix = isPreorder
+      ? `[Pré-venda${releaseDateLabel ? ` ${releaseDateLabel}` : ""}] `
+      : "";
     add(
       {
         id: `sealed:${item.id}`,
         cardId: `sealed:${item.id}`,
-        name: item.title,
+        name: `${namePrefix}${item.title}`,
         image: imgs[0],
         collection: "Selado",
         number: "—",
@@ -44,11 +54,11 @@ export function SealedModal({ item, onClose }: Props) {
         language: "—",
         condition: "NM",
         unitPrice: price,
-        maxStock: item.stock,
+        maxStock: maxQty,
       },
       qty,
     );
-    toast.success("Adicionado ao carrinho");
+    toast.success(isPreorder ? "Pré-venda adicionada ao carrinho" : "Adicionado ao carrinho");
     onClose();
   };
 
@@ -98,7 +108,19 @@ export function SealedModal({ item, onClose }: Props) {
           </div>
 
           <div className="flex flex-col">
-            <h2 className="text-xl font-bold">{item.title}</h2>
+            <div className="flex items-start gap-2">
+              <h2 className="text-xl font-bold">{item.title}</h2>
+              {isPreorder && (
+                <span className="rounded bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+                  Pré-venda
+                </span>
+              )}
+            </div>
+            {isPreorder && releaseDateLabel && (
+              <p className="mt-1 text-sm font-semibold text-primary">
+                Envio a partir de {releaseDateLabel}
+              </p>
+            )}
             {item.description && (
               <p className="mt-2 text-sm text-muted-foreground whitespace-pre-line">{item.description}</p>
             )}
@@ -107,26 +129,30 @@ export function SealedModal({ item, onClose }: Props) {
               R$ {price.toFixed(2).replace(".", ",")}
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              {inStock ? `${item.stock} em estoque` : "Esgotado"}
+              {isPreorder
+                ? "Reserve agora — o envio ocorrerá após o lançamento."
+                : item.stock > 0
+                  ? `${item.stock} em estoque`
+                  : "Esgotado"}
             </p>
 
-            {inStock && (
+            {canBuy && (
               <div className="mt-4 flex items-center gap-2">
                 <label className="text-sm">Qtd.</label>
                 <div className="inline-flex items-center rounded-md border border-border">
                   <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="px-2 py-1 text-sm">−</button>
                   <span className="px-3 text-sm font-semibold">{qty}</span>
-                  <button onClick={() => setQty((q) => Math.min(item.stock, q + 1))} className="px-2 py-1 text-sm">+</button>
+                  <button onClick={() => setQty((q) => Math.min(maxQty, q + 1))} className="px-2 py-1 text-sm">+</button>
                 </div>
               </div>
             )}
 
             <button
               onClick={handleAdd}
-              disabled={!inStock}
+              disabled={!canBuy}
               className="mt-6 rounded-md bg-primary px-4 py-3 text-sm font-bold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {inStock ? "Adicionar ao carrinho" : "Esgotado"}
+              {canBuy ? (isPreorder ? "Reservar pré-venda" : "Adicionar ao carrinho") : "Esgotado"}
             </button>
           </div>
         </div>
