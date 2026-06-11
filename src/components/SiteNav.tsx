@@ -5,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 const LINKS = [
   { to: "/cartas", label: "Cartas" },
+  { to: "/mais-vendidas", label: "Mais vendidas" },
   { to: "/imas", label: "Ímãs" },
   { to: "/acessorios", label: "Acessórios" },
   { to: "/selados", label: "Selados" },
