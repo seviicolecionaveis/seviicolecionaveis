@@ -26,6 +26,22 @@ export const Route = createFileRoute("/imas")({
       { name: "description", content: "Transforme cartas Pokémon em ímãs colecionáveis. Veja todas as cartas disponíveis para virar ímã." },
       { property: "og:title", content: "Ímãs de Cartas Pokémon | Sevii Colecionáveis" },
       { property: "og:description", content: "Cartas Pokémon disponíveis no acabamento Ímã." },
+      { property: "og:url", content: "https://seviicolecionaveis.com.br/imas" },
+      { property: "og:type", content: "website" },
+    ],
+    links: [{ rel: "canonical", href: "https://seviicolecionaveis.com.br/imas" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Ímãs de Cartas Pokémon",
+          url: "https://seviicolecionaveis.com.br/imas",
+          inLanguage: "pt-BR",
+          isPartOf: { "@type": "WebSite", name: "Sevii Colecionáveis", url: "https://seviicolecionaveis.com.br" },
+        }),
+      },
     ],
   }),
   component: ImasPage,

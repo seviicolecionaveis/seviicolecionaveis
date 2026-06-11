@@ -16,6 +16,21 @@ export const Route = createFileRoute("/cartas")({
         content: "Todo o estoque de cartas Pokémon em um só lugar, com filtros avançados.",
       },
       { property: "og:url", content: "https://seviicolecionaveis.com.br/cartas" },
+      { property: "og:type", content: "website" },
+    ],
+    links: [{ rel: "canonical", href: "https://seviicolecionaveis.com.br/cartas" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Cartas Pokémon — Catálogo completo",
+          url: "https://seviicolecionaveis.com.br/cartas",
+          inLanguage: "pt-BR",
+          isPartOf: { "@type": "WebSite", name: "Sevii Colecionáveis", url: "https://seviicolecionaveis.com.br" },
+        }),
+      },
     ],
   }),
   component: CartasPage,

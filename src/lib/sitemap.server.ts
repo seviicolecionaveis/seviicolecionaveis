@@ -23,6 +23,7 @@ export async function buildSitemapXml(origin: string): Promise<string> {
   const urls: { loc: string; lastmod?: string }[] = [
     { loc: `${origin}/` },
     { loc: `${origin}/cartas` },
+    { loc: `${origin}/colecoes` },
     { loc: `${origin}/mais-vendidas` },
     { loc: `${origin}/selados` },
     { loc: `${origin}/imas` },

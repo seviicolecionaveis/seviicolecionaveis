@@ -19,10 +19,10 @@ export const Route = createFileRoute("/sobre")({
       },
       {
         property: "og:url",
-        content: "https://seviicolecionaveis.lovable.app/sobre",
+        content: "https://seviicolecionaveis.com.br/sobre",
       },
     ],
-    links: [{ rel: "canonical", href: "https://seviicolecionaveis.lovable.app/sobre" }],
+    links: [{ rel: "canonical", href: "https://seviicolecionaveis.com.br/sobre" }],
   }),
   component: SobrePage,
 });
