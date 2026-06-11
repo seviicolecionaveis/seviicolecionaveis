@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Trash2, Plus, X, Upload, Link as LinkIcon, ArrowUp, ArrowDown } from "lucide-react";
 
 export const Route = createFileRoute("/admin/sealed")({
-  head: () => ({ meta: [{ title: "Painéis — Admin" }] }),
+  head: () => ({ meta: [{ title: "Selados — Admin" }] }),
   component: SealedAdmin,
 });
 
@@ -51,7 +51,7 @@ function SealedAdmin() {
   const createNew = async () => {
     const { data, error } = await supabase
       .from("sealed_products")
-      .insert({ title: "Novo painel", price_cents: 0, stock: 0, images: [], active: false })
+      .insert({ title: "Novo selado", price_cents: 0, stock: 0, images: [], active: false })
       .select("*")
       .single();
     if (error) { toast.error(error.message); return; }
@@ -60,7 +60,7 @@ function SealedAdmin() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Remover este painel?")) return;
+    if (!confirm("Remover este selado?")) return;
     await supabase.from("sealed_products").delete().eq("id", id);
     await load();
   };
@@ -91,19 +91,19 @@ function SealedAdmin() {
 
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Painéis (Ímãs)</h1>
+          <h1 className="text-2xl font-bold">Produtos Selados</h1>
           <button
             onClick={createNew}
             className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground"
           >
-            <Plus className="h-4 w-4" /> Novo painel
+            <Plus className="h-4 w-4" /> Novo selado
           </button>
         </div>
 
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum painel cadastrado.</p>
+          <p className="text-sm text-muted-foreground">Nenhum produto selado cadastrado.</p>
         ) : (
           <ul className="space-y-3">
             {items.map((p, i) => (
@@ -229,7 +229,7 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
         <button onClick={onClose} className="absolute right-4 top-4 rounded-full p-1 hover:bg-secondary" aria-label="Fechar">
           <X className="h-5 w-5" />
         </button>
-        <h2 className="mb-5 text-lg font-bold">Editar painel</h2>
+        <h2 className="mb-5 text-lg font-bold">Editar selado</h2>
 
         <div className="space-y-4">
           <div>
