@@ -427,7 +427,7 @@ export const adminAddOrderItemsToStack = createServerFn({ method: "POST" })
 
     const { error: insErr } = await supabaseAdmin
       .from("card_stack_items")
-      .upsert(rows, { onConflict: "order_item_id", ignoreDuplicates: true });
+      .insert(rows);
     if (insErr) throw new Error(insErr.message);
 
     // Notifica o cliente
