@@ -19,6 +19,8 @@ type Sealed = {
   images: string[];
   active: boolean;
   sort_order: number;
+  is_preorder: boolean;
+  release_date: string | null;
 };
 
 function SealedAdmin() {
