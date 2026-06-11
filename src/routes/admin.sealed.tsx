@@ -209,6 +209,7 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
     if (!title.trim()) { toast.error("Título obrigatório"); return; }
     if (!Number.isFinite(priceCents) || priceCents < 0) { toast.error("Preço inválido"); return; }
     if (!Number.isInteger(stockN) || stockN < 0) { toast.error("Estoque inválido"); return; }
+    if (isPreorder && !releaseDate) { toast.error("Informe a data de lançamento da pré-venda"); return; }
     setSaving(true);
     const { error } = await supabase
       .from("sealed_products")
@@ -219,6 +220,8 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
         stock: stockN,
         active,
         images,
+        is_preorder: isPreorder,
+        release_date: isPreorder ? releaseDate : null,
       })
       .eq("id", item.id);
     setSaving(false);
