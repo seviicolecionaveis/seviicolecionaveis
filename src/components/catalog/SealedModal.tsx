@@ -10,6 +10,8 @@ export type Sealed = {
   price_cents: number;
   stock: number;
   images: string[];
+  is_preorder?: boolean;
+  release_date?: string | null;
 };
 
 interface Props {
