@@ -683,6 +683,127 @@ function CheckoutPage() {
           <div>
             <h2 className="text-lg font-bold mb-3">Envio</h2>
             <div className="space-y-2">
+              <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
+                <input
+                  type="radio"
+                  name="ship"
+                  checked={shipping === "card_stack"}
+                  onChange={() => {
+                    if (stackTermsAccepted) {
+                      setShipping("card_stack");
+                    } else {
+                      setStackTermsOpen(true);
+                    }
+                  }}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold flex items-center gap-2 flex-wrap">
+                    🃏 Pilha de Cartas (escolha depois como retirar/enviar)
+                    <span className="ml-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+                      Armazenamento gratuito por 30 dias
+                    </span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Guarde suas cartas com a gente por até 30 dias e junte várias compras antes de
+                    pedir o envio ou retirada. O prazo conta a partir do seu primeiro pedido na
+                    pilha e não reinicia a cada nova compra.
+                  </p>
+                  {shipping === "card_stack" && (
+                    <div className="mt-2 rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
+                      Quando quiser despachar, acesse <span className="font-semibold text-foreground">Pilha de Cartas</span> na sua conta,
+                      selecione as cartas e escolha o método (Correios, aplicativo, retirada presencial ou Arte em Cards).
+                      Você receberá avisos por e-mail quando o prazo estiver acabando.
+                    </div>
+                  )}
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
+                <input
+                  type="radio"
+                  name="ship"
+                  checked={shipping === "arrange" && pickupPoint === "app"}
+                  onChange={() => {
+                    setShipping("arrange");
+                    setPickupPoint("app");
+                  }}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">Entrega por aplicativo (Uber / 99)</p>
+                  <p className="text-xs text-muted-foreground">
+                    Após a compra, solicite a disponibilidade pelo WhatsApp — o valor da corrida é por sua conta.
+                  </p>
+                  {shipping === "arrange" && pickupPoint === "app" && (
+                    <div className="mt-2 rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
+                      Assim que o pedido for confirmado, abra o pedido em <span className="font-semibold text-foreground">Meus pedidos</span> e
+                      clique no botão <span className="font-semibold text-foreground">"Solicitar entrega por aplicativo"</span> para falar com a loja no WhatsApp.
+                    </div>
+                  )}
+                </div>
+              </label>
+
+              <div className="rounded-lg border border-border">
+                <label className="flex items-start gap-3 p-4 cursor-pointer hover:bg-secondary/50">
+                  <input
+                    type="radio"
+                    name="ship"
+                    checked={shipping === "arrange" && pickupPoint !== "app"}
+                    onChange={() => {
+                      setShipping("arrange");
+                      if (pickupPoint === "app") setPickupPoint(null);
+                    }}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold">Retirada em mãos (somente em Aracaju)</p>
+                    <p className="text-xs text-muted-foreground">Escolha um dos pontos de retirada abaixo</p>
+                  </div>
+                </label>
+                {shipping === "arrange" && pickupPoint !== "app" && (
+                  <div className="px-4 pb-4 space-y-2">
+                    <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
+                      <input
+                        type="radio"
+                        name="pickup"
+                        checked={pickupPoint === "aruana"}
+                        onChange={() => setPickupPoint("aruana")}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold">Aruana</p>
+                        <p className="text-xs text-muted-foreground">
+                          Rua Josepha Andrade Irmã Fontes, 600 — Residencial Vista Aruana
+                        </p>
+                      </div>
+                    </label>
+                    <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
+                      <input
+                        type="radio"
+                        name="pickup"
+                        checked={pickupPoint === "aeroporto"}
+                        onChange={() => setPickupPoint("aeroporto")}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold">Aeroporto</p>
+                        <p className="text-xs text-muted-foreground">
+                          Av. Silvério Leite Fontes, 1128 — Palm Ville Residence
+                        </p>
+                      </div>
+                    </label>
+                    {pickupPoint && (
+                      <div className="rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
+                        <span className="font-semibold text-foreground">Atenção:</span> retiradas são feitas no período da
+                        tarde, das <span className="font-semibold text-foreground">14h às 18h</span>, em qualquer dia útil
+                        da semana, desde que você entre em contato com a gente pela manhã do mesmo dia.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className="rounded-lg border border-border p-4">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-semibold">🚚 Frete rastreado (Superfrete)</p>
@@ -763,127 +884,7 @@ function CheckoutPage() {
                   </div>
                 )}
               </div>
-              <div className="rounded-lg border border-border">
-                <label className="flex items-start gap-3 p-4 cursor-pointer hover:bg-secondary/50">
-                  <input
-                    type="radio"
-                    name="ship"
-                    checked={shipping === "arrange" && pickupPoint !== "app"}
-                    onChange={() => {
-                      setShipping("arrange");
-                      if (pickupPoint === "app") setPickupPoint(null);
-                    }}
-                    className="mt-1"
-                  />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold">Retirada em mãos (somente em Aracaju)</p>
-                    <p className="text-xs text-muted-foreground">Escolha um dos pontos de retirada abaixo</p>
-                  </div>
-                </label>
-                {shipping === "arrange" && pickupPoint !== "app" && (
-                  <div className="px-4 pb-4 space-y-2">
-                    <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
-                      <input
-                        type="radio"
-                        name="pickup"
-                        checked={pickupPoint === "aruana"}
-                        onChange={() => setPickupPoint("aruana")}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold">Aruana</p>
-                        <p className="text-xs text-muted-foreground">
-                          Rua Josepha Andrade Irmã Fontes, 600 — Residencial Vista Aruana
-                        </p>
-                      </div>
-                    </label>
-                    <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
-                      <input
-                        type="radio"
-                        name="pickup"
-                        checked={pickupPoint === "aeroporto"}
-                        onChange={() => setPickupPoint("aeroporto")}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold">Aeroporto</p>
-                        <p className="text-xs text-muted-foreground">
-                          Av. Silvério Leite Fontes, 1128 — Palm Ville Residence
-                        </p>
-                      </div>
-                    </label>
-                    {pickupPoint && (
-                      <div className="rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
-                        <span className="font-semibold text-foreground">Atenção:</span> retiradas são feitas no período da
-                        tarde, das <span className="font-semibold text-foreground">14h às 18h</span>, em qualquer dia útil
-                        da semana, desde que você entre em contato com a gente pela manhã do mesmo dia.
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
-                <input
-                  type="radio"
-                  name="ship"
-                  checked={shipping === "arrange" && pickupPoint === "app"}
-                  onChange={() => {
-                    setShipping("arrange");
-                    setPickupPoint("app");
-                  }}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">Entrega por aplicativo (Uber / 99)</p>
-                  <p className="text-xs text-muted-foreground">
-                    Após a compra, solicite a disponibilidade pelo WhatsApp — o valor da corrida é por sua conta.
-                  </p>
-                  {shipping === "arrange" && pickupPoint === "app" && (
-                    <div className="mt-2 rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
-                      Assim que o pedido for confirmado, abra o pedido em <span className="font-semibold text-foreground">Meus pedidos</span> e
-                      clique no botão <span className="font-semibold text-foreground">"Solicitar entrega por aplicativo"</span> para falar com a loja no WhatsApp.
-                    </div>
-                  )}
-                </div>
-              </label>
-
             </div>
-
-            <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
-              <input
-                type="radio"
-                name="ship"
-                checked={shipping === "card_stack"}
-                onChange={() => {
-                  if (stackTermsAccepted) {
-                    setShipping("card_stack");
-                  } else {
-                    setStackTermsOpen(true);
-                  }
-                }}
-                className="mt-1"
-              />
-              <div className="flex-1">
-                <p className="text-sm font-semibold flex items-center gap-2 flex-wrap">
-                  🃏 Pilha de Cartas (escolha depois como retirar/enviar)
-                  <span className="ml-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
-                    Armazenamento gratuito por 30 dias
-                  </span>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Guarde suas cartas com a gente por até 30 dias e junte várias compras antes de
-                  pedir o envio ou retirada. O prazo conta a partir do seu primeiro pedido na
-                  pilha e não reinicia a cada nova compra.
-                </p>
-                {shipping === "card_stack" && (
-                  <div className="mt-2 rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
-                    Quando quiser despachar, acesse <span className="font-semibold text-foreground">Pilha de Cartas</span> na sua conta,
-                    selecione as cartas e escolha o método (Correios, aplicativo, retirada presencial ou Arte em Cards).
-                    Você receberá avisos por e-mail quando o prazo estiver acabando.
-                  </div>
-                )}
-              </div>
-            </label>
           </div>
 
           <div>
