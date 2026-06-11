@@ -29,16 +29,24 @@ export function SealedModal({ item, onClose }: Props) {
   if (!item) return null;
 
   const imgs = item.images.length ? item.images : [""];
-  const inStock = item.stock > 0;
+  const isPreorder = !!item.is_preorder;
+  const releaseDateLabel = item.release_date
+    ? new Date(item.release_date + "T00:00:00").toLocaleDateString("pt-BR")
+    : null;
+  const canBuy = isPreorder ? true : item.stock > 0;
+  const maxQty = isPreorder ? 99 : item.stock;
   const price = item.price_cents / 100;
 
   const handleAdd = () => {
-    if (!inStock) return;
+    if (!canBuy) return;
+    const namePrefix = isPreorder
+      ? `[Pré-venda${releaseDateLabel ? ` ${releaseDateLabel}` : ""}] `
+      : "";
     add(
       {
         id: `sealed:${item.id}`,
         cardId: `sealed:${item.id}`,
-        name: item.title,
+        name: `${namePrefix}${item.title}`,
         image: imgs[0],
         collection: "Selado",
         number: "—",
@@ -46,11 +54,11 @@ export function SealedModal({ item, onClose }: Props) {
         language: "—",
         condition: "NM",
         unitPrice: price,
-        maxStock: item.stock,
+        maxStock: maxQty,
       },
       qty,
     );
-    toast.success("Adicionado ao carrinho");
+    toast.success(isPreorder ? "Pré-venda adicionada ao carrinho" : "Adicionado ao carrinho");
     onClose();
   };
 
