@@ -17,6 +17,7 @@ import { Route as SeladosRouteImport } from './routes/selados'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PilhaRouteImport } from './routes/pilha'
 import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as MaisVendidasRouteImport } from './routes/mais-vendidas'
 import { Route as ImasRouteImport } from './routes/imas'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as FaqRouteImport } from './routes/faq'
@@ -106,6 +107,11 @@ const PilhaRoute = PilhaRouteImport.update({
 const OrdersRoute = OrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaisVendidasRoute = MaisVendidasRouteImport.update({
+  id: '/mais-vendidas',
+  path: '/mais-vendidas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImasRoute = ImasRouteImport.update({
@@ -382,6 +388,7 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
+  '/mais-vendidas': typeof MaisVendidasRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pilha': typeof PilhaRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
@@ -442,6 +449,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
+  '/mais-vendidas': typeof MaisVendidasRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -501,6 +509,7 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
+  '/mais-vendidas': typeof MaisVendidasRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pilha': typeof PilhaRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
@@ -563,6 +572,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/favoritos'
     | '/imas'
+    | '/mais-vendidas'
     | '/orders'
     | '/pilha'
     | '/reset-password'
@@ -623,6 +633,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/favoritos'
     | '/imas'
+    | '/mais-vendidas'
     | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
@@ -681,6 +692,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/favoritos'
     | '/imas'
+    | '/mais-vendidas'
     | '/orders'
     | '/pilha'
     | '/reset-password'
@@ -742,6 +754,7 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   FavoritosRoute: typeof FavoritosRoute
   ImasRoute: typeof ImasRoute
+  MaisVendidasRoute: typeof MaisVendidasRoute
   OrdersRoute: typeof OrdersRouteWithChildren
   PilhaRoute: typeof PilhaRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -827,6 +840,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/orders'
       preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mais-vendidas': {
+      id: '/mais-vendidas'
+      path: '/mais-vendidas'
+      fullPath: '/mais-vendidas'
+      preLoaderRoute: typeof MaisVendidasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/imas': {
@@ -1269,6 +1289,7 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   FavoritosRoute: FavoritosRoute,
   ImasRoute: ImasRoute,
+  MaisVendidasRoute: MaisVendidasRoute,
   OrdersRoute: OrdersRouteWithChildren,
   PilhaRoute: PilhaRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
