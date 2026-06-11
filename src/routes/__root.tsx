@@ -51,8 +51,6 @@ export const Route = createRootRoute({
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Sevii Colecionáveis — Cartas Pokémon Colecionáveis" },
       { name: "twitter:description", content: "Catálogo completo de cartas Pokémon com filtros avançados e estoque em tempo real." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/25b6f12f-a487-4cc6-9c81-8cd9418a012f/id-preview-be88fb60--392637a4-5b2d-43f0-a643-ac0dba0c2366.lovable.app-1777949491317.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/25b6f12f-a487-4cc6-9c81-8cd9418a012f/id-preview-be88fb60--392637a4-5b2d-43f0-a643-ac0dba0c2366.lovable.app-1777949491317.png" },
       { name: "theme-color", content: "#0f172a" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
