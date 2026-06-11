@@ -332,75 +332,131 @@ function AdminOrderDetailPage() {
         </div>
 
         {/* Itens */}
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="px-5 py-3 border-b border-border flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-xs font-bold uppercase tracking-widest">
-              Itens vendidos ({items.length})
-            </h2>
-            <PickingSummary items={items} />
-          </div>
-          <ul className="divide-y divide-border">
-            {items.map((it) => {
-              const cancelledQty = it.cancelled_quantity ?? 0;
-              const activeQty = (it.quantity ?? 0) - cancelledQty;
-              const lineTotal = (it.unit_price_cents ?? 0) * (it.quantity ?? 0);
-              const refundCents = it.refund_cents ?? 0;
-              const canCancel =
-                activeQty > 0 &&
-                ["paid", "preparing", "shipped", "awaiting_pickup", "delivered"].includes(order.status);
-              return (
-                <li key={it.id} className="flex items-start gap-4 p-4">
-                  <div className="h-24 w-[68px] shrink-0 rounded-md overflow-hidden bg-secondary border border-border grid place-items-center">
-                    {it.card_image ? (
-                      <img src={it.card_image} alt={it.card_name} className="h-full w-full object-cover" loading="lazy" />
-                    ) : (
-                      <ImageOff className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold">
-                      {it.card_name}
-                      {it.card_number && <span className="text-muted-foreground font-normal"> · {it.card_number}</span>}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {[it.collection, it.finish, it.language, it.condition].filter(Boolean).join(" · ")}
-                    </p>
-                    <p className="text-xs mt-2">
-                      <span className="text-muted-foreground">Qtd:</span>{" "}
-                      <span className="font-semibold">{it.quantity}</span>{" "}
-                      <span className="text-muted-foreground">×</span>{" "}
-                      <span className="font-semibold tabular-nums">{fmtBRL(it.unit_price_cents)}</span>
-                    </p>
-                    {cancelledQty > 0 && (
-                      <p className="text-xs mt-1 text-orange-700 font-semibold">
-                        {cancelledQty}× cancelado{refundCents > 0 ? ` · reembolso ${fmtBRL(refundCents)}` : ""}
-                        {it.refund_method ? ` (${it.refund_method === "mercadopago" ? "estorno MP" : it.refund_method === "coupon" ? "cupom" : "manual"})` : ""}
-                        {it.refund_coupon_code ? ` · ${it.refund_coupon_code}` : ""}
-                      </p>
-                    )}
-                    <PickedByControl item={it} onChanged={load} />
-                  </div>
+        {(() => {
+          const stackEligible = ["paid", "preparing", "shipped", "awaiting_pickup", "delivered"].includes(order.status);
+          const selectedCount = Object.keys(selectedForStack).length;
+          return (
+            <div className="rounded-xl border border-border bg-card overflow-hidden">
+              <div className="px-5 py-3 border-b border-border flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-xs font-bold uppercase tracking-widest">
+                  Itens vendidos ({items.length})
+                </h2>
+                <div className="flex items-center gap-3">
+                  <PickingSummary items={items} />
+                  {stackEligible && selectedCount > 0 && (
+                    <button
+                      onClick={sendSelectedToStack}
+                      disabled={sendingToStack}
+                      className="inline-flex items-center gap-1.5 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50"
+                    >
+                      <Layers className="h-3.5 w-3.5" />
+                      {sendingToStack ? "Enviando..." : `Enviar ${selectedCount} para Pilha`}
+                    </button>
+                  )}
+                </div>
+              </div>
+              <ul className="divide-y divide-border">
+                {items.map((it) => {
+                  const cancelledQty = it.cancelled_quantity ?? 0;
+                  const activeQty = (it.quantity ?? 0) - cancelledQty;
+                  const lineTotal = (it.unit_price_cents ?? 0) * (it.quantity ?? 0);
+                  const refundCents = it.refund_cents ?? 0;
+                  const canCancel =
+                    activeQty > 0 &&
+                    ["paid", "preparing", "shipped", "awaiting_pickup", "delivered"].includes(order.status);
+                  const inStack = stackedItemIds.has(it.id);
+                  const canStack = stackEligible && !inStack && activeQty > 0;
+                  const selectedQty = selectedForStack[it.id];
+                  const isSelected = selectedQty != null;
+                  return (
+                    <li key={it.id} className="flex items-start gap-4 p-4">
+                      {canStack ? (
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => toggleStackItem(it, e.target.checked)}
+                          className="mt-2 h-4 w-4 shrink-0 cursor-pointer accent-primary"
+                          title="Selecionar para enviar à Pilha"
+                        />
+                      ) : (
+                        <div className="w-4 shrink-0" />
+                      )}
+                      <div className="h-24 w-[68px] shrink-0 rounded-md overflow-hidden bg-secondary border border-border grid place-items-center">
+                        {it.card_image ? (
+                          <img src={it.card_image} alt={it.card_name} className="h-full w-full object-cover" loading="lazy" />
+                        ) : (
+                          <ImageOff className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold">
+                          {it.card_name}
+                          {it.card_number && <span className="text-muted-foreground font-normal"> · {it.card_number}</span>}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {[it.collection, it.finish, it.language, it.condition].filter(Boolean).join(" · ")}
+                        </p>
+                        <p className="text-xs mt-2">
+                          <span className="text-muted-foreground">Qtd:</span>{" "}
+                          <span className="font-semibold">{it.quantity}</span>{" "}
+                          <span className="text-muted-foreground">×</span>{" "}
+                          <span className="font-semibold tabular-nums">{fmtBRL(it.unit_price_cents)}</span>
+                        </p>
+                        {cancelledQty > 0 && (
+                          <p className="text-xs mt-1 text-orange-700 font-semibold">
+                            {cancelledQty}× cancelado{refundCents > 0 ? ` · reembolso ${fmtBRL(refundCents)}` : ""}
+                            {it.refund_method ? ` (${it.refund_method === "mercadopago" ? "estorno MP" : it.refund_method === "coupon" ? "cupom" : "manual"})` : ""}
+                            {it.refund_coupon_code ? ` · ${it.refund_coupon_code}` : ""}
+                          </p>
+                        )}
+                        {inStack && (
+                          <p className="text-xs mt-1 inline-flex items-center gap-1 text-primary font-semibold">
+                            <Layers className="h-3 w-3" /> Já está na Pilha do cliente
+                          </p>
+                        )}
+                        {isSelected && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
+                              Qtd p/ Pilha
+                            </label>
+                            <input
+                              type="number"
+                              min={1}
+                              max={activeQty}
+                              value={selectedQty}
+                              onChange={(e) => updateStackQty(it.id, parseInt(e.target.value), activeQty)}
+                              className="w-16 rounded-md border border-border bg-background px-2 py-1 text-xs font-semibold"
+                            />
+                            <span className="text-[11px] text-muted-foreground">de {activeQty}</span>
+                          </div>
+                        )}
+                        <PickedByControl item={it} onChanged={load} />
+                      </div>
 
-                  <div className="text-right shrink-0 flex flex-col items-end gap-2">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Subtotal</p>
-                      <p className="text-base font-bold tabular-nums">{fmtBRL(lineTotal)}</p>
-                    </div>
-                    {canCancel && (
-                      <button
-                        onClick={() => setCancelItem(it)}
-                        className="text-[11px] text-destructive hover:underline font-semibold inline-flex items-center gap-1"
-                        title="Cancelar este item (sem estoque, etc.)"
-                      >
-                        <X className="h-3 w-3" /> Cancelar item
-                      </button>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+                      <div className="text-right shrink-0 flex flex-col items-end gap-2">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Subtotal</p>
+                          <p className="text-base font-bold tabular-nums">{fmtBRL(lineTotal)}</p>
+                        </div>
+                        {canCancel && (
+                          <button
+                            onClick={() => setCancelItem(it)}
+                            className="text-[11px] text-destructive hover:underline font-semibold inline-flex items-center gap-1"
+                            title="Cancelar este item (sem estoque, etc.)"
+                          >
+                            <X className="h-3 w-3" /> Cancelar item
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })()}
+
+
 
 
         {/* Totais */}
