@@ -105,7 +105,7 @@ gtag('config', 'G-2Y61Z4FGFL', { send_page_view: false });`,
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
