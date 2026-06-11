@@ -60,7 +60,7 @@ function SealedAdmin() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Remover este painel?")) return;
+    if (!confirm("Remover este selado?")) return;
     await supabase.from("sealed_products").delete().eq("id", id);
     await load();
   };
