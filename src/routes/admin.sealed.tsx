@@ -229,7 +229,7 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
         <button onClick={onClose} className="absolute right-4 top-4 rounded-full p-1 hover:bg-secondary" aria-label="Fechar">
           <X className="h-5 w-5" />
         </button>
-        <h2 className="mb-5 text-lg font-bold">Editar painel</h2>
+        <h2 className="mb-5 text-lg font-bold">Editar selado</h2>
 
         <div className="space-y-4">
           <div>
