@@ -167,6 +167,52 @@ function AdminOrderDetailPage() {
     }
   };
 
+  const toggleStackItem = (it: any, checked: boolean) => {
+    setSelectedForStack((prev) => {
+      const next = { ...prev };
+      if (checked) {
+        const avail = (it.quantity ?? 0) - (it.cancelled_quantity ?? 0);
+        next[it.id] = Math.max(1, avail);
+      } else {
+        delete next[it.id];
+      }
+      return next;
+    });
+  };
+
+  const updateStackQty = (itemId: string, qty: number, max: number) => {
+    setSelectedForStack((prev) => ({
+      ...prev,
+      [itemId]: Math.max(1, Math.min(max, qty || 1)),
+    }));
+  };
+
+  const sendSelectedToStack = async () => {
+    const entries = Object.entries(selectedForStack);
+    if (entries.length === 0) {
+      toast.error("Selecione ao menos 1 item.");
+      return;
+    }
+    if (!confirm(`Enviar ${entries.length} item(ns) para a Pilha do cliente?`)) return;
+    setSendingToStack(true);
+    try {
+      const res = await addItemsToStackFn({
+        data: {
+          orderId,
+          items: entries.map(([orderItemId, quantity]) => ({ orderItemId, quantity })),
+        },
+      });
+      toast.success(`${res.addedCount} item(ns) enviado(s) para a Pilha.`);
+      setSelectedForStack({});
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao enviar para a Pilha.");
+    } finally {
+      setSendingToStack(false);
+    }
+  };
+
+
   if (authLoading || !isAdmin || loading) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
   }
