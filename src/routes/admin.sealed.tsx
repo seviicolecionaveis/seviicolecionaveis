@@ -103,7 +103,7 @@ function SealedAdmin() {
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum painel cadastrado.</p>
+          <p className="text-sm text-muted-foreground">Nenhum produto selado cadastrado.</p>
         ) : (
           <ul className="space-y-3">
             {items.map((p, i) => (
