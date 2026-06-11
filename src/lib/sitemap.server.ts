@@ -22,6 +22,15 @@ function escapeXml(s: string) {
 export async function buildSitemapXml(origin: string): Promise<string> {
   const urls: { loc: string; lastmod?: string }[] = [
     { loc: `${origin}/` },
+    { loc: `${origin}/cartas` },
+    { loc: `${origin}/mais-vendidas` },
+    { loc: `${origin}/selados` },
+    { loc: `${origin}/imas` },
+    { loc: `${origin}/acessorios` },
+    { loc: `${origin}/sobre` },
+    { loc: `${origin}/faq` },
+    { loc: `${origin}/tipos-de-carta` },
+    { loc: `${origin}/envios` },
     { loc: `${origin}/favoritos` },
   ];
 

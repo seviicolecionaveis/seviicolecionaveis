@@ -68,6 +68,31 @@ export const Route = createFileRoute("/carta/$slug")({
               : {}),
           }),
         },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Início", item: "https://seviicolecionaveis.com.br/" },
+              { "@type": "ListItem", position: 2, name: "Cartas", item: "https://seviicolecionaveis.com.br/cartas" },
+              ...(loaderData
+                ? [{
+                    "@type": "ListItem",
+                    position: 3,
+                    name: loaderData.collection,
+                    item: `https://seviicolecionaveis.com.br/colecao/${loaderData.collection.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}`,
+                  }]
+                : []),
+              {
+                "@type": "ListItem",
+                position: loaderData ? 4 : 3,
+                name: loaderData?.name ?? pretty,
+                item: url,
+              },
+            ],
+          }),
+        },
       ],
     };
   },

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Share2, Check } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "sonner";
+
 
 export type Sealed = {
   id: string;
@@ -23,8 +24,10 @@ export function SealedModal({ item, onClose }: Props) {
   const { add } = useCart();
   const [idx, setIdx] = useState(0);
   const [qty, setQty] = useState(1);
+  const [shared, setShared] = useState(false);
 
-  useEffect(() => { setIdx(0); setQty(1); }, [item?.id]);
+  useEffect(() => { setIdx(0); setQty(1); setShared(false); }, [item?.id]);
+
 
   if (!item) return null;
 
@@ -154,6 +157,22 @@ export function SealedModal({ item, onClose }: Props) {
             >
               {canBuy ? (isPreorder ? "Reservar pré-venda" : "Adicionar ao carrinho") : "Esgotado"}
             </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                const url = typeof window !== "undefined" ? window.location.href : "https://seviicolecionaveis.com.br/selados";
+                const text = `Olha esse produto na Sevii Colecionáveis: ${item.title} — R$ ${price.toFixed(2).replace(".", ",")}`;
+                window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, "_blank");
+                setShared(true);
+                setTimeout(() => setShared(false), 1500);
+              }}
+              className="mt-2 inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-secondary"
+            >
+              {shared ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+              Compartilhar no WhatsApp
+            </button>
+
           </div>
         </div>
       </div>
