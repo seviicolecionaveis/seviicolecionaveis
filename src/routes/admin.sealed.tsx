@@ -261,6 +261,31 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
             </label>
           </div>
 
+          <div className="rounded-md border border-border p-3 space-y-3">
+            <label className="flex items-center gap-2 text-sm font-semibold">
+              <input
+                type="checkbox"
+                checked={isPreorder}
+                onChange={(e) => setIsPreorder(e.target.checked)}
+              />
+              Pré-venda
+            </label>
+            {isPreorder && (
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-widest">Data de lançamento</label>
+                <input
+                  type="date"
+                  value={releaseDate}
+                  onChange={(e) => setReleaseDate(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  O cliente poderá comprar mesmo com estoque zero. Avisaremos que o envio ocorre a partir desta data.
+                </p>
+              </div>
+            )}
+          </div>
+
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest mb-2">Imagens ({images.length})</p>
             <p className="text-xs text-muted-foreground mb-3">A primeira imagem é a capa exibida no catálogo.</p>
