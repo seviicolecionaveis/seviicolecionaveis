@@ -116,7 +116,14 @@ function SealedAdmin() {
                   className="h-20 w-20 rounded-md object-cover bg-secondary"
                 />
                 <div className="flex-1 min-w-[200px]">
-                  <p className="font-semibold">{p.title}</p>
+                  <p className="font-semibold">
+                    {p.title}
+                    {p.is_preorder && (
+                      <span className="ml-2 rounded bg-primary/15 text-primary px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                        Pré-venda{p.release_date ? ` · ${new Date(p.release_date + "T00:00:00").toLocaleDateString("pt-BR")}` : ""}
+                      </span>
+                    )}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     R$ {(p.price_cents / 100).toFixed(2)} · Estoque: {p.stock} · {p.images.length} foto(s)
                     {!p.active && " · Inativo"}
