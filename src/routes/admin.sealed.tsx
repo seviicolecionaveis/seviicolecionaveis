@@ -91,12 +91,12 @@ function SealedAdmin() {
 
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Painéis (Ímãs)</h1>
+          <h1 className="text-2xl font-bold">Produtos Selados</h1>
           <button
             onClick={createNew}
             className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground"
           >
-            <Plus className="h-4 w-4" /> Novo painel
+            <Plus className="h-4 w-4" /> Novo selado
           </button>
         </div>
 
