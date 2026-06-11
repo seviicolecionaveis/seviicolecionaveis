@@ -17,7 +17,6 @@ const NAV_GROUPS: NavGroup[] = [
       { to: "/admin/panels", label: "Painéis" },
       { to: "/admin/sealed", label: "Selados" },
       { to: "/admin/accessories", label: "Acessórios" },
-      { to: "/admin/banners", label: "Banners" },
     ],
   },
   {
@@ -31,6 +30,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Marketing",
     links: [
+      { to: "/admin/banners", label: "Banners" },
       { to: "/admin/coupons", label: "Cupons" },
       { to: "/admin/emails", label: "E-mails" },
       { to: "/admin/loyalty", label: "Pontos / Fidelidade" },
