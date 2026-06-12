@@ -31,7 +31,7 @@ export function StockSyncNoticeDialog() {
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-            <PackageWarning className="h-7 w-7" />
+            <AlertTriangle className="h-7 w-7" />
           </div>
           <DialogTitle className="text-center text-xl">
             Aviso importante sobre o estoque
