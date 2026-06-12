@@ -319,6 +319,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
 
       <CardModal card={active} onClose={() => setActive(null)} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      <StockSyncNoticeDialog />
       <WelcomeDialog />
 
       <RecentlyViewed />
