@@ -12,6 +12,7 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { BannerCarousel } from "@/components/BannerCarousel";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { TrustBadges } from "@/components/TrustBadges";
+import { StockSyncNoticeDialog } from "@/components/StockSyncNoticeDialog";
 import { SiteFooter } from "@/components/SiteFooter";
 import { RecentlyViewed } from "@/components/catalog/RecentlyViewed";
 import { NewArrivals } from "@/components/catalog/NewArrivals";
