@@ -333,6 +333,33 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
             )}
           </div>
 
+          <div className="rounded-md border border-border p-3 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Ficha técnica</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <ComboField
+                label="Produto"
+                value={productType}
+                onChange={setProductType}
+                options={PRODUCT_TYPE_OPTIONS}
+                placeholder="Ex.: Blister Triplo"
+              />
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-widest">Coleção</label>
+                <input
+                  value={collection}
+                  onChange={(e) => setCollection(e.target.value)}
+                  placeholder="Ex.: Amigos de Jornada"
+                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                />
+              </div>
+              <ComboField label="Idioma" value={language} onChange={setLanguage} options={LANGUAGE_OPTIONS} />
+              <ComboField label="Distribuição" value={distribution} onChange={setDistribution} options={DISTRIBUTION_OPTIONS} />
+              <ComboField label="Condição" value={condition} onChange={setCondition} options={CONDITION_OPTIONS} />
+              <ComboField label="Faixa etária" value={ageRating} onChange={setAgeRating} options={AGE_RATING_OPTIONS} placeholder="Ex.: 6+" />
+            </div>
+          </div>
+
+
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest mb-2">Imagens ({images.length})</p>
             <p className="text-xs text-muted-foreground mb-3">A primeira imagem é a capa exibida no catálogo.</p>
