@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Clock, XCircle, Package, Truck, AlertTriangle } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { requestOrderCancellation } from "@/utils/orders.functions";
+import { checkPixOrderStatus } from "@/utils/payments.functions";
 import { toast } from "sonner";
 import { PostPurchaseSurvey } from "@/components/PostPurchaseSurvey";
 
