@@ -40,9 +40,6 @@ export function StockSyncNoticeDialog() {
 
         <div className="space-y-4 text-sm leading-relaxed text-foreground">
           <p>
-            Pessoal, boa noite!
-          </p>
-          <p>
             Nosso site está passando por alguns problemas de sincronização de estoque e estamos trabalhando para corrigir tudo o mais rápido possível.
           </p>
           <p>
