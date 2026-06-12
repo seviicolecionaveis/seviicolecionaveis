@@ -154,6 +154,7 @@ function SealedAdmin() {
                     )}
                   </p>
                   <p className="text-xs text-muted-foreground">
+                    {p.sku && <span className="font-mono">{p.sku} · </span>}
                     R$ {(p.price_cents / 100).toFixed(2)} · Estoque: {p.stock} · {p.images.length} foto(s)
                     {!p.active && " · Inativo"}
                   </p>
