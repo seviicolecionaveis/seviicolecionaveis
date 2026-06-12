@@ -1026,12 +1026,18 @@ export type Database = {
       sealed_products: {
         Row: {
           active: boolean
+          age_rating: string | null
+          collection: string | null
+          condition: string | null
           created_at: string
           description: string | null
+          distribution: string | null
           id: string
           images: string[]
           is_preorder: boolean
+          language: string | null
           price_cents: number
+          product_type: string | null
           release_date: string | null
           sort_order: number
           stock: number
@@ -1040,12 +1046,18 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          age_rating?: string | null
+          collection?: string | null
+          condition?: string | null
           created_at?: string
           description?: string | null
+          distribution?: string | null
           id?: string
           images?: string[]
           is_preorder?: boolean
+          language?: string | null
           price_cents?: number
+          product_type?: string | null
           release_date?: string | null
           sort_order?: number
           stock?: number
@@ -1054,12 +1066,18 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          age_rating?: string | null
+          collection?: string | null
+          condition?: string | null
           created_at?: string
           description?: string | null
+          distribution?: string | null
           id?: string
           images?: string[]
           is_preorder?: boolean
+          language?: string | null
           price_cents?: number
+          product_type?: string | null
           release_date?: string | null
           sort_order?: number
           stock?: number

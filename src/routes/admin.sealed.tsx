@@ -21,7 +21,35 @@ type Sealed = {
   sort_order: number;
   is_preorder: boolean;
   release_date: string | null;
+  product_type: string | null;
+  collection: string | null;
+  language: string | null;
+  distribution: string | null;
+  condition: string | null;
+  age_rating: string | null;
 };
+
+const PRODUCT_TYPE_OPTIONS = [
+  "Blister Unitário",
+  "Blister Duplo",
+  "Blister Triplo",
+  "Blister Quádruplo",
+  "Booster Avulso",
+  "Booster Box",
+  "Booster Bundle",
+  "ETB (Elite Trainer Box)",
+  "Deck Temático",
+  "Battle Deck",
+  "Box Coleção Especial",
+  "Lata (Tin)",
+  "Mini Lata",
+  "Premium Collection",
+  "Display",
+];
+const LANGUAGE_OPTIONS = ["Português (Brasil)", "Inglês", "Japonês", "Espanhol", "Outro"];
+const DISTRIBUTION_OPTIONS = ["Copag", "Pokémon Company International", "Importado", "Outro"];
+const CONDITION_OPTIONS = ["Novo e Lacrado", "Aberto / Reembalado", "Usado"];
+const AGE_RATING_OPTIONS = ["3+", "6+", "8+", "10+", "12+", "Livre"];
 
 function SealedAdmin() {
   const { user, isAdmin, loading: authLoading } = useAuth();
@@ -168,6 +196,12 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
   const [active, setActive] = useState(item.active);
   const [isPreorder, setIsPreorder] = useState(item.is_preorder ?? false);
   const [releaseDate, setReleaseDate] = useState(item.release_date ?? "");
+  const [productType, setProductType] = useState(item.product_type ?? "");
+  const [collection, setCollection] = useState(item.collection ?? "");
+  const [language, setLanguage] = useState(item.language ?? "Português (Brasil)");
+  const [distribution, setDistribution] = useState(item.distribution ?? "Copag");
+  const [condition, setCondition] = useState(item.condition ?? "Novo e Lacrado");
+  const [ageRating, setAgeRating] = useState(item.age_rating ?? "");
   const [images, setImages] = useState<string[]>(item.images ?? []);
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -229,6 +263,12 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
         images,
         is_preorder: isPreorder,
         release_date: isPreorder ? releaseDate : null,
+        product_type: productType.trim() || null,
+        collection: collection.trim() || null,
+        language: language.trim() || null,
+        distribution: distribution.trim() || null,
+        condition: condition.trim() || null,
+        age_rating: ageRating.trim() || null,
       })
       .eq("id", item.id);
     setSaving(false);
@@ -292,6 +332,33 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
               </div>
             )}
           </div>
+
+          <div className="rounded-md border border-border p-3 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Ficha técnica</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <ComboField
+                label="Produto"
+                value={productType}
+                onChange={setProductType}
+                options={PRODUCT_TYPE_OPTIONS}
+                placeholder="Ex.: Blister Triplo"
+              />
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-widest">Coleção</label>
+                <input
+                  value={collection}
+                  onChange={(e) => setCollection(e.target.value)}
+                  placeholder="Ex.: Amigos de Jornada"
+                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                />
+              </div>
+              <ComboField label="Idioma" value={language} onChange={setLanguage} options={LANGUAGE_OPTIONS} />
+              <ComboField label="Distribuição" value={distribution} onChange={setDistribution} options={DISTRIBUTION_OPTIONS} />
+              <ComboField label="Condição" value={condition} onChange={setCondition} options={CONDITION_OPTIONS} />
+              <ComboField label="Faixa etária" value={ageRating} onChange={setAgeRating} options={AGE_RATING_OPTIONS} placeholder="Ex.: 6+" />
+            </div>
+          </div>
+
 
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest mb-2">Imagens ({images.length})</p>
@@ -381,6 +448,39 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ComboField({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder?: string;
+}) {
+  const listId = `combo-${label.replace(/\s+/g, "-").toLowerCase()}`;
+  return (
+    <div>
+      <label className="text-xs font-semibold uppercase tracking-widest">{label}</label>
+      <input
+        list={listId}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+      />
+      <datalist id={listId}>
+        {options.map((o) => (
+          <option key={o} value={o} />
+        ))}
+      </datalist>
     </div>
   );
 }

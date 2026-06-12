@@ -13,6 +13,12 @@ export type Sealed = {
   images: string[];
   is_preorder?: boolean;
   release_date?: string | null;
+  product_type?: string | null;
+  collection?: string | null;
+  language?: string | null;
+  distribution?: string | null;
+  condition?: string | null;
+  age_rating?: string | null;
 };
 
 interface Props {
@@ -127,6 +133,29 @@ export function SealedModal({ item, onClose }: Props) {
             {item.description && (
               <p className="mt-2 text-sm text-muted-foreground whitespace-pre-line">{item.description}</p>
             )}
+
+            {(() => {
+              const specs: Array<[string, string | null | undefined]> = [
+                ["Produto", item.product_type],
+                ["Coleção", item.collection],
+                ["Idioma", item.language],
+                ["Distribuição", item.distribution],
+                ["Condição", item.condition],
+                ["Faixa etária", item.age_rating],
+              ];
+              const filled = specs.filter(([, v]) => v && v.trim());
+              if (filled.length === 0) return null;
+              return (
+                <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
+                  {filled.map(([k, v]) => (
+                    <div key={k} className="contents">
+                      <dt className="font-semibold text-muted-foreground">{k}:</dt>
+                      <dd className="text-foreground">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              );
+            })()}
 
             <div className="mt-4 text-2xl font-bold">
               R$ {price.toFixed(2).replace(".", ",")}
