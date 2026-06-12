@@ -40,7 +40,7 @@ async function loadItems(userId: string, itemIds: string[]): Promise<ResolvedIte
   if (itemIds.length === 0) throw new Error("Selecione ao menos uma carta.");
   const { data, error } = await supabaseAdmin
     .from("card_stack_items")
-    .select("id, stack_id, user_id, status, card_name, quantity")
+    .select("id, stack_id, user_id, status, card_name, quantity, card_id")
     .in("id", itemIds);
   if (error) throw new Error(error.message);
   if (!data || data.length !== itemIds.length) throw new Error("Itens não encontrados.");
@@ -52,7 +52,15 @@ async function loadItems(userId: string, itemIds: string[]): Promise<ResolvedIte
   if (data.some((d) => d.stack_id !== stackId)) {
     throw new Error("Itens de pilhas diferentes.");
   }
-  return { stackId, items: data.map((d) => ({ id: d.id, card_name: d.card_name, quantity: d.quantity })) };
+  return {
+    stackId,
+    items: data.map((d) => ({
+      id: d.id,
+      card_name: d.card_name,
+      quantity: d.quantity,
+      card_id: d.card_id,
+    })),
+  };
 }
 
 async function resolveArteCode(userId: string, rawCode: string | null | undefined) {
