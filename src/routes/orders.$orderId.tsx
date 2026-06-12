@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Clock, XCircle, Package, Truck, AlertTriangle } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { requestOrderCancellation } from "@/utils/orders.functions";
+import { checkPixOrderStatus } from "@/utils/payments.functions";
 import { toast } from "sonner";
 import { PostPurchaseSurvey } from "@/components/PostPurchaseSurvey";
 
@@ -132,6 +133,31 @@ function OrderDetailPage() {
       supabase.removeChannel(channel);
     };
   }, [user, orderId]);
+
+  // Se o pedido está pendente (Pix aguardando), consulta o Mercado Pago
+  // diretamente — confirma o pagamento mesmo se o webhook atrasar/falhar.
+  useEffect(() => {
+    if (!order || order.status !== "pending" || order.payment_method !== "pix") return;
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const r = await checkPixOrderStatus({ data: { orderId: order.id } });
+        if (!cancelled && r.status === "paid") {
+          const { data } = await supabase
+            .from("orders")
+            .select("*, order_items(*)")
+            .eq("id", order.id)
+            .maybeSingle();
+          if (!cancelled && data) setOrder(data);
+        }
+      } catch (e) {
+        console.error("checkPixOrderStatus failed", e);
+      }
+    };
+    poll();
+    const i = setInterval(poll, 5000);
+    return () => { cancelled = true; clearInterval(i); };
+  }, [order?.id, order?.status, order?.payment_method]);
 
   // GA4 purchase — disparado apenas uma vez quando o pedido fica pago
   useEffect(() => {

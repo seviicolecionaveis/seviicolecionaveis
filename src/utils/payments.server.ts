@@ -884,17 +884,34 @@ export async function checkPixOrderStatusServer(orderId: string, userId: string)
   if (error) throw new Error(error.message);
   if (!order || order.user_id !== userId) throw new Error("Pedido não encontrado");
 
-  if (order.status === "paid") return { status: "paid" as const };
+  if (order.status === "paid" || order.status === "preparing" || order.status === "delivered") {
+    return { status: "paid" as const };
+  }
 
-  if (order.payment_method === "pix" && order.mercadopago_payment_id) {
+  if (order.payment_method === "pix") {
+    // 1) Consulta direta pelo payment_id (quando temos)
+    if (order.mercadopago_payment_id) {
+      try {
+        const remote = await getPixPayment(order.mercadopago_payment_id);
+        if (remote.status === "approved") {
+          await markOrderPaid(order.id, { mercadopagoPaymentId: order.mercadopago_payment_id });
+          return { status: "paid" as const };
+        }
+      } catch (e) {
+        console.error("checkPixOrderStatus poll error", e);
+      }
+    }
+    // 2) Fallback: busca por external_reference (caso o webhook tenha falhado
+    //    e o cliente tenha pago via Pix copiado para outra conta/QR salvo)
     try {
-      const remote = await getPixPayment(order.mercadopago_payment_id);
-      if (remote.status === "approved" && order.status !== "paid") {
-        await markOrderPaid(order.id, { mercadopagoPaymentId: order.mercadopago_payment_id });
+      const { findPaymentByExternalReference } = await import("@/lib/mercadopago.server");
+      const found = await findPaymentByExternalReference(order.id);
+      if (found?.status === "approved") {
+        await markOrderPaid(order.id, { mercadopagoPaymentId: String(found.id) });
         return { status: "paid" as const };
       }
     } catch (e) {
-      console.error("checkPixOrderStatus poll error", e);
+      console.error("checkPixOrderStatus externalRef lookup failed", e);
     }
   }
 
