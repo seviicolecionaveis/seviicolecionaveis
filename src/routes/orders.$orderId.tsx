@@ -134,6 +134,31 @@ function OrderDetailPage() {
     };
   }, [user, orderId]);
 
+  // Se o pedido está pendente (Pix aguardando), consulta o Mercado Pago
+  // diretamente — confirma o pagamento mesmo se o webhook atrasar/falhar.
+  useEffect(() => {
+    if (!order || order.status !== "pending" || order.payment_method !== "pix") return;
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const r = await checkPixOrderStatus({ data: { orderId: order.id } });
+        if (!cancelled && r.status === "paid") {
+          const { data } = await supabase
+            .from("orders")
+            .select("*, order_items(*)")
+            .eq("id", order.id)
+            .maybeSingle();
+          if (!cancelled && data) setOrder(data);
+        }
+      } catch (e) {
+        console.error("checkPixOrderStatus failed", e);
+      }
+    };
+    poll();
+    const i = setInterval(poll, 5000);
+    return () => { cancelled = true; clearInterval(i); };
+  }, [order?.id, order?.status, order?.payment_method]);
+
   // GA4 purchase — disparado apenas uma vez quando o pedido fica pago
   useEffect(() => {
     if (!order || order.status !== "paid") return;
