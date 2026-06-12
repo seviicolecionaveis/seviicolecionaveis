@@ -19,6 +19,7 @@ export type Sealed = {
   distribution?: string | null;
   condition?: string | null;
   age_rating?: string | null;
+  sku?: string | null;
 };
 
 interface Props {
