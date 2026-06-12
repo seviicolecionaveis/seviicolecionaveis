@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PackageWarning } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 const STORAGE_KEY = "stock-sync-notice-dismissed";
 
