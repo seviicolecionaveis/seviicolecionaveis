@@ -263,6 +263,12 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
         images,
         is_preorder: isPreorder,
         release_date: isPreorder ? releaseDate : null,
+        product_type: productType.trim() || null,
+        collection: collection.trim() || null,
+        language: language.trim() || null,
+        distribution: distribution.trim() || null,
+        condition: condition.trim() || null,
+        age_rating: ageRating.trim() || null,
       })
       .eq("id", item.id);
     setSaving(false);
