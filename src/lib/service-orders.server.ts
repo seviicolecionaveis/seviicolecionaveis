@@ -33,7 +33,7 @@ export interface CreateServiceOrderInput {
 
 interface ResolvedItems {
   stackId: string;
-  items: Array<{ id: string; card_name: string; quantity: number }>;
+  items: Array<{ id: string; card_name: string; quantity: number; card_id: string }>;
 }
 
 async function loadItems(userId: string, itemIds: string[]): Promise<ResolvedItems> {
