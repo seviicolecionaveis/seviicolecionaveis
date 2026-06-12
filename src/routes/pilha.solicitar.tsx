@@ -161,6 +161,17 @@ function SolicitarPage() {
     [stack, selectedIds],
   );
   const totalQty = selectedItems.reduce((s, i) => s + i.quantity, 0);
+  const hasSealedSelected = selectedItems.some((i) =>
+    typeof i.card_id === "string" && i.card_id.startsWith("sealed:"),
+  );
+
+  // Se houver selado, "Arte em Cards" não é permitido. Volta para Correios.
+  useEffect(() => {
+    if (hasSealedSelected && method === "arte_em_cards") {
+      setMethod("correios");
+      toast.info("Retirada na Arte em Cards não está disponível para produtos selados.");
+    }
+  }, [hasSealedSelected, method]);
 
   const fetchQuotes = async (cepValue: string) => {
     const clean = cepValue.replace(/\D/g, "");
