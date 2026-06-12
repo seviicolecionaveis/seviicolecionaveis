@@ -13,6 +13,12 @@ export type Sealed = {
   images: string[];
   is_preorder?: boolean;
   release_date?: string | null;
+  product_type?: string | null;
+  collection?: string | null;
+  language?: string | null;
+  distribution?: string | null;
+  condition?: string | null;
+  age_rating?: string | null;
 };
 
 interface Props {
