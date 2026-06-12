@@ -21,7 +21,35 @@ type Sealed = {
   sort_order: number;
   is_preorder: boolean;
   release_date: string | null;
+  product_type: string | null;
+  collection: string | null;
+  language: string | null;
+  distribution: string | null;
+  condition: string | null;
+  age_rating: string | null;
 };
+
+const PRODUCT_TYPE_OPTIONS = [
+  "Blister Unitário",
+  "Blister Duplo",
+  "Blister Triplo",
+  "Blister Quádruplo",
+  "Booster Avulso",
+  "Booster Box",
+  "Booster Bundle",
+  "ETB (Elite Trainer Box)",
+  "Deck Temático",
+  "Battle Deck",
+  "Box Coleção Especial",
+  "Lata (Tin)",
+  "Mini Lata",
+  "Premium Collection",
+  "Display",
+];
+const LANGUAGE_OPTIONS = ["Português (Brasil)", "Inglês", "Japonês", "Espanhol", "Outro"];
+const DISTRIBUTION_OPTIONS = ["Copag", "Pokémon Company International", "Importado", "Outro"];
+const CONDITION_OPTIONS = ["Novo e Lacrado", "Aberto / Reembalado", "Usado"];
+const AGE_RATING_OPTIONS = ["3+", "6+", "8+", "10+", "12+", "Livre"];
 
 function SealedAdmin() {
   const { user, isAdmin, loading: authLoading } = useAuth();
