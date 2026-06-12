@@ -451,3 +451,36 @@ function SealedEditor({ item, onClose, onSaved }: { item: Sealed; onClose: () =>
     </div>
   );
 }
+
+function ComboField({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder?: string;
+}) {
+  const listId = `combo-${label.replace(/\s+/g, "-").toLowerCase()}`;
+  return (
+    <div>
+      <label className="text-xs font-semibold uppercase tracking-widest">{label}</label>
+      <input
+        list={listId}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+      />
+      <datalist id={listId}>
+        {options.map((o) => (
+          <option key={o} value={o} />
+        ))}
+      </datalist>
+    </div>
+  );
+}
