@@ -19,6 +19,7 @@ export type Sealed = {
   distribution?: string | null;
   condition?: string | null;
   age_rating?: string | null;
+  sku?: string | null;
 };
 
 interface Props {
@@ -136,6 +137,7 @@ export function SealedModal({ item, onClose }: Props) {
 
             {(() => {
               const specs: Array<[string, string | null | undefined]> = [
+                ["SKU", item.sku],
                 ["Produto", item.product_type],
                 ["Coleção", item.collection],
                 ["Idioma", item.language],

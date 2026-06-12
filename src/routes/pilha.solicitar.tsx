@@ -161,6 +161,17 @@ function SolicitarPage() {
     [stack, selectedIds],
   );
   const totalQty = selectedItems.reduce((s, i) => s + i.quantity, 0);
+  const hasSealedSelected = selectedItems.some((i: any) =>
+    typeof i.cardId === "string" && i.cardId.startsWith("sealed:"),
+  );
+
+  // Se houver selado, "Arte em Cards" não é permitido. Volta para Correios.
+  useEffect(() => {
+    if (hasSealedSelected && method === "arte_em_cards") {
+      setMethod("correios");
+      toast.info("Retirada na Arte em Cards não está disponível para produtos selados.");
+    }
+  }, [hasSealedSelected, method]);
 
   const fetchQuotes = async (cepValue: string) => {
     const clean = cepValue.replace(/\D/g, "");
@@ -373,22 +384,33 @@ function SolicitarPage() {
                     { v: "presencial", label: "🏪 Retirada Presencial", desc: "Aruana ou Aeroporto — gratuito" },
                     { v: "arte_em_cards", label: "🎴 Retirada na Arte em Cards", desc: "Taxa R$ 5,00 (isenta com código válido)" },
                   ] as { v: Method; label: string; desc: string }[]
-                ).map((opt) => (
-                  <label key={opt.v} className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer hover:bg-secondary/30">
-                    <input
-                      type="radio"
-                      name="method"
-                      value={opt.v}
-                      checked={method === opt.v}
-                      onChange={() => setMethod(opt.v)}
-                      className="mt-1"
-                    />
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold">{opt.label}</p>
-                      <p className="text-xs text-muted-foreground">{opt.desc}</p>
-                    </div>
-                  </label>
-                ))}
+                ).map((opt) => {
+                  const disabled = opt.v === "arte_em_cards" && hasSealedSelected;
+                  return (
+                    <label
+                      key={opt.v}
+                      className={`flex items-start gap-3 rounded-lg border border-border p-3 ${
+                        disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-secondary/30"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="method"
+                        value={opt.v}
+                        checked={method === opt.v}
+                        onChange={() => !disabled && setMethod(opt.v)}
+                        disabled={disabled}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold">{opt.label}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {disabled ? "Não disponível para produtos selados." : opt.desc}
+                        </p>
+                      </div>
+                    </label>
+                  );
+                })}
               </div>
             </section>
 

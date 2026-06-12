@@ -1039,6 +1039,7 @@ export type Database = {
           price_cents: number
           product_type: string | null
           release_date: string | null
+          sku: string | null
           sort_order: number
           stock: number
           title: string
@@ -1059,6 +1060,7 @@ export type Database = {
           price_cents?: number
           product_type?: string | null
           release_date?: string | null
+          sku?: string | null
           sort_order?: number
           stock?: number
           title: string
@@ -1079,6 +1081,7 @@ export type Database = {
           price_cents?: number
           product_type?: string | null
           release_date?: string | null
+          sku?: string | null
           sort_order?: number
           stock?: number
           title?: string
