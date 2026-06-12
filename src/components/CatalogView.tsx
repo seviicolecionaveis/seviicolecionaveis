@@ -12,6 +12,7 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { BannerCarousel } from "@/components/BannerCarousel";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { TrustBadges } from "@/components/TrustBadges";
+import { StockSyncNoticeDialog } from "@/components/StockSyncNoticeDialog";
 import { SiteFooter } from "@/components/SiteFooter";
 import { RecentlyViewed } from "@/components/catalog/RecentlyViewed";
 import { NewArrivals } from "@/components/catalog/NewArrivals";
@@ -318,6 +319,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
 
       <CardModal card={active} onClose={() => setActive(null)} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      <StockSyncNoticeDialog />
       <WelcomeDialog />
 
       <RecentlyViewed />
