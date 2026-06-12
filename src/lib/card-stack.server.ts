@@ -97,10 +97,12 @@ export async function addOrderToStack(orderId: string): Promise<void> {
     status: "stored" as const,
   }));
 
-  // upsert com ignoreDuplicates evita corrida quando o webhook é chamado em paralelo
+  // A idempotência é garantida pela checagem de count > 0 acima.
+  // Não usamos upsert porque o índice único em order_item_id é parcial
+  // (WHERE order_item_id IS NOT NULL), o que impede o ON CONFLICT.
   const { error } = await supabaseAdmin
     .from("card_stack_items")
-    .upsert(rows, { onConflict: "order_item_id", ignoreDuplicates: true });
+    .insert(rows);
   if (error) throw new Error(`Falha ao adicionar itens à pilha: ${error.message}`);
 
   if (order.email) {
