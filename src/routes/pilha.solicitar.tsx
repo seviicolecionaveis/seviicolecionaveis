@@ -161,8 +161,8 @@ function SolicitarPage() {
     [stack, selectedIds],
   );
   const totalQty = selectedItems.reduce((s, i) => s + i.quantity, 0);
-  const hasSealedSelected = selectedItems.some((i) =>
-    typeof i.card_id === "string" && i.card_id.startsWith("sealed:"),
+  const hasSealedSelected = selectedItems.some((i: any) =>
+    typeof i.cardId === "string" && i.cardId.startsWith("sealed:"),
   );
 
   // Se houver selado, "Arte em Cards" não é permitido. Volta para Correios.
