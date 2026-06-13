@@ -10,7 +10,7 @@ type Banner = {
 };
 
 export function BannerCarousel() {
-  const [banners, setBanners] = useState<Banner[]>([]);
+  const [banners, setBanners] = useState<Banner[] | null>(null);
   const [index, setIndex] = useState(0);
   const [interactionAt, setInteractionAt] = useState(0);
 
@@ -24,37 +24,41 @@ export function BannerCarousel() {
   }, []);
 
   useEffect(() => {
-    if (banners.length <= 1) return;
+    if (!banners || banners.length <= 1) return;
     const delay = interactionAt ? 7000 : 5000;
     const id = setTimeout(() => {
       setIndex((i) => (i + 1) % banners.length);
       setInteractionAt(0);
     }, delay);
     return () => clearTimeout(id);
-  }, [banners.length, index, interactionAt]);
+  }, [banners, index, interactionAt]);
 
-  if (banners.length === 0) return null;
+  // Reservar o espaço imediatamente para evitar layout shift (CLS) durante o carregamento
+  if (banners && banners.length === 0) return null;
 
-  const current = banners[index];
+  const current = banners?.[index] ?? null;
 
   const go = (next: number) => {
+    if (!banners) return;
     setIndex((next + banners.length) % banners.length);
     setInteractionAt(Date.now());
   };
 
-  const Img = (
+  const Img = current ? (
     <img
       src={current.image_url}
       alt={current.alt ?? ""}
       className="h-full w-full object-cover transition-opacity duration-500"
+      fetchPriority="high"
+      decoding="async"
       key={current.id}
     />
-  );
+  ) : null;
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-6">
       <div className="relative aspect-[16/5] w-full overflow-hidden rounded-2xl bg-secondary group">
-        {current.link_url ? (
+        {current?.link_url ? (
           <a href={current.link_url} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
             {Img}
           </a>
