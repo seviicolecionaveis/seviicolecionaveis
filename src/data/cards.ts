@@ -1,6 +1,6 @@
 import rawCards from "./cards.json";
 
-export type Finish = "Normal" | "Foil" | "Reverse Foil" | "Pokebola" | "Masterball" | "Rocket" | "Energia" | "Promo" | "Ímã" | "Shattered Holo" | "Illustration Rare" | "Ultra Rara" | "Black Star Promo" | "Double Rare";
+export type Finish = "Normal" | "Foil" | "Reverse Foil" | "Pokebola" | "Masterball" | "Rocket" | "Energia" | "Promo" | "Ímã" | "Shattered Holo" | "Illustration Rare" | "Ultra Rara" | "Black Star Promo" | "Double Rare" | "Liga";
 export type Language = "Português" | "Inglês" | "Italiano" | "Espanhol" | "Japonês" | "Chinês";
 export type Condition = "M" | "NM" | "SP" | "MP" | "HP" | "D";
 export type CardCategory = "Pokémon" | "Treinador" | "Energia";
@@ -64,8 +64,8 @@ const RAW: RawCard[] = (rawCards as any[]).map((c) => ({
   condition: (c.condition as Condition) ?? "NM",
 })) as RawCard[];
 
-const FINISH_PRIORITY: Finish[] = ["Promo", "Masterball", "Rocket", "Pokebola", "Energia", "Foil", "Reverse Foil", "Normal"];
-const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Masterball", "Rocket", "Energia", "Promo"];
+const FINISH_PRIORITY: Finish[] = ["Promo", "Masterball", "Rocket", "Pokebola", "Energia", "Foil", "Reverse Foil", "Liga", "Normal"];
+const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Masterball", "Rocket", "Energia", "Promo", "Liga"];
 const LANGUAGE_ORDER: Language[] = ["Português", "Inglês", "Espanhol", "Italiano", "Japonês", "Chinês"];
 
 function pickHeadlineFinish(variants: FinishVariant[]): Finish {
@@ -205,7 +205,7 @@ export const COLLECTIONS = Array.from(
   new Set([...CARDS.map((c) => c.collection).filter(Boolean), ...EXTRA_COLLECTIONS]),
 ).sort();
 
-export const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Masterball", "Rocket", "Energia", "Promo", "Shattered Holo", "Illustration Rare", "Ultra Rara", "Black Star Promo", "Double Rare"];
+export const FINISHES: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Masterball", "Rocket", "Energia", "Promo", "Shattered Holo", "Illustration Rare", "Ultra Rara", "Black Star Promo", "Double Rare", "Liga"];
 
 const EXTRA_LANGUAGES: Language[] = ["Japonês", "Chinês"];
 export const LANGUAGES = Array.from(

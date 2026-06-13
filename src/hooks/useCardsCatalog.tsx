@@ -5,8 +5,8 @@ import { CONDITIONS } from "@/data/cards";
 import { useAuth } from "@/hooks/useAuth";
 import { isTestCardCatalogEntry } from "@/lib/test-card";
 
-const FINISH_PRIORITY: Finish[] = ["Promo", "Masterball", "Rocket", "Pokebola", "Energia", "Foil", "Reverse Foil", "Normal"];
-const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Masterball", "Rocket", "Energia", "Promo"];
+const FINISH_PRIORITY: Finish[] = ["Promo", "Masterball", "Rocket", "Pokebola", "Energia", "Foil", "Reverse Foil", "Liga", "Normal"];
+const FINISH_ORDER: Finish[] = ["Normal", "Reverse Foil", "Foil", "Pokebola", "Masterball", "Rocket", "Energia", "Promo", "Liga"];
 const LANGUAGE_ORDER: Language[] = ["Português", "Inglês", "Espanhol", "Italiano"];
 
 export interface CardWithMeta extends Card {
