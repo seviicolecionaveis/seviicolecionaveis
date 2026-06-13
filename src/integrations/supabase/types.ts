@@ -1404,6 +1404,7 @@ export type Database = {
         | "Double Rare"
         | "Masterball"
         | "Rocket"
+        | "Liga"
       card_language:
         | "Português"
         | "Inglês"
@@ -1556,6 +1557,7 @@ export const Constants = {
         "Double Rare",
         "Masterball",
         "Rocket",
+        "Liga",
       ],
       card_language: [
         "Português",
