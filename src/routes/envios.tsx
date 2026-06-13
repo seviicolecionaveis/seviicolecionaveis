@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MapPin, Clock, Bike, CalendarCheck, AlertTriangle } from "lucide-react";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 const WHATSAPP_URL = "https://wa.me/557998150955";
 const WHATSAPP_DISPLAY = "(79) 9 9815-0955";

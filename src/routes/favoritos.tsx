@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
 import type { Card } from "@/data/cards";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/favoritos")({
   head: () => ({

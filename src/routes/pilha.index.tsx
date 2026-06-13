@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { getMyStack } from "@/lib/card-stack.functions";
 import { Checkbox } from "@/components/ui/checkbox";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/pilha/")({
   head: () => ({

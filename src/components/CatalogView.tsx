@@ -17,7 +17,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { RecentlyViewed } from "@/components/catalog/RecentlyViewed";
 import { NewArrivals } from "@/components/catalog/NewArrivals";
 import { SiteNav } from "@/components/SiteNav";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 const DEFAULT_FILTERS: FilterState = {
   categories: [],

@@ -3,7 +3,7 @@ import { Mail, MapPin, MessageCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 import { subscribeNewsletter } from "@/lib/newsletter.functions";
 
 const BRAND = "#20a5c9";

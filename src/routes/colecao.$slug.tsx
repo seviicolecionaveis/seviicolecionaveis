@@ -8,7 +8,7 @@ import { collectionSlug } from "@/lib/slug";
 import { getCollectionDescription } from "@/data/collectionDescriptions";
 import { SiteFooter } from "@/components/SiteFooter";
 import type { Card } from "@/data/cards";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/colecao/$slug")({
   loader: async ({ params }) => {

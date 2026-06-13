@@ -4,7 +4,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SealedModal, type Sealed } from "@/components/catalog/SealedModal";
 import { supabase } from "@/integrations/supabase/client";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/selados")({
   head: () => ({

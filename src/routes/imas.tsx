@@ -9,7 +9,7 @@ import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { useCardPrices, priceLookupKey } from "@/hooks/useCardPrices";
 import { supabase } from "@/integrations/supabase/client";
 import type { Card, Finish } from "@/data/cards";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 const MAGNET_EXCLUDED_KEYS = new Set<string>([
   "Psyduck__TRR - Team Rocket Returns__70/109",

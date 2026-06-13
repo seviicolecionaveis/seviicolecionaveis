@@ -13,7 +13,7 @@ import { validateArteEmCardsCode, getMyArteEmCardsCode } from "@/lib/arte-em-car
 import { Loader2, Copy, Check, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { copyToClipboard } from "@/lib/clipboard";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/pilha/solicitar")({
   validateSearch: (search: Record<string, unknown>) => ({

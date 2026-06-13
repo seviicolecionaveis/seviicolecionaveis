@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { useCardStats } from "@/hooks/useCardStats";
 import { cardSlug } from "@/lib/slug";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/mais-vendidas")({
   head: () => ({

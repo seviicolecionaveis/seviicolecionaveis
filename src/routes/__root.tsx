@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
 import appCss from "../styles.css?url";
-import pokeballPattern from "@/assets/pokeball-pattern.png";
+import pokeballPattern from "@/assets/pokeball-pattern.webp";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { WishlistProvider } from "@/hooks/useWishlist";
