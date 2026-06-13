@@ -66,7 +66,7 @@ export function BannerCarousel() {
           Img
         )}
 
-        {banners.length > 1 && (
+        {banners && banners.length > 1 && (
           <>
             <button
               onClick={() => go(index - 1)}
