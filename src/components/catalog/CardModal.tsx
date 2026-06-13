@@ -112,6 +112,7 @@ const finishDot: Record<Finish, string> = {
   "Ultra Rara": "bg-brand-gold",
   "Black Star Promo": "bg-foreground text-background",
   "Double Rare": "bg-type-fire",
+  Liga: "bg-type-fighting",
 };
 
 export function CardModal({ card, onClose, magnetOnly = false }: Props) {

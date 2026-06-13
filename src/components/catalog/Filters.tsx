@@ -33,6 +33,7 @@ const finishClass: Record<Finish, string> = {
   "Ultra Rara": "bg-brand-gold/15 text-foreground border-brand-gold/40",
   "Black Star Promo": "bg-foreground text-background border-foreground",
   "Double Rare": "bg-type-fire/15 text-foreground border-type-fire/40",
+  Liga: "bg-type-fighting/15 text-type-fighting border-type-fighting/40",
 };
 
 export function Filters({ filters, onChange, onReset }: Props) {
