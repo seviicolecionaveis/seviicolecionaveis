@@ -4,7 +4,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AccessoryModal, type Accessory } from "@/components/catalog/AccessoryModal";
 import { supabase } from "@/integrations/supabase/client";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 const CATEGORIES = [
   "Sleeves/Shields",

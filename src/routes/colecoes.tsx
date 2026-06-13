@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { COLLECTION_DESCRIPTIONS } from "@/data/collectionDescriptions";
 import { collectionSlug } from "@/lib/slug";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/colecoes")({
   head: () => ({

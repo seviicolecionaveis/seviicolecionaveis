@@ -6,7 +6,7 @@ import { cardSlug } from "@/lib/slug";
 import { trackEvent } from "@/lib/analytics";
 import { useAuth } from "@/hooks/useAuth";
 import { TEST_ADMIN_CARD_SLUG } from "@/lib/test-card";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/carta/$slug")({
   loader: async ({ params }) => {

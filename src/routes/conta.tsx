@@ -7,7 +7,7 @@ import { PreferencesForm } from "@/components/account/PreferencesForm";
 import { AddressesManager } from "@/components/account/AddressesManager";
 import { LoyaltyPointsCard } from "@/components/account/LoyaltyPointsCard";
 import { ShoppingBag, Heart, Layers, Sparkles } from "lucide-react";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/conta")({
   head: () => ({
