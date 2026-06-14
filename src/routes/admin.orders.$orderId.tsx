@@ -85,6 +85,16 @@ function AdminOrderDetailPage() {
       .eq("id", orderId)
       .maybeSingle();
     setOrder(data);
+    if (data?.coupon_code) {
+      const { data: c } = await supabase
+        .from("coupons")
+        .select("code, percent, amount_cents, user_id, notes")
+        .ilike("code", data.coupon_code)
+        .maybeSingle();
+      setCoupon(c);
+    } else {
+      setCoupon(null);
+    }
     const itemIds = (data?.order_items ?? []).map((it: any) => it.id);
     if (itemIds.length) {
       const { data: stackRows } = await supabase
