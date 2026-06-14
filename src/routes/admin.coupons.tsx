@@ -892,6 +892,13 @@ function AdminCouponsPage() {
                             >
                               Prévia
                             </button>
+                            <button
+                              onClick={() => handleViewUsage(c)}
+                              className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-secondary"
+                              title="Ver pedidos onde foi usado"
+                            >
+                              Histórico
+                            </button>
                             {c.user_id && (
                               <button
                                 onClick={() => handleSend(c.id)}
