@@ -77,6 +77,32 @@ export function Filters({ filters, onChange, onReset }: Props) {
         </div>
       </section>
 
+      {filters.categories.includes("Treinador") && (
+        <section>
+          <h4 className="mb-3 inline-block rounded bg-foreground px-2 py-1 text-xs font-bold uppercase tracking-widest text-background">
+            Subtipo de Treinador
+          </h4>
+          <div className="flex flex-wrap gap-1.5">
+            {TRAINER_SUBCATEGORIES.map((sub) => {
+              const active = filters.trainerSubcategories.includes(sub);
+              return (
+                <button
+                  key={sub}
+                  onClick={() => onChange({ ...filters, trainerSubcategories: toggle(filters.trainerSubcategories, sub) })}
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                    active
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border bg-background text-muted-foreground hover:border-foreground/30"
+                  }`}
+                >
+                  {sub}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <section>
         <h4 className="mb-3 inline-block rounded bg-foreground px-2 py-1 text-xs font-bold uppercase tracking-widest text-background">
           Extras
