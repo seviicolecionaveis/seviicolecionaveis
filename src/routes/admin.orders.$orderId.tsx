@@ -66,6 +66,7 @@ function AdminOrderDetailPage() {
   const { isAdmin, loading: authLoading } = useAuth();
   const nav = useNavigate();
   const [order, setOrder] = useState<any>(null);
+  const [coupon, setCoupon] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [cancelItem, setCancelItem] = useState<any | null>(null);
   const [stackedItemIds, setStackedItemIds] = useState<Set<string>>(new Set());
