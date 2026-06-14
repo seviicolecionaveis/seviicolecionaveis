@@ -66,6 +66,7 @@ function AdminOrderDetailPage() {
   const { isAdmin, loading: authLoading } = useAuth();
   const nav = useNavigate();
   const [order, setOrder] = useState<any>(null);
+  const [coupon, setCoupon] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [cancelItem, setCancelItem] = useState<any | null>(null);
   const [stackedItemIds, setStackedItemIds] = useState<Set<string>>(new Set());
@@ -84,6 +85,16 @@ function AdminOrderDetailPage() {
       .eq("id", orderId)
       .maybeSingle();
     setOrder(data);
+    if (data?.coupon_code) {
+      const { data: c } = await supabase
+        .from("coupons")
+        .select("code, percent, amount_cents, user_id, notes")
+        .ilike("code", data.coupon_code)
+        .maybeSingle();
+      setCoupon(c);
+    } else {
+      setCoupon(null);
+    }
     const itemIds = (data?.order_items ?? []).map((it: any) => it.id);
     if (itemIds.length) {
       const { data: stackRows } = await supabase
@@ -231,15 +242,17 @@ function AdminOrderDetailPage() {
   const items: any[] = order.order_items ?? [];
   const subtotalCents = order.subtotal_cents ?? 0;
   const shippingCents = order.shipping_cost_cents ?? 0;
-  const discountCents = order.discount_cents ?? 0;
   const totalCents = order.total_cents ?? 0;
-  const isPix = order.payment_method === "pix" || order.payment_method === "mercadopago_pix";
   const paymentLabel = PAYMENT_METHOD_LABEL[order.payment_method] ?? order.payment_method ?? "—";
   const shippingLabel = SHIPPING_METHOD_LABEL[order.shipping_method] ?? order.shipping_method ?? "—";
 
-  const discountReasons: string[] = [];
-  if (order.coupon_code) discountReasons.push(`cupom ${order.coupon_code}`);
-  if (isPix && discountCents > 0) discountReasons.push("desconto Pix (5%)");
+  const isGiftCoupon = coupon && coupon.amount_cents != null && coupon.user_id;
+  const isPercentCoupon = coupon && coupon.percent != null;
+  const couponLabel = isGiftCoupon
+    ? "Vale-presente"
+    : isPercentCoupon
+      ? `Cupom de desconto (${coupon.percent}%)`
+      : "Cupom de desconto";
 
   return (
     <div className="min-h-screen bg-background">
@@ -468,10 +481,27 @@ function AdminOrderDetailPage() {
               label={`Frete${order.shipping_method ? ` (${shippingLabel})` : ""}`}
               value={shippingCents > 0 ? fmtBRL(shippingCents) : (order.shipping_method === "combinar" || order.shipping_method === "delivery_app" ? "a combinar" : "grátis")}
             />
-            {discountCents > 0 && (
+            {order.bundle_discount_cents > 0 && (
+              <Row label="Desconto de combo" value={`− ${fmtBRL(order.bundle_discount_cents)}`} tone="discount" />
+            )}
+            {order.coupon_discount_cents > 0 && (
               <Row
-                label={`Desconto${discountReasons.length ? ` (${discountReasons.join(" + ")})` : ""}`}
-                value={`− ${fmtBRL(discountCents)}`}
+                label={`${couponLabel}${order.coupon_code ? ` (${order.coupon_code})` : ""}`}
+                value={`− ${fmtBRL(order.coupon_discount_cents)}`}
+                tone="discount"
+              />
+            )}
+            {order.points_discount_cents > 0 && (
+              <Row label="Desconto de pontos" value={`− ${fmtBRL(order.points_discount_cents)}`} tone="discount" />
+            )}
+            {order.pix_discount_cents > 0 && (
+              <Row label="Desconto Pix (5%)" value={`− ${fmtBRL(order.pix_discount_cents)}`} tone="discount" />
+            )}
+            {/* Fallback para pedidos antigos sem separação */}
+            {order.discount_cents > 0 && order.bundle_discount_cents === 0 && order.coupon_discount_cents === 0 && order.points_discount_cents === 0 && order.pix_discount_cents === 0 && (
+              <Row
+                label={`Desconto${order.coupon_code ? ` (${order.coupon_code})` : ""}`}
+                value={`− ${fmtBRL(order.discount_cents)}`}
                 tone="discount"
               />
             )}

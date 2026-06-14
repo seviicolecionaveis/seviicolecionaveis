@@ -300,7 +300,44 @@ function OrderDetailPage() {
             <span className="text-muted-foreground">Subtotal</span>
             <span className="tabular-nums">R$ {(order.subtotal_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
           </div>
-          {order.discount_cents > 0 && (() => {
+          {order.bundle_discount_cents > 0 && (
+            <div className="flex justify-between text-green-700">
+              <span>Desconto de combo</span>
+              <span className="tabular-nums">- R$ {(order.bundle_discount_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+            </div>
+          )}
+          {order.coupon_discount_cents > 0 && (() => {
+            const isGift = coupon && coupon.amount_cents != null && coupon.user_id;
+            const isPercent = coupon && coupon.percent != null;
+            const label = isGift
+              ? "Vale-presente"
+              : isPercent
+                ? `Cupom de desconto (${coupon.percent}%)`
+                : "Cupom de desconto";
+            return (
+              <div className="flex justify-between text-green-700">
+                <span>
+                  {label}
+                  {order.coupon_code ? <span className="font-mono ml-1 opacity-80">({order.coupon_code})</span> : null}
+                </span>
+                <span className="tabular-nums">- R$ {(order.coupon_discount_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+              </div>
+            );
+          })()}
+          {order.points_discount_cents > 0 && (
+            <div className="flex justify-between text-green-700">
+              <span>Desconto de pontos</span>
+              <span className="tabular-nums">- R$ {(order.points_discount_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+            </div>
+          )}
+          {order.pix_discount_cents > 0 && (
+            <div className="flex justify-between text-green-700">
+              <span>Desconto Pix (5%)</span>
+              <span className="tabular-nums">- R$ {(order.pix_discount_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+            </div>
+          )}
+          {/* Fallback para pedidos antigos sem separação de descontos */}
+          {order.discount_cents > 0 && order.bundle_discount_cents === 0 && order.coupon_discount_cents === 0 && order.points_discount_cents === 0 && order.pix_discount_cents === 0 && (() => {
             const isGift = coupon && coupon.amount_cents != null && coupon.user_id;
             const isPercent = coupon && coupon.percent != null;
             const label = isGift
