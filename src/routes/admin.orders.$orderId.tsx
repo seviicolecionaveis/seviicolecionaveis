@@ -242,15 +242,17 @@ function AdminOrderDetailPage() {
   const items: any[] = order.order_items ?? [];
   const subtotalCents = order.subtotal_cents ?? 0;
   const shippingCents = order.shipping_cost_cents ?? 0;
-  const discountCents = order.discount_cents ?? 0;
   const totalCents = order.total_cents ?? 0;
-  const isPix = order.payment_method === "pix" || order.payment_method === "mercadopago_pix";
   const paymentLabel = PAYMENT_METHOD_LABEL[order.payment_method] ?? order.payment_method ?? "—";
   const shippingLabel = SHIPPING_METHOD_LABEL[order.shipping_method] ?? order.shipping_method ?? "—";
 
-  const discountReasons: string[] = [];
-  if (order.coupon_code) discountReasons.push(`cupom ${order.coupon_code}`);
-  if (isPix && discountCents > 0) discountReasons.push("desconto Pix (5%)");
+  const isGiftCoupon = coupon && coupon.amount_cents != null && coupon.user_id;
+  const isPercentCoupon = coupon && coupon.percent != null;
+  const couponLabel = isGiftCoupon
+    ? "Vale-presente"
+    : isPercentCoupon
+      ? `Cupom de desconto (${coupon.percent}%)`
+      : "Cupom de desconto";
 
   return (
     <div className="min-h-screen bg-background">
