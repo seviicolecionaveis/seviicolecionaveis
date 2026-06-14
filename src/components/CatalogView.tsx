@@ -21,6 +21,7 @@ import logoUrl from "@/assets/logo.webp";
 
 const DEFAULT_FILTERS: FilterState = {
   categories: [],
+  trainerSubcategories: [],
   finishes: [],
   collection: "",
   languages: [],
@@ -68,6 +69,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
 
     const list = CARDS.filter((c) => {
       if (filters.categories.length && !filters.categories.includes(c.category)) return false;
+      if (filters.trainerSubcategories.length && (c.category !== "Treinador" || !c.trainerSubcategory || !filters.trainerSubcategories.includes(c.trainerSubcategory))) return false;
       if (filters.finishes.length && !c.variants.some((v) => filters.finishes.includes(v.finish))) return false;
       if (filters.collection && c.collection !== filters.collection) return false;
       if (filters.languages.length && !c.languages.some((l) => filters.languages.includes(l.language))) return false;

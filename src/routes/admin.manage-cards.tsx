@@ -4,8 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateCardsCache } from "@/hooks/useCardsCatalog";
-import type { Condition, Finish, Language } from "@/data/cards";
-import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS } from "@/data/cards";
+import type { Condition, Finish, Language, TrainerSubcategory } from "@/data/cards";
+import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS, TRAINER_SUBCATEGORIES } from "@/data/cards";
 import { notifyStockBack } from "@/lib/stock-alerts.functions";
 import { cardSlug } from "@/lib/slug";
 
@@ -52,6 +52,7 @@ interface CardRow {
   finish: Finish;
   condition: Condition;
   category: CardCategory;
+  trainer_subcategory: TrainerSubcategory | null;
   stock: number;
   base_price_cents: number | null;
   image: string;
@@ -69,6 +70,7 @@ interface FormState {
   finish: Finish;
   condition: Condition;
   category: CardCategory;
+  trainer_subcategory: TrainerSubcategory | "";
   stock: string;
   price: string;
   image: string;
@@ -82,6 +84,7 @@ const EMPTY_FORM: FormState = {
   finish: "Normal",
   condition: "NM",
   category: "Pokémon",
+  trainer_subcategory: "",
   stock: "1",
   price: "",
   image: "",
@@ -215,6 +218,7 @@ function AdminCardsManagePage() {
       finish: form.finish,
       condition: form.condition,
       category: form.category,
+      trainer_subcategory: form.category === "Treinador" && form.trainer_subcategory ? form.trainer_subcategory : null,
       stock: Math.max(0, parseInt(form.stock) || 0),
       base_price_cents: priceCents,
       image: form.image.trim(),
@@ -246,6 +250,7 @@ function AdminCardsManagePage() {
       finish: r.finish,
       condition: r.condition ?? "NM",
       category: r.category ?? "Pokémon",
+      trainer_subcategory: r.trainer_subcategory ?? "",
       stock: String(r.stock),
       price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
       image: r.image,
@@ -273,6 +278,7 @@ function AdminCardsManagePage() {
       finish: r.finish,
       condition: r.condition ?? "NM",
       category: r.category ?? "Pokémon",
+      trainer_subcategory: r.trainer_subcategory ?? "",
       stock: String(r.stock),
       price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
       image: r.image,
@@ -311,6 +317,7 @@ function AdminCardsManagePage() {
     const payload = {
       condition: quickForm.condition,
       category: quickForm.category,
+      trainer_subcategory: quickForm.category === "Treinador" && quickForm.trainer_subcategory ? quickForm.trainer_subcategory : null,
       stock: newStock,
       base_price_cents: quickForm.price.trim() === "" ? null : Math.round(parseFloat(quickForm.price.replace(",", ".")) * 100),
       image: quickForm.image.trim(),
@@ -426,12 +433,26 @@ function AdminCardsManagePage() {
               <span className="font-semibold">Tipo de carta *</span>
               <select
                 value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value as CardCategory })}
+                onChange={(e) => setForm({ ...form, category: e.target.value as CardCategory, trainer_subcategory: e.target.value === "Treinador" ? form.trainer_subcategory : "" })}
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
               >
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </label>
+
+            {form.category === "Treinador" && (
+              <label className="text-xs space-y-1">
+                <span className="font-semibold">Subtipo de Treinador</span>
+                <select
+                  value={form.trainer_subcategory}
+                  onChange={(e) => setForm({ ...form, trainer_subcategory: e.target.value as TrainerSubcategory | "" })}
+                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">— Selecionar —</option>
+                  {TRAINER_SUBCATEGORIES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </label>
+            )}
 
             <label className="text-xs space-y-1">
               <span className="font-semibold">Estoque *</span>
@@ -645,12 +666,25 @@ function AdminCardsManagePage() {
                           <span className="font-semibold">Tipo</span>
                           <select
                             value={quickForm.category}
-                            onChange={(e) => setQuickForm({ ...quickForm, category: e.target.value as CardCategory })}
+                            onChange={(e) => setQuickForm({ ...quickForm, category: e.target.value as CardCategory, trainer_subcategory: e.target.value === "Treinador" ? quickForm.trainer_subcategory : "" })}
                             className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
                           >
                             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                           </select>
                         </label>
+                        {quickForm.category === "Treinador" && (
+                          <label className="text-xs space-y-1">
+                            <span className="font-semibold">Subtipo Treinador</span>
+                            <select
+                              value={quickForm.trainer_subcategory}
+                              onChange={(e) => setQuickForm({ ...quickForm, trainer_subcategory: e.target.value as TrainerSubcategory | "" })}
+                              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                            >
+                              <option value="">— Selecionar —</option>
+                              {TRAINER_SUBCATEGORIES.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </label>
+                        )}
                         <label className="text-xs space-y-1">
                           <span className="font-semibold">Estoque</span>
                           <input
@@ -736,6 +770,7 @@ function AdminCardsManagePage() {
                               finish: r.finish,
                               condition: r.condition ?? "NM",
                               category: r.category ?? "Pokémon",
+                              trainer_subcategory: r.trainer_subcategory ?? "",
                               stock: "1",
                               price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
                               image: r.image,
