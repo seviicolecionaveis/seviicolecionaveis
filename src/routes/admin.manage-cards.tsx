@@ -432,12 +432,26 @@ function AdminCardsManagePage() {
               <span className="font-semibold">Tipo de carta *</span>
               <select
                 value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value as CardCategory })}
+                onChange={(e) => setForm({ ...form, category: e.target.value as CardCategory, trainer_subcategory: e.target.value === "Treinador" ? form.trainer_subcategory : "" })}
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
               >
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </label>
+
+            {form.category === "Treinador" && (
+              <label className="text-xs space-y-1">
+                <span className="font-semibold">Subtipo de Treinador</span>
+                <select
+                  value={form.trainer_subcategory}
+                  onChange={(e) => setForm({ ...form, trainer_subcategory: e.target.value as TrainerSubcategory | "" })}
+                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">— Selecionar —</option>
+                  {TRAINER_SUBCATEGORIES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </label>
+            )}
 
             <label className="text-xs space-y-1">
               <span className="font-semibold">Estoque *</span>
