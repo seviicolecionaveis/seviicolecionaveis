@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Card, CardCategory, Condition, Finish, FinishVariant, Language, LanguageVariant, RawCard } from "@/data/cards";
+import type { Card, CardCategory, Condition, Finish, FinishVariant, Language, LanguageVariant, RawCard, TrainerSubcategory } from "@/data/cards";
 import { CONDITIONS } from "@/data/cards";
 import { useAuth } from "@/hooks/useAuth";
 import { isTestCardCatalogEntry } from "@/lib/test-card";
