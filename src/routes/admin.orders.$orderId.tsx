@@ -481,10 +481,27 @@ function AdminOrderDetailPage() {
               label={`Frete${order.shipping_method ? ` (${shippingLabel})` : ""}`}
               value={shippingCents > 0 ? fmtBRL(shippingCents) : (order.shipping_method === "combinar" || order.shipping_method === "delivery_app" ? "a combinar" : "grátis")}
             />
-            {discountCents > 0 && (
+            {order.bundle_discount_cents > 0 && (
+              <Row label="Desconto de combo" value={`− ${fmtBRL(order.bundle_discount_cents)}`} tone="discount" />
+            )}
+            {order.coupon_discount_cents > 0 && (
               <Row
-                label={`Desconto${discountReasons.length ? ` (${discountReasons.join(" + ")})` : ""}`}
-                value={`− ${fmtBRL(discountCents)}`}
+                label={`${couponLabel}${order.coupon_code ? ` (${order.coupon_code})` : ""}`}
+                value={`− ${fmtBRL(order.coupon_discount_cents)}`}
+                tone="discount"
+              />
+            )}
+            {order.points_discount_cents > 0 && (
+              <Row label="Desconto de pontos" value={`− ${fmtBRL(order.points_discount_cents)}`} tone="discount" />
+            )}
+            {order.pix_discount_cents > 0 && (
+              <Row label="Desconto Pix (5%)" value={`− ${fmtBRL(order.pix_discount_cents)}`} tone="discount" />
+            )}
+            {/* Fallback para pedidos antigos sem separação */}
+            {order.discount_cents > 0 && order.bundle_discount_cents === 0 && order.coupon_discount_cents === 0 && order.points_discount_cents === 0 && order.pix_discount_cents === 0 && (
+              <Row
+                label={`Desconto${order.coupon_code ? ` (${order.coupon_code})` : ""}`}
+                value={`− ${fmtBRL(order.discount_cents)}`}
                 tone="discount"
               />
             )}
