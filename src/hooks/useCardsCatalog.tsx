@@ -87,7 +87,7 @@ async function loadCards(): Promise<Card[]> {
   while (true) {
     const { data, error } = await supabase
       .from("cards")
-      .select("name, card_number, collection, language, finish, condition, stock, base_price_cents, image, category, created_at")
+      .select("name, card_number, collection, language, finish, condition, stock, base_price_cents, image, category, trainer_subcategory, created_at")
       .range(from, from + CHUNK - 1);
     if (error) { console.error("loadCards", error); break; }
     const batch = data ?? [];
