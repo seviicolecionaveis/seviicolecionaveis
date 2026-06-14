@@ -726,11 +726,13 @@ export type Database = {
       orders: {
         Row: {
           arte_em_cards_code: string | null
+          bundle_discount_cents: number
           carrier: string | null
           cep: string
           city: string
           complement: string | null
           coupon_code: string | null
+          coupon_discount_cents: number
           cpf: string | null
           created_at: string
           discount_cents: number
@@ -742,6 +744,7 @@ export type Database = {
           number: string
           payment_method: string
           phone: string | null
+          pix_discount_cents: number
           pix_expires_at: string | null
           pix_qr_code: string | null
           pix_qr_code_base64: string | null
@@ -775,11 +778,13 @@ export type Database = {
         }
         Insert: {
           arte_em_cards_code?: string | null
+          bundle_discount_cents?: number
           carrier?: string | null
           cep: string
           city: string
           complement?: string | null
           coupon_code?: string | null
+          coupon_discount_cents?: number
           cpf?: string | null
           created_at?: string
           discount_cents?: number
@@ -791,6 +796,7 @@ export type Database = {
           number: string
           payment_method?: string
           phone?: string | null
+          pix_discount_cents?: number
           pix_expires_at?: string | null
           pix_qr_code?: string | null
           pix_qr_code_base64?: string | null
@@ -824,11 +830,13 @@ export type Database = {
         }
         Update: {
           arte_em_cards_code?: string | null
+          bundle_discount_cents?: number
           carrier?: string | null
           cep?: string
           city?: string
           complement?: string | null
           coupon_code?: string | null
+          coupon_discount_cents?: number
           cpf?: string | null
           created_at?: string
           discount_cents?: number
@@ -840,6 +848,7 @@ export type Database = {
           number?: string
           payment_method?: string
           phone?: string | null
+          pix_discount_cents?: number
           pix_expires_at?: string | null
           pix_qr_code?: string | null
           pix_qr_code_base64?: string | null
