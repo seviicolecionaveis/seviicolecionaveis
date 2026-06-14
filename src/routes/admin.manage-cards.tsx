@@ -4,8 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateCardsCache } from "@/hooks/useCardsCatalog";
-import type { Condition, Finish, Language } from "@/data/cards";
-import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS } from "@/data/cards";
+import type { Condition, Finish, Language, TrainerSubcategory } from "@/data/cards";
+import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS, TRAINER_SUBCATEGORIES } from "@/data/cards";
 import { notifyStockBack } from "@/lib/stock-alerts.functions";
 import { cardSlug } from "@/lib/slug";
 
