@@ -158,6 +158,32 @@ function AdminCouponsPage() {
 
   const [preview, setPreview] = useState<PreviewState | null>(null);
   const [editing, setEditing] = useState<CouponRow | null>(null);
+  const [usage, setUsage] = useState<{
+    open: boolean;
+    code: string;
+    loading: boolean;
+    rows: Array<{
+      order_id: string;
+      number: number | null;
+      created_at: string;
+      status: string | null;
+      subtotal_cents: number | null;
+      discount_cents: number | null;
+      total_cents: number | null;
+      user_email: string | null;
+    }>;
+  } | null>(null);
+
+  const handleViewUsage = async (c: CouponRow) => {
+    setUsage({ open: true, code: c.code, loading: true, rows: [] });
+    try {
+      const res: any = await fetchUsage({ data: { coupon_id: c.id } });
+      setUsage({ open: true, code: c.code, loading: false, rows: res.rows ?? [] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao carregar histórico.");
+      setUsage(null);
+    }
+  };
 
   useEffect(() => {
     if (!authLoading) {
