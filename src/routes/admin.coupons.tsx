@@ -12,6 +12,7 @@ import {
   previewCouponEmail,
   updateCoupon,
   incrementCouponMaxUses,
+  getCouponUsage,
 } from "@/utils/coupons.functions";
 import { toast } from "sonner";
 
