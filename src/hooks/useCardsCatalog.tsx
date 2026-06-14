@@ -68,6 +68,7 @@ function buildCards(raw: RawCard[]): Card[] {
       languages, variants: allVariants, language: primary, stock: totalStock,
       price: prices.length ? Math.min(...prices) : null, finish: pickHeadlineFinish(allVariants),
       category: wc.category,
+      trainerSubcategory: wc.trainerSubcategory,
     });
   }
   return out.sort((a, b) => a.name.localeCompare(b.name));
