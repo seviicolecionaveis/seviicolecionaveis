@@ -419,6 +419,59 @@ export async function countBroadcastRecipientsServer(userId: string) {
   return { count: await countAllUserEmails() };
 }
 
+export interface CouponUsageRow {
+  order_id: string;
+  number: number | null;
+  created_at: string;
+  status: string | null;
+  subtotal_cents: number | null;
+  discount_cents: number | null;
+  total_cents: number | null;
+  user_id: string | null;
+  user_email: string | null;
+}
+
+export async function getCouponUsageServer(
+  userId: string,
+  couponId: string,
+): Promise<{ code: string; rows: CouponUsageRow[] }> {
+  await assertAdmin(userId);
+  const { data: coupon, error: cErr } = await supabaseAdmin
+    .from("coupons")
+    .select("id, code")
+    .eq("id", couponId)
+    .maybeSingle();
+  if (cErr) throw new Response(cErr.message, { status: 500 });
+  if (!coupon) throw new Response("Cupom não encontrado", { status: 404 });
+
+  const { data: orders, error: oErr } = await supabaseAdmin
+    .from("orders")
+    .select(
+      "id, number, created_at, status, subtotal_cents, discount_cents, total_cents, user_id, coupon_code",
+    )
+    .eq("coupon_code", (coupon as any).code)
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (oErr) throw new Response(oErr.message, { status: 500 });
+
+  const rows: CouponUsageRow[] = [];
+  for (const o of orders ?? []) {
+    const email = await emailForUserId((o as any).user_id);
+    rows.push({
+      order_id: (o as any).id,
+      number: (o as any).number ?? null,
+      created_at: (o as any).created_at,
+      status: (o as any).status ?? null,
+      subtotal_cents: (o as any).subtotal_cents ?? null,
+      discount_cents: (o as any).discount_cents ?? null,
+      total_cents: (o as any).total_cents ?? null,
+      user_id: (o as any).user_id ?? null,
+      user_email: email,
+    });
+  }
+  return { code: (coupon as any).code, rows };
+}
+
 interface PreviewInput {
   kind: "broadcast" | "voucher";
   code: string;

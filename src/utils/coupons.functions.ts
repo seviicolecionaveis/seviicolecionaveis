@@ -137,6 +137,14 @@ export const countBroadcastRecipients = createServerFn({ method: "GET" })
     return countBroadcastRecipientsServer(context.userId);
   });
 
+export const getCouponUsage = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ coupon_id: z.string().uuid() }).parse(d))
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context, data }) => {
+    const { getCouponUsageServer } = await import("./coupons.server");
+    return getCouponUsageServer(context.userId, data.coupon_id);
+  });
+
 export const previewCouponEmail = createServerFn({ method: "POST" })
   .inputValidator((d) =>
     z

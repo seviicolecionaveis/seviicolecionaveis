@@ -12,6 +12,7 @@ import {
   previewCouponEmail,
   updateCoupon,
   incrementCouponMaxUses,
+  getCouponUsage,
 } from "@/utils/coupons.functions";
 import { toast } from "sonner";
 
@@ -126,6 +127,7 @@ function AdminCouponsPage() {
   const previewEmail = useServerFn(previewCouponEmail);
   const editCoupon = useServerFn(updateCoupon);
   const bumpMaxUses = useServerFn(incrementCouponMaxUses);
+  const fetchUsage = useServerFn(getCouponUsage);
 
   const [coupons, setCoupons] = useState<CouponRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,6 +158,32 @@ function AdminCouponsPage() {
 
   const [preview, setPreview] = useState<PreviewState | null>(null);
   const [editing, setEditing] = useState<CouponRow | null>(null);
+  const [usage, setUsage] = useState<{
+    open: boolean;
+    code: string;
+    loading: boolean;
+    rows: Array<{
+      order_id: string;
+      number: number | null;
+      created_at: string;
+      status: string | null;
+      subtotal_cents: number | null;
+      discount_cents: number | null;
+      total_cents: number | null;
+      user_email: string | null;
+    }>;
+  } | null>(null);
+
+  const handleViewUsage = async (c: CouponRow) => {
+    setUsage({ open: true, code: c.code, loading: true, rows: [] });
+    try {
+      const res: any = await fetchUsage({ data: { coupon_id: c.id } });
+      setUsage({ open: true, code: c.code, loading: false, rows: res.rows ?? [] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao carregar histórico.");
+      setUsage(null);
+    }
+  };
 
   useEffect(() => {
     if (!authLoading) {
@@ -864,6 +892,13 @@ function AdminCouponsPage() {
                             >
                               Prévia
                             </button>
+                            <button
+                              onClick={() => handleViewUsage(c)}
+                              className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-secondary"
+                              title="Ver pedidos onde foi usado"
+                            >
+                              Histórico
+                            </button>
                             {c.user_id && (
                               <button
                                 onClick={() => handleSend(c.id)}
@@ -1021,6 +1056,115 @@ function AdminCouponsPage() {
           onCancel={() => setEditing(null)}
           onSave={handleSaveEdit}
         />
+      )}
+
+      {usage?.open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setUsage(null)}
+        >
+          <div
+            className="bg-background rounded-lg max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col border border-border"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Histórico de uso
+                </div>
+                <div className="font-mono font-semibold">{usage.code}</div>
+              </div>
+              <button
+                onClick={() => setUsage(null)}
+                className="rounded-md border border-border px-3 py-1 text-sm hover:bg-secondary"
+              >
+                Fechar
+              </button>
+            </div>
+            <div className="overflow-auto p-4">
+              {usage.loading ? (
+                <p className="text-sm text-muted-foreground">Carregando...</p>
+              ) : usage.rows.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Este cupom ainda não foi usado em nenhum pedido.
+                </p>
+              ) : (
+                <>
+                  <div className="mb-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                    <span>
+                      <strong className="text-foreground">{usage.rows.length}</strong>{" "}
+                      pedido{usage.rows.length === 1 ? "" : "s"}
+                    </span>
+                    <span>
+                      Total descontado:{" "}
+                      <strong className="text-foreground tabular-nums">
+                        {fmtBRL(
+                          usage.rows.reduce(
+                            (acc, r) => acc + (r.discount_cents ?? 0),
+                            0,
+                          ),
+                        )}
+                      </strong>
+                    </span>
+                    <span>
+                      Total gasto:{" "}
+                      <strong className="text-foreground tabular-nums">
+                        {fmtBRL(
+                          usage.rows.reduce(
+                            (acc, r) => acc + (r.total_cents ?? 0),
+                            0,
+                          ),
+                        )}
+                      </strong>
+                    </span>
+                  </div>
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
+                      <tr>
+                        <th className="text-left p-2">Pedido</th>
+                        <th className="text-left p-2">Data</th>
+                        <th className="text-left p-2">Cliente</th>
+                        <th className="text-left p-2">Status</th>
+                        <th className="text-right p-2">Subtotal</th>
+                        <th className="text-right p-2">Desconto</th>
+                        <th className="text-right p-2">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {usage.rows.map((r) => (
+                        <tr key={r.order_id} className="border-t border-border">
+                          <td className="p-2">
+                            <Link
+                              to="/admin/orders/$orderId"
+                              params={{ orderId: r.order_id }}
+                              className="font-mono text-xs underline hover:no-underline"
+                            >
+                              #{r.number ?? r.order_id.slice(0, 8)}
+                            </Link>
+                          </td>
+                          <td className="p-2 text-xs whitespace-nowrap">
+                            {new Date(r.created_at).toLocaleString("pt-BR")}
+                          </td>
+                          <td className="p-2 text-xs">{r.user_email ?? "—"}</td>
+                          <td className="p-2 text-xs">{r.status ?? "—"}</td>
+                          <td className="p-2 tabular-nums text-xs text-right">
+                            {fmtBRL(r.subtotal_cents ?? 0)}
+                          </td>
+                          <td className="p-2 tabular-nums text-xs text-right text-emerald-700 dark:text-emerald-400">
+                            −{fmtBRL(r.discount_cents ?? 0)}
+                          </td>
+                          <td className="p-2 tabular-nums text-xs text-right font-semibold">
+                            {fmtBRL(r.total_cents ?? 0)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
