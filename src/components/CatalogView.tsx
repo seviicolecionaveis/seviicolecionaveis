@@ -21,6 +21,7 @@ import logoUrl from "@/assets/logo.webp";
 
 const DEFAULT_FILTERS: FilterState = {
   categories: [],
+  trainerSubcategories: [],
   finishes: [],
   collection: "",
   languages: [],
