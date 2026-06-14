@@ -851,18 +851,27 @@ function AdminCouponsPage() {
                           )}
                         </td>
                         <td className="p-3 tabular-nums text-xs">
-                          {isWalletVoucher(c) ? (
-                            <span title="Saldo restante / valor inicial">
-                              {fmtBRL(c.balance_cents ?? 0)}
-                              <span className="text-muted-foreground">
-                                {" "}/ {fmtBRL(c.amount_cents ?? 0)}
+                          <button
+                            onClick={() => handleViewUsage(c)}
+                            className="underline-offset-2 hover:underline text-left"
+                            title="Ver histórico de uso"
+                          >
+                            {isWalletVoucher(c) ? (
+                              <span>
+                                {fmtBRL(c.balance_cents ?? 0)}
+                                <span className="text-muted-foreground">
+                                  {" "}/ {fmtBRL(c.amount_cents ?? 0)}
+                                </span>
                               </span>
-                            </span>
-                          ) : (
-                            <>
-                              {c.used_count}/{c.max_uses}
-                            </>
-                          )}
+                            ) : (
+                              <span>
+                                {c.used_count}/{c.max_uses}
+                              </span>
+                            )}
+                            <div className="text-[10px] text-primary font-sans font-semibold mt-0.5">
+                              ver histórico →
+                            </div>
+                          </button>
                         </td>
                         <td className="p-3">
                           <span
