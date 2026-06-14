@@ -127,6 +127,7 @@ function AdminCouponsPage() {
   const previewEmail = useServerFn(previewCouponEmail);
   const editCoupon = useServerFn(updateCoupon);
   const bumpMaxUses = useServerFn(incrementCouponMaxUses);
+  const fetchUsage = useServerFn(getCouponUsage);
 
   const [coupons, setCoupons] = useState<CouponRow[]>([]);
   const [loading, setLoading] = useState(true);
