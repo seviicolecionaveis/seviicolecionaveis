@@ -218,6 +218,7 @@ function AdminCardsManagePage() {
       finish: form.finish,
       condition: form.condition,
       category: form.category,
+      trainer_subcategory: form.category === "Treinador" && form.trainer_subcategory ? form.trainer_subcategory : null,
       stock: Math.max(0, parseInt(form.stock) || 0),
       base_price_cents: priceCents,
       image: form.image.trim(),
