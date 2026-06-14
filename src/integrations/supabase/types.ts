@@ -389,6 +389,7 @@ export type Database = {
           language: Database["public"]["Enums"]["card_language"]
           name: string
           stock: number
+          trainer_subcategory: string | null
           updated_at: string
         }
         Insert: {
@@ -405,6 +406,7 @@ export type Database = {
           language: Database["public"]["Enums"]["card_language"]
           name: string
           stock?: number
+          trainer_subcategory?: string | null
           updated_at?: string
         }
         Update: {
@@ -421,6 +423,7 @@ export type Database = {
           language?: Database["public"]["Enums"]["card_language"]
           name?: string
           stock?: number
+          trainer_subcategory?: string | null
           updated_at?: string
         }
         Relationships: []
