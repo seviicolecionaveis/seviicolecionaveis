@@ -323,7 +323,7 @@ function AdminCouponsPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      await createVoucher({
+      const res: any = await createVoucher({
         data: {
           code: vCode,
           email: vEmail,
@@ -336,7 +336,13 @@ function AdminCouponsPage() {
           notes: vNotes.trim() || null,
         },
       });
-      toast.success("Vale-presente criado.");
+      if (res?.email_sent) {
+        toast.success(`Vale-presente criado e e-mail enviado para ${vEmail}.`);
+      } else if (res?.email_error) {
+        toast.warning(`Vale-presente criado, mas o e-mail falhou: ${res.email_error}`);
+      } else {
+        toast.success("Vale-presente criado.");
+      }
       setVCode("");
       setVEmail("");
       setVAmount("");

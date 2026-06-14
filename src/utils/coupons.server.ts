@@ -236,7 +236,26 @@ export async function createGiftVoucherServer(
     .select()
     .single();
   if (error) throw new Response(error.message, { status: 500 });
-  return { coupon: { ...inserted, user_email: email } };
+
+  // Auto-envia o e-mail do vale-presente para o cliente
+  let emailSent = false;
+  let emailError: string | null = null;
+  try {
+    const sendRes = await sendGiftVoucherEmailServer(userId, inserted.id);
+    emailSent = !!sendRes?.ok;
+  } catch (e: any) {
+    emailError =
+      e instanceof Response
+        ? await e.text().catch(() => "Falha ao enviar e-mail.")
+        : e?.message || "Falha ao enviar e-mail.";
+    console.error("[gift-voucher] auto-send failed", emailError);
+  }
+
+  return {
+    coupon: { ...inserted, user_email: email },
+    email_sent: emailSent,
+    email_error: emailError,
+  };
 }
 
 export interface UpdateCouponInput {
