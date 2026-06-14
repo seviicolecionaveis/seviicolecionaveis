@@ -7,6 +7,9 @@ export type CardCategory = "Pokémon" | "Treinador" | "Energia";
 
 export const CARD_CATEGORIES: CardCategory[] = ["Pokémon", "Treinador", "Energia"];
 
+export type TrainerSubcategory = "Apoiador" | "Item" | "Ferramenta Pokémon" | "Estádio";
+export const TRAINER_SUBCATEGORIES: TrainerSubcategory[] = ["Apoiador", "Item", "Ferramenta Pokémon", "Estádio"];
+
 export const CONDITIONS: Condition[] = ["M", "NM", "SP", "MP", "HP", "D"];
 export const CONDITION_LABEL: Record<Condition, string> = {
   M: "M (Lacrada)",
