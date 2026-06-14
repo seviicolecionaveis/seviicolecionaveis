@@ -52,6 +52,7 @@ interface CardRow {
   finish: Finish;
   condition: Condition;
   category: CardCategory;
+  trainer_subcategory: TrainerSubcategory | null;
   stock: number;
   base_price_cents: number | null;
   image: string;
@@ -69,6 +70,7 @@ interface FormState {
   finish: Finish;
   condition: Condition;
   category: CardCategory;
+  trainer_subcategory: TrainerSubcategory | "";
   stock: string;
   price: string;
   image: string;
@@ -82,6 +84,7 @@ const EMPTY_FORM: FormState = {
   finish: "Normal",
   condition: "NM",
   category: "Pokémon",
+  trainer_subcategory: "",
   stock: "1",
   price: "",
   image: "",
