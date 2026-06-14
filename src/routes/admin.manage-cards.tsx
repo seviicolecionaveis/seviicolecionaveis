@@ -317,6 +317,7 @@ function AdminCardsManagePage() {
     const payload = {
       condition: quickForm.condition,
       category: quickForm.category,
+      trainer_subcategory: quickForm.category === "Treinador" && quickForm.trainer_subcategory ? quickForm.trainer_subcategory : null,
       stock: newStock,
       base_price_cents: quickForm.price.trim() === "" ? null : Math.round(parseFloat(quickForm.price.replace(",", ".")) * 100),
       image: quickForm.image.trim(),
