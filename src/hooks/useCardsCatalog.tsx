@@ -24,15 +24,17 @@ function buildCards(raw: RawCard[]): Card[] {
   const map = new Map<string, {
     id: string; name: string; image: string; number: string; collection: string;
     category: CardCategory;
+    trainerSubcategory: TrainerSubcategory | null;
     byLanguage: Map<Language, Map<string, FinishVariant>>;
   }>();
   for (const c of raw) {
     const key = `${c.name}__${c.collection}__${c.number}`;
     let wc = map.get(key);
     if (!wc) {
-      wc = { id: key, name: c.name, image: c.image, number: c.number, collection: c.collection, category: c.category ?? "Pokémon", byLanguage: new Map() };
+      wc = { id: key, name: c.name, image: c.image, number: c.number, collection: c.collection, category: c.category ?? "Pokémon", trainerSubcategory: c.trainerSubcategory ?? null, byLanguage: new Map() };
       map.set(key, wc);
     }
+    if (!wc.trainerSubcategory && c.trainerSubcategory) wc.trainerSubcategory = c.trainerSubcategory;
     if (wc.image.includes("placehold.co") && !c.image.includes("placehold.co")) wc.image = c.image;
     let langMap = wc.byLanguage.get(c.language);
     if (!langMap) { langMap = new Map(); wc.byLanguage.set(c.language, langMap); }
