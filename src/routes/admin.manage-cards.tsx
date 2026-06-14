@@ -666,12 +666,25 @@ function AdminCardsManagePage() {
                           <span className="font-semibold">Tipo</span>
                           <select
                             value={quickForm.category}
-                            onChange={(e) => setQuickForm({ ...quickForm, category: e.target.value as CardCategory })}
+                            onChange={(e) => setQuickForm({ ...quickForm, category: e.target.value as CardCategory, trainer_subcategory: e.target.value === "Treinador" ? quickForm.trainer_subcategory : "" })}
                             className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
                           >
                             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                           </select>
                         </label>
+                        {quickForm.category === "Treinador" && (
+                          <label className="text-xs space-y-1">
+                            <span className="font-semibold">Subtipo Treinador</span>
+                            <select
+                              value={quickForm.trainer_subcategory}
+                              onChange={(e) => setQuickForm({ ...quickForm, trainer_subcategory: e.target.value as TrainerSubcategory | "" })}
+                              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                            >
+                              <option value="">— Selecionar —</option>
+                              {TRAINER_SUBCATEGORIES.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </label>
+                        )}
                         <label className="text-xs space-y-1">
                           <span className="font-semibold">Estoque</span>
                           <input
