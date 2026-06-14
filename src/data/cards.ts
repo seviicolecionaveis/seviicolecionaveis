@@ -32,6 +32,7 @@ export interface RawCard {
   stock: number;
   price: number | null;
   category?: CardCategory;
+  trainerSubcategory?: TrainerSubcategory | null;
 }
 
 export interface FinishVariant {
