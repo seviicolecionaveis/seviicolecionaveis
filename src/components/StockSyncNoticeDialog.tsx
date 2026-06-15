@@ -7,13 +7,19 @@ import {
 } from "@/components/ui/dialog";
 import { AlertTriangle } from "lucide-react";
 
+import { DontShowAgainCheckbox } from "@/components/DontShowAgainCheckbox";
+import { getPermanentlyDismissed, useDontShowAgain } from "@/hooks/usePopupPreference";
+
 const STORAGE_KEY = "stock-sync-notice-dismissed";
+const POPUP_KEY = "stock-sync-notice";
 
 export function StockSyncNoticeDialog() {
   const [open, setOpen] = useState(false);
+  const { dontShowAgain, setDontShowAgain, commit } = useDontShowAgain(POPUP_KEY);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (getPermanentlyDismissed(POPUP_KEY)) return;
     const dismissed = sessionStorage.getItem(STORAGE_KEY);
     if (!dismissed) {
       const t = setTimeout(() => setOpen(true), 800);
@@ -23,7 +29,10 @@ export function StockSyncNoticeDialog() {
 
   const handleClose = (next: boolean) => {
     setOpen(next);
-    if (!next) sessionStorage.setItem(STORAGE_KEY, "1");
+    if (!next) {
+      sessionStorage.setItem(STORAGE_KEY, "1");
+      commit();
+    }
   };
 
   return (
