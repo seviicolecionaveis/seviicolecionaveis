@@ -105,6 +105,10 @@ function AccountPage() {
               </Link>
             </div>
           </TabsContent>
+
+          <TabsContent value="alertas" className="mt-6">
+            <StockAlertsManager />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
