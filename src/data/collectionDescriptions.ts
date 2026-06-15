@@ -28,6 +28,8 @@ export const COLLECTION_DESCRIPTIONS: Record<string, string> = {
     "Unbroken Bonds (2019) — expansão da era Sun & Moon com 234 cartas. Famosa pelas cartas de Reshiram & Charizard-GX e Dedenne-GX, uma das coleções mais populares da era SM.",
   "LOT - Trovões Perdidos":
     "Lost Thunder (2018) — expansão da era Sun & Moon com 236 cartas. Destaca-se pelas cartas de Lugia-GX e Tyranitar-GX, além de introduzir o conceito de Prism Star. Uma das maiores coleções da era SM.",
+  "BCR - Fronteiras Cruzadas":
+    "Boundaries Crossed (2012) — expansão da era Black & White com 149 cartas. Introduziu mecânicas de ACE SPEC e cartas de Pokémon EX como Black Kyurem e White Kyurem. Uma das coleções mais completas da era BW, com arte marcante e forte presença competitiva.",
 };
 
 export function getCollectionDescription(name: string): string | undefined {
