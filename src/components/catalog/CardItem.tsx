@@ -147,6 +147,21 @@ export function CardItem({ card, onClick }: Props) {
           className={`h-4 w-4 ${isFav ? "fill-brand-gold text-brand-gold" : "text-foreground"}`}
         />
       </button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          const res = compare.toggle(card);
+          if (res.full) toast.error(`Máximo de ${compare.max} cartas para comparar`);
+          else if (res.added) toast.success("Adicionada à comparação");
+        }}
+        aria-label={isCompared ? "Remover da comparação" : "Comparar"}
+        title="Comparar"
+        className={`absolute top-12 right-3 grid h-8 w-8 place-items-center rounded-full backdrop-blur shadow-sm transition ${
+          isCompared ? "bg-primary text-primary-foreground" : "bg-background/90 hover:bg-background text-foreground"
+        }`}
+      >
+        <Scale className="h-4 w-4" />
+      </button>
     </div>
   );
 }
