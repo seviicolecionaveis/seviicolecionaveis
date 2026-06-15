@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 import { template as loyaltyProgramLaunchTemplate } from './loyalty-program-launch'
 import { template as giftVoucherTemplate } from './gift-voucher'
 import { template as couponBroadcastTemplate } from './coupon-broadcast'
+import { template as backInStockTemplate } from './back-in-stock'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -20,4 +21,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'loyalty-program-launch': loyaltyProgramLaunchTemplate,
   'gift-voucher': giftVoucherTemplate,
   'coupon-broadcast': couponBroadcastTemplate,
+  'back-in-stock': backInStockTemplate,
 }

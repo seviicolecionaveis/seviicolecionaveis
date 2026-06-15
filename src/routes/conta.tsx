@@ -6,7 +6,8 @@ import { PersonalDataForm } from "@/components/account/PersonalDataForm";
 import { PreferencesForm } from "@/components/account/PreferencesForm";
 import { AddressesManager } from "@/components/account/AddressesManager";
 import { LoyaltyPointsCard } from "@/components/account/LoyaltyPointsCard";
-import { ShoppingBag, Heart, Layers, Sparkles } from "lucide-react";
+import { StockAlertsManager } from "@/components/account/StockAlertsManager";
+import { ShoppingBag, Heart, Layers, Sparkles, Bell } from "lucide-react";
 import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/conta")({
@@ -56,6 +57,7 @@ function AccountPage() {
             <TabsTrigger value="preferencias">Preferências</TabsTrigger>
             <TabsTrigger value="enderecos">Endereços</TabsTrigger>
             <TabsTrigger value="atalhos">Pedidos & Favoritos</TabsTrigger>
+            <TabsTrigger value="alertas"><Bell className="h-3.5 w-3.5 mr-1" />Alertas</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dados" className="mt-6">
@@ -102,6 +104,10 @@ function AccountPage() {
                 <p className="text-xs text-muted-foreground mt-1">Armazene cartas por até 30 dias</p>
               </Link>
             </div>
+          </TabsContent>
+
+          <TabsContent value="alertas" className="mt-6">
+            <StockAlertsManager />
           </TabsContent>
         </Tabs>
       </main>

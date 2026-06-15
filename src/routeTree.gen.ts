@@ -23,6 +23,7 @@ import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EnviosRouteImport } from './routes/envios'
 import { Route as ContaRouteImport } from './routes/conta'
+import { Route as ComparadorRouteImport } from './routes/comparador'
 import { Route as ColecoesRouteImport } from './routes/colecoes'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartasRouteImport } from './routes/cartas'
@@ -44,6 +45,7 @@ import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
 import { Route as AdminSealedRouteImport } from './routes/admin.sealed'
 import { Route as AdminPilhaRouteImport } from './routes/admin.pilha'
 import { Route as AdminPanelsRouteImport } from './routes/admin.panels'
+import { Route as AdminOfertasRelampagoRouteImport } from './routes/admin.ofertas-relampago'
 import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-cards'
 import { Route as AdminLoyaltyRouteImport } from './routes/admin.loyalty'
 import { Route as AdminLeiloesRouteImport } from './routes/admin.leiloes'
@@ -65,6 +67,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicPaymentsMercadopagoWebhookRouteImport } from './routes/api/public/payments/mercadopago-webhook'
 import { Route as ApiPublicMelhorenvioCallbackRouteImport } from './routes/api/public/melhorenvio/callback'
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
+import { Route as ApiPublicHooksStockBackCheckRouteImport } from './routes/api/public/hooks/stock-back-check'
 import { Route as ApiPublicHooksStackRemindersRouteImport } from './routes/api/public/hooks/stack-reminders'
 import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/public/hooks/price-drop-check'
 import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
@@ -138,6 +141,11 @@ const EnviosRoute = EnviosRouteImport.update({
 const ContaRoute = ContaRouteImport.update({
   id: '/conta',
   path: '/conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComparadorRoute = ComparadorRouteImport.update({
+  id: '/comparador',
+  path: '/comparador',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ColecoesRoute = ColecoesRouteImport.update({
@@ -243,6 +251,11 @@ const AdminPilhaRoute = AdminPilhaRouteImport.update({
 const AdminPanelsRoute = AdminPanelsRouteImport.update({
   id: '/panels',
   path: '/panels',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOfertasRelampagoRoute = AdminOfertasRelampagoRouteImport.update({
+  id: '/ofertas-relampago',
+  path: '/ofertas-relampago',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminManageCardsRoute = AdminManageCardsRouteImport.update({
@@ -357,6 +370,12 @@ const ApiPublicHooksUpdatePricesRoute =
     path: '/api/public/hooks/update-prices',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksStockBackCheckRoute =
+  ApiPublicHooksStockBackCheckRouteImport.update({
+    id: '/api/public/hooks/stock-back-check',
+    path: '/api/public/hooks/stock-back-check',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksStackRemindersRoute =
   ApiPublicHooksStackRemindersRouteImport.update({
     id: '/api/public/hooks/stack-reminders',
@@ -390,6 +409,7 @@ export interface FileRoutesByFullPath {
   '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/colecoes': typeof ColecoesRoute
+  '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
@@ -413,6 +433,7 @@ export interface FileRoutesByFullPath {
   '/admin/leiloes': typeof AdminLeiloesRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
+  '/admin/ofertas-relampago': typeof AdminOfertasRelampagoRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
   '/admin/sealed': typeof AdminSealedRoute
@@ -434,6 +455,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
+  '/api/public/hooks/stock-back-check': typeof ApiPublicHooksStockBackCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -452,6 +474,7 @@ export interface FileRoutesByTo {
   '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/colecoes': typeof ColecoesRoute
+  '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
@@ -473,6 +496,7 @@ export interface FileRoutesByTo {
   '/admin/leiloes': typeof AdminLeiloesRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
+  '/admin/ofertas-relampago': typeof AdminOfertasRelampagoRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
   '/admin/sealed': typeof AdminSealedRoute
@@ -494,6 +518,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
+  '/api/public/hooks/stock-back-check': typeof ApiPublicHooksStockBackCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -513,6 +538,7 @@ export interface FileRoutesById {
   '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/colecoes': typeof ColecoesRoute
+  '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
@@ -536,6 +562,7 @@ export interface FileRoutesById {
   '/admin/leiloes': typeof AdminLeiloesRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/manage-cards': typeof AdminManageCardsRoute
+  '/admin/ofertas-relampago': typeof AdminOfertasRelampagoRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
   '/admin/sealed': typeof AdminSealedRoute
@@ -557,6 +584,7 @@ export interface FileRoutesById {
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
+  '/api/public/hooks/stock-back-check': typeof ApiPublicHooksStockBackCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -577,6 +605,7 @@ export interface FileRouteTypes {
     | '/cartas'
     | '/checkout'
     | '/colecoes'
+    | '/comparador'
     | '/conta'
     | '/envios'
     | '/faq'
@@ -600,6 +629,7 @@ export interface FileRouteTypes {
     | '/admin/leiloes'
     | '/admin/loyalty'
     | '/admin/manage-cards'
+    | '/admin/ofertas-relampago'
     | '/admin/panels'
     | '/admin/pilha'
     | '/admin/sealed'
@@ -621,6 +651,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/stack-reminders'
+    | '/api/public/hooks/stock-back-check'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
@@ -639,6 +670,7 @@ export interface FileRouteTypes {
     | '/cartas'
     | '/checkout'
     | '/colecoes'
+    | '/comparador'
     | '/conta'
     | '/envios'
     | '/faq'
@@ -660,6 +692,7 @@ export interface FileRouteTypes {
     | '/admin/leiloes'
     | '/admin/loyalty'
     | '/admin/manage-cards'
+    | '/admin/ofertas-relampago'
     | '/admin/panels'
     | '/admin/pilha'
     | '/admin/sealed'
@@ -681,6 +714,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/stack-reminders'
+    | '/api/public/hooks/stock-back-check'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
@@ -699,6 +733,7 @@ export interface FileRouteTypes {
     | '/cartas'
     | '/checkout'
     | '/colecoes'
+    | '/comparador'
     | '/conta'
     | '/envios'
     | '/faq'
@@ -722,6 +757,7 @@ export interface FileRouteTypes {
     | '/admin/leiloes'
     | '/admin/loyalty'
     | '/admin/manage-cards'
+    | '/admin/ofertas-relampago'
     | '/admin/panels'
     | '/admin/pilha'
     | '/admin/sealed'
@@ -743,6 +779,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/stack-reminders'
+    | '/api/public/hooks/stock-back-check'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
@@ -762,6 +799,7 @@ export interface RootRouteChildren {
   CartasRoute: typeof CartasRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ColecoesRoute: typeof ColecoesRoute
+  ComparadorRoute: typeof ComparadorRoute
   ContaRoute: typeof ContaRoute
   EnviosRoute: typeof EnviosRoute
   FaqRoute: typeof FaqRoute
@@ -786,6 +824,7 @@ export interface RootRouteChildren {
   ApiPublicHooksExpireLoyaltyPointsRoute: typeof ApiPublicHooksExpireLoyaltyPointsRoute
   ApiPublicHooksPriceDropCheckRoute: typeof ApiPublicHooksPriceDropCheckRoute
   ApiPublicHooksStackRemindersRoute: typeof ApiPublicHooksStackRemindersRoute
+  ApiPublicHooksStockBackCheckRoute: typeof ApiPublicHooksStockBackCheckRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
   ApiPublicMelhorenvioCallbackRoute: typeof ApiPublicMelhorenvioCallbackRoute
   ApiPublicPaymentsMercadopagoWebhookRoute: typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -895,6 +934,13 @@ declare module '@tanstack/react-router' {
       path: '/conta'
       fullPath: '/conta'
       preLoaderRoute: typeof ContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comparador': {
+      id: '/comparador'
+      path: '/comparador'
+      fullPath: '/comparador'
+      preLoaderRoute: typeof ComparadorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/colecoes': {
@@ -1044,6 +1090,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPanelsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/ofertas-relampago': {
+      id: '/admin/ofertas-relampago'
+      path: '/ofertas-relampago'
+      fullPath: '/admin/ofertas-relampago'
+      preLoaderRoute: typeof AdminOfertasRelampagoRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/manage-cards': {
       id: '/admin/manage-cards'
       path: '/manage-cards'
@@ -1191,6 +1244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksUpdatePricesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/stock-back-check': {
+      id: '/api/public/hooks/stock-back-check'
+      path: '/api/public/hooks/stock-back-check'
+      fullPath: '/api/public/hooks/stock-back-check'
+      preLoaderRoute: typeof ApiPublicHooksStockBackCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/stack-reminders': {
       id: '/api/public/hooks/stack-reminders'
       path: '/api/public/hooks/stack-reminders'
@@ -1232,6 +1292,7 @@ interface AdminRouteChildren {
   AdminLeiloesRoute: typeof AdminLeiloesRoute
   AdminLoyaltyRoute: typeof AdminLoyaltyRoute
   AdminManageCardsRoute: typeof AdminManageCardsRoute
+  AdminOfertasRelampagoRoute: typeof AdminOfertasRelampagoRoute
   AdminPanelsRoute: typeof AdminPanelsRoute
   AdminPilhaRoute: typeof AdminPilhaRoute
   AdminSealedRoute: typeof AdminSealedRoute
@@ -1250,6 +1311,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminLeiloesRoute: AdminLeiloesRoute,
   AdminLoyaltyRoute: AdminLoyaltyRoute,
   AdminManageCardsRoute: AdminManageCardsRoute,
+  AdminOfertasRelampagoRoute: AdminOfertasRelampagoRoute,
   AdminPanelsRoute: AdminPanelsRoute,
   AdminPilhaRoute: AdminPilhaRoute,
   AdminSealedRoute: AdminSealedRoute,
@@ -1305,6 +1367,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartasRoute: CartasRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   ColecoesRoute: ColecoesRoute,
+  ComparadorRoute: ComparadorRoute,
   ContaRoute: ContaRoute,
   EnviosRoute: EnviosRoute,
   FaqRoute: FaqRoute,
@@ -1330,6 +1393,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksExpireLoyaltyPointsRoute,
   ApiPublicHooksPriceDropCheckRoute: ApiPublicHooksPriceDropCheckRoute,
   ApiPublicHooksStackRemindersRoute: ApiPublicHooksStackRemindersRoute,
+  ApiPublicHooksStockBackCheckRoute: ApiPublicHooksStockBackCheckRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,
   ApiPublicMelhorenvioCallbackRoute: ApiPublicMelhorenvioCallbackRoute,
   ApiPublicPaymentsMercadopagoWebhookRoute:
@@ -1344,13 +1408,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
