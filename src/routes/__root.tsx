@@ -155,6 +155,7 @@ function RootComponent() {
             <GlobalHeaderActions />
             <WhatsAppGroupDialog />
             <WhatsAppButton />
+            <CompareBar />
         </CartProvider>
       </WishlistProvider>
     </AuthProvider>
