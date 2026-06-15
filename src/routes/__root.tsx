@@ -12,6 +12,7 @@ import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { WhatsAppGroupDialog } from "@/components/WhatsAppGroupDialog";
 import { GlobalHeaderActions } from "@/components/GlobalHeaderActions";
+import { CompareBar } from "@/components/CompareBar";
 
 function NotFoundComponent() {
   return (
