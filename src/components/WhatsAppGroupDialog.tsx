@@ -82,7 +82,7 @@ export function WhatsAppGroupDialog() {
           Entrar no grupo
         </a>
 
-        <DialogFooter className="sm:justify-center">
+        <DialogFooter className="sm:justify-center flex-col gap-1">
           <button
             onClick={() => handleClose(false)}
             className="flex items-center gap-1 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
@@ -90,6 +90,11 @@ export function WhatsAppGroupDialog() {
             <X className="h-3 w-3" />
             Agora não
           </button>
+          <DontShowAgainCheckbox
+            checked={dontShowAgain}
+            onCheckedChange={setDontShowAgain}
+            id="whatsapp-group-dsa"
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>
