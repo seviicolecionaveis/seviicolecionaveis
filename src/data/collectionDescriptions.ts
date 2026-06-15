@@ -30,6 +30,8 @@ export const COLLECTION_DESCRIPTIONS: Record<string, string> = {
     "Lost Thunder (2018) — expansão da era Sun & Moon com 236 cartas. Destaca-se pelas cartas de Lugia-GX e Tyranitar-GX, além de introduzir o conceito de Prism Star. Uma das maiores coleções da era SM.",
   "BCR - Fronteiras Cruzadas":
     "Boundaries Crossed (2012) — expansão da era Black & White com 149 cartas. Introduziu mecânicas de ACE SPEC e cartas de Pokémon EX como Black Kyurem e White Kyurem. Uma das coleções mais completas da era BW, com arte marcante e forte presença competitiva.",
+  "EPO - Poderes Emergentes":
+    "Emerging Powers (2011) — expansão da era Black & White com 98 cartas. Destaca-se por trazer Pokémon de Unova como Darmanitan, Scolipede e Chandelure, além de introduzir mecânicas de deck building com Energia Prismática. Uma coleção essencial para completar a era BW e para fãs da região de Unova.",
 };
 
 export function getCollectionDescription(name: string): string | undefined {

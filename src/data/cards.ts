@@ -204,6 +204,7 @@ export const EXTRA_COLLECTIONS = [
   "XY - XY",
   "UNB - Elos Inquebráveis",
   "BCR - Fronteiras Cruzadas",
+  "EPO - Poderes Emergentes",
 ];
 
 export const COLLECTIONS = Array.from(
