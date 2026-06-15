@@ -21,10 +21,13 @@ export function WelcomeDialog() {
   const { user, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { dontShowAgain, setDontShowAgain, commit } = useDontShowAgain(POPUP_KEY);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (loading) return;
+
+    if (getPermanentlyDismissed(POPUP_KEY)) return;
 
     // Already shown in this session — don't reopen
     if (sessionStorage.getItem(SESSION_KEY)) return;
