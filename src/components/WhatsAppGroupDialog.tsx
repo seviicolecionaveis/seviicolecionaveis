@@ -9,6 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import { MessageCircle, X } from "lucide-react";
 import logo from "@/assets/logo.webp";
+import { DontShowAgainCheckbox } from "@/components/DontShowAgainCheckbox";
+import { getPermanentlyDismissed, useDontShowAgain } from "@/hooks/usePopupPreference";
+
+const POPUP_KEY = "whatsapp-group";
 
 const STORAGE_KEY = "whatsapp-group-dismissed-at";
 const GROUP_LINK = "https://chat.whatsapp.com/LfG18YtcQMJ8PBjNz5IogS";
