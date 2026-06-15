@@ -566,6 +566,56 @@ export type Database = {
         }
         Relationships: []
       }
+      flash_offers: {
+        Row: {
+          active: boolean
+          card_id: string
+          created_at: string
+          created_by: string | null
+          discount_percent: number
+          ends_at: string
+          id: string
+          max_uses: number | null
+          starts_at: string
+          updated_at: string
+          uses_count: number
+        }
+        Insert: {
+          active?: boolean
+          card_id: string
+          created_at?: string
+          created_by?: string | null
+          discount_percent: number
+          ends_at: string
+          id?: string
+          max_uses?: number | null
+          starts_at?: string
+          updated_at?: string
+          uses_count?: number
+        }
+        Update: {
+          active?: boolean
+          card_id?: string
+          created_at?: string
+          created_by?: string | null
+          discount_percent?: number
+          ends_at?: string
+          id?: string
+          max_uses?: number | null
+          starts_at?: string
+          updated_at?: string
+          uses_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flash_offers_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loyalty_points_ledger: {
         Row: {
           created_at: string
@@ -1032,6 +1082,39 @@ export type Database = {
           updated_at?: string
           user_id?: string
           whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_used_at: string | null
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_used_at?: string | null
+          p256dh: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_used_at?: string | null
+          p256dh?: string
+          user_agent?: string | null
+          user_id?: string
         }
         Relationships: []
       }
