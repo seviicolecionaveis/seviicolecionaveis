@@ -128,6 +128,11 @@ export function WelcomeDialog() {
         >
           Bora colecionar!
         </button>
+        <DontShowAgainCheckbox
+          checked={dontShowAgain}
+          onCheckedChange={setDontShowAgain}
+          id="welcome-dialog-dsa"
+        />
       </DialogContent>
     </Dialog>
   );
