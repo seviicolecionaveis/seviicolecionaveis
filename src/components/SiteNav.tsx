@@ -3,10 +3,13 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-const LINKS = [
+const CARTAS_GROUP = [
   { to: "/cartas", label: "Cartas" },
   { to: "/colecoes", label: "Coleções" },
   { to: "/mais-vendidas", label: "Mais vendidas" },
+] as const;
+
+const LINKS = [
   { to: "/imas", label: "Ímãs" },
   { to: "/acessorios", label: "Acessórios" },
   { to: "/selados", label: "Selados" },
@@ -21,12 +24,45 @@ const FAQ_GROUP = [
 ] as const;
 
 export function SiteNav({ className = "" }: { className?: string }) {
-  const [open, setOpen] = useState(false);
+  const [cartasOpen, setCartasOpen] = useState(false);
+  const [faqOpen, setFaqOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const cartasActive = CARTAS_GROUP.some((l) => pathname === l.to);
   const faqActive = FAQ_GROUP.some((l) => pathname === l.to);
 
   return (
     <nav className={`items-center gap-1 ${className}`}>
+      <Popover open={cartasOpen} onOpenChange={setCartasOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition ${
+              cartasActive
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+            }`}
+            aria-haspopup="menu"
+            aria-expanded={cartasOpen}
+          >
+            Cartas
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${cartasOpen ? "rotate-180" : ""}`} />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent align="start" sideOffset={6} className="w-56 p-1">
+          {CARTAS_GROUP.map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              onClick={() => setCartasOpen(false)}
+              className="block rounded-md px-3 py-2 text-sm text-foreground transition hover:bg-secondary"
+              activeProps={{ className: "bg-secondary font-semibold" }}
+            >
+              {l.label}
+            </Link>
+          ))}
+        </PopoverContent>
+      </Popover>
+
       {LINKS.map((l) => (
         <Link
           key={l.to}
@@ -38,7 +74,7 @@ export function SiteNav({ className = "" }: { className?: string }) {
         </Link>
       ))}
 
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={faqOpen} onOpenChange={setFaqOpen}>
         <PopoverTrigger asChild>
           <button
             type="button"
@@ -48,10 +84,10 @@ export function SiteNav({ className = "" }: { className?: string }) {
                 : "text-muted-foreground hover:bg-secondary hover:text-foreground"
             }`}
             aria-haspopup="menu"
-            aria-expanded={open}
+            aria-expanded={faqOpen}
           >
             Dúvidas (FAQ)
-            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${faqOpen ? "rotate-180" : ""}`} />
           </button>
         </PopoverTrigger>
         <PopoverContent align="start" sideOffset={6} className="w-56 p-1">
@@ -59,7 +95,7 @@ export function SiteNav({ className = "" }: { className?: string }) {
             <Link
               key={l.to}
               to={l.to}
-              onClick={() => setOpen(false)}
+              onClick={() => setFaqOpen(false)}
               className="block rounded-md px-3 py-2 text-sm text-foreground transition hover:bg-secondary"
               activeProps={{ className: "bg-secondary font-semibold" }}
             >
@@ -68,6 +104,14 @@ export function SiteNav({ className = "" }: { className?: string }) {
           ))}
         </PopoverContent>
       </Popover>
+
+      <Link
+        to="/avisos"
+        className="whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+        activeProps={{ className: "bg-foreground text-background hover:bg-foreground hover:text-background" }}
+      >
+        Avisos
+      </Link>
     </nav>
   );
 }

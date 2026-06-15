@@ -9,6 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import { MessageCircle, X } from "lucide-react";
 import logo from "@/assets/logo.webp";
+import { DontShowAgainCheckbox } from "@/components/DontShowAgainCheckbox";
+import { getPermanentlyDismissed, useDontShowAgain } from "@/hooks/usePopupPreference";
+
+const POPUP_KEY = "whatsapp-group";
 
 const STORAGE_KEY = "whatsapp-group-dismissed-at";
 const GROUP_LINK = "https://chat.whatsapp.com/LfG18YtcQMJ8PBjNz5IogS";
@@ -16,6 +20,7 @@ const DISMISS_DAYS = 7;
 
 function shouldShow() {
   if (typeof window === "undefined") return false;
+  if (getPermanentlyDismissed(POPUP_KEY)) return false;
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return true;
   const dismissedAt = parseInt(raw, 10);
@@ -27,6 +32,7 @@ function shouldShow() {
 
 export function WhatsAppGroupDialog() {
   const [open, setOpen] = useState(false);
+  const { dontShowAgain, setDontShowAgain, commit } = useDontShowAgain(POPUP_KEY);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -43,6 +49,7 @@ export function WhatsAppGroupDialog() {
     setOpen(next);
     if (!next) {
       localStorage.setItem(STORAGE_KEY, String(Date.now()));
+      commit();
     }
   };
 
@@ -75,7 +82,7 @@ export function WhatsAppGroupDialog() {
           Entrar no grupo
         </a>
 
-        <DialogFooter className="sm:justify-center">
+        <DialogFooter className="sm:justify-center flex-col gap-1">
           <button
             onClick={() => handleClose(false)}
             className="flex items-center gap-1 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
@@ -83,6 +90,11 @@ export function WhatsAppGroupDialog() {
             <X className="h-3 w-3" />
             Agora não
           </button>
+          <DontShowAgainCheckbox
+            checked={dontShowAgain}
+            onCheckedChange={setDontShowAgain}
+            id="whatsapp-group-dsa"
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

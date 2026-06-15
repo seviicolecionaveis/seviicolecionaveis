@@ -10,17 +10,24 @@ import { Sparkles, Check, Copy } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
+import { DontShowAgainCheckbox } from "@/components/DontShowAgainCheckbox";
+import { getPermanentlyDismissed, useDontShowAgain } from "@/hooks/usePopupPreference";
+
 const SESSION_KEY = "welcome-dialog-shown-session";
+const POPUP_KEY = "welcome-coupon";
 const COUPON = "PRIMEIRACOMPRA10";
 
 export function WelcomeDialog() {
   const { user, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { dontShowAgain, setDontShowAgain, commit } = useDontShowAgain(POPUP_KEY);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (loading) return;
+
+    if (getPermanentlyDismissed(POPUP_KEY)) return;
 
     // Already shown in this session — don't reopen
     if (sessionStorage.getItem(SESSION_KEY)) return;
@@ -58,6 +65,7 @@ export function WelcomeDialog() {
 
   const handleClose = (next: boolean) => {
     setOpen(next);
+    if (!next) commit();
   };
 
   const handleCopy = async () => {
@@ -120,6 +128,11 @@ export function WelcomeDialog() {
         >
           Bora colecionar!
         </button>
+        <DontShowAgainCheckbox
+          checked={dontShowAgain}
+          onCheckedChange={setDontShowAgain}
+          id="welcome-dialog-dsa"
+        />
       </DialogContent>
     </Dialog>
   );
