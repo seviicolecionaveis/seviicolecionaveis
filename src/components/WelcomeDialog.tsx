@@ -65,6 +65,7 @@ export function WelcomeDialog() {
 
   const handleClose = (next: boolean) => {
     setOpen(next);
+    if (!next) commit();
   };
 
   const handleCopy = async () => {
