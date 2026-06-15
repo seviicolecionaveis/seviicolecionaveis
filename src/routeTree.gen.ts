@@ -66,6 +66,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicPaymentsMercadopagoWebhookRouteImport } from './routes/api/public/payments/mercadopago-webhook'
 import { Route as ApiPublicMelhorenvioCallbackRouteImport } from './routes/api/public/melhorenvio/callback'
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
+import { Route as ApiPublicHooksStockBackCheckRouteImport } from './routes/api/public/hooks/stock-back-check'
 import { Route as ApiPublicHooksStackRemindersRouteImport } from './routes/api/public/hooks/stack-reminders'
 import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/public/hooks/price-drop-check'
 import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
@@ -363,6 +364,12 @@ const ApiPublicHooksUpdatePricesRoute =
     path: '/api/public/hooks/update-prices',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksStockBackCheckRoute =
+  ApiPublicHooksStockBackCheckRouteImport.update({
+    id: '/api/public/hooks/stock-back-check',
+    path: '/api/public/hooks/stock-back-check',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksStackRemindersRoute =
   ApiPublicHooksStackRemindersRouteImport.update({
     id: '/api/public/hooks/stack-reminders',
@@ -441,6 +448,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
+  '/api/public/hooks/stock-back-check': typeof ApiPublicHooksStockBackCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -502,6 +510,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
+  '/api/public/hooks/stock-back-check': typeof ApiPublicHooksStockBackCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -566,6 +575,7 @@ export interface FileRoutesById {
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
+  '/api/public/hooks/stock-back-check': typeof ApiPublicHooksStockBackCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
   '/api/public/melhorenvio/callback': typeof ApiPublicMelhorenvioCallbackRoute
   '/api/public/payments/mercadopago-webhook': typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -631,6 +641,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/stack-reminders'
+    | '/api/public/hooks/stock-back-check'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
@@ -692,6 +703,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/stack-reminders'
+    | '/api/public/hooks/stock-back-check'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
@@ -755,6 +767,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
     | '/api/public/hooks/stack-reminders'
+    | '/api/public/hooks/stock-back-check'
     | '/api/public/hooks/update-prices'
     | '/api/public/melhorenvio/callback'
     | '/api/public/payments/mercadopago-webhook'
@@ -799,6 +812,7 @@ export interface RootRouteChildren {
   ApiPublicHooksExpireLoyaltyPointsRoute: typeof ApiPublicHooksExpireLoyaltyPointsRoute
   ApiPublicHooksPriceDropCheckRoute: typeof ApiPublicHooksPriceDropCheckRoute
   ApiPublicHooksStackRemindersRoute: typeof ApiPublicHooksStackRemindersRoute
+  ApiPublicHooksStockBackCheckRoute: typeof ApiPublicHooksStockBackCheckRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
   ApiPublicMelhorenvioCallbackRoute: typeof ApiPublicMelhorenvioCallbackRoute
   ApiPublicPaymentsMercadopagoWebhookRoute: typeof ApiPublicPaymentsMercadopagoWebhookRoute
@@ -1211,6 +1225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksUpdatePricesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/stock-back-check': {
+      id: '/api/public/hooks/stock-back-check'
+      path: '/api/public/hooks/stock-back-check'
+      fullPath: '/api/public/hooks/stock-back-check'
+      preLoaderRoute: typeof ApiPublicHooksStockBackCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/stack-reminders': {
       id: '/api/public/hooks/stack-reminders'
       path: '/api/public/hooks/stack-reminders'
@@ -1351,6 +1372,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksExpireLoyaltyPointsRoute,
   ApiPublicHooksPriceDropCheckRoute: ApiPublicHooksPriceDropCheckRoute,
   ApiPublicHooksStackRemindersRoute: ApiPublicHooksStackRemindersRoute,
+  ApiPublicHooksStockBackCheckRoute: ApiPublicHooksStockBackCheckRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,
   ApiPublicMelhorenvioCallbackRoute: ApiPublicMelhorenvioCallbackRoute,
   ApiPublicPaymentsMercadopagoWebhookRoute:
