@@ -27,6 +27,7 @@ import { Route as ComparadorRouteImport } from './routes/comparador'
 import { Route as ColecoesRouteImport } from './routes/colecoes'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartasRouteImport } from './routes/cartas'
+import { Route as AvisosRouteImport } from './routes/avisos'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
@@ -161,6 +162,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const CartasRoute = CartasRouteImport.update({
   id: '/cartas',
   path: '/cartas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvisosRoute = AvisosRouteImport.update({
+  id: '/avisos',
+  path: '/avisos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -406,6 +412,7 @@ export interface FileRoutesByFullPath {
   '/acessorios': typeof AcessoriosRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/avisos': typeof AvisosRoute
   '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/colecoes': typeof ColecoesRoute
@@ -471,6 +478,7 @@ export interface FileRoutesByTo {
   '/acessorios': typeof AcessoriosRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/avisos': typeof AvisosRoute
   '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/colecoes': typeof ColecoesRoute
@@ -535,6 +543,7 @@ export interface FileRoutesById {
   '/acessorios': typeof AcessoriosRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/avisos': typeof AvisosRoute
   '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/colecoes': typeof ColecoesRoute
@@ -602,6 +611,7 @@ export interface FileRouteTypes {
     | '/acessorios'
     | '/admin'
     | '/auth'
+    | '/avisos'
     | '/cartas'
     | '/checkout'
     | '/colecoes'
@@ -667,6 +677,7 @@ export interface FileRouteTypes {
     | '/acessorios'
     | '/admin'
     | '/auth'
+    | '/avisos'
     | '/cartas'
     | '/checkout'
     | '/colecoes'
@@ -730,6 +741,7 @@ export interface FileRouteTypes {
     | '/acessorios'
     | '/admin'
     | '/auth'
+    | '/avisos'
     | '/cartas'
     | '/checkout'
     | '/colecoes'
@@ -796,6 +808,7 @@ export interface RootRouteChildren {
   AcessoriosRoute: typeof AcessoriosRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
+  AvisosRoute: typeof AvisosRoute
   CartasRoute: typeof CartasRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ColecoesRoute: typeof ColecoesRoute
@@ -962,6 +975,13 @@ declare module '@tanstack/react-router' {
       path: '/cartas'
       fullPath: '/cartas'
       preLoaderRoute: typeof CartasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/avisos': {
+      id: '/avisos'
+      path: '/avisos'
+      fullPath: '/avisos'
+      preLoaderRoute: typeof AvisosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -1364,6 +1384,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcessoriosRoute: AcessoriosRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
+  AvisosRoute: AvisosRoute,
   CartasRoute: CartasRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   ColecoesRoute: ColecoesRoute,
@@ -1408,13 +1429,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
