@@ -3,6 +3,8 @@ import { priceLookupKey, useCardPrices } from "@/hooks/useCardPrices";
 import { cardCreatedAt } from "@/hooks/useCardsCatalog";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCompare } from "@/hooks/useCompare";
+import { useFlashOffers } from "@/hooks/useFlashOffers";
+import { FlashOfferBadge } from "@/components/FlashOfferBadge";
 import { toast } from "sonner";
 import { Heart, Scale } from "lucide-react";
 
