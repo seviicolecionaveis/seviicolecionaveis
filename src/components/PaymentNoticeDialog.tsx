@@ -9,13 +9,19 @@ import {
 } from "@/components/ui/dialog";
 import { AlertTriangle, Mail } from "lucide-react";
 
+import { DontShowAgainCheckbox } from "@/components/DontShowAgainCheckbox";
+import { getPermanentlyDismissed, useDontShowAgain } from "@/hooks/usePopupPreference";
+
 const STORAGE_KEY = "payment-notice-dismissed";
+const POPUP_KEY = "payment-notice";
 
 export function PaymentNoticeDialog() {
   const [open, setOpen] = useState(false);
+  const { dontShowAgain, setDontShowAgain, commit } = useDontShowAgain(POPUP_KEY);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (getPermanentlyDismissed(POPUP_KEY)) return;
     const dismissed = sessionStorage.getItem(STORAGE_KEY);
     if (!dismissed) {
       const t = setTimeout(() => setOpen(true), 400);
@@ -25,7 +31,10 @@ export function PaymentNoticeDialog() {
 
   const handleClose = (next: boolean) => {
     setOpen(next);
-    if (!next) sessionStorage.setItem(STORAGE_KEY, "1");
+    if (!next) {
+      sessionStorage.setItem(STORAGE_KEY, "1");
+      commit();
+    }
   };
 
   return (
