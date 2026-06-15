@@ -57,13 +57,18 @@ export function PaymentNoticeDialog() {
           <Mail className="h-4 w-4" />
           seviicolecionaveis@gmail.com
         </a>
-        <DialogFooter className="sm:justify-center">
+        <DialogFooter className="sm:justify-center flex-col gap-1">
           <button
             onClick={() => handleClose(false)}
             className="text-xs text-muted-foreground underline underline-offset-2"
           >
             Entendi, continuar navegando
           </button>
+          <DontShowAgainCheckbox
+            checked={dontShowAgain}
+            onCheckedChange={setDontShowAgain}
+            id="payment-notice-dsa"
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>
