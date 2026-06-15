@@ -85,8 +85,8 @@ function AvisosPage() {
                   >
                     <Icon className="h-5 w-5" />
                   </div>
-                  <div className="flex-1 min-w-0 text-center">
-                    <div className="flex flex-wrap items-center justify-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                         {notice.category}
                       </span>
@@ -103,7 +103,7 @@ function AvisosPage() {
                     <p className="mt-1 text-sm text-muted-foreground">{notice.summary}</p>
                     <div className="mt-3 space-y-2 text-sm leading-relaxed text-foreground">
                       {notice.body.map((p, i) => (
-                        <p key={i} className="text-center">{p}</p>
+                        <p key={i} className="text-justify">{p}</p>
                       ))}
                     </div>
                   </div>
