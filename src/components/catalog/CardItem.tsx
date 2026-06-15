@@ -80,6 +80,11 @@ export function CardItem({ card, onClick }: Props) {
             </span>
           </div>
         )}
+        {offer && !out && (
+          <div className="absolute top-2 left-2">
+            <FlashOfferBadge discountPercent={offer.discount_percent} endsAt={offer.ends_at} compact />
+          </div>
+        )}
       </div>
       <div className="mt-3 flex items-center gap-1 flex-nowrap overflow-hidden">
         <span className="shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[9px] font-bold tracking-tight">
