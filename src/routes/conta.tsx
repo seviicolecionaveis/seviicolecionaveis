@@ -57,6 +57,7 @@ function AccountPage() {
             <TabsTrigger value="preferencias">Preferências</TabsTrigger>
             <TabsTrigger value="enderecos">Endereços</TabsTrigger>
             <TabsTrigger value="atalhos">Pedidos & Favoritos</TabsTrigger>
+            <TabsTrigger value="alertas"><Bell className="h-3.5 w-3.5 mr-1" />Alertas</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dados" className="mt-6">
