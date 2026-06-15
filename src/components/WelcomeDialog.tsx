@@ -10,7 +10,11 @@ import { Sparkles, Check, Copy } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
+import { DontShowAgainCheckbox } from "@/components/DontShowAgainCheckbox";
+import { getPermanentlyDismissed, useDontShowAgain } from "@/hooks/usePopupPreference";
+
 const SESSION_KEY = "welcome-dialog-shown-session";
+const POPUP_KEY = "welcome-coupon";
 const COUPON = "PRIMEIRACOMPRA10";
 
 export function WelcomeDialog() {
