@@ -23,6 +23,7 @@ import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EnviosRouteImport } from './routes/envios'
 import { Route as ContaRouteImport } from './routes/conta'
+import { Route as ComparadorRouteImport } from './routes/comparador'
 import { Route as ColecoesRouteImport } from './routes/colecoes'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartasRouteImport } from './routes/cartas'
@@ -138,6 +139,11 @@ const EnviosRoute = EnviosRouteImport.update({
 const ContaRoute = ContaRouteImport.update({
   id: '/conta',
   path: '/conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComparadorRoute = ComparadorRouteImport.update({
+  id: '/comparador',
+  path: '/comparador',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ColecoesRoute = ColecoesRouteImport.update({
@@ -390,6 +396,7 @@ export interface FileRoutesByFullPath {
   '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/colecoes': typeof ColecoesRoute
+  '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
@@ -452,6 +459,7 @@ export interface FileRoutesByTo {
   '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/colecoes': typeof ColecoesRoute
+  '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
@@ -513,6 +521,7 @@ export interface FileRoutesById {
   '/cartas': typeof CartasRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/colecoes': typeof ColecoesRoute
+  '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
@@ -577,6 +586,7 @@ export interface FileRouteTypes {
     | '/cartas'
     | '/checkout'
     | '/colecoes'
+    | '/comparador'
     | '/conta'
     | '/envios'
     | '/faq'
@@ -639,6 +649,7 @@ export interface FileRouteTypes {
     | '/cartas'
     | '/checkout'
     | '/colecoes'
+    | '/comparador'
     | '/conta'
     | '/envios'
     | '/faq'
@@ -699,6 +710,7 @@ export interface FileRouteTypes {
     | '/cartas'
     | '/checkout'
     | '/colecoes'
+    | '/comparador'
     | '/conta'
     | '/envios'
     | '/faq'
@@ -762,6 +774,7 @@ export interface RootRouteChildren {
   CartasRoute: typeof CartasRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ColecoesRoute: typeof ColecoesRoute
+  ComparadorRoute: typeof ComparadorRoute
   ContaRoute: typeof ContaRoute
   EnviosRoute: typeof EnviosRoute
   FaqRoute: typeof FaqRoute
@@ -895,6 +908,13 @@ declare module '@tanstack/react-router' {
       path: '/conta'
       fullPath: '/conta'
       preLoaderRoute: typeof ContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comparador': {
+      id: '/comparador'
+      path: '/comparador'
+      fullPath: '/comparador'
+      preLoaderRoute: typeof ComparadorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/colecoes': {
@@ -1305,6 +1325,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartasRoute: CartasRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   ColecoesRoute: ColecoesRoute,
+  ComparadorRoute: ComparadorRoute,
   ContaRoute: ContaRoute,
   EnviosRoute: EnviosRoute,
   FaqRoute: FaqRoute,
