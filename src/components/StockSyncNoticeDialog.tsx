@@ -74,6 +74,11 @@ export function StockSyncNoticeDialog() {
         >
           Entendi, continuar navegando
         </button>
+        <DontShowAgainCheckbox
+          checked={dontShowAgain}
+          onCheckedChange={setDontShowAgain}
+          id="stock-sync-notice-dsa"
+        />
       </DialogContent>
     </Dialog>
   );
