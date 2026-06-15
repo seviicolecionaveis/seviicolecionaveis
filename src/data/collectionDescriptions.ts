@@ -32,6 +32,8 @@ export const COLLECTION_DESCRIPTIONS: Record<string, string> = {
     "Boundaries Crossed (2012) — expansão da era Black & White com 149 cartas. Introduziu mecânicas de ACE SPEC e cartas de Pokémon EX como Black Kyurem e White Kyurem. Uma das coleções mais completas da era BW, com arte marcante e forte presença competitiva.",
   "EPO - Poderes Emergentes":
     "Emerging Powers (2011) — expansão da era Black & White com 98 cartas. Destaca-se por trazer Pokémon de Unova como Darmanitan, Scolipede e Chandelure, além de introduzir mecânicas de deck building com Energia Prismática. Uma coleção essencial para completar a era BW e para fãs da região de Unova.",
+  "BLW - Black and White":
+    "Black & White (2011) — coleção base da quinta geração do TCG Pokémon, com 114 cartas. Marca o início da era Black & White e introduz Pokémon lendários de Unova como Reshiram e Zekrom, além de trazer novas mecânicas de jogo e cartas de Treinador atualizadas. Essencial para colecionadores da era BW.",
 };
 
 export function getCollectionDescription(name: string): string | undefined {
