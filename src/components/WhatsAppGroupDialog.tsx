@@ -20,6 +20,7 @@ const DISMISS_DAYS = 7;
 
 function shouldShow() {
   if (typeof window === "undefined") return false;
+  if (getPermanentlyDismissed(POPUP_KEY)) return false;
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return true;
   const dismissedAt = parseInt(raw, 10);
@@ -31,6 +32,7 @@ function shouldShow() {
 
 export function WhatsAppGroupDialog() {
   const [open, setOpen] = useState(false);
+  const { dontShowAgain, setDontShowAgain, commit } = useDontShowAgain(POPUP_KEY);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -47,6 +49,7 @@ export function WhatsAppGroupDialog() {
     setOpen(next);
     if (!next) {
       localStorage.setItem(STORAGE_KEY, String(Date.now()));
+      commit();
     }
   };
 
