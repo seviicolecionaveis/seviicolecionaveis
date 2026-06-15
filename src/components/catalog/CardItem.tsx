@@ -34,6 +34,8 @@ export function CardItem({ card, onClick }: Props) {
   const { has, toggle } = useWishlist();
   const out = card.stock === 0;
   const isFav = has(card.id);
+  const compare = useCompare();
+  const isCompared = compare.has(card.id);
   const createdAt = cardCreatedAt.get(card.id);
   const isNew = createdAt
     ? Date.now() - new Date(createdAt).getTime() < 14 * 24 * 60 * 60 * 1000
