@@ -34,6 +34,8 @@ export const COLLECTION_DESCRIPTIONS: Record<string, string> = {
     "Emerging Powers (2011) — expansão da era Black & White com 98 cartas. Destaca-se por trazer Pokémon de Unova como Darmanitan, Scolipede e Chandelure, além de introduzir mecânicas de deck building com Energia Prismática. Uma coleção essencial para completar a era BW e para fãs da região de Unova.",
   "BLW - Black and White":
     "Black & White (2011) — coleção base da quinta geração do TCG Pokémon, com 114 cartas. Marca o início da era Black & White e introduz Pokémon lendários de Unova como Reshiram e Zekrom, além de trazer novas mecânicas de jogo e cartas de Treinador atualizadas. Essencial para colecionadores da era BW.",
+  "HIF - Destinos Ocultos":
+    "Hidden Fates / Destinos Ocultos (2019) — coleção especial da era Sun & Moon com 69 cartas no set principal e um subset Shiny Vault de 94 cartas. Famosa por trazer versões Shiny de Pokémon populares como Charizard-GX, Mewtwo-GX e Rayquaza-GX em arte alternativa. Uma das coleções mais desejadas pelos colecionadores devido à raridade dos Shiny Vault e ao valor de mercado das cartas especiais.",
 };
 
 export function getCollectionDescription(name: string): string | undefined {
