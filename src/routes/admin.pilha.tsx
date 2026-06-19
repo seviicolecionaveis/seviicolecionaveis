@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { ImageOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { adminUpdateServiceOrder, adminRestoreItemToStack } from "@/lib/service-orders-admin.functions";
+import { adminUpdateServiceOrder, adminRestoreItemToStack, adminCheckServiceOrderPayment } from "@/lib/service-orders-admin.functions";
 import {
   adminGetPilhaData,
   adminAdjustStackItem,
