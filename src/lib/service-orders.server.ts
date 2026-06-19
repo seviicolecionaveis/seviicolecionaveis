@@ -166,7 +166,10 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
   }
 
   // Gera Pix
-  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
+  // Use the custom domain by default — the lovable.app URL responds with a 307
+  // redirect to the custom domain, which Mercado Pago's webhook delivery does
+  // not follow reliably, causing missed payment notifications.
+  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.com.br";
   const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
   const [firstName, ...rest] = (input.address?.recipientName ?? "Cliente").trim().split(/\s+/);
   const lastName = rest.join(" ") || "Sevii";

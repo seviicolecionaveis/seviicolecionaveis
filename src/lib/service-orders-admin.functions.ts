@@ -103,3 +103,53 @@ export const adminRestoreItemToStack = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const CheckPaymentSchema = z.object({
+  serviceOrderId: z.string().uuid(),
+});
+
+/**
+ * Consulta o Mercado Pago pelo external_reference (`so:<id>`) e, se houver
+ * pagamento aprovado, marca a OS como paga. Útil quando o webhook do MP não
+ * chega (rede, downtime, retries esgotados).
+ */
+export const adminCheckServiceOrderPayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => CheckPaymentSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: roleRow } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!roleRow) throw new Error("Apenas administradores.");
+
+    const { findPaymentByExternalReference } = await import("@/lib/mercadopago.server");
+    const payment = await findPaymentByExternalReference(`so:${data.serviceOrderId}`);
+
+    if (!payment) {
+      return { found: false as const, status: null, message: "Nenhum pagamento encontrado no Mercado Pago." };
+    }
+
+    if (payment.status === "approved") {
+      const { markServiceOrderPaid } = await import("@/lib/service-orders.server");
+      await markServiceOrderPaid(data.serviceOrderId);
+      return {
+        found: true as const,
+        status: "approved" as const,
+        paymentId: payment.id,
+        message: "Pagamento confirmado e OS marcada como paga.",
+      };
+    }
+
+    return {
+      found: true as const,
+      status: payment.status,
+      paymentId: payment.id,
+      message: `Pagamento encontrado, mas status é "${payment.status}". OS não foi alterada.`,
+    };
+  });
+
+
