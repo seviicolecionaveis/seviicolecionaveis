@@ -422,7 +422,8 @@ function AdminPilhaPage() {
               tab === "orders" ? "bg-foreground text-background" : "bg-secondary"
             }`}
           >
-            Ordens de Serviço ({data.serviceOrders.length})
+            Ordens de Serviço ({filteredServiceOrders.length}
+            {filteredServiceOrders.length !== data.serviceOrders.length ? `/${data.serviceOrders.length}` : ""})
           </button>
           <button
             onClick={() => setTab("stacks")}
@@ -430,7 +431,8 @@ function AdminPilhaPage() {
               tab === "stacks" ? "bg-foreground text-background" : "bg-secondary"
             }`}
           >
-            Pilhas Ativas ({data.stacks.length})
+            Pilhas Ativas ({visibleStacks.length}
+            {visibleStacks.length !== data.stacks.length ? `/${data.stacks.length}` : ""})
           </button>
         </div>
 
