@@ -617,7 +617,7 @@ function AdminPilhaPage() {
                       </div>
 
                       {o.method === "correios" &&
-                        (o.status === "paid" || o.status === "dispatched") && (
+                        (o.status === "paid" || o.status === "preparing" || o.status === "dispatched") && (
                           <TrackingForm
                             order={o}
                             onSave={(carrier, code, url) =>
