@@ -844,7 +844,7 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     };
   }
 
-  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
+  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.com.br";
   const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
 
   const [firstName, ...rest] = data.address.recipientName.trim().split(/\s+/);
@@ -1022,7 +1022,7 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
     return { orderId: order.id, status: "approved" as const };
   }
 
-  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
+  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.com.br";
   const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
 
   const [firstName, ...rest] = data.address.recipientName.trim().split(/\s+/);
@@ -1085,7 +1085,7 @@ export async function regeneratePixForExistingOrderServer(orderId: string, userI
   if (!order || order.user_id !== userId) throw new Error("Pedido não encontrado");
   if (order.status !== "pending") throw new Error("Este pedido não está mais pendente.");
 
-  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
+  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.com.br";
   const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
 
   const [firstName, ...rest] = (order.recipient_name ?? "Cliente").trim().split(/\s+/);
@@ -1144,7 +1144,7 @@ export async function payExistingOrderWithCardServer(
   if (!order || order.user_id !== userId) throw new Error("Pedido não encontrado");
   if (order.status !== "pending") throw new Error("Este pedido não está mais pendente.");
 
-  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.lovable.app";
+  const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.com.br";
   const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
 
   const [firstName, ...rest] = (order.recipient_name ?? "Cliente").trim().split(/\s+/);
