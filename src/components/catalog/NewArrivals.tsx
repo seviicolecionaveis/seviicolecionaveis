@@ -1,33 +1,62 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useCardsCatalog, cardCreatedAt } from "@/hooks/useCardsCatalog";
 import { CardItem } from "./CardItem";
 import { CardModal } from "./CardModal";
+import { SealedModal, type Sealed } from "./SealedModal";
+import { supabase } from "@/integrations/supabase/client";
 import type { Card } from "@/data/cards";
 
 interface Props {
-  /** Show cards added within the last N days. Default 21. */
+  /** Show items added within the last N days. Default 21. */
   windowDays?: number;
   /** Max items to show. Default 12. */
   limit?: number;
 }
 
+type Entry =
+  | { kind: "card"; t: number; card: Card }
+  | { kind: "sealed"; t: number; sealed: Sealed };
+
 export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
   const { cards } = useCardsCatalog();
-  const [active, setActive] = useState<Card | null>(null);
+  const [activeCard, setActiveCard] = useState<Card | null>(null);
+  const [activeSealed, setActiveSealed] = useState<Sealed | null>(null);
+  const [sealed, setSealed] = useState<Array<Sealed & { created_at: string }>>([]);
 
-  const items = useMemo(() => {
-    if (!cards.length) return [];
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const cutoff = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
+      const { data } = await supabase
+        .from("sealed_products")
+        .select("id, title, description, price_cents, stock, images, is_preorder, release_date, product_type, collection, language, distribution, condition, age_rating, sku, created_at")
+        .eq("active", true)
+        .gte("created_at", cutoff)
+        .order("created_at", { ascending: false });
+      if (!cancelled) setSealed((data ?? []) as Array<Sealed & { created_at: string }>);
+    })();
+    return () => { cancelled = true; };
+  }, [windowDays]);
+
+  const items = useMemo<Entry[]>(() => {
     const cutoff = Date.now() - windowDays * 24 * 60 * 60 * 1000;
-    const withDates = cards
+    const cardEntries: Entry[] = cards
       .map((c) => {
         const ts = cardCreatedAt.get(c.id);
-        return ts ? { c, t: new Date(ts).getTime() } : null;
+        if (!ts) return null;
+        const t = new Date(ts).getTime();
+        if (t < cutoff || c.stock <= 0) return null;
+        return { kind: "card" as const, t, card: c };
       })
-      .filter((x): x is { c: Card; t: number } => !!x && x.t >= cutoff && x.c.stock > 0);
-    withDates.sort((a, b) => b.t - a.t);
-    return withDates.slice(0, limit).map((x) => x.c);
-  }, [cards, windowDays, limit]);
+      .filter((x): x is Entry => !!x);
+    const sealedEntries: Entry[] = sealed
+      .filter((s) => (s.stock > 0 || s.is_preorder))
+      .map((s) => ({ kind: "sealed" as const, t: new Date(s.created_at).getTime(), sealed: s }));
+    const all = [...cardEntries, ...sealedEntries];
+    all.sort((a, b) => b.t - a.t);
+    return all.slice(0, limit);
+  }, [cards, sealed, windowDays, limit]);
 
   if (items.length < 4) return null;
 
@@ -42,16 +71,55 @@ export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
             </h2>
           </div>
           <p className="text-xs text-muted-foreground">
-            Adicionadas nas últimas {windowDays >= 7 ? `${Math.round(windowDays / 7)} semanas` : `${windowDays} dias`}
+            Adicionados nas últimas {windowDays >= 7 ? `${Math.round(windowDays / 7)} semanas` : `${windowDays} dias`}
           </p>
         </div>
         <div className="grid grid-cols-3 gap-x-4 gap-y-8 sm:gap-x-6 md:grid-cols-4 lg:grid-cols-6">
-          {items.map((card) => (
-            <CardItem key={card.id} card={card} onClick={() => setActive(card)} />
-          ))}
+          {items.map((entry) =>
+            entry.kind === "card" ? (
+              <CardItem
+                key={`c-${entry.card.id}`}
+                card={entry.card}
+                onClick={() => setActiveCard(entry.card)}
+              />
+            ) : (
+              <button
+                key={`s-${entry.sealed.id}`}
+                onClick={() => setActiveSealed(entry.sealed)}
+                className="group text-left"
+              >
+                <div className="relative aspect-square overflow-hidden rounded-lg bg-secondary">
+                  {entry.sealed.images[0] ? (
+                    <img
+                      src={entry.sealed.images[0]}
+                      alt={entry.sealed.title}
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">
+                      Sem imagem
+                    </div>
+                  )}
+                  <span className="absolute left-2 top-2 rounded bg-brand-gold px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-background shadow">
+                    Selado
+                  </span>
+                  {entry.sealed.is_preorder && (
+                    <span className="absolute right-2 top-2 rounded bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow">
+                      Pré-venda
+                    </span>
+                  )}
+                </div>
+                <p className="mt-2 text-sm font-semibold line-clamp-2">{entry.sealed.title}</p>
+                <p className="text-sm text-muted-foreground">
+                  R$ {(entry.sealed.price_cents / 100).toFixed(2).replace(".", ",")}
+                </p>
+              </button>
+            )
+          )}
         </div>
       </div>
-      <CardModal card={active} onClose={() => setActive(null)} />
+      <CardModal card={activeCard} onClose={() => setActiveCard(null)} />
+      <SealedModal item={activeSealed} onClose={() => setActiveSealed(null)} />
     </section>
   );
 }
