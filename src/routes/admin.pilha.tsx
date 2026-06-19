@@ -384,7 +384,7 @@ function AdminPilhaPage() {
 
   async function patch(id: string, body: {
     serviceOrderId: string;
-    status?: "paid" | "dispatched" | "delivered" | "cancelled";
+    status?: "paid" | "preparing" | "dispatched" | "delivered" | "cancelled";
     carrier?: "correios" | "latam" | "pickup" | null;
     trackingCode?: string | null;
     trackingUrl?: string | null;
