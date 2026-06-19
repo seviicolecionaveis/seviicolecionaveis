@@ -665,12 +665,41 @@ function AdminPilhaPage() {
                 );
               })}
             </div>
-          )
-        ) : data.stacks.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma pilha ativa.</p>
+            )}
+          </>
+        ) : visibleStacks.length === 0 ? (
+          <>
+            <p className="text-sm text-muted-foreground">
+              {data.stacks.length === 0
+                ? "Nenhuma pilha ativa."
+                : "Nenhuma pilha com cartas no momento."}
+            </p>
+            {hiddenEmptyCount > 0 && (
+              <label className="mt-2 inline-flex items-center gap-2 text-xs cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={showEmptyStacks}
+                  onChange={(e) => setShowEmptyStacks(e.target.checked)}
+                  className="h-4 w-4 rounded border-border accent-foreground"
+                />
+                Mostrar pilhas vazias ({hiddenEmptyCount})
+              </label>
+            )}
+          </>
         ) : (
           <div className="space-y-4">
-            {data.stacks.map((s) => {
+            {hiddenEmptyCount > 0 && (
+              <label className="inline-flex items-center gap-2 text-xs cursor-pointer select-none rounded-lg border border-border bg-card px-3 py-2">
+                <input
+                  type="checkbox"
+                  checked={showEmptyStacks}
+                  onChange={(e) => setShowEmptyStacks(e.target.checked)}
+                  className="h-4 w-4 rounded border-border accent-foreground"
+                />
+                Mostrar pilhas vazias ({hiddenEmptyCount} oculta{hiddenEmptyCount === 1 ? "" : "s"})
+              </label>
+            )}
+            {visibleStacks.map((s) => {
               const now = new Date();
               const exp = new Date(s.expires_at);
               const days = daysBetween(now, exp);
