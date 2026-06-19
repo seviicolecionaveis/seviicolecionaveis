@@ -894,7 +894,8 @@ function AdminPilhaPage() {
                             >
                               <option value="delivered">Entregue</option>
                               <option value="dispatched">Despachado</option>
-                              <option value="paid">Pago — preparar</option>
+                              <option value="preparing">Em preparação</option>
+                              <option value="paid">Pago</option>
                             </select>
                           </label>
                           <button
