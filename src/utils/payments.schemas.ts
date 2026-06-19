@@ -36,7 +36,7 @@ const AddressSchema = z.object({
 export const ShippingMethodEnum = z.enum(["fixed", "arrange", "arte_em_cards", "card_stack"]);
 
 export const StripeInputSchema = z.object({
-  items: z.array(ItemSchema).min(1).max(50),
+  items: z.array(ItemSchema).min(1).max(500),
   shippingMethod: ShippingMethodEnum,
   shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
@@ -49,7 +49,7 @@ export const StripeInputSchema = z.object({
 });
 
 export const PixInputSchema = z.object({
-  items: z.array(ItemSchema).min(1).max(50),
+  items: z.array(ItemSchema).min(1).max(500),
   shippingMethod: ShippingMethodEnum,
   shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
@@ -60,7 +60,7 @@ export const PixInputSchema = z.object({
 });
 
 export const CardInputSchema = z.object({
-  items: z.array(ItemSchema).min(1).max(50),
+  items: z.array(ItemSchema).min(1).max(500),
   shippingMethod: ShippingMethodEnum,
   shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
@@ -79,7 +79,7 @@ export const CardInputSchema = z.object({
 });
 
 export const AdminTestInputSchema = z.object({
-  items: z.array(ItemSchema).min(1).max(50),
+  items: z.array(ItemSchema).min(1).max(500),
   shippingMethod: ShippingMethodEnum,
   shippingQuote: ShippingQuoteSchema.optional().nullable(),
   address: AddressSchema,
