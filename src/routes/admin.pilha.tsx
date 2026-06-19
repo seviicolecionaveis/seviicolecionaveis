@@ -185,6 +185,8 @@ function AdminPilhaPage() {
 
   const update = useServerFn(adminUpdateServiceOrder);
   const restoreItem = useServerFn(adminRestoreItemToStack);
+  const checkPayment = useServerFn(adminCheckServiceOrderPayment);
+  const [checkingPayment, setCheckingPayment] = useState<string | null>(null);
   const fetchData = useServerFn(adminGetPilhaData);
   const adjustStackItem = useServerFn(adminAdjustStackItem);
   const addOrderToStack = useServerFn(adminAddOrderToStack);
