@@ -47,6 +47,8 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 const STATUS_OPTIONS = ["paid", "dispatched", "delivered", "cancelled"] as const;
+const ALL_OS_STATUSES = ["awaiting_payment", "paid", "dispatched", "delivered", "cancelled"] as const;
+const DEFAULT_OS_STATUSES: readonly string[] = ["paid", "dispatched", "delivered"];
 
 const fmtMoney = (cents: number) =>
   `R$ ${(cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
@@ -194,6 +196,45 @@ function AdminPilhaPage() {
   const [stackMethod, setStackMethod] = useState<Record<string, "correios" | "app" | "arte_em_cards" | "presencial">>({});
   const [stackStatus, setStackStatus] = useState<Record<string, "paid" | "dispatched" | "delivered">>({});
   const [stackBusy, setStackBusy] = useState<string | null>(null);
+  const [selectedOSStatuses, setSelectedOSStatuses] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [...DEFAULT_OS_STATUSES];
+    const raw = localStorage.getItem("admin-pilha-os-filter-v1");
+    if (!raw) return [...DEFAULT_OS_STATUSES];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    return [...DEFAULT_OS_STATUSES];
+  });
+  const [showEmptyStacks, setShowEmptyStacks] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("admin-pilha-show-empty") === "1";
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("admin-pilha-os-filter-v1", JSON.stringify(selectedOSStatuses));
+    }
+  }, [selectedOSStatuses]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("admin-pilha-show-empty", showEmptyStacks ? "1" : "0");
+    }
+  }, [showEmptyStacks]);
+
+  const toggleOSStatus = (s: string) =>
+    setSelectedOSStatuses((curr) => (curr.includes(s) ? curr.filter((x) => x !== s) : [...curr, s]));
+
+  const filteredServiceOrders = useMemo(
+    () => data.serviceOrders.filter((o) => selectedOSStatuses.includes(o.status)),
+    [data.serviceOrders, selectedOSStatuses],
+  );
+  const visibleStacks = useMemo(
+    () => (showEmptyStacks ? data.stacks : data.stacks.filter((s) => s.items.length > 0)),
+    [data.stacks, showEmptyStacks],
+  );
+  const hiddenEmptyCount = data.stacks.length - data.stacks.filter((s) => s.items.length > 0).length;
 
   function toggleStackItem(stackId: string, itemId: string) {
     setStackSelected((prev) => {
@@ -381,7 +422,8 @@ function AdminPilhaPage() {
               tab === "orders" ? "bg-foreground text-background" : "bg-secondary"
             }`}
           >
-            Ordens de Serviço ({data.serviceOrders.length})
+            Ordens de Serviço ({filteredServiceOrders.length}
+            {filteredServiceOrders.length !== data.serviceOrders.length ? `/${data.serviceOrders.length}` : ""})
           </button>
           <button
             onClick={() => setTab("stacks")}
@@ -389,7 +431,8 @@ function AdminPilhaPage() {
               tab === "stacks" ? "bg-foreground text-background" : "bg-secondary"
             }`}
           >
-            Pilhas Ativas ({data.stacks.length})
+            Pilhas Ativas ({visibleStacks.length}
+            {visibleStacks.length !== data.stacks.length ? `/${data.stacks.length}` : ""})
           </button>
         </div>
 
@@ -433,11 +476,53 @@ function AdminPilhaPage() {
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : tab === "orders" ? (
-          data.serviceOrders.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma ordem de serviço.</p>
-          ) : (
+          <>
+            <div className="rounded-lg border border-border bg-card p-3">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Filtrar por status
+                </p>
+                <div className="flex gap-2 text-[10px]">
+                  <button
+                    onClick={() => setSelectedOSStatuses([...ALL_OS_STATUSES])}
+                    className="text-foreground hover:underline font-semibold"
+                  >
+                    Todos
+                  </button>
+                  <span className="text-muted-foreground">·</span>
+                  <button
+                    onClick={() => setSelectedOSStatuses([])}
+                    className="text-foreground hover:underline font-semibold"
+                  >
+                    Nenhum
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                {ALL_OS_STATUSES.map((s) => (
+                  <label key={s} className="flex items-center gap-2 text-xs cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={selectedOSStatuses.includes(s)}
+                      onChange={() => toggleOSStatus(s)}
+                      className="h-4 w-4 rounded border-border accent-foreground"
+                    />
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${STATUS_STYLE[s] ?? "bg-secondary"}`}>
+                      {STATUS_LABEL[s] ?? s}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            {filteredServiceOrders.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                {data.serviceOrders.length === 0
+                  ? "Nenhuma ordem de serviço."
+                  : "Nenhuma ordem de serviço corresponde aos filtros."}
+              </p>
+            ) : (
             <div className="space-y-4">
-              {data.serviceOrders.map((o) => {
+              {filteredServiceOrders.map((o) => {
                 const open = expanded.has(o.id);
                 const totalCards = o.items.reduce((s, i) => s + i.quantity, 0);
                 return (
@@ -580,12 +665,41 @@ function AdminPilhaPage() {
                 );
               })}
             </div>
-          )
-        ) : data.stacks.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma pilha ativa.</p>
+            )}
+          </>
+        ) : visibleStacks.length === 0 ? (
+          <>
+            <p className="text-sm text-muted-foreground">
+              {data.stacks.length === 0
+                ? "Nenhuma pilha ativa."
+                : "Nenhuma pilha com cartas no momento."}
+            </p>
+            {hiddenEmptyCount > 0 && (
+              <label className="mt-2 inline-flex items-center gap-2 text-xs cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={showEmptyStacks}
+                  onChange={(e) => setShowEmptyStacks(e.target.checked)}
+                  className="h-4 w-4 rounded border-border accent-foreground"
+                />
+                Mostrar pilhas vazias ({hiddenEmptyCount})
+              </label>
+            )}
+          </>
         ) : (
           <div className="space-y-4">
-            {data.stacks.map((s) => {
+            {hiddenEmptyCount > 0 && (
+              <label className="inline-flex items-center gap-2 text-xs cursor-pointer select-none rounded-lg border border-border bg-card px-3 py-2">
+                <input
+                  type="checkbox"
+                  checked={showEmptyStacks}
+                  onChange={(e) => setShowEmptyStacks(e.target.checked)}
+                  className="h-4 w-4 rounded border-border accent-foreground"
+                />
+                Mostrar pilhas vazias ({hiddenEmptyCount} oculta{hiddenEmptyCount === 1 ? "" : "s"})
+              </label>
+            )}
+            {visibleStacks.map((s) => {
               const now = new Date();
               const exp = new Date(s.expires_at);
               const days = daysBetween(now, exp);
