@@ -202,7 +202,7 @@ export async function markServiceOrderPaid(serviceOrderId: string): Promise<void
     .select("id, status, method")
     .eq("id", serviceOrderId)
     .maybeSingle();
-  if (!so || so.status === "paid" || so.status === "dispatched" || so.status === "delivered") return;
+  if (!so || so.status === "paid" || so.status === "preparing" || so.status === "dispatched" || so.status === "delivered") return;
 
   await supabaseAdmin
     .from("service_orders")
