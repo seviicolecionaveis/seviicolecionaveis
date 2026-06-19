@@ -553,19 +553,46 @@ function AdminPilhaPage() {
                             </p>
                           )}
                         </div>
-                        <select
-                          value={o.status}
-                          onChange={(e) =>
-                            patch(o.id, { serviceOrderId: o.id, status: e.target.value as any })
-                          }
-                          className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold"
-                        >
-                          {STATUS_OPTIONS.map((s) => (
-                            <option key={s} value={s}>
-                              {STATUS_LABEL[s]}
-                            </option>
-                          ))}
-                        </select>
+                        <div className="flex flex-col items-end gap-2">
+                          <select
+                            value={o.status}
+                            onChange={(e) =>
+                              patch(o.id, { serviceOrderId: o.id, status: e.target.value as any })
+                            }
+                            className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold"
+                          >
+                            {STATUS_OPTIONS.map((s) => (
+                              <option key={s} value={s}>
+                                {STATUS_LABEL[s]}
+                              </option>
+                            ))}
+                          </select>
+                          {o.status === "awaiting_payment" && (
+                            <button
+                              type="button"
+                              disabled={checkingPayment === o.id}
+                              onClick={async () => {
+                                setCheckingPayment(o.id);
+                                try {
+                                  const res = await checkPayment({ data: { serviceOrderId: o.id } });
+                                  if (res.status === "approved") {
+                                    toast.success(res.message);
+                                    await load();
+                                  } else {
+                                    toast.message(res.message);
+                                  }
+                                } catch (e: any) {
+                                  toast.error(e?.message ?? "Erro ao consultar pagamento.");
+                                } finally {
+                                  setCheckingPayment(null);
+                                }
+                              }}
+                              className="rounded-md border border-amber-300 bg-amber-50 text-amber-900 px-3 py-1 text-[11px] font-semibold hover:bg-amber-100 disabled:opacity-50"
+                            >
+                              {checkingPayment === o.id ? "Consultando..." : "Verificar pagamento"}
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       {/* Thumbnails preview row */}
