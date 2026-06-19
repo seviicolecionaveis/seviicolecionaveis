@@ -196,6 +196,45 @@ function AdminPilhaPage() {
   const [stackMethod, setStackMethod] = useState<Record<string, "correios" | "app" | "arte_em_cards" | "presencial">>({});
   const [stackStatus, setStackStatus] = useState<Record<string, "paid" | "dispatched" | "delivered">>({});
   const [stackBusy, setStackBusy] = useState<string | null>(null);
+  const [selectedOSStatuses, setSelectedOSStatuses] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [...DEFAULT_OS_STATUSES];
+    const raw = localStorage.getItem("admin-pilha-os-filter-v1");
+    if (!raw) return [...DEFAULT_OS_STATUSES];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    return [...DEFAULT_OS_STATUSES];
+  });
+  const [showEmptyStacks, setShowEmptyStacks] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("admin-pilha-show-empty") === "1";
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("admin-pilha-os-filter-v1", JSON.stringify(selectedOSStatuses));
+    }
+  }, [selectedOSStatuses]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("admin-pilha-show-empty", showEmptyStacks ? "1" : "0");
+    }
+  }, [showEmptyStacks]);
+
+  const toggleOSStatus = (s: string) =>
+    setSelectedOSStatuses((curr) => (curr.includes(s) ? curr.filter((x) => x !== s) : [...curr, s]));
+
+  const filteredServiceOrders = useMemo(
+    () => data.serviceOrders.filter((o) => selectedOSStatuses.includes(o.status)),
+    [data.serviceOrders, selectedOSStatuses],
+  );
+  const visibleStacks = useMemo(
+    () => (showEmptyStacks ? data.stacks : data.stacks.filter((s) => s.items.length > 0)),
+    [data.stacks, showEmptyStacks],
+  );
+  const hiddenEmptyCount = data.stacks.length - data.stacks.filter((s) => s.items.length > 0).length;
 
   function toggleStackItem(stackId: string, itemId: string) {
     setStackSelected((prev) => {
