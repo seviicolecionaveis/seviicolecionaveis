@@ -471,7 +471,7 @@ export const adminCreateManualServiceOrder = createServerFn({ method: "POST" })
         stackId: z.string().uuid(),
         itemIds: z.array(z.string().uuid()).min(1).max(500),
         method: z.enum(["correios", "app", "arte_em_cards", "presencial"]),
-        status: z.enum(["paid", "dispatched", "delivered"]).default("delivered"),
+        status: z.enum(["paid", "preparing", "dispatched", "delivered"]).default("delivered"),
         notes: z.string().trim().max(500).optional(),
       })
       .parse(input),
