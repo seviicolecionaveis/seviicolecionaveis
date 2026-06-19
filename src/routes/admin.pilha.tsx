@@ -198,7 +198,7 @@ function AdminPilhaPage() {
   const [addingOrder, setAddingOrder] = useState(false);
   const [stackSelected, setStackSelected] = useState<Record<string, Set<string>>>({});
   const [stackMethod, setStackMethod] = useState<Record<string, "correios" | "app" | "arte_em_cards" | "presencial">>({});
-  const [stackStatus, setStackStatus] = useState<Record<string, "paid" | "dispatched" | "delivered">>({});
+  const [stackStatus, setStackStatus] = useState<Record<string, "paid" | "preparing" | "dispatched" | "delivered">>({});
   const [stackBusy, setStackBusy] = useState<string | null>(null);
   const [selectedOSStatuses, setSelectedOSStatuses] = useState<string[]>(() => {
     if (typeof window === "undefined") return [...DEFAULT_OS_STATUSES];
