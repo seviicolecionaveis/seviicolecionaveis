@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const UpdateSchema = z.object({
   serviceOrderId: z.string().uuid(),
-  status: z.enum(["paid", "dispatched", "delivered", "cancelled"]).optional(),
+  status: z.enum(["paid", "preparing", "dispatched", "delivered", "cancelled"]).optional(),
   carrier: z.enum(["correios", "latam", "pickup"]).nullable().optional(),
   trackingCode: z.string().trim().max(80).nullable().optional(),
   trackingUrl: z.string().trim().max(500).nullable().optional(),
