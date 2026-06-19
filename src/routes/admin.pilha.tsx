@@ -32,7 +32,8 @@ const METHOD_LABEL: Record<string, string> = {
 
 const STATUS_LABEL: Record<string, string> = {
   awaiting_payment: "Aguardando pagamento",
-  paid: "Pago — preparar",
+  paid: "Pago",
+  preparing: "Em preparação",
   dispatched: "Despachado",
   delivered: "Entregue",
   cancelled: "Cancelado",
@@ -41,14 +42,15 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_STYLE: Record<string, string> = {
   awaiting_payment: "bg-amber-100 text-amber-800",
   paid: "bg-orange-100 text-orange-800",
+  preparing: "bg-purple-100 text-purple-800",
   dispatched: "bg-blue-100 text-blue-800",
   delivered: "bg-green-100 text-green-800",
   cancelled: "bg-zinc-200 text-zinc-700",
 };
 
-const STATUS_OPTIONS = ["paid", "dispatched", "delivered", "cancelled"] as const;
-const ALL_OS_STATUSES = ["awaiting_payment", "paid", "dispatched", "delivered", "cancelled"] as const;
-const DEFAULT_OS_STATUSES: readonly string[] = ["paid", "dispatched", "delivered"];
+const STATUS_OPTIONS = ["paid", "preparing", "dispatched", "delivered", "cancelled"] as const;
+const ALL_OS_STATUSES = ["awaiting_payment", "paid", "preparing", "dispatched", "delivered", "cancelled"] as const;
+const DEFAULT_OS_STATUSES: readonly string[] = ["paid", "preparing", "dispatched", "delivered"];
 
 const fmtMoney = (cents: number) =>
   `R$ ${(cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
