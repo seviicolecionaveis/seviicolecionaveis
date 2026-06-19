@@ -41,18 +41,18 @@ export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
 
   const items = useMemo<Entry[]>(() => {
     const cutoff = Date.now() - windowDays * 24 * 60 * 60 * 1000;
-    const cardEntries: Entry[] = cards
-      .map((c) => {
+    const cardEntries = cards
+      .map((c): Entry | null => {
         const ts = cardCreatedAt.get(c.id);
         if (!ts) return null;
         const t = new Date(ts).getTime();
         if (t < cutoff || c.stock <= 0) return null;
-        return { kind: "card" as const, t, card: c };
+        return { kind: "card", t, card: c };
       })
-      .filter((x): x is Entry => !!x);
+      .filter((x): x is Entry => x !== null);
     const sealedEntries: Entry[] = sealed
       .filter((s) => (s.stock > 0 || s.is_preorder))
-      .map((s) => ({ kind: "sealed" as const, t: new Date(s.created_at).getTime(), sealed: s }));
+      .map((s) => ({ kind: "sealed", t: new Date(s.created_at).getTime(), sealed: s }));
     const all = [...cardEntries, ...sealedEntries];
     all.sort((a, b) => b.t - a.t);
     return all.slice(0, limit);
