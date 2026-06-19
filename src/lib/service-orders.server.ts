@@ -202,7 +202,7 @@ export async function markServiceOrderPaid(serviceOrderId: string): Promise<void
     .select("id, status, method")
     .eq("id", serviceOrderId)
     .maybeSingle();
-  if (!so || so.status === "paid" || so.status === "dispatched" || so.status === "delivered") return;
+  if (!so || so.status === "paid" || so.status === "preparing" || so.status === "dispatched" || so.status === "delivered") return;
 
   await supabaseAdmin
     .from("service_orders")
@@ -223,7 +223,7 @@ export async function checkServiceOrderStatusServer(serviceOrderId: string, user
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!so || so.user_id !== userId) throw new Error("OS não encontrada");
-  if (so.status === "paid" || so.status === "dispatched" || so.status === "delivered") {
+  if (so.status === "paid" || so.status === "preparing" || so.status === "dispatched" || so.status === "delivered") {
     return { status: "paid" as const };
   }
 

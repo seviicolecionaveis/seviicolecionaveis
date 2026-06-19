@@ -32,7 +32,8 @@ const METHOD_LABEL: Record<string, string> = {
 
 const STATUS_LABEL: Record<string, string> = {
   awaiting_payment: "Aguardando pagamento",
-  paid: "Pago — preparar",
+  paid: "Pago",
+  preparing: "Em preparação",
   dispatched: "Despachado",
   delivered: "Entregue",
   cancelled: "Cancelado",
@@ -41,14 +42,15 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_STYLE: Record<string, string> = {
   awaiting_payment: "bg-amber-100 text-amber-800",
   paid: "bg-orange-100 text-orange-800",
+  preparing: "bg-purple-100 text-purple-800",
   dispatched: "bg-blue-100 text-blue-800",
   delivered: "bg-green-100 text-green-800",
   cancelled: "bg-zinc-200 text-zinc-700",
 };
 
-const STATUS_OPTIONS = ["paid", "dispatched", "delivered", "cancelled"] as const;
-const ALL_OS_STATUSES = ["awaiting_payment", "paid", "dispatched", "delivered", "cancelled"] as const;
-const DEFAULT_OS_STATUSES: readonly string[] = ["paid", "dispatched", "delivered"];
+const STATUS_OPTIONS = ["paid", "preparing", "dispatched", "delivered", "cancelled"] as const;
+const ALL_OS_STATUSES = ["awaiting_payment", "paid", "preparing", "dispatched", "delivered", "cancelled"] as const;
+const DEFAULT_OS_STATUSES: readonly string[] = ["paid", "preparing", "dispatched", "delivered"];
 
 const fmtMoney = (cents: number) =>
   `R$ ${(cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
@@ -196,7 +198,7 @@ function AdminPilhaPage() {
   const [addingOrder, setAddingOrder] = useState(false);
   const [stackSelected, setStackSelected] = useState<Record<string, Set<string>>>({});
   const [stackMethod, setStackMethod] = useState<Record<string, "correios" | "app" | "arte_em_cards" | "presencial">>({});
-  const [stackStatus, setStackStatus] = useState<Record<string, "paid" | "dispatched" | "delivered">>({});
+  const [stackStatus, setStackStatus] = useState<Record<string, "paid" | "preparing" | "dispatched" | "delivered">>({});
   const [stackBusy, setStackBusy] = useState<string | null>(null);
   const [selectedOSStatuses, setSelectedOSStatuses] = useState<string[]>(() => {
     if (typeof window === "undefined") return [...DEFAULT_OS_STATUSES];
@@ -382,7 +384,7 @@ function AdminPilhaPage() {
 
   async function patch(id: string, body: {
     serviceOrderId: string;
-    status?: "paid" | "dispatched" | "delivered" | "cancelled";
+    status?: "paid" | "preparing" | "dispatched" | "delivered" | "cancelled";
     carrier?: "correios" | "latam" | "pickup" | null;
     trackingCode?: string | null;
     trackingUrl?: string | null;
@@ -615,7 +617,7 @@ function AdminPilhaPage() {
                       </div>
 
                       {o.method === "correios" &&
-                        (o.status === "paid" || o.status === "dispatched") && (
+                        (o.status === "paid" || o.status === "preparing" || o.status === "dispatched") && (
                           <TrackingForm
                             order={o}
                             onSave={(carrier, code, url) =>
@@ -892,7 +894,8 @@ function AdminPilhaPage() {
                             >
                               <option value="delivered">Entregue</option>
                               <option value="dispatched">Despachado</option>
-                              <option value="paid">Pago — preparar</option>
+                              <option value="preparing">Em preparação</option>
+                              <option value="paid">Pago</option>
                             </select>
                           </label>
                           <button
