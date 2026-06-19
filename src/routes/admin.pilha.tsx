@@ -47,6 +47,8 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 const STATUS_OPTIONS = ["paid", "dispatched", "delivered", "cancelled"] as const;
+const ALL_OS_STATUSES = ["awaiting_payment", "paid", "dispatched", "delivered", "cancelled"] as const;
+const DEFAULT_OS_STATUSES: readonly string[] = ["paid", "dispatched", "delivered"];
 
 const fmtMoney = (cents: number) =>
   `R$ ${(cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
