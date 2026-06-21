@@ -1492,6 +1492,19 @@ function CardScreen({
 
         <div id={containerId} />
 
+        <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={saveCard}
+            onChange={(e) => setSaveCard(e.target.checked)}
+            className="mt-0.5"
+          />
+          <span>
+            Salvar este cartão para pagamentos futuros. O número fica armazenado de forma segura no Mercado Pago
+            (PCI-DSS); guardamos apenas os 4 últimos dígitos e a bandeira. Você pode remover em "Minha conta".
+          </span>
+        </label>
+
         {submitting && (
           <p className="text-center text-sm text-muted-foreground">Processando pagamento...</p>
         )}
