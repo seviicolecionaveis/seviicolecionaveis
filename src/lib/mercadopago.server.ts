@@ -63,6 +63,7 @@ export interface CreateCardInput {
   payerCpf?: string | null;
   externalReference: string;
   notificationUrl: string;
+  customerId?: string | null; // MP customer id — quando presente, MP vincula o cartão ao cliente
 }
 
 export interface CardPaymentResult {
