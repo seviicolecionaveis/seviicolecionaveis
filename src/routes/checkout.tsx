@@ -1330,8 +1330,12 @@ function CardScreen({
   const [err, setErr] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "in_process" | "approved" | "rejected">("idle");
   const [statusDetail, setStatusDetail] = useState<string | null>(null);
+  const [saveCard, setSaveCard] = useState(false);
+  const saveCardRef = useRef(false);
   const brickControllerRef = useRef<any>(null);
   const containerId = "mp-card-brick-container";
+
+  useEffect(() => { saveCardRef.current = saveCard; }, [saveCard]);
 
   useEffect(() => {
     let cancelled = false;
