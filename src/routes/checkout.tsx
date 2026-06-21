@@ -11,6 +11,7 @@ import {
   getMercadoPagoPublicKey,
   previewCoupon,
 } from "@/utils/payments.functions";
+import { getMpCustomerForCheckout } from "@/lib/saved-cards.functions";
 import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
 import { Copy, Check, QrCode, CreditCard, Loader2, ShieldCheck, Sparkles } from "lucide-react";
