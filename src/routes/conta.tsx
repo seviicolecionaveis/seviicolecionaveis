@@ -111,6 +111,10 @@ function AccountPage() {
           <TabsContent value="alertas" className="mt-6">
             <StockAlertsManager />
           </TabsContent>
+
+          <TabsContent value="cartoes" className="mt-6">
+            <SavedCardsManager />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
