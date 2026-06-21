@@ -70,6 +70,12 @@ export interface CardPaymentResult {
   id: number;
   status: string; // approved, in_process, rejected, ...
   status_detail?: string;
+  card_id?: string | null;
+  card_last_four?: string | null;
+  card_brand?: string | null;
+  card_exp_month?: number | null;
+  card_exp_year?: number | null;
+  card_cardholder_name?: string | null;
 }
 
 export async function createCardPaymentMP(input: CreateCardInput): Promise<CardPaymentResult> {
