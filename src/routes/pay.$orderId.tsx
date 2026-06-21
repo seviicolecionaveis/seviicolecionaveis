@@ -8,6 +8,7 @@ import {
   checkPixOrderStatus,
   getMercadoPagoPublicKey,
 } from "@/utils/payments.functions";
+import { getMpCustomerForCheckout } from "@/lib/saved-cards.functions";
 import { toast } from "sonner";
 import { copyToClipboard } from "@/lib/clipboard";
 import { Copy, Check, QrCode, CreditCard, ArrowLeft } from "lucide-react";
