@@ -1407,6 +1407,7 @@ function CardScreen({
                       payerCpf:
                         cardFormData.payer?.identification?.number ?? card.payerCpf,
                     },
+                    saveCard: saveCardRef.current,
                   },
                 });
                 if (result.status === "approved") {
