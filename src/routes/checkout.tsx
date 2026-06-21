@@ -1341,7 +1341,10 @@ function CardScreen({
     let cancelled = false;
     (async () => {
       try {
-        const { publicKey } = await getMercadoPagoPublicKey({});
+        const [{ publicKey }, customerInfo] = await Promise.all([
+          getMercadoPagoPublicKey({}),
+          getMpCustomerForCheckout({}).catch(() => ({ customerId: null as string | null })),
+        ]);
         if (cancelled) return;
         await loadMercadoPagoSdk();
         if (cancelled) return;
@@ -1349,10 +1352,13 @@ function CardScreen({
         const mp = new window.MercadoPago(publicKey, { locale: "pt-BR" });
         const bricksBuilder = mp.bricks();
 
+        const payerInit: Record<string, unknown> = { email: card.payerEmail };
+        if (customerInfo.customerId) payerInit.customerId = customerInfo.customerId;
+
         const settings = {
           initialization: {
             amount: card.totalCents / 100,
-            payer: { email: card.payerEmail },
+            payer: payerInit,
           },
           customization: {
             paymentMethods: { maxInstallments: 12 },
