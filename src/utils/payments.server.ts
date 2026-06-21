@@ -1134,6 +1134,7 @@ export async function payExistingOrderWithCardServer(
     payerEmail?: string | null;
     payerCpf?: string | null;
   },
+  options: { saveCard?: boolean } = {},
 ) {
   const { data: order, error } = await supabaseAdmin
     .from("orders")
@@ -1150,6 +1151,17 @@ export async function payExistingOrderWithCardServer(
   const [firstName, ...rest] = (order.recipient_name ?? "Cliente").trim().split(/\s+/);
   const lastName = rest.join(" ") || "Sevii";
 
+  // Se o usuário pediu para salvar, garante o MP customer antes do pagamento
+  let customerId: string | null = null;
+  if (options.saveCard) {
+    try {
+      const { ensureMpCustomerForUser } = await import("@/lib/saved-cards.server");
+      customerId = await ensureMpCustomerForUser(userId);
+    } catch (e) {
+      console.error("ensureMpCustomerForUser failed (continuando sem salvar)", e);
+    }
+  }
+
   const result = await createCardPaymentMP({
     amountCents: order.total_cents,
     description: `Pedido Sevii Colecionáveis #${order.id.slice(0, 8)}`,
@@ -1163,6 +1175,7 @@ export async function payExistingOrderWithCardServer(
     payerCpf: card.payerCpf ?? order.cpf ?? null,
     externalReference: order.id,
     notificationUrl,
+    customerId,
   });
 
   await supabaseAdmin
@@ -1172,6 +1185,16 @@ export async function payExistingOrderWithCardServer(
       mercadopago_payment_id: String(result.id),
     })
     .eq("id", order.id);
+
+  // Sincroniza cartões salvos se MP vinculou ao customer
+  if (customerId && (result.status === "approved" || result.status === "in_process" || result.status === "authorized")) {
+    try {
+      const { syncSavedCardsForUser } = await import("@/lib/saved-cards.server");
+      await syncSavedCardsForUser(userId, customerId);
+    } catch (e) {
+      console.error("syncSavedCardsForUser failed", e);
+    }
+  }
 
   if (result.status === "approved") {
     await markOrderPaid(order.id, { mercadopagoPaymentId: String(result.id) });
