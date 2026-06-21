@@ -7,7 +7,8 @@ import { PreferencesForm } from "@/components/account/PreferencesForm";
 import { AddressesManager } from "@/components/account/AddressesManager";
 import { LoyaltyPointsCard } from "@/components/account/LoyaltyPointsCard";
 import { StockAlertsManager } from "@/components/account/StockAlertsManager";
-import { ShoppingBag, Heart, Layers, Sparkles, Bell } from "lucide-react";
+import { SavedCardsManager } from "@/components/account/SavedCardsManager";
+import { ShoppingBag, Heart, Layers, Sparkles, Bell, CreditCard } from "lucide-react";
 import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/conta")({
@@ -58,6 +59,7 @@ function AccountPage() {
             <TabsTrigger value="enderecos">Endereços</TabsTrigger>
             <TabsTrigger value="atalhos">Pedidos & Favoritos</TabsTrigger>
             <TabsTrigger value="alertas"><Bell className="h-3.5 w-3.5 mr-1" />Alertas</TabsTrigger>
+            <TabsTrigger value="cartoes"><CreditCard className="h-3.5 w-3.5 mr-1" />Cartões</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dados" className="mt-6">
@@ -108,6 +110,10 @@ function AccountPage() {
 
           <TabsContent value="alertas" className="mt-6">
             <StockAlertsManager />
+          </TabsContent>
+
+          <TabsContent value="cartoes" className="mt-6">
+            <SavedCardsManager />
           </TabsContent>
         </Tabs>
       </main>

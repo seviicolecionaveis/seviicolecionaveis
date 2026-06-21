@@ -63,12 +63,19 @@ export interface CreateCardInput {
   payerCpf?: string | null;
   externalReference: string;
   notificationUrl: string;
+  customerId?: string | null; // MP customer id — quando presente, MP vincula o cartão ao cliente
 }
 
 export interface CardPaymentResult {
   id: number;
   status: string; // approved, in_process, rejected, ...
   status_detail?: string;
+  card_id?: string | null;
+  card_last_four?: string | null;
+  card_brand?: string | null;
+  card_exp_month?: number | null;
+  card_exp_year?: number | null;
+  card_cardholder_name?: string | null;
 }
 
 export async function createCardPaymentMP(input: CreateCardInput): Promise<CardPaymentResult> {
@@ -76,6 +83,21 @@ export async function createCardPaymentMP(input: CreateCardInput): Promise<CardP
   const cleanCpf = validateCpf(input.payerCpf) ?? undefined;
   if (input.payerCpf && !cleanCpf) {
     throw new Error("CPF inválido. Verifique o número informado e tente novamente.");
+  }
+
+  const payer: Record<string, unknown> = {
+    email: input.payerEmail,
+    first_name: input.payerFirstName?.slice(0, 50) ?? "Cliente",
+    last_name: input.payerLastName?.slice(0, 50) ?? "Sevii",
+    ...(cleanCpf && cleanCpf.length === 11
+      ? { identification: { type: "CPF", number: cleanCpf } }
+      : {}),
+  };
+  // Quando passamos o customer id, MP vincula o cartão ao customer automaticamente
+  // (o cartão fica disponível em /v1/customers/{id}/cards após a aprovação).
+  if (input.customerId) {
+    payer.type = "customer";
+    payer.id = input.customerId;
   }
 
   const body: Record<string, unknown> = {
@@ -87,14 +109,7 @@ export async function createCardPaymentMP(input: CreateCardInput): Promise<CardP
     ...(input.issuerId ? { issuer_id: input.issuerId } : {}),
     external_reference: input.externalReference,
     notification_url: input.notificationUrl,
-    payer: {
-      email: input.payerEmail,
-      first_name: input.payerFirstName?.slice(0, 50) ?? "Cliente",
-      last_name: input.payerLastName?.slice(0, 50) ?? "Sevii",
-      ...(cleanCpf && cleanCpf.length === 11
-        ? { identification: { type: "CPF", number: cleanCpf } }
-        : {}),
-    },
+    payer,
   };
 
   const idempotencyKey = `${input.externalReference}-card-${Date.now()}`;
@@ -116,11 +131,93 @@ export async function createCardPaymentMP(input: CreateCardInput): Promise<CardP
     throw new Error(`Mercado Pago: ${String(msg).slice(0, 300)}`);
   }
 
+  const card = json.card ?? {};
   return {
     id: json.id,
     status: json.status,
     status_detail: json.status_detail,
+    card_id: card.id ?? null,
+    card_last_four: card.last_four_digits ?? null,
+    card_brand: json.payment_method_id ?? null,
+    card_exp_month: card.expiration_month ?? null,
+    card_exp_year: card.expiration_year ?? null,
+    card_cardholder_name: card.cardholder?.name ?? null,
   };
+}
+
+// ============================================================
+// Customers + saved cards
+// ============================================================
+
+export interface MpCustomerCard {
+  id: string;
+  last_four_digits: string;
+  payment_method?: { id?: string; name?: string };
+  expiration_month?: number;
+  expiration_year?: number;
+  cardholder?: { name?: string };
+}
+
+export async function findMpCustomerByEmail(email: string): Promise<{ id: string } | null> {
+  const token = getAccessToken();
+  const res = await fetchMpWithTimeout(
+    `${MP_API}/v1/customers/search?email=${encodeURIComponent(email)}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok) return null;
+  const json: any = await res.json().catch(() => ({}));
+  const first = json?.results?.[0];
+  return first?.id ? { id: first.id } : null;
+}
+
+export async function createMpCustomer(email: string, firstName?: string, lastName?: string): Promise<{ id: string }> {
+  const token = getAccessToken();
+  const res = await fetchMpWithTimeout(`${MP_API}/v1/customers`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "X-Idempotency-Key": `customer-${email}-${Date.now()}`,
+    },
+    body: JSON.stringify({
+      email,
+      first_name: firstName?.slice(0, 50) ?? "Cliente",
+      last_name: lastName?.slice(0, 50) ?? "Sevii",
+    }),
+  });
+  const json: any = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    // pode ser conflito (já existe). tenta buscar.
+    const existing = await findMpCustomerByEmail(email);
+    if (existing) return existing;
+    throw new Error(`Mercado Pago (customer): ${json?.message ?? res.status}`);
+  }
+  return { id: json.id };
+}
+
+export async function getOrCreateMpCustomer(email: string, firstName?: string, lastName?: string): Promise<string> {
+  const existing = await findMpCustomerByEmail(email);
+  if (existing) return existing.id;
+  const created = await createMpCustomer(email, firstName, lastName);
+  return created.id;
+}
+
+export async function listMpCustomerCards(customerId: string): Promise<MpCustomerCard[]> {
+  const token = getAccessToken();
+  const res = await fetchMpWithTimeout(`${MP_API}/v1/customers/${customerId}/cards`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return [];
+  const json: any = await res.json().catch(() => []);
+  return Array.isArray(json) ? json : [];
+}
+
+export async function deleteMpCustomerCard(customerId: string, cardId: string): Promise<void> {
+  const token = getAccessToken();
+  await fetchMpWithTimeout(`${MP_API}/v1/customers/${customerId}/cards/${cardId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
 
 export interface CreatePixInput {

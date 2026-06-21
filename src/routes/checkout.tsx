@@ -11,6 +11,7 @@ import {
   getMercadoPagoPublicKey,
   previewCoupon,
 } from "@/utils/payments.functions";
+import { getMpCustomerForCheckout } from "@/lib/saved-cards.functions";
 import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
 import { Copy, Check, QrCode, CreditCard, Loader2, ShieldCheck, Sparkles } from "lucide-react";
@@ -1329,14 +1330,21 @@ function CardScreen({
   const [err, setErr] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "in_process" | "approved" | "rejected">("idle");
   const [statusDetail, setStatusDetail] = useState<string | null>(null);
+  const [saveCard, setSaveCard] = useState(false);
+  const saveCardRef = useRef(false);
   const brickControllerRef = useRef<any>(null);
   const containerId = "mp-card-brick-container";
+
+  useEffect(() => { saveCardRef.current = saveCard; }, [saveCard]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const { publicKey } = await getMercadoPagoPublicKey({});
+        const [{ publicKey }, customerInfo] = await Promise.all([
+          getMercadoPagoPublicKey({}),
+          getMpCustomerForCheckout({}).catch(() => ({ customerId: null as string | null })),
+        ]);
         if (cancelled) return;
         await loadMercadoPagoSdk();
         if (cancelled) return;
@@ -1344,10 +1352,13 @@ function CardScreen({
         const mp = new window.MercadoPago(publicKey, { locale: "pt-BR" });
         const bricksBuilder = mp.bricks();
 
+        const payerInit: Record<string, unknown> = { email: card.payerEmail };
+        if (customerInfo.customerId) payerInit.customerId = customerInfo.customerId;
+
         const settings = {
           initialization: {
             amount: card.totalCents / 100,
-            payer: { email: card.payerEmail },
+            payer: payerInit,
           },
           customization: {
             paymentMethods: { maxInstallments: 12 },
@@ -1396,6 +1407,7 @@ function CardScreen({
                       payerCpf:
                         cardFormData.payer?.identification?.number ?? card.payerCpf,
                     },
+                    saveCard: saveCardRef.current,
                   },
                 });
                 if (result.status === "approved") {
@@ -1479,6 +1491,19 @@ function CardScreen({
         )}
 
         <div id={containerId} />
+
+        <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={saveCard}
+            onChange={(e) => setSaveCard(e.target.checked)}
+            className="mt-0.5"
+          />
+          <span>
+            Salvar este cartão para pagamentos futuros. O número fica armazenado de forma segura no Mercado Pago
+            (PCI-DSS); guardamos apenas os 4 últimos dígitos e a bandeira. Você pode remover em "Minha conta".
+          </span>
+        </label>
 
         {submitting && (
           <p className="text-center text-sm text-muted-foreground">Processando pagamento...</p>

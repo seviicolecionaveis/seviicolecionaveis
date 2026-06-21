@@ -51,6 +51,7 @@ const CardForOrderSchema = z.object({
     payerEmail: z.string().email().max(200).optional().nullable(),
     payerCpf: z.string().max(20).optional().nullable(),
   }),
+  saveCard: z.boolean().optional().default(false),
 });
 
 export const regeneratePixForOrder = createServerFn({ method: "POST" })
@@ -66,7 +67,7 @@ export const payExistingOrderWithCard = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => CardForOrderSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { payExistingOrderWithCardServer } = await import("./payments.server");
-    return payExistingOrderWithCardServer(data.orderId, context.userId, data.card);
+    return payExistingOrderWithCardServer(data.orderId, context.userId, data.card, { saveCard: data.saveCard });
   });
 
 export const resendPendingOrderEmails = createServerFn({ method: "POST" })

@@ -1052,6 +1052,7 @@ export type Database = {
           favorite_pokemons: string[]
           full_name: string | null
           id: string
+          mp_customer_id: string | null
           phone: string | null
           updated_at: string
           user_id: string
@@ -1065,6 +1066,7 @@ export type Database = {
           favorite_pokemons?: string[]
           full_name?: string | null
           id?: string
+          mp_customer_id?: string | null
           phone?: string | null
           updated_at?: string
           user_id: string
@@ -1078,6 +1080,7 @@ export type Database = {
           favorite_pokemons?: string[]
           full_name?: string | null
           id?: string
+          mp_customer_id?: string | null
           phone?: string | null
           updated_at?: string
           user_id?: string
@@ -1114,6 +1117,51 @@ export type Database = {
           last_used_at?: string | null
           p256dh?: string
           user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_cards: {
+        Row: {
+          brand: string | null
+          cardholder_name: string | null
+          created_at: string
+          exp_month: number | null
+          exp_year: number | null
+          id: string
+          last_four: string
+          mp_card_id: string
+          mp_customer_id: string
+          payment_method_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand?: string | null
+          cardholder_name?: string | null
+          created_at?: string
+          exp_month?: number | null
+          exp_year?: number | null
+          id?: string
+          last_four: string
+          mp_card_id: string
+          mp_customer_id: string
+          payment_method_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand?: string | null
+          cardholder_name?: string | null
+          created_at?: string
+          exp_month?: number | null
+          exp_year?: number | null
+          id?: string
+          last_four?: string
+          mp_card_id?: string
+          mp_customer_id?: string
+          payment_method_id?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

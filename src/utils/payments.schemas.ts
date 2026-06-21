@@ -76,6 +76,7 @@ export const CardInputSchema = z.object({
     payerEmail: z.string().email().max(200).optional().nullable(),
     payerCpf: z.string().max(20).optional().nullable(),
   }),
+  saveCard: z.boolean().optional().default(false),
 });
 
 export const AdminTestInputSchema = z.object({
