@@ -67,7 +67,7 @@ export const payExistingOrderWithCard = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => CardForOrderSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { payExistingOrderWithCardServer } = await import("./payments.server");
-    return payExistingOrderWithCardServer(data.orderId, context.userId, data.card);
+    return payExistingOrderWithCardServer(data.orderId, context.userId, data.card, { saveCard: data.saveCard });
   });
 
 export const resendPendingOrderEmails = createServerFn({ method: "POST" })
