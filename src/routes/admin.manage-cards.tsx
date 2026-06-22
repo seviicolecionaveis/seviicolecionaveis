@@ -776,6 +776,7 @@ function AdminCardsManagePage() {
                               condition: r.condition ?? "NM",
                               category: r.category ?? "Pokémon",
                               trainer_subcategory: r.trainer_subcategory ?? "",
+                              pokemon_type: r.pokemon_type ?? "",
                               stock: "1",
                               price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
                               image: r.image,
