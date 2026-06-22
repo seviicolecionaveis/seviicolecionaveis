@@ -750,6 +750,19 @@ function AdminCardsManagePage() {
                           </label>
                         )}
                         <label className="text-xs space-y-1">
+                          <span className="font-semibold">Tipo Pokémon</span>
+                          <select
+                            ref={quickPokemonTypeRef}
+                            value={quickForm.pokemon_type}
+                            onChange={(e) => setQuickForm({ ...quickForm, pokemon_type: e.target.value as PokemonType | "" })}
+                            disabled={quickForm.category !== "Pokémon"}
+                            className="w-full rounded border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
+                          >
+                            <option value="">— Nenhum —</option>
+                            {POKEMON_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                        </label>
+                        <label className="text-xs space-y-1">
                           <span className="font-semibold">Estoque</span>
                           <input
                             type="number"
