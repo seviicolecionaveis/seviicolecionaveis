@@ -634,7 +634,39 @@ function AdminCardsManagePage() {
             </div>
           )}
 
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded border border-border bg-card px-3 py-2">
+            <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Tipo Pokémon:</span>
+            {POKEMON_TYPES.map((t) => {
+              const checked = pokemonTypeFilter.includes(t);
+              const count = rows.filter((r) => r.pokemon_type === t).length;
+              return (
+                <label key={t} className="flex items-center gap-1 text-xs cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) =>
+                      setPokemonTypeFilter((prev) =>
+                        e.target.checked ? [...prev, t] : prev.filter((x) => x !== t),
+                      )
+                    }
+                    className="rounded border-border accent-foreground"
+                  />
+                  <span>{t} <span className="text-muted-foreground">({count})</span></span>
+                </label>
+              );
+            })}
+            {pokemonTypeFilter.length > 0 && (
+              <button
+                onClick={() => setPokemonTypeFilter([])}
+                className="ml-auto text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              >
+                Limpar
+              </button>
+            )}
+          </div>
+
           <div className="mb-4 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-3 py-2">
+
             <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
               <input
                 type="checkbox"
