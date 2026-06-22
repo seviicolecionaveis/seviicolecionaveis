@@ -100,6 +100,7 @@ function AdminCardsManagePage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CardCategory[]>([]);
+  const [pokemonTypeFilter, setPokemonTypeFilter] = useState<PokemonType[]>([]);
   const [noPriceOnly, setNoPriceOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
