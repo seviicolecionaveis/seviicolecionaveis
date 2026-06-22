@@ -120,6 +120,7 @@ async function loadCards(): Promise<Card[]> {
     price: r.base_price_cents != null ? (r.base_price_cents as number) / 100 : null,
     category: (r.category as CardCategory) ?? "Pokémon",
     trainerSubcategory: (r.trainer_subcategory as TrainerSubcategory | null) ?? null,
+    pokemonType: (r.pokemon_type as PokemonType | null) ?? null,
   }));
   return buildCards(raw);
 }
