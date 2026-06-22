@@ -87,6 +87,7 @@ export interface Card {
   finish: Finish;
   category: CardCategory;
   trainerSubcategory?: TrainerSubcategory | null;
+  pokemonType?: PokemonType | null;
 }
 
 const RAW: RawCard[] = (rawCards as any[]).map((c) => ({
