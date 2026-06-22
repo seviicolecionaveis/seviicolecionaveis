@@ -20,7 +20,8 @@ export type PokemonType =
   | "Incolor"
   | "Sombrio"
   | "Metálico"
-  | "Fada";
+  | "Fada"
+  | "Dragão";
 export const POKEMON_TYPES: PokemonType[] = [
   "Água",
   "Planta",
@@ -32,6 +33,7 @@ export const POKEMON_TYPES: PokemonType[] = [
   "Sombrio",
   "Metálico",
   "Fada",
+  "Dragão",
 ];
 
 export const CONDITIONS: Condition[] = ["M", "NM", "SP", "MP", "HP", "D"];
