@@ -482,7 +482,7 @@ function AdminCardsManagePage() {
               <span className="font-semibold">Tipo de carta *</span>
               <select
                 value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value as CardCategory, trainer_subcategory: e.target.value === "Treinador" ? form.trainer_subcategory : "" })}
+                onChange={(e) => setForm({ ...form, category: e.target.value as CardCategory, trainer_subcategory: e.target.value === "Treinador" ? form.trainer_subcategory : "", pokemon_type: e.target.value === "Pokémon" ? form.pokemon_type : "" })}
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
               >
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
