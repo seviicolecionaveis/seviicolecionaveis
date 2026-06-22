@@ -825,6 +825,14 @@ function AdminCardsManagePage() {
                           {quickSaving ? "Salvando..." : "💾 Salvar"}
                         </button>
                         <button
+                          onClick={() => handleQuickSave(r.id, { goNext: true })}
+                          disabled={quickSaving}
+                          title="Salva e abre a edição rápida da próxima carta da lista, com foco em Tipo Pokémon"
+                          className="rounded bg-foreground px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-background hover:opacity-90 disabled:opacity-50"
+                        >
+                          {quickSaving ? "Salvando..." : "💾 Salvar e ir p/ próxima →"}
+                        </button>
+                        <button
                           onClick={() => setQuickEditId(null)}
                           className="rounded border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary"
                         >
