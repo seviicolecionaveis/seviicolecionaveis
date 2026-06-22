@@ -57,6 +57,7 @@ export interface RawCard {
   price: number | null;
   category?: CardCategory;
   trainerSubcategory?: TrainerSubcategory | null;
+  pokemonType?: PokemonType | null;
 }
 
 export interface FinishVariant {
