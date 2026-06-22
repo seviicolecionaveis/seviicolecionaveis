@@ -106,6 +106,31 @@ export function Filters({ filters, onChange, onReset }: Props) {
 
       <section>
         <h4 className="mb-3 inline-block rounded bg-foreground px-2 py-1 text-xs font-bold uppercase tracking-widest text-background">
+          Tipo Pokémon
+        </h4>
+        <div className="flex flex-wrap gap-1.5">
+          {POKEMON_TYPES.map((t) => {
+            const active = filters.pokemonTypes.includes(t);
+            return (
+              <button
+                key={t}
+                onClick={() => onChange({ ...filters, pokemonTypes: toggle(filters.pokemonTypes, t) })}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                  active
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border bg-background text-muted-foreground hover:border-foreground/30"
+                }`}
+              >
+                {t}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+
+      <section>
+        <h4 className="mb-3 inline-block rounded bg-foreground px-2 py-1 text-xs font-bold uppercase tracking-widest text-background">
           Extras
         </h4>
         <div className="flex flex-wrap gap-1.5">
