@@ -316,7 +316,21 @@ function AdminCardsManagePage() {
     }
   };
 
-  const handleQuickSave = async (id: string) => {
+  const quickPokemonTypeRef = useRef<HTMLSelectElement | null>(null);
+  const focusPokemonOnOpenRef = useRef(false);
+
+  useEffect(() => {
+    if (quickEditId && focusPokemonOnOpenRef.current) {
+      // Aguarda o painel renderizar antes de focar
+      const t = setTimeout(() => {
+        quickPokemonTypeRef.current?.focus();
+        focusPokemonOnOpenRef.current = false;
+      }, 50);
+      return () => clearTimeout(t);
+    }
+  }, [quickEditId]);
+
+  const handleQuickSave = async (id: string, opts?: { goNext?: boolean }) => {
     setQuickSaving(true);
     setQuickMsg(null);
     const newStock = Math.max(0, parseInt(quickForm.stock) || 0);
@@ -324,6 +338,7 @@ function AdminCardsManagePage() {
       condition: quickForm.condition,
       category: quickForm.category,
       trainer_subcategory: quickForm.category === "Treinador" && quickForm.trainer_subcategory ? quickForm.trainer_subcategory : null,
+      pokemon_type: quickForm.category === "Pokémon" && quickForm.pokemon_type ? quickForm.pokemon_type : null,
       stock: newStock,
       base_price_cents: quickForm.price.trim() === "" ? null : Math.round(parseFloat(quickForm.price.replace(",", ".")) * 100),
       image: quickForm.image.trim(),
@@ -336,6 +351,34 @@ function AdminCardsManagePage() {
     setQuickMsg({ type: "ok", text: "Salvo!" });
     invalidateCardsCache();
     setRows((prev) => prev.map((row) => row.id === id ? { ...row, ...payload } as CardRow : row));
+
+    if (opts?.goNext) {
+      // Acha a próxima carta da página atual filtrada e abre a edição rápida nela.
+      const idx = filtered.findIndex((r) => r.id === id);
+      const next = idx >= 0 ? filtered[idx + 1] : null;
+      if (next) {
+        focusPokemonOnOpenRef.current = true;
+        setQuickEditId(next.id);
+        setQuickMsg(null);
+        setQuickForm({
+          name: next.name,
+          card_number: next.card_number,
+          collection: next.collection,
+          language: next.language,
+          finish: next.finish,
+          condition: next.condition ?? "NM",
+          category: next.category ?? "Pokémon",
+          trainer_subcategory: next.trainer_subcategory ?? "",
+          pokemon_type: next.pokemon_type ?? "",
+          stock: String(next.stock),
+          price: next.base_price_cents != null ? (next.base_price_cents / 100).toFixed(2) : "",
+          image: next.image,
+        });
+        return;
+      }
+      setQuickMsg({ type: "ok", text: "Fim da página — não há próxima carta." });
+    }
+
     setTimeout(() => { setQuickEditId((cur) => cur === id ? null : cur); setQuickMsg(null); }, 600);
   };
 
