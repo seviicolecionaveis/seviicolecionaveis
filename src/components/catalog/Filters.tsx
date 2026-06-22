@@ -1,8 +1,9 @@
-import { CARD_CATEGORIES, COLLECTIONS, FINISHES, LANGUAGES, TRAINER_SUBCATEGORIES, type CardCategory, type Condition, type Finish, type Language, type TrainerSubcategory } from "@/data/cards";
+import { CARD_CATEGORIES, COLLECTIONS, FINISHES, LANGUAGES, POKEMON_TYPES, TRAINER_SUBCATEGORIES, type CardCategory, type Condition, type Finish, type Language, type PokemonType, type TrainerSubcategory } from "@/data/cards";
 
 export interface FilterState {
   categories: CardCategory[];
   trainerSubcategories: TrainerSubcategory[];
+  pokemonTypes: PokemonType[];
   finishes: Finish[];
   collection: string;
   languages: Language[];
