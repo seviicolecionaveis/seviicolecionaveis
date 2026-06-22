@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Card, CardCategory, Condition, Finish, FinishVariant, Language, LanguageVariant, RawCard, TrainerSubcategory } from "@/data/cards";
+import type { Card, CardCategory, Condition, Finish, FinishVariant, Language, LanguageVariant, PokemonType, RawCard, TrainerSubcategory } from "@/data/cards";
 import { CONDITIONS } from "@/data/cards";
 import { useAuth } from "@/hooks/useAuth";
 import { isTestCardCatalogEntry } from "@/lib/test-card";
@@ -25,16 +25,18 @@ function buildCards(raw: RawCard[]): Card[] {
     id: string; name: string; image: string; number: string; collection: string;
     category: CardCategory;
     trainerSubcategory: TrainerSubcategory | null;
+    pokemonType: PokemonType | null;
     byLanguage: Map<Language, Map<string, FinishVariant>>;
   }>();
   for (const c of raw) {
     const key = `${c.name}__${c.collection}__${c.number}`;
     let wc = map.get(key);
     if (!wc) {
-      wc = { id: key, name: c.name, image: c.image, number: c.number, collection: c.collection, category: c.category ?? "Pokémon", trainerSubcategory: c.trainerSubcategory ?? null, byLanguage: new Map() };
+      wc = { id: key, name: c.name, image: c.image, number: c.number, collection: c.collection, category: c.category ?? "Pokémon", trainerSubcategory: c.trainerSubcategory ?? null, pokemonType: c.pokemonType ?? null, byLanguage: new Map() };
       map.set(key, wc);
     }
     if (!wc.trainerSubcategory && c.trainerSubcategory) wc.trainerSubcategory = c.trainerSubcategory;
+    if (!wc.pokemonType && c.pokemonType) wc.pokemonType = c.pokemonType;
     if (wc.image.includes("placehold.co") && !c.image.includes("placehold.co")) wc.image = c.image;
     let langMap = wc.byLanguage.get(c.language);
     if (!langMap) { langMap = new Map(); wc.byLanguage.set(c.language, langMap); }
@@ -69,6 +71,7 @@ function buildCards(raw: RawCard[]): Card[] {
       price: prices.length ? Math.min(...prices) : null, finish: pickHeadlineFinish(allVariants),
       category: wc.category,
       trainerSubcategory: wc.trainerSubcategory,
+      pokemonType: wc.pokemonType,
     });
   }
   return out.sort((a, b) => a.name.localeCompare(b.name));
@@ -87,7 +90,7 @@ async function loadCards(): Promise<Card[]> {
   while (true) {
     const { data, error } = await supabase
       .from("cards")
-      .select("name, card_number, collection, language, finish, condition, stock, base_price_cents, image, category, trainer_subcategory, created_at")
+      .select("name, card_number, collection, language, finish, condition, stock, base_price_cents, image, category, trainer_subcategory, pokemon_type, created_at")
       .range(from, from + CHUNK - 1);
     if (error) { console.error("loadCards", error); break; }
     const batch = data ?? [];
@@ -117,6 +120,7 @@ async function loadCards(): Promise<Card[]> {
     price: r.base_price_cents != null ? (r.base_price_cents as number) / 100 : null,
     category: (r.category as CardCategory) ?? "Pokémon",
     trainerSubcategory: (r.trainer_subcategory as TrainerSubcategory | null) ?? null,
+    pokemonType: (r.pokemon_type as PokemonType | null) ?? null,
   }));
   return buildCards(raw);
 }

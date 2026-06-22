@@ -10,6 +10,30 @@ export const CARD_CATEGORIES: CardCategory[] = ["Pokémon", "Treinador", "Energi
 export type TrainerSubcategory = "Apoiador" | "Item" | "Ferramenta Pokémon" | "Estádio";
 export const TRAINER_SUBCATEGORIES: TrainerSubcategory[] = ["Apoiador", "Item", "Ferramenta Pokémon", "Estádio"];
 
+export type PokemonType =
+  | "Água"
+  | "Planta"
+  | "Lutador"
+  | "Fogo"
+  | "Elétrico"
+  | "Psíquico"
+  | "Incolor"
+  | "Sombrio"
+  | "Metálico"
+  | "Fada";
+export const POKEMON_TYPES: PokemonType[] = [
+  "Água",
+  "Planta",
+  "Lutador",
+  "Fogo",
+  "Elétrico",
+  "Psíquico",
+  "Incolor",
+  "Sombrio",
+  "Metálico",
+  "Fada",
+];
+
 export const CONDITIONS: Condition[] = ["M", "NM", "SP", "MP", "HP", "D"];
 export const CONDITION_LABEL: Record<Condition, string> = {
   M: "M (Lacrada)",
@@ -33,6 +57,7 @@ export interface RawCard {
   price: number | null;
   category?: CardCategory;
   trainerSubcategory?: TrainerSubcategory | null;
+  pokemonType?: PokemonType | null;
 }
 
 export interface FinishVariant {
@@ -62,6 +87,7 @@ export interface Card {
   finish: Finish;
   category: CardCategory;
   trainerSubcategory?: TrainerSubcategory | null;
+  pokemonType?: PokemonType | null;
 }
 
 const RAW: RawCard[] = (rawCards as any[]).map((c) => ({

@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateCardsCache } from "@/hooks/useCardsCatalog";
-import type { Condition, Finish, Language, TrainerSubcategory } from "@/data/cards";
-import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS, TRAINER_SUBCATEGORIES } from "@/data/cards";
+import type { Condition, Finish, Language, PokemonType, TrainerSubcategory } from "@/data/cards";
+import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS, POKEMON_TYPES, TRAINER_SUBCATEGORIES } from "@/data/cards";
 import { notifyStockBack } from "@/lib/stock-alerts.functions";
 import { cardSlug } from "@/lib/slug";
 
@@ -53,6 +53,7 @@ interface CardRow {
   condition: Condition;
   category: CardCategory;
   trainer_subcategory: TrainerSubcategory | null;
+  pokemon_type: PokemonType | null;
   stock: number;
   base_price_cents: number | null;
   image: string;
@@ -71,6 +72,7 @@ interface FormState {
   condition: Condition;
   category: CardCategory;
   trainer_subcategory: TrainerSubcategory | "";
+  pokemon_type: PokemonType | "";
   stock: string;
   price: string;
   image: string;
@@ -85,6 +87,7 @@ const EMPTY_FORM: FormState = {
   condition: "NM",
   category: "Pokémon",
   trainer_subcategory: "",
+  pokemon_type: "",
   stock: "1",
   price: "",
   image: "",
@@ -97,6 +100,7 @@ function AdminCardsManagePage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CardCategory[]>([]);
+  const [pokemonTypeFilter, setPokemonTypeFilter] = useState<PokemonType[]>([]);
   const [noPriceOnly, setNoPriceOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
@@ -166,6 +170,7 @@ function AdminCardsManagePage() {
     const q = search.trim().toLowerCase();
     return rows.filter((r) => {
       if (categoryFilter.length > 0 && !categoryFilter.includes(r.category)) return false;
+      if (pokemonTypeFilter.length > 0 && (!r.pokemon_type || !pokemonTypeFilter.includes(r.pokemon_type))) return false;
       if (noPriceOnly && r.base_price_cents != null) return false;
       if (!q) return true;
       return (
@@ -174,9 +179,9 @@ function AdminCardsManagePage() {
         r.card_number.toLowerCase().includes(q)
       );
     });
-  }, [rows, search, categoryFilter, noPriceOnly]);
+  }, [rows, search, categoryFilter, pokemonTypeFilter, noPriceOnly]);
 
-  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, noPriceOnly]);
+  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, pokemonTypeFilter, noPriceOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredAll.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -219,6 +224,7 @@ function AdminCardsManagePage() {
       condition: form.condition,
       category: form.category,
       trainer_subcategory: form.category === "Treinador" && form.trainer_subcategory ? form.trainer_subcategory : null,
+      pokemon_type: form.category === "Pokémon" && form.pokemon_type ? form.pokemon_type : null,
       stock: Math.max(0, parseInt(form.stock) || 0),
       base_price_cents: priceCents,
       image: form.image.trim(),
@@ -251,6 +257,7 @@ function AdminCardsManagePage() {
       condition: r.condition ?? "NM",
       category: r.category ?? "Pokémon",
       trainer_subcategory: r.trainer_subcategory ?? "",
+      pokemon_type: r.pokemon_type ?? "",
       stock: String(r.stock),
       price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
       image: r.image,
@@ -279,6 +286,7 @@ function AdminCardsManagePage() {
       condition: r.condition ?? "NM",
       category: r.category ?? "Pokémon",
       trainer_subcategory: r.trainer_subcategory ?? "",
+      pokemon_type: r.pokemon_type ?? "",
       stock: String(r.stock),
       price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
       image: r.image,
@@ -310,7 +318,21 @@ function AdminCardsManagePage() {
     }
   };
 
-  const handleQuickSave = async (id: string) => {
+  const quickPokemonTypeRef = useRef<HTMLSelectElement | null>(null);
+  const focusPokemonOnOpenRef = useRef(false);
+
+  useEffect(() => {
+    if (quickEditId && focusPokemonOnOpenRef.current) {
+      // Aguarda o painel renderizar antes de focar
+      const t = setTimeout(() => {
+        quickPokemonTypeRef.current?.focus();
+        focusPokemonOnOpenRef.current = false;
+      }, 50);
+      return () => clearTimeout(t);
+    }
+  }, [quickEditId]);
+
+  const handleQuickSave = async (id: string, opts?: { goNext?: boolean }) => {
     setQuickSaving(true);
     setQuickMsg(null);
     const newStock = Math.max(0, parseInt(quickForm.stock) || 0);
@@ -318,6 +340,7 @@ function AdminCardsManagePage() {
       condition: quickForm.condition,
       category: quickForm.category,
       trainer_subcategory: quickForm.category === "Treinador" && quickForm.trainer_subcategory ? quickForm.trainer_subcategory : null,
+      pokemon_type: quickForm.category === "Pokémon" && quickForm.pokemon_type ? quickForm.pokemon_type : null,
       stock: newStock,
       base_price_cents: quickForm.price.trim() === "" ? null : Math.round(parseFloat(quickForm.price.replace(",", ".")) * 100),
       image: quickForm.image.trim(),
@@ -330,6 +353,34 @@ function AdminCardsManagePage() {
     setQuickMsg({ type: "ok", text: "Salvo!" });
     invalidateCardsCache();
     setRows((prev) => prev.map((row) => row.id === id ? { ...row, ...payload } as CardRow : row));
+
+    if (opts?.goNext) {
+      // Acha a próxima carta da página atual filtrada e abre a edição rápida nela.
+      const idx = filtered.findIndex((r) => r.id === id);
+      const next = idx >= 0 ? filtered[idx + 1] : null;
+      if (next) {
+        focusPokemonOnOpenRef.current = true;
+        setQuickEditId(next.id);
+        setQuickMsg(null);
+        setQuickForm({
+          name: next.name,
+          card_number: next.card_number,
+          collection: next.collection,
+          language: next.language,
+          finish: next.finish,
+          condition: next.condition ?? "NM",
+          category: next.category ?? "Pokémon",
+          trainer_subcategory: next.trainer_subcategory ?? "",
+          pokemon_type: next.pokemon_type ?? "",
+          stock: String(next.stock),
+          price: next.base_price_cents != null ? (next.base_price_cents / 100).toFixed(2) : "",
+          image: next.image,
+        });
+        return;
+      }
+      setQuickMsg({ type: "ok", text: "Fim da página — não há próxima carta." });
+    }
+
     setTimeout(() => { setQuickEditId((cur) => cur === id ? null : cur); setQuickMsg(null); }, 600);
   };
 
@@ -433,7 +484,7 @@ function AdminCardsManagePage() {
               <span className="font-semibold">Tipo de carta *</span>
               <select
                 value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value as CardCategory, trainer_subcategory: e.target.value === "Treinador" ? form.trainer_subcategory : "" })}
+                onChange={(e) => setForm({ ...form, category: e.target.value as CardCategory, trainer_subcategory: e.target.value === "Treinador" ? form.trainer_subcategory : "", pokemon_type: e.target.value === "Pokémon" ? form.pokemon_type : "" })}
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
               >
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -453,6 +504,21 @@ function AdminCardsManagePage() {
                 </select>
               </label>
             )}
+
+            <label className="text-xs space-y-1">
+              <span className="font-semibold">Tipo Pokémon</span>
+              <select
+                value={form.pokemon_type}
+                onChange={(e) => setForm({ ...form, pokemon_type: e.target.value as PokemonType | "" })}
+                disabled={form.category !== "Pokémon"}
+                className="w-full rounded border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
+              >
+                <option value="">— Nenhum —</option>
+                {POKEMON_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </label>
+
+
 
             <label className="text-xs space-y-1">
               <span className="font-semibold">Estoque *</span>
@@ -568,7 +634,39 @@ function AdminCardsManagePage() {
             </div>
           )}
 
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded border border-border bg-card px-3 py-2">
+            <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Tipo Pokémon:</span>
+            {POKEMON_TYPES.map((t) => {
+              const checked = pokemonTypeFilter.includes(t);
+              const count = rows.filter((r) => r.pokemon_type === t).length;
+              return (
+                <label key={t} className="flex items-center gap-1 text-xs cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) =>
+                      setPokemonTypeFilter((prev) =>
+                        e.target.checked ? [...prev, t] : prev.filter((x) => x !== t),
+                      )
+                    }
+                    className="rounded border-border accent-foreground"
+                  />
+                  <span>{t} <span className="text-muted-foreground">({count})</span></span>
+                </label>
+              );
+            })}
+            {pokemonTypeFilter.length > 0 && (
+              <button
+                onClick={() => setPokemonTypeFilter([])}
+                className="ml-auto text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              >
+                Limpar
+              </button>
+            )}
+          </div>
+
           <div className="mb-4 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-3 py-2">
+
             <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
               <input
                 type="checkbox"
@@ -666,7 +764,7 @@ function AdminCardsManagePage() {
                           <span className="font-semibold">Tipo</span>
                           <select
                             value={quickForm.category}
-                            onChange={(e) => setQuickForm({ ...quickForm, category: e.target.value as CardCategory, trainer_subcategory: e.target.value === "Treinador" ? quickForm.trainer_subcategory : "" })}
+                            onChange={(e) => setQuickForm({ ...quickForm, category: e.target.value as CardCategory, trainer_subcategory: e.target.value === "Treinador" ? quickForm.trainer_subcategory : "", pokemon_type: e.target.value === "Pokémon" ? quickForm.pokemon_type : "" })}
                             className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
                           >
                             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -685,6 +783,19 @@ function AdminCardsManagePage() {
                             </select>
                           </label>
                         )}
+                        <label className="text-xs space-y-1">
+                          <span className="font-semibold">Tipo Pokémon</span>
+                          <select
+                            ref={quickPokemonTypeRef}
+                            value={quickForm.pokemon_type}
+                            onChange={(e) => setQuickForm({ ...quickForm, pokemon_type: e.target.value as PokemonType | "" })}
+                            disabled={quickForm.category !== "Pokémon"}
+                            className="w-full rounded border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
+                          >
+                            <option value="">— Nenhum —</option>
+                            {POKEMON_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                        </label>
                         <label className="text-xs space-y-1">
                           <span className="font-semibold">Estoque</span>
                           <input
@@ -748,6 +859,14 @@ function AdminCardsManagePage() {
                           {quickSaving ? "Salvando..." : "💾 Salvar"}
                         </button>
                         <button
+                          onClick={() => handleQuickSave(r.id, { goNext: true })}
+                          disabled={quickSaving}
+                          title="Salva e abre a edição rápida da próxima carta da lista, com foco em Tipo Pokémon"
+                          className="rounded bg-foreground px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-background hover:opacity-90 disabled:opacity-50"
+                        >
+                          {quickSaving ? "Salvando..." : "💾 Salvar e ir p/ próxima →"}
+                        </button>
+                        <button
                           onClick={() => setQuickEditId(null)}
                           className="rounded border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary"
                         >
@@ -771,6 +890,7 @@ function AdminCardsManagePage() {
                               condition: r.condition ?? "NM",
                               category: r.category ?? "Pokémon",
                               trainer_subcategory: r.trainer_subcategory ?? "",
+                              pokemon_type: r.pokemon_type ?? "",
                               stock: "1",
                               price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
                               image: r.image,
