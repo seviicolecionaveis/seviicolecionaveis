@@ -730,7 +730,7 @@ function AdminCardsManagePage() {
                           <span className="font-semibold">Tipo</span>
                           <select
                             value={quickForm.category}
-                            onChange={(e) => setQuickForm({ ...quickForm, category: e.target.value as CardCategory, trainer_subcategory: e.target.value === "Treinador" ? quickForm.trainer_subcategory : "" })}
+                            onChange={(e) => setQuickForm({ ...quickForm, category: e.target.value as CardCategory, trainer_subcategory: e.target.value === "Treinador" ? quickForm.trainer_subcategory : "", pokemon_type: e.target.value === "Pokémon" ? quickForm.pokemon_type : "" })}
                             className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
                           >
                             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
