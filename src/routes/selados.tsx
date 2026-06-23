@@ -92,6 +92,7 @@ function SeladosPage() {
           <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 md:grid-cols-4">
             {items.map((p) => {
               const cover = p.images[0];
+              const out = !p.is_preorder && (p.stock ?? 0) <= 0;
               return (
                 <button
                   key={p.id}
@@ -108,6 +109,13 @@ function SeladosPage() {
                       <span className="absolute left-2 top-2 rounded bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow">
                         Pré-venda
                       </span>
+                    )}
+                    {out && (
+                      <div className="absolute inset-0 grid place-items-center bg-foreground/40">
+                        <span className="rounded bg-foreground px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-background">
+                          Esgotado
+                        </span>
+                      </div>
                     )}
                   </div>
                   <p className="mt-2 text-sm font-semibold line-clamp-2">{p.title}</p>
