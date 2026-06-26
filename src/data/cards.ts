@@ -236,6 +236,7 @@ export const EXTRA_COLLECTIONS = [
   "EPO - Poderes Emergentes",
   "BLW - Black and White",
   "HIF - Destinos Ocultos",
+  "M4 - Ninja Spinner",
 ];
 
 export const COLLECTIONS = Array.from(
