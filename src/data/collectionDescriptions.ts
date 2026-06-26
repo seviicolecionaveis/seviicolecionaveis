@@ -36,6 +36,8 @@ export const COLLECTION_DESCRIPTIONS: Record<string, string> = {
     "Black & White (2011) — coleção base da quinta geração do TCG Pokémon, com 114 cartas. Marca o início da era Black & White e introduz Pokémon lendários de Unova como Reshiram e Zekrom, além de trazer novas mecânicas de jogo e cartas de Treinador atualizadas. Essencial para colecionadores da era BW.",
   "HIF - Destinos Ocultos":
     "Hidden Fates / Destinos Ocultos (2019) — coleção especial da era Sun & Moon com 69 cartas no set principal e um subset Shiny Vault de 94 cartas. Famosa por trazer versões Shiny de Pokémon populares como Charizard-GX, Mewtwo-GX e Rayquaza-GX em arte alternativa. Uma das coleções mais desejadas pelos colecionadores devido à raridade dos Shiny Vault e ao valor de mercado das cartas especiais.",
+  "M4 - Ninja Spinner":
+    "M4 - Ninja Spinner — coleção especial do TCG Pokémon com foco em itens de batalha e Pokémon com habilidades ágeis. Inclui cartas de Treinador e Pokémon com temática ninja, ideal para completistas e jogadores que buscam mecânicas diferenciadas.",
 };
 
 export function getCollectionDescription(name: string): string | undefined {
