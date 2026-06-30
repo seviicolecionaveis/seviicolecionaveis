@@ -98,10 +98,20 @@ function SealedAdmin() {
 
   const move = async (id: string, dir: -1 | 1) => {
     const idx = items.findIndex((p) => p.id === id);
-    const swap = items[idx + dir];
-    if (!swap) return;
-    await supabase.from("sealed_products").update({ sort_order: swap.sort_order }).eq("id", id);
-    await supabase.from("sealed_products").update({ sort_order: items[idx].sort_order }).eq("id", swap.id);
+    const j = idx + dir;
+    if (idx < 0 || j < 0 || j >= items.length) return;
+    const next = [...items];
+    [next[idx], next[j]] = [next[j], next[idx]];
+    setItems(next);
+    // Reassign sort_order sequentially so ordering is deterministic
+    // even when rows previously shared the same value (e.g. all 0).
+    await Promise.all(
+      next.map((p, i) =>
+        p.sort_order === i
+          ? Promise.resolve()
+          : supabase.from("sealed_products").update({ sort_order: i }).eq("id", p.id),
+      ),
+    );
     await load();
   };
 
