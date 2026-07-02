@@ -243,7 +243,15 @@ function AdminOrderDetailPage() {
     );
   }
 
-  const items: any[] = order.order_items ?? [];
+  const items: any[] = sortByCardGroup(orderItemsRaw, (it: any) => {
+    const m = itemMetaMap.get(it.card_id);
+    return {
+      category: m?.category ?? null,
+      pokemonType: m?.pokemonType ?? null,
+      trainerSubcategory: m?.trainerSubcategory ?? null,
+      name: it.card_name,
+    };
+  });
   const subtotalCents = order.subtotal_cents ?? 0;
   const shippingCents = order.shipping_cost_cents ?? 0;
   const totalCents = order.total_cents ?? 0;
