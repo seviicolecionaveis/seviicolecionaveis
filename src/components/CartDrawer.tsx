@@ -1,6 +1,9 @@
 import { ShoppingBag, X, Minus, Plus, Trash2 } from "lucide-react";
+import { useMemo } from "react";
 import { useCart } from "@/hooks/useCart";
 import { Link } from "@tanstack/react-router";
+import { useCardMetaMap } from "@/hooks/useCardMetaMap";
+import { sortByCardGroup } from "@/lib/sortCards";
 
 interface Props {
   open: boolean;
