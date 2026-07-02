@@ -108,7 +108,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((p) =>
       p.map((i) => (i.id === id ? { ...i, quantity: Math.max(1, Math.min(qty, i.maxStock)) } : i)),
     );
-  const clear = () => setItems([]);
+  const clear = () => {
+    setItems((prev) => {
+      const uniqueCardIds = Array.from(new Set(prev.map((i) => i.cardId)));
+      uniqueCardIds.forEach((cid) => removeCardInterestCart(cid));
+      return [];
+    });
+  };
 
   const count = items.reduce((s, i) => s + i.quantity, 0);
   const subtotal = items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
