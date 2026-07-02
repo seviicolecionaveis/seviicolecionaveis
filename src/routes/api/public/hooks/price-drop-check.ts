@@ -99,7 +99,13 @@ export const Route = createFileRoute('/api/public/hooks/price-drop-check')({
           oldCents: number
           newCents: number
         }> = []
-        const upserts: Array<{ card_id: string; last_min_price_cents: number; updated_at: string }> = []
+        const upserts: Array<{
+          card_id: string
+          last_min_price_cents: number
+          updated_at: string
+          previous_min_price_cents?: number | null
+          price_dropped_at?: string | null
+        }> = []
         const now = new Date().toISOString()
 
         for (const card of cards as CardRow[]) {
@@ -110,10 +116,13 @@ export const Route = createFileRoute('/api/public/hooks/price-drop-check')({
           if (candidates.length === 0) continue
           const currentMin = Math.min(...candidates)
           const previous = watchMap.get(card.id)
-          upserts.push({ card_id: card.id, last_min_price_cents: currentMin, updated_at: now })
+          const row: any = { card_id: card.id, last_min_price_cents: currentMin, updated_at: now }
           if (previous != null && currentMin < previous) {
+            row.previous_min_price_cents = previous
+            row.price_dropped_at = now
             drops.push({ card, oldCents: previous, newCents: currentMin })
           }
+          upserts.push(row)
         }
 
         // 6. Persist current snapshot
