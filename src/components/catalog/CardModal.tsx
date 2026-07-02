@@ -5,6 +5,7 @@ import { useCardPrices, priceLookupKey } from "@/hooks/useCardPrices";
 import { useWishlist } from "@/hooks/useWishlist";
 import { trackCardView } from "@/hooks/useCardStats";
 import { trackRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { trackCardInterestView } from "@/hooks/useCardInterest";
 import { cardSlug } from "@/lib/slug";
 import { Plus, Check, Heart, Share2, ZoomIn, ZoomOut, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -128,6 +129,7 @@ export function CardModal({ card, onClose, magnetOnly = false }: Props) {
     if (card) {
       trackCardView(card.id);
       trackRecentlyViewed(card.id);
+      trackCardInterestView(card.id);
       setZoomed(false);
       setShareCopied(false);
     }
