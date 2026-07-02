@@ -12,6 +12,20 @@ interface Props {
 
 export function CartDrawer({ open, onClose }: Props) {
   const { items, remove, setQty, subtotal } = useCart();
+  const metaMap = useCardMetaMap(items.map((i) => i.cardId));
+  const sortedItems = useMemo(
+    () =>
+      sortByCardGroup(items, (i) => {
+        const m = metaMap.get(i.cardId);
+        return {
+          category: m?.category ?? null,
+          pokemonType: m?.pokemonType ?? null,
+          trainerSubcategory: m?.trainerSubcategory ?? null,
+          name: i.name,
+        };
+      }),
+    [items, metaMap],
+  );
 
   if (!open) return null;
   return (
