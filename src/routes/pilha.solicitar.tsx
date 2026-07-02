@@ -169,7 +169,7 @@ function SolicitarPage() {
   useEffect(() => {
     if (hasSealedSelected && method === "arte_em_cards") {
       setMethod("correios");
-      toast.info("Retirada na Arte em Cards não está disponível para produtos selados.");
+      toast.info("Retirada na Arte em Cards não está disponível para produtos lacrados.");
     }
   }, [hasSealedSelected, method]);
 
