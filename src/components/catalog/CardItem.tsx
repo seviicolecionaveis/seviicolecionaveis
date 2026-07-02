@@ -120,9 +120,18 @@ export function CardItem({ card, onClick }: Props) {
             {card.collection}
           </p>
         </div>
-        <p className="shrink-0 text-sm font-bold">
+        <p className="shrink-0 text-sm font-bold text-right">
           {displayPrice != null ? (
-            `R$ ${displayPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+            <>
+              {drop && (
+                <span className="block text-[10px] font-medium text-muted-foreground line-through leading-none">
+                  R$ {(drop.previousCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                </span>
+              )}
+              <span className={drop ? "text-emerald-600" : ""}>
+                R$ {displayPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+              </span>
+            </>
           ) : loading ? (
             <span className="text-muted-foreground font-medium">Carregando...</span>
           ) : (
