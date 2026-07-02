@@ -88,6 +88,17 @@ export function CardItem({ card, onClick }: Props) {
             <FlashOfferBadge discountPercent={offer.discount_percent} endsAt={offer.ends_at} compact />
           </div>
         )}
+        {drop && !out && !offer && (
+          <div className="absolute top-2 left-2">
+            <span
+              className="inline-flex items-center gap-1 rounded-full bg-emerald-600 text-white px-2 py-0.5 text-[10px] font-bold shadow"
+              title={`Preço caiu de R$ ${(drop.previousCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+            >
+              <TrendingDown className="h-3 w-3" />
+              BAIXOU -{drop.percent}%
+            </span>
+          </div>
+        )}
       </div>
       <div className="mt-3 flex items-center gap-1 flex-nowrap overflow-hidden">
         <span className="shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[9px] font-bold tracking-tight">
