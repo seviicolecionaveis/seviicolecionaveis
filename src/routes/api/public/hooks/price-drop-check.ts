@@ -34,11 +34,15 @@ export const Route = createFileRoute('/api/public/hooks/price-drop-check')({
         if (unauthorized) return unauthorized
         const admin = supabaseAdmin as any
 
-        // 1. Distinct wishlisted card ids
-        const { data: wishRows, error: wishErr } = await admin
-          .from('wishlist')
-          .select('card_key')
-          .limit(5000)
+        // 1. Distinct wishlisted + interested card ids
+        const [{ data: wishRows, error: wishErr }, { data: interestRows }] = await Promise.all([
+          admin.from('wishlist').select('card_key').limit(5000),
+          admin
+            .from('card_interest')
+            .select('card_id, source, last_seen_at')
+            .gte('last_seen_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+            .limit(10000),
+        ])
         if (wishErr) {
           console.error('[price-drop] wishlist fetch failed', wishErr)
           return new Response(JSON.stringify({ ok: false, error: 'wishlist_fetch_failed' }), {
@@ -48,7 +52,10 @@ export const Route = createFileRoute('/api/public/hooks/price-drop-check')({
         }
         const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
         const cardIds = Array.from(
-          new Set((wishRows ?? []).map((r: any) => r.card_key).filter((k: string) => UUID_RE.test(k))),
+          new Set([
+            ...(wishRows ?? []).map((r: any) => r.card_key as string),
+            ...(interestRows ?? []).map((r: any) => r.card_id as string),
+          ].filter((k: string) => UUID_RE.test(k))),
         )
         if (cardIds.length === 0) {
           return new Response(JSON.stringify({ ok: true, checked: 0, sent: 0 }), {
