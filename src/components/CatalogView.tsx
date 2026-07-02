@@ -33,7 +33,7 @@ const DEFAULT_FILTERS: FilterState = {
   numberQuery: "",
 };
 
-type Sort = "relevance" | "price-asc" | "price-desc" | "name" | "number-asc" | "number-desc";
+type Sort = "relevance" | "price-asc" | "price-desc" | "name" | "number-asc" | "number-desc" | "newest" | "oldest";
 
 const cardNumValue = (n: string) => {
   const m = n.match(/\d+/);
