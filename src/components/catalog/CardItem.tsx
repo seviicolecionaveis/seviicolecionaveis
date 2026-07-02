@@ -4,9 +4,10 @@ import { cardCreatedAt } from "@/hooks/useCardsCatalog";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCompare } from "@/hooks/useCompare";
 import { useFlashOffers } from "@/hooks/useFlashOffers";
+import { usePriceDrops } from "@/hooks/usePriceDrops";
 import { FlashOfferBadge } from "@/components/FlashOfferBadge";
 import { toast } from "sonner";
-import { Heart, Scale } from "lucide-react";
+import { Heart, Scale, TrendingDown } from "lucide-react";
 
 const finishBadge: Record<Finish, string> = {
   Normal: "bg-background/90 text-foreground",
@@ -41,6 +42,8 @@ export function CardItem({ card, onClick }: Props) {
   const createdAt = cardCreatedAt.get(card.id);
   const { offers } = useFlashOffers();
   const offer = offers.get(`${card.name}__${card.collection}__${card.number}`);
+  const priceDrops = usePriceDrops();
+  const drop = priceDrops.get(card.id);
   const isNew = createdAt
     ? Date.now() - new Date(createdAt).getTime() < 14 * 24 * 60 * 60 * 1000
     : false;
@@ -85,6 +88,17 @@ export function CardItem({ card, onClick }: Props) {
             <FlashOfferBadge discountPercent={offer.discount_percent} endsAt={offer.ends_at} compact />
           </div>
         )}
+        {drop && !out && !offer && (
+          <div className="absolute top-2 left-2">
+            <span
+              className="inline-flex items-center gap-1 rounded-full bg-emerald-600 text-white px-2 py-0.5 text-[10px] font-bold shadow"
+              title={`Preço caiu de R$ ${(drop.previousCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+            >
+              <TrendingDown className="h-3 w-3" />
+              BAIXOU -{drop.percent}%
+            </span>
+          </div>
+        )}
       </div>
       <div className="mt-3 flex items-center gap-1 flex-nowrap overflow-hidden">
         <span className="shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[9px] font-bold tracking-tight">
@@ -106,9 +120,18 @@ export function CardItem({ card, onClick }: Props) {
             {card.collection}
           </p>
         </div>
-        <p className="shrink-0 text-sm font-bold">
+        <p className="shrink-0 text-sm font-bold text-right">
           {displayPrice != null ? (
-            `R$ ${displayPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+            <>
+              {drop && (
+                <span className="block text-[10px] font-medium text-muted-foreground line-through leading-none">
+                  R$ {(drop.previousCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                </span>
+              )}
+              <span className={drop ? "text-emerald-600" : ""}>
+                R$ {displayPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+              </span>
+            </>
           ) : loading ? (
             <span className="text-muted-foreground font-medium">Carregando...</span>
           ) : (

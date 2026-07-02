@@ -171,16 +171,22 @@ export type Database = {
         Row: {
           card_id: string
           last_min_price_cents: number
+          previous_min_price_cents: number | null
+          price_dropped_at: string | null
           updated_at: string
         }
         Insert: {
           card_id: string
           last_min_price_cents: number
+          previous_min_price_cents?: number | null
+          price_dropped_at?: string | null
           updated_at?: string
         }
         Update: {
           card_id?: string
           last_min_price_cents?: number
+          previous_min_price_cents?: number | null
+          price_dropped_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1495,6 +1501,7 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
