@@ -34,11 +34,15 @@ export const Route = createFileRoute('/api/public/hooks/price-drop-check')({
         if (unauthorized) return unauthorized
         const admin = supabaseAdmin as any
 
-        // 1. Distinct wishlisted card ids
-        const { data: wishRows, error: wishErr } = await admin
-          .from('wishlist')
-          .select('card_key')
-          .limit(5000)
+        // 1. Distinct wishlisted + interested card ids
+        const [{ data: wishRows, error: wishErr }, { data: interestRows }] = await Promise.all([
+          admin.from('wishlist').select('card_key').limit(5000),
+          admin
+            .from('card_interest')
+            .select('card_id, source, last_seen_at')
+            .gte('last_seen_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+            .limit(10000),
+        ])
         if (wishErr) {
           console.error('[price-drop] wishlist fetch failed', wishErr)
           return new Response(JSON.stringify({ ok: false, error: 'wishlist_fetch_failed' }), {
@@ -48,7 +52,10 @@ export const Route = createFileRoute('/api/public/hooks/price-drop-check')({
         }
         const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
         const cardIds = Array.from(
-          new Set((wishRows ?? []).map((r: any) => r.card_key).filter((k: string) => UUID_RE.test(k))),
+          new Set([
+            ...(wishRows ?? []).map((r: any) => r.card_key as string),
+            ...(interestRows ?? []).map((r: any) => r.card_id as string),
+          ].filter((k: string) => UUID_RE.test(k))),
         )
         if (cardIds.length === 0) {
           return new Response(JSON.stringify({ ok: true, checked: 0, sent: 0 }), {
@@ -140,22 +147,34 @@ export const Route = createFileRoute('/api/public/hooks/price-drop-check')({
           )
         }
 
-        // 7. For each drop find wishlist users and their emails
+        // 7. For each drop find target users (wishlist ∪ cart ∪ view) and emails
         let totalSent = 0
         for (const drop of drops) {
-          const { data: userRows } = await admin
-            .from('wishlist')
-            .select('user_id')
-            .eq('card_key', drop.card.id)
-            .limit(1000)
-          const userIds = Array.from(new Set((userRows ?? []).map((r: any) => r.user_id as string)))
-          if (userIds.length === 0) continue
-
           const oldPrice = drop.oldCents / 100
           const newPrice = drop.newCents / 100
           const dropPercent = Math.round(((drop.oldCents - drop.newCents) / drop.oldCents) * 100)
           const slug = cardSlug(drop.card.name, drop.card.collection, drop.card.card_number)
           const cardUrl = `${SITE_URL}/carta/${slug}`
+
+          const [{ data: wishUsers }, { data: interestUsers }] = await Promise.all([
+            admin.from('wishlist').select('user_id').eq('card_key', drop.card.id).limit(1000),
+            admin
+              .from('card_interest')
+              .select('user_id, source')
+              .eq('card_id', drop.card.id)
+              .limit(2000),
+          ])
+          const targetIds = new Set<string>()
+          for (const r of (wishUsers ?? []) as any[]) targetIds.add(r.user_id)
+          for (const r of (interestUsers ?? []) as any[]) {
+            // cart: any drop; view: only when ≥ 5% to avoid spam
+            if (r.source === 'cart' || (r.source === 'view' && dropPercent >= 5)) {
+              targetIds.add(r.user_id)
+            }
+          }
+          const userIds = Array.from(targetIds)
+          if (userIds.length === 0) continue
+
 
           for (const userId of userIds) {
             // Fetch email from auth.users via admin API
