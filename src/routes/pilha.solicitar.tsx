@@ -165,7 +165,7 @@ function SolicitarPage() {
     typeof i.cardId === "string" && i.cardId.startsWith("sealed:"),
   );
 
-  // Se houver selado, "Arte em Cards" não é permitido. Volta para Correios.
+  // Se houver produto lacrado, "Arte em Cards" não é permitido. Volta para Correios.
   useEffect(() => {
     if (hasSealedSelected && method === "arte_em_cards") {
       setMethod("correios");

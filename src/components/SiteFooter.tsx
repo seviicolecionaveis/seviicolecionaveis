@@ -80,7 +80,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 const NAV_LINKS: { to: string; label: string }[] = [
   { to: "/", label: "Catálogo" },
   { to: "/imas", label: "Ímãs" },
-  { to: "/selados", label: "Selados" },
+  { to: "/produtos-lacrados", label: "Produtos Lacrados" },
   { to: "/sobre", label: "Sobre nós" },
   { to: "/faq", label: "Perguntas frequentes" },
   { to: "/favoritos", label: "Favoritos" },

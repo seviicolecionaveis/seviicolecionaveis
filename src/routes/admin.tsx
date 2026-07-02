@@ -15,7 +15,7 @@ const NAV_GROUPS: NavGroup[] = [
     links: [
       { to: "/admin/manage-cards", label: "Gerenciar cartas" },
       { to: "/admin/panels", label: "Painéis" },
-      { to: "/admin/sealed", label: "Selados" },
+      { to: "/admin/sealed", label: "Produtos Lacrados" },
       { to: "/admin/accessories", label: "Acessórios" },
     ],
   },

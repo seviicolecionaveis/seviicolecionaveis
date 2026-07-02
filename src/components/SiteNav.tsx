@@ -12,7 +12,7 @@ const CARTAS_GROUP = [
 const LINKS = [
   { to: "/imas", label: "Ímãs" },
   { to: "/acessorios", label: "Acessórios" },
-  { to: "/selados", label: "Selados" },
+  { to: "/produtos-lacrados", label: "Produtos Lacrados" },
   { to: "/sobre", label: "Sobre" },
   { to: "/favoritos", label: "Favoritos" },
 ] as const;
