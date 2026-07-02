@@ -48,7 +48,7 @@ export function CartDrawer({ open, onClose }: Props) {
             </div>
           ) : (
             <ul className="space-y-4">
-              {items.map((i) => (
+              {sortedItems.map((i) => (
                 <li key={i.id} className="flex gap-3 border-b border-border pb-4">
                   <img
                     src={i.image}
