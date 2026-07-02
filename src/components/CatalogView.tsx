@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { type Card } from "@/data/cards";
-import { useCardsCatalog } from "@/hooks/useCardsCatalog";
+import { useCardsCatalog, cardCreatedAt } from "@/hooks/useCardsCatalog";
 import { useCardStats } from "@/hooks/useCardStats";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
@@ -33,7 +33,7 @@ const DEFAULT_FILTERS: FilterState = {
   numberQuery: "",
 };
 
-type Sort = "relevance" | "price-asc" | "price-desc" | "name" | "number-asc" | "number-desc";
+type Sort = "relevance" | "price-asc" | "price-desc" | "name" | "number-asc" | "number-desc" | "newest" | "oldest";
 
 const cardNumValue = (n: string) => {
   const m = n.match(/\d+/);
@@ -124,6 +124,18 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
         return [...list].sort((a, b) => cardNumValue(a.number) - cardNumValue(b.number) || a.number.localeCompare(b.number));
       case "number-desc":
         return [...list].sort((a, b) => cardNumValue(b.number) - cardNumValue(a.number) || b.number.localeCompare(a.number));
+      case "newest":
+        return [...list].sort((a, b) => {
+          const ca = cardCreatedAt.get(`${a.name}__${a.collection}__${a.number}`) ?? "";
+          const cb = cardCreatedAt.get(`${b.name}__${b.collection}__${b.number}`) ?? "";
+          return cb.localeCompare(ca);
+        });
+      case "oldest":
+        return [...list].sort((a, b) => {
+          const ca = cardCreatedAt.get(`${a.name}__${a.collection}__${a.number}`) ?? "";
+          const cb = cardCreatedAt.get(`${b.name}__${b.collection}__${b.number}`) ?? "";
+          return ca.localeCompare(cb);
+        });
       default: {
         const maxViews = Math.max(1, ...Array.from(stats.views.values()));
         const maxSales = Math.max(1, ...Array.from(stats.sales.values()));
@@ -263,6 +275,8 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
               <option value="name">Nome (A-Z)</option>
               <option value="number-asc">Numeração do Card [0-9]</option>
               <option value="number-desc">Numeração do Card [9-0]</option>
+              <option value="newest">Adicionadas Recentemente</option>
+              <option value="oldest">Adicionadas Antigamente</option>
             </select>
           </div>
 
