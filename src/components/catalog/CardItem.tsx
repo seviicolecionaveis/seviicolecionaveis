@@ -42,6 +42,8 @@ export function CardItem({ card, onClick }: Props) {
   const createdAt = cardCreatedAt.get(card.id);
   const { offers } = useFlashOffers();
   const offer = offers.get(`${card.name}__${card.collection}__${card.number}`);
+  const priceDrops = usePriceDrops();
+  const drop = priceDrops.get(card.id);
   const isNew = createdAt
     ? Date.now() - new Date(createdAt).getTime() < 14 * 24 * 60 * 60 * 1000
     : false;
