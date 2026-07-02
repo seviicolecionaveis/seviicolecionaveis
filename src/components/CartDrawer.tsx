@@ -1,6 +1,9 @@
 import { ShoppingBag, X, Minus, Plus, Trash2 } from "lucide-react";
+import { useMemo } from "react";
 import { useCart } from "@/hooks/useCart";
 import { Link } from "@tanstack/react-router";
+import { useCardMetaMap } from "@/hooks/useCardMetaMap";
+import { sortByCardGroup } from "@/lib/sortCards";
 
 interface Props {
   open: boolean;
@@ -9,6 +12,20 @@ interface Props {
 
 export function CartDrawer({ open, onClose }: Props) {
   const { items, remove, setQty, subtotal } = useCart();
+  const metaMap = useCardMetaMap(items.map((i) => i.cardId));
+  const sortedItems = useMemo(
+    () =>
+      sortByCardGroup(items, (i) => {
+        const m = metaMap.get(i.cardId);
+        return {
+          category: m?.category ?? null,
+          pokemonType: m?.pokemonType ?? null,
+          trainerSubcategory: m?.trainerSubcategory ?? null,
+          name: i.name,
+        };
+      }),
+    [items, metaMap],
+  );
 
   if (!open) return null;
   return (
@@ -31,7 +48,7 @@ export function CartDrawer({ open, onClose }: Props) {
             </div>
           ) : (
             <ul className="space-y-4">
-              {items.map((i) => (
+              {sortedItems.map((i) => (
                 <li key={i.id} className="flex gap-3 border-b border-border pb-4">
                   <img
                     src={i.image}

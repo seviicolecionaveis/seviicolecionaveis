@@ -14,6 +14,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { ArrowLeft, ImageOff, Layers, X } from "lucide-react";
 import { AdminTrackingEditor, type TrackingInfo } from "@/components/admin/AdminTrackingEditor";
+import { useCardMetaMap } from "@/hooks/useCardMetaMap";
+import { sortByCardGroup } from "@/lib/sortCards";
 
 export const Route = createFileRoute("/admin/orders/$orderId")({
   head: () => ({ meta: [{ title: "Pedido — Sevii Admin" }] }),
@@ -223,6 +225,8 @@ function AdminOrderDetailPage() {
     }
   };
 
+  const orderItemsRaw: any[] = order?.order_items ?? [];
+  const itemMetaMap = useCardMetaMap(orderItemsRaw.map((it: any) => it.card_id));
 
   if (authLoading || !isAdmin || loading) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
@@ -239,7 +243,15 @@ function AdminOrderDetailPage() {
     );
   }
 
-  const items: any[] = order.order_items ?? [];
+  const items: any[] = sortByCardGroup(orderItemsRaw, (it: any) => {
+    const m = itemMetaMap.get(it.card_id);
+    return {
+      category: m?.category ?? null,
+      pokemonType: m?.pokemonType ?? null,
+      trainerSubcategory: m?.trainerSubcategory ?? null,
+      name: it.card_name,
+    };
+  });
   const subtotalCents = order.subtotal_cents ?? 0;
   const shippingCents = order.shipping_cost_cents ?? 0;
   const totalCents = order.total_cents ?? 0;
