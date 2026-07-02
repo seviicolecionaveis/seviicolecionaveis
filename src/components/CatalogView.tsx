@@ -124,6 +124,18 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
         return [...list].sort((a, b) => cardNumValue(a.number) - cardNumValue(b.number) || a.number.localeCompare(b.number));
       case "number-desc":
         return [...list].sort((a, b) => cardNumValue(b.number) - cardNumValue(a.number) || b.number.localeCompare(a.number));
+      case "newest":
+        return [...list].sort((a, b) => {
+          const ca = cardCreatedAt.get(`${a.name}__${a.collection}__${a.number}`) ?? "";
+          const cb = cardCreatedAt.get(`${b.name}__${b.collection}__${b.number}`) ?? "";
+          return cb.localeCompare(ca);
+        });
+      case "oldest":
+        return [...list].sort((a, b) => {
+          const ca = cardCreatedAt.get(`${a.name}__${a.collection}__${a.number}`) ?? "";
+          const cb = cardCreatedAt.get(`${b.name}__${b.collection}__${b.number}`) ?? "";
+          return ca.localeCompare(cb);
+        });
       default: {
         const maxViews = Math.max(1, ...Array.from(stats.views.values()));
         const maxSales = Math.max(1, ...Array.from(stats.sales.values()));
