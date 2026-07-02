@@ -437,11 +437,11 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
         .maybeSingle();
       if (sErr) throw new Error(sErr.message);
       if (!sealed || sealed.active === false) {
-        throw new Error(`Produto selado não encontrado ou indisponível: "${it.name}".`);
+        throw new Error(`Produto lacrado não encontrado ou indisponível: "${it.name}".`);
       }
       const cents = Number(sealed.price_cents ?? 0);
       if (cents <= 0) {
-        throw new Error(`Preço indisponível para o produto selado "${it.name}".`);
+        throw new Error(`Preço indisponível para o produto lacrado "${it.name}".`);
       }
       resolved.push({ ...it, unitPrice: cents / 100 });
       continue;

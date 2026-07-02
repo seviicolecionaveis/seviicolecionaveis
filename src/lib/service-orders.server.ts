@@ -86,7 +86,7 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
   const { stackId, items } = await loadItems(input.userId, input.itemIds);
 
   if (input.method === "arte_em_cards" && items.some((i) => i.card_id?.startsWith("sealed:"))) {
-    throw new Error("Retirada na Arte em Cards não está disponível para produtos selados. Escolha outra forma de envio.");
+    throw new Error("Retirada na Arte em Cards não está disponível para produtos lacrados. Escolha outra forma de envio.");
   }
 
   let amountCents = 0;

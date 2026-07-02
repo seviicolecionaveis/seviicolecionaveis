@@ -101,7 +101,7 @@ export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
                     </div>
                   )}
                   <span className="absolute left-2 top-2 rounded bg-brand-gold px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-background shadow">
-                    Selado
+                    Lacrado
                   </span>
                   {entry.sealed.is_preorder && (
                     <span className="absolute right-2 top-2 rounded bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow">

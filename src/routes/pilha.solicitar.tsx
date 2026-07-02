@@ -405,7 +405,7 @@ function SolicitarPage() {
                       <div className="flex-1">
                         <p className="text-sm font-semibold">{opt.label}</p>
                         <p className="text-xs text-muted-foreground">
-                          {disabled ? "Não disponível para produtos selados." : opt.desc}
+                          {disabled ? "Não disponível para produtos lacrados." : opt.desc}
                         </p>
                       </div>
                     </label>
