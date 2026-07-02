@@ -4,9 +4,10 @@ import { cardCreatedAt } from "@/hooks/useCardsCatalog";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCompare } from "@/hooks/useCompare";
 import { useFlashOffers } from "@/hooks/useFlashOffers";
+import { usePriceDrops } from "@/hooks/usePriceDrops";
 import { FlashOfferBadge } from "@/components/FlashOfferBadge";
 import { toast } from "sonner";
-import { Heart, Scale } from "lucide-react";
+import { Heart, Scale, TrendingDown } from "lucide-react";
 
 const finishBadge: Record<Finish, string> = {
   Normal: "bg-background/90 text-foreground",
