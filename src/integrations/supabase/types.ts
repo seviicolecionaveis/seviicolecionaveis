@@ -171,16 +171,22 @@ export type Database = {
         Row: {
           card_id: string
           last_min_price_cents: number
+          previous_min_price_cents: number | null
+          price_dropped_at: string | null
           updated_at: string
         }
         Insert: {
           card_id: string
           last_min_price_cents: number
+          previous_min_price_cents?: number | null
+          price_dropped_at?: string | null
           updated_at?: string
         }
         Update: {
           card_id?: string
           last_min_price_cents?: number
+          previous_min_price_cents?: number | null
+          price_dropped_at?: string | null
           updated_at?: string
         }
         Relationships: []
