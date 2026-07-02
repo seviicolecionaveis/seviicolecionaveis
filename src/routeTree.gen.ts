@@ -15,6 +15,7 @@ import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeladosRouteImport } from './routes/selados'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ProdutosLacradosRouteImport } from './routes/produtos-lacrados'
 import { Route as PilhaRouteImport } from './routes/pilha'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as MaisVendidasRouteImport } from './routes/mais-vendidas'
@@ -102,6 +103,11 @@ const SeladosRoute = SeladosRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosLacradosRoute = ProdutosLacradosRouteImport.update({
+  id: '/produtos-lacrados',
+  path: '/produtos-lacrados',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PilhaRoute = PilhaRouteImport.update({
@@ -425,6 +431,7 @@ export interface FileRoutesByFullPath {
   '/mais-vendidas': typeof MaisVendidasRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pilha': typeof PilhaRouteWithChildren
+  '/produtos-lacrados': typeof ProdutosLacradosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -489,6 +496,7 @@ export interface FileRoutesByTo {
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
   '/mais-vendidas': typeof MaisVendidasRoute
+  '/produtos-lacrados': typeof ProdutosLacradosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -556,6 +564,7 @@ export interface FileRoutesById {
   '/mais-vendidas': typeof MaisVendidasRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pilha': typeof PilhaRouteWithChildren
+  '/produtos-lacrados': typeof ProdutosLacradosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -624,6 +633,7 @@ export interface FileRouteTypes {
     | '/mais-vendidas'
     | '/orders'
     | '/pilha'
+    | '/produtos-lacrados'
     | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
@@ -688,6 +698,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/imas'
     | '/mais-vendidas'
+    | '/produtos-lacrados'
     | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
@@ -754,6 +765,7 @@ export interface FileRouteTypes {
     | '/mais-vendidas'
     | '/orders'
     | '/pilha'
+    | '/produtos-lacrados'
     | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
@@ -821,6 +833,7 @@ export interface RootRouteChildren {
   MaisVendidasRoute: typeof MaisVendidasRoute
   OrdersRoute: typeof OrdersRouteWithChildren
   PilhaRoute: typeof PilhaRouteWithChildren
+  ProdutosLacradosRoute: typeof ProdutosLacradosRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SeladosRoute: typeof SeladosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -891,6 +904,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produtos-lacrados': {
+      id: '/produtos-lacrados'
+      path: '/produtos-lacrados'
+      fullPath: '/produtos-lacrados'
+      preLoaderRoute: typeof ProdutosLacradosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pilha': {
@@ -1397,6 +1417,7 @@ const rootRouteChildren: RootRouteChildren = {
   MaisVendidasRoute: MaisVendidasRoute,
   OrdersRoute: OrdersRouteWithChildren,
   PilhaRoute: PilhaRouteWithChildren,
+  ProdutosLacradosRoute: ProdutosLacradosRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SeladosRoute: SeladosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
@@ -1429,13 +1450,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

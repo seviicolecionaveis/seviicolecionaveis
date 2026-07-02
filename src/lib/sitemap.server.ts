@@ -25,7 +25,7 @@ export async function buildSitemapXml(origin: string): Promise<string> {
     { loc: `${origin}/cartas` },
     { loc: `${origin}/colecoes` },
     { loc: `${origin}/mais-vendidas` },
-    { loc: `${origin}/selados` },
+    { loc: `${origin}/produtos-lacrados` },
     { loc: `${origin}/imas` },
     { loc: `${origin}/acessorios` },
     { loc: `${origin}/sobre` },

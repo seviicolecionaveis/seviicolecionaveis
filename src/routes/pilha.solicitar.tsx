@@ -165,11 +165,11 @@ function SolicitarPage() {
     typeof i.cardId === "string" && i.cardId.startsWith("sealed:"),
   );
 
-  // Se houver selado, "Arte em Cards" não é permitido. Volta para Correios.
+  // Se houver produto lacrado, "Arte em Cards" não é permitido. Volta para Correios.
   useEffect(() => {
     if (hasSealedSelected && method === "arte_em_cards") {
       setMethod("correios");
-      toast.info("Retirada na Arte em Cards não está disponível para produtos selados.");
+      toast.info("Retirada na Arte em Cards não está disponível para produtos lacrados.");
     }
   }, [hasSealedSelected, method]);
 
@@ -405,7 +405,7 @@ function SolicitarPage() {
                       <div className="flex-1">
                         <p className="text-sm font-semibold">{opt.label}</p>
                         <p className="text-xs text-muted-foreground">
-                          {disabled ? "Não disponível para produtos selados." : opt.desc}
+                          {disabled ? "Não disponível para produtos lacrados." : opt.desc}
                         </p>
                       </div>
                     </label>

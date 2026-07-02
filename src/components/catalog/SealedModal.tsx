@@ -192,7 +192,7 @@ export function SealedModal({ item, onClose }: Props) {
             <button
               type="button"
               onClick={() => {
-                const url = typeof window !== "undefined" ? window.location.href : "https://seviicolecionaveis.com.br/selados";
+                const url = typeof window !== "undefined" ? window.location.href : "https://seviicolecionaveis.com.br/produtos-lacrados";
                 const text = `Olha esse produto na Sevii Colecionáveis: ${item.title} — R$ ${price.toFixed(2).replace(".", ",")}`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, "_blank");
                 setShared(true);
