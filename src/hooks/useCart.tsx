@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
+import { trackCardInterestCart, removeCardInterestCart } from "@/hooks/useCardInterest";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -93,9 +94,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
         quantity: qty,
       }],
     });
+    trackCardInterestCart(item.cardId);
   };
 
-  const remove = (id: string) => setItems((p) => p.filter((i) => i.id !== id));
+  const remove = (id: string) => setItems((p) => {
+    const removed = p.find((i) => i.id === id);
+    if (removed && !p.some((i) => i.id !== id && i.cardId === removed.cardId)) {
+      removeCardInterestCart(removed.cardId);
+    }
+    return p.filter((i) => i.id !== id);
+  });
   const setQty = (id: string, qty: number) =>
     setItems((p) =>
       p.map((i) => (i.id === id ? { ...i, quantity: Math.max(1, Math.min(qty, i.maxStock)) } : i)),
