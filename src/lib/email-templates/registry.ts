@@ -4,6 +4,7 @@ import { template as giftVoucherTemplate } from './gift-voucher'
 import { template as couponBroadcastTemplate } from './coupon-broadcast'
 import { template as backInStockTemplate } from './back-in-stock'
 import { template as arteEmCardsDescontinuadaTemplate } from './arte-em-cards-descontinuada'
+import { template as adminBroadcastTemplate } from './admin-broadcast'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -24,4 +25,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'coupon-broadcast': couponBroadcastTemplate,
   'back-in-stock': backInStockTemplate,
   'arte-em-cards-descontinuada': arteEmCardsDescontinuadaTemplate,
+  'admin-broadcast': adminBroadcastTemplate,
 }
