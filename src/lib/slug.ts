@@ -14,10 +14,3 @@ export function cardSlug(name: string, collection: string, number: string): stri
 export function collectionSlug(collection: string): string {
   return slugify(collection);
 }
-
-export function sealedSlug(title: string, id: string): string {
-  const suffix = id.replace(/-/g, "").slice(-6);
-  const base = slugify(title);
-  return base ? `${base}-${suffix}` : suffix;
-}
-

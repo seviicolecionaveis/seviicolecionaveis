@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 import { useCardsCatalog, cardCreatedAt } from "@/hooks/useCardsCatalog";
 import { CardItem } from "./CardItem";
 import { CardModal } from "./CardModal";
-import { type Sealed } from "./SealedModal";
+import { SealedModal, type Sealed } from "./SealedModal";
 import { supabase } from "@/integrations/supabase/client";
-import { sealedSlug } from "@/lib/slug";
 import type { Card } from "@/data/cards";
-
 
 interface Props {
   /** Show items added within the last N days. Default 21. */
@@ -24,8 +21,8 @@ type Entry =
 export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
   const { cards } = useCardsCatalog();
   const [activeCard, setActiveCard] = useState<Card | null>(null);
+  const [activeSealed, setActiveSealed] = useState<Sealed | null>(null);
   const [sealed, setSealed] = useState<Array<Sealed & { created_at: string }>>([]);
-
 
   useEffect(() => {
     let cancelled = false;
@@ -86,10 +83,9 @@ export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
                 onClick={() => setActiveCard(entry.card)}
               />
             ) : (
-              <Link
+              <button
                 key={`s-${entry.sealed.id}`}
-                to="/produtos-lacrados/$slug"
-                params={{ slug: sealedSlug(entry.sealed.title, entry.sealed.id) }}
+                onClick={() => setActiveSealed(entry.sealed)}
                 className="group text-left"
               >
                 <div className="relative aspect-square overflow-hidden rounded-lg bg-secondary">
@@ -117,13 +113,13 @@ export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
                 <p className="text-sm text-muted-foreground">
                   R$ {(entry.sealed.price_cents / 100).toFixed(2).replace(".", ",")}
                 </p>
-              </Link>
+              </button>
             )
           )}
         </div>
       </div>
       <CardModal card={activeCard} onClose={() => setActiveCard(null)} />
-
+      <SealedModal item={activeSealed} onClose={() => setActiveSealed(null)} />
     </section>
   );
 }

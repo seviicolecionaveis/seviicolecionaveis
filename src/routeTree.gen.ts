@@ -35,7 +35,6 @@ import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PilhaIndexRouteImport } from './routes/pilha.index'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
-import { Route as ProdutosLacradosSlugRouteImport } from './routes/produtos-lacrados.$slug'
 import { Route as PilhaSolicitarRouteImport } from './routes/pilha.solicitar'
 import { Route as PayOrderIdRouteImport } from './routes/pay.$orderId'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
@@ -205,11 +204,6 @@ const OrdersIndexRoute = OrdersIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => OrdersRoute,
-} as any)
-const ProdutosLacradosSlugRoute = ProdutosLacradosSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => ProdutosLacradosRoute,
 } as any)
 const PilhaSolicitarRoute = PilhaSolicitarRouteImport.update({
   id: '/solicitar',
@@ -437,7 +431,7 @@ export interface FileRoutesByFullPath {
   '/mais-vendidas': typeof MaisVendidasRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pilha': typeof PilhaRouteWithChildren
-  '/produtos-lacrados': typeof ProdutosLacradosRouteWithChildren
+  '/produtos-lacrados': typeof ProdutosLacradosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -466,7 +460,6 @@ export interface FileRoutesByFullPath {
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
-  '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
@@ -503,7 +496,7 @@ export interface FileRoutesByTo {
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
   '/mais-vendidas': typeof MaisVendidasRoute
-  '/produtos-lacrados': typeof ProdutosLacradosRouteWithChildren
+  '/produtos-lacrados': typeof ProdutosLacradosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -532,7 +525,6 @@ export interface FileRoutesByTo {
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
-  '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/orders': typeof OrdersIndexRoute
   '/pilha': typeof PilhaIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
@@ -572,7 +564,7 @@ export interface FileRoutesById {
   '/mais-vendidas': typeof MaisVendidasRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pilha': typeof PilhaRouteWithChildren
-  '/produtos-lacrados': typeof ProdutosLacradosRouteWithChildren
+  '/produtos-lacrados': typeof ProdutosLacradosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -601,7 +593,6 @@ export interface FileRoutesById {
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
-  '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
@@ -671,7 +662,6 @@ export interface FileRouteTypes {
     | '/orders/$orderId'
     | '/pay/$orderId'
     | '/pilha/solicitar'
-    | '/produtos-lacrados/$slug'
     | '/orders/'
     | '/pilha/'
     | '/admin/orders/$orderId'
@@ -737,7 +727,6 @@ export interface FileRouteTypes {
     | '/orders/$orderId'
     | '/pay/$orderId'
     | '/pilha/solicitar'
-    | '/produtos-lacrados/$slug'
     | '/orders'
     | '/pilha'
     | '/admin/orders/$orderId'
@@ -805,7 +794,6 @@ export interface FileRouteTypes {
     | '/orders/$orderId'
     | '/pay/$orderId'
     | '/pilha/solicitar'
-    | '/produtos-lacrados/$slug'
     | '/orders/'
     | '/pilha/'
     | '/admin/orders/$orderId'
@@ -845,7 +833,7 @@ export interface RootRouteChildren {
   MaisVendidasRoute: typeof MaisVendidasRoute
   OrdersRoute: typeof OrdersRouteWithChildren
   PilhaRoute: typeof PilhaRouteWithChildren
-  ProdutosLacradosRoute: typeof ProdutosLacradosRouteWithChildren
+  ProdutosLacradosRoute: typeof ProdutosLacradosRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SeladosRoute: typeof SeladosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -1057,13 +1045,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/orders/'
       preLoaderRoute: typeof OrdersIndexRouteImport
       parentRoute: typeof OrdersRoute
-    }
-    '/produtos-lacrados/$slug': {
-      id: '/produtos-lacrados/$slug'
-      path: '/$slug'
-      fullPath: '/produtos-lacrados/$slug'
-      preLoaderRoute: typeof ProdutosLacradosSlugRouteImport
-      parentRoute: typeof ProdutosLacradosRoute
     }
     '/pilha/solicitar': {
       id: '/pilha/solicitar'
@@ -1418,17 +1399,6 @@ const PilhaRouteChildren: PilhaRouteChildren = {
 
 const PilhaRouteWithChildren = PilhaRoute._addFileChildren(PilhaRouteChildren)
 
-interface ProdutosLacradosRouteChildren {
-  ProdutosLacradosSlugRoute: typeof ProdutosLacradosSlugRoute
-}
-
-const ProdutosLacradosRouteChildren: ProdutosLacradosRouteChildren = {
-  ProdutosLacradosSlugRoute: ProdutosLacradosSlugRoute,
-}
-
-const ProdutosLacradosRouteWithChildren =
-  ProdutosLacradosRoute._addFileChildren(ProdutosLacradosRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcessoriosRoute: AcessoriosRoute,
@@ -1447,7 +1417,7 @@ const rootRouteChildren: RootRouteChildren = {
   MaisVendidasRoute: MaisVendidasRoute,
   OrdersRoute: OrdersRouteWithChildren,
   PilhaRoute: PilhaRouteWithChildren,
-  ProdutosLacradosRoute: ProdutosLacradosRouteWithChildren,
+  ProdutosLacradosRoute: ProdutosLacradosRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SeladosRoute: SeladosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

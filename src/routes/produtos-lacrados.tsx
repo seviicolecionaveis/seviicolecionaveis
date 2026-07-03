@@ -2,11 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import type { Sealed } from "@/components/catalog/SealedModal";
+import { SealedModal, type Sealed } from "@/components/catalog/SealedModal";
 import { supabase } from "@/integrations/supabase/client";
-import { sealedSlug } from "@/lib/slug";
 import logoUrl from "@/assets/logo.webp";
-
 
 export const Route = createFileRoute("/produtos-lacrados")({
   head: () => ({
@@ -40,6 +38,7 @@ export const Route = createFileRoute("/produtos-lacrados")({
 function ProdutosLacradosPage() {
   const [items, setItems] = useState<Sealed[]>([]);
   const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState<Sealed | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,12 +93,10 @@ function ProdutosLacradosPage() {
             {items.map((p) => {
               const cover = p.images[0];
               const out = !p.is_preorder && (p.stock ?? 0) <= 0;
-              const slug = sealedSlug(p.title, p.id);
               return (
-                <Link
+                <button
                   key={p.id}
-                  to="/produtos-lacrados/$slug"
-                  params={{ slug }}
+                  onClick={() => setActive(p)}
                   className="group text-left"
                 >
                   <div className="relative aspect-square overflow-hidden rounded-lg bg-secondary">
@@ -131,15 +128,15 @@ function ProdutosLacradosPage() {
                       Envio a partir de {new Date(p.release_date + "T00:00:00").toLocaleDateString("pt-BR")}
                     </p>
                   )}
-                </Link>
+                </button>
               );
             })}
           </div>
         )}
       </main>
 
+      <SealedModal item={active} onClose={() => setActive(null)} />
       <SiteFooter />
     </div>
   );
-
 }

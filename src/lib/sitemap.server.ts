@@ -69,18 +69,6 @@ export async function buildSitemapXml(origin: string): Promise<string> {
     urls.push({ loc: `${origin}/colecao/${slugify(name)}`, lastmod });
   }
 
-  const { data: sealedRows } = await supabaseAdmin
-    .from("sealed_products")
-    .select("id, title, updated_at")
-    .eq("active", true);
-  for (const s of sealedRows ?? []) {
-    const suffix = s.id.replace(/-/g, "").slice(-6);
-    const base = slugify(s.title);
-    const slug = base ? `${base}-${suffix}` : suffix;
-    urls.push({ loc: `${origin}/produtos-lacrados/${slug}`, lastmod: s.updated_at });
-  }
-
-
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls
