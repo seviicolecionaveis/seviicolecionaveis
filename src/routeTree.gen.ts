@@ -36,6 +36,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProdutosLacradosIndexRouteImport } from './routes/produtos-lacrados.index'
 import { Route as PilhaIndexRouteImport } from './routes/pilha.index'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
+import { Route as ProdutosLacradosSlugRouteImport } from './routes/produtos-lacrados.$slug'
 import { Route as PilhaSolicitarRouteImport } from './routes/pilha.solicitar'
 import { Route as PayOrderIdRouteImport } from './routes/pay.$orderId'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
@@ -210,6 +211,11 @@ const OrdersIndexRoute = OrdersIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => OrdersRoute,
+} as any)
+const ProdutosLacradosSlugRoute = ProdutosLacradosSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ProdutosLacradosRoute,
 } as any)
 const PilhaSolicitarRoute = PilhaSolicitarRouteImport.update({
   id: '/solicitar',
@@ -466,6 +472,7 @@ export interface FileRoutesByFullPath {
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
+  '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
   '/produtos-lacrados/': typeof ProdutosLacradosIndexRoute
@@ -531,6 +538,7 @@ export interface FileRoutesByTo {
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
+  '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/orders': typeof OrdersIndexRoute
   '/pilha': typeof PilhaIndexRoute
   '/produtos-lacrados': typeof ProdutosLacradosIndexRoute
@@ -600,6 +608,7 @@ export interface FileRoutesById {
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
+  '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
   '/produtos-lacrados/': typeof ProdutosLacradosIndexRoute
@@ -670,6 +679,7 @@ export interface FileRouteTypes {
     | '/orders/$orderId'
     | '/pay/$orderId'
     | '/pilha/solicitar'
+    | '/produtos-lacrados/$slug'
     | '/orders/'
     | '/pilha/'
     | '/produtos-lacrados/'
@@ -735,6 +745,7 @@ export interface FileRouteTypes {
     | '/orders/$orderId'
     | '/pay/$orderId'
     | '/pilha/solicitar'
+    | '/produtos-lacrados/$slug'
     | '/orders'
     | '/pilha'
     | '/produtos-lacrados'
@@ -803,6 +814,7 @@ export interface FileRouteTypes {
     | '/orders/$orderId'
     | '/pay/$orderId'
     | '/pilha/solicitar'
+    | '/produtos-lacrados/$slug'
     | '/orders/'
     | '/pilha/'
     | '/produtos-lacrados/'
@@ -1062,6 +1074,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/orders/'
       preLoaderRoute: typeof OrdersIndexRouteImport
       parentRoute: typeof OrdersRoute
+    }
+    '/produtos-lacrados/$slug': {
+      id: '/produtos-lacrados/$slug'
+      path: '/$slug'
+      fullPath: '/produtos-lacrados/$slug'
+      preLoaderRoute: typeof ProdutosLacradosSlugRouteImport
+      parentRoute: typeof ProdutosLacradosRoute
     }
     '/pilha/solicitar': {
       id: '/pilha/solicitar'
@@ -1417,10 +1436,12 @@ const PilhaRouteChildren: PilhaRouteChildren = {
 const PilhaRouteWithChildren = PilhaRoute._addFileChildren(PilhaRouteChildren)
 
 interface ProdutosLacradosRouteChildren {
+  ProdutosLacradosSlugRoute: typeof ProdutosLacradosSlugRoute
   ProdutosLacradosIndexRoute: typeof ProdutosLacradosIndexRoute
 }
 
 const ProdutosLacradosRouteChildren: ProdutosLacradosRouteChildren = {
+  ProdutosLacradosSlugRoute: ProdutosLacradosSlugRoute,
   ProdutosLacradosIndexRoute: ProdutosLacradosIndexRoute,
 }
 
