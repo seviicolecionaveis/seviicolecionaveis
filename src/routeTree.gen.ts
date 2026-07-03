@@ -33,6 +33,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProdutosLacradosIndexRouteImport } from './routes/produtos-lacrados.index'
 import { Route as PilhaIndexRouteImport } from './routes/pilha.index'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
 import { Route as PilhaSolicitarRouteImport } from './routes/pilha.solicitar'
@@ -194,6 +195,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosLacradosIndexRoute = ProdutosLacradosIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProdutosLacradosRoute,
 } as any)
 const PilhaIndexRoute = PilhaIndexRouteImport.update({
   id: '/',
@@ -431,7 +437,7 @@ export interface FileRoutesByFullPath {
   '/mais-vendidas': typeof MaisVendidasRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pilha': typeof PilhaRouteWithChildren
-  '/produtos-lacrados': typeof ProdutosLacradosRoute
+  '/produtos-lacrados': typeof ProdutosLacradosRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -462,6 +468,7 @@ export interface FileRoutesByFullPath {
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
+  '/produtos-lacrados/': typeof ProdutosLacradosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -496,7 +503,6 @@ export interface FileRoutesByTo {
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
   '/mais-vendidas': typeof MaisVendidasRoute
-  '/produtos-lacrados': typeof ProdutosLacradosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -527,6 +533,7 @@ export interface FileRoutesByTo {
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/orders': typeof OrdersIndexRoute
   '/pilha': typeof PilhaIndexRoute
+  '/produtos-lacrados': typeof ProdutosLacradosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -564,7 +571,7 @@ export interface FileRoutesById {
   '/mais-vendidas': typeof MaisVendidasRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pilha': typeof PilhaRouteWithChildren
-  '/produtos-lacrados': typeof ProdutosLacradosRoute
+  '/produtos-lacrados': typeof ProdutosLacradosRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -595,6 +602,7 @@ export interface FileRoutesById {
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
+  '/produtos-lacrados/': typeof ProdutosLacradosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -664,6 +672,7 @@ export interface FileRouteTypes {
     | '/pilha/solicitar'
     | '/orders/'
     | '/pilha/'
+    | '/produtos-lacrados/'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
@@ -698,7 +707,6 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/imas'
     | '/mais-vendidas'
-    | '/produtos-lacrados'
     | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
@@ -729,6 +737,7 @@ export interface FileRouteTypes {
     | '/pilha/solicitar'
     | '/orders'
     | '/pilha'
+    | '/produtos-lacrados'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
@@ -796,6 +805,7 @@ export interface FileRouteTypes {
     | '/pilha/solicitar'
     | '/orders/'
     | '/pilha/'
+    | '/produtos-lacrados/'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
@@ -833,7 +843,7 @@ export interface RootRouteChildren {
   MaisVendidasRoute: typeof MaisVendidasRoute
   OrdersRoute: typeof OrdersRouteWithChildren
   PilhaRoute: typeof PilhaRouteWithChildren
-  ProdutosLacradosRoute: typeof ProdutosLacradosRoute
+  ProdutosLacradosRoute: typeof ProdutosLacradosRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   SeladosRoute: typeof SeladosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -1031,6 +1041,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/produtos-lacrados/': {
+      id: '/produtos-lacrados/'
+      path: '/'
+      fullPath: '/produtos-lacrados/'
+      preLoaderRoute: typeof ProdutosLacradosIndexRouteImport
+      parentRoute: typeof ProdutosLacradosRoute
     }
     '/pilha/': {
       id: '/pilha/'
@@ -1399,6 +1416,17 @@ const PilhaRouteChildren: PilhaRouteChildren = {
 
 const PilhaRouteWithChildren = PilhaRoute._addFileChildren(PilhaRouteChildren)
 
+interface ProdutosLacradosRouteChildren {
+  ProdutosLacradosIndexRoute: typeof ProdutosLacradosIndexRoute
+}
+
+const ProdutosLacradosRouteChildren: ProdutosLacradosRouteChildren = {
+  ProdutosLacradosIndexRoute: ProdutosLacradosIndexRoute,
+}
+
+const ProdutosLacradosRouteWithChildren =
+  ProdutosLacradosRoute._addFileChildren(ProdutosLacradosRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcessoriosRoute: AcessoriosRoute,
@@ -1417,7 +1445,7 @@ const rootRouteChildren: RootRouteChildren = {
   MaisVendidasRoute: MaisVendidasRoute,
   OrdersRoute: OrdersRouteWithChildren,
   PilhaRoute: PilhaRouteWithChildren,
-  ProdutosLacradosRoute: ProdutosLacradosRoute,
+  ProdutosLacradosRoute: ProdutosLacradosRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   SeladosRoute: SeladosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
