@@ -382,7 +382,7 @@ function SolicitarPage() {
                     { v: "correios", label: "📦 Correios (Mini Envios)", desc: "Cobrança do frete via Pix" },
                     { v: "app", label: "🛵 Entrega por aplicativo (Uber/99)", desc: "Combinar via WhatsApp" },
                     { v: "presencial", label: "🏪 Retirada Presencial", desc: "Aruana ou Aeroporto — gratuito" },
-                    { v: "arte_em_cards", label: "🎴 Retirada na Arte em Cards", desc: "Taxa R$ 5,00 (isenta com código válido)" },
+                    
                   ] as { v: Method; label: string; desc: string }[]
                 ).map((opt) => {
                   const disabled = opt.v === "arte_em_cards" && hasSealedSelected;
