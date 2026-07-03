@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { getEmailLogs } from "@/utils/emailLogs.functions";
+import { sendArteEmCardsDiscontinuedNotice } from "@/lib/admin-arte-em-cards-notice.functions";
 
 export const Route = createFileRoute("/admin/emails")({
   head: () => ({ meta: [{ title: "Admin · E-mails" }] }),
@@ -32,6 +34,7 @@ function EmailsAdminPage() {
   const [status, setStatus] = useState<string>("");
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [sendingArteNotice, setSendingArteNotice] = useState(false);
 
   useEffect(() => {
     if (!authLoading) {
