@@ -86,6 +86,34 @@ function EmailsAdminPage() {
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-6">
+        <section className="rounded-xl border border-border bg-card p-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold">Aviso: fim da retirada na Arte em Cards</p>
+            <p className="text-xs text-muted-foreground">
+              Envia o comunicado uma única vez para todos os clientes que já solicitaram retirada de pilha na Arte em Cards.
+            </p>
+          </div>
+          <button
+            disabled={sendingArteNotice}
+            onClick={async () => {
+              if (!window.confirm("Enviar o e-mail de aviso sobre o fim da retirada na Arte em Cards para todos os clientes que já usaram essa opção?")) return;
+              setSendingArteNotice(true);
+              try {
+                const res = await sendArteEmCardsDiscontinuedNotice();
+                toast.success(`Aviso enfileirado: ${res.enqueued} enviados, ${res.skipped} pulados (${res.totalUsers} clientes).`);
+                setTimeout(() => load(), 1500);
+              } catch (e: any) {
+                toast.error(e?.message ?? "Falha ao enviar aviso");
+              } finally {
+                setSendingArteNotice(false);
+              }
+            }}
+            className="rounded-md bg-foreground px-4 py-2 text-xs font-semibold text-background hover:opacity-90 disabled:opacity-50"
+          >
+            {sendingArteNotice ? "Enviando..." : "Enviar aviso Arte em Cards"}
+          </button>
+        </section>
+
         <div className="flex flex-wrap items-center gap-2">
           {RANGES.map((r) => (
             <button
