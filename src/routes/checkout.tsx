@@ -713,7 +713,7 @@ function CheckoutPage() {
                   {shipping === "card_stack" && (
                     <div className="mt-2 rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
                       Quando quiser despachar, acesse <span className="font-semibold text-foreground">Pilha de Cartas</span> na sua conta,
-                      selecione as cartas e escolha o método (Correios, aplicativo, retirada presencial ou Arte em Cards).
+                      selecione as cartas e escolha o método (Correios, aplicativo ou retirada presencial).
                       Você receberá avisos por e-mail quando o prazo estiver acabando.
                     </div>
                   )}
