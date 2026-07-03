@@ -115,6 +115,10 @@ function EmailsAdminPage() {
           </button>
         </section>
 
+        <ManualEmailComposer onSent={() => setTimeout(() => load(), 1500)} />
+
+
+
         <div className="flex flex-wrap items-center gap-2">
           {RANGES.map((r) => (
             <button
