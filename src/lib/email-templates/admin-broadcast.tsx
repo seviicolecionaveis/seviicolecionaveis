@@ -27,7 +27,7 @@ export type InlineNode =
   | { kind: 'br' }
 
 export interface AdminBroadcastProps {
-  previewText?: string
+  previewText?: string | null
   heading?: string | null
   bodyBlocks: BodyBlock[]
   cta?: { label: string; url: string } | null
