@@ -121,7 +121,7 @@ export async function sendAdminBroadcastServer(userId: string, payload: ComposeP
     .filter((r) => EMAIL_RE.test(r))
   const unique = Array.from(new Set(recipients))
   if (unique.length === 0) throw new Error('Nenhum destinatário válido')
-  if (unique.length > 200) throw new Error('Máximo 200 destinatários por envio')
+  if (unique.length > 5000) throw new Error('Máximo 5000 destinatários por envio')
 
   const data = templateDataFrom(payload)
   const day = new Date().toISOString().slice(0, 10)
@@ -145,6 +145,40 @@ export async function sendAdminBroadcastServer(userId: string, payload: ComposeP
     }
   }
   return { enqueued, skipped, total: unique.length }
+}
+
+export async function listAllCustomerEmailsServer(
+  userId: string,
+): Promise<{ emails: string[]; total: number }> {
+  await assertAdmin(userId)
+  const seen = new Set<string>()
+  const perPage = 1000
+  let page = 1
+  // Supabase Auth Admin listUsers pagination
+  // Stop after a safety cap to avoid runaway loops
+  for (let i = 0; i < 20; i++) {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage })
+    if (error) throw new Error(error.message)
+    const users = data?.users ?? []
+    for (const u of users) {
+      const email = (u.email ?? '').trim().toLowerCase()
+      if (email && EMAIL_RE.test(email)) seen.add(email)
+    }
+    if (users.length < perPage) break
+    page++
+  }
+  // Filter out suppressed emails
+  const all = Array.from(seen)
+  if (all.length > 0) {
+    const { data: suppressed } = await supabaseAdmin
+      .from('suppressed_emails')
+      .select('email')
+      .in('email', all)
+    const supSet = new Set((suppressed ?? []).map((r: any) => String(r.email).toLowerCase()))
+    const filtered = all.filter((e) => !supSet.has(e))
+    return { emails: filtered, total: filtered.length }
+  }
+  return { emails: all, total: all.length }
 }
 
 function simpleHash(input: string): string {

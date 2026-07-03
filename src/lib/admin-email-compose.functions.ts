@@ -46,3 +46,10 @@ export const sendAdminBroadcast = createServerFn({ method: 'POST' })
     const { sendAdminBroadcastServer } = await import('./admin-email-compose.server')
     return sendAdminBroadcastServer(context.userId, data)
   })
+
+export const listAllCustomerEmails = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { listAllCustomerEmailsServer } = await import('./admin-email-compose.server')
+    return listAllCustomerEmailsServer(context.userId)
+  })
