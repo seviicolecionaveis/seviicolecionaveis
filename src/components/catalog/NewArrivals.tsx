@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 import { useCardsCatalog, cardCreatedAt } from "@/hooks/useCardsCatalog";
 import { CardItem } from "./CardItem";
 import { CardModal } from "./CardModal";
-import { SealedModal, type Sealed } from "./SealedModal";
+import { type Sealed } from "./SealedModal";
 import { supabase } from "@/integrations/supabase/client";
+import { sealedSlug } from "@/lib/slug";
 import type { Card } from "@/data/cards";
+
 
 interface Props {
   /** Show items added within the last N days. Default 21. */
