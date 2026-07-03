@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { getEmailLogs } from "@/utils/emailLogs.functions";
 import { sendArteEmCardsDiscontinuedNotice } from "@/lib/admin-arte-em-cards-notice.functions";
+import ManualEmailComposer from "@/components/admin/ManualEmailComposer";
 
 export const Route = createFileRoute("/admin/emails")({
   head: () => ({ meta: [{ title: "Admin · E-mails" }] }),
@@ -113,6 +114,10 @@ function EmailsAdminPage() {
             {sendingArteNotice ? "Enviando..." : "Enviar aviso Arte em Cards"}
           </button>
         </section>
+
+        <ManualEmailComposer onSent={() => setTimeout(() => load(), 1500)} />
+
+
 
         <div className="flex flex-wrap items-center gap-2">
           {RANGES.map((r) => (
