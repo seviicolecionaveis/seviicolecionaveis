@@ -24,8 +24,8 @@ type Entry =
 export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
   const { cards } = useCardsCatalog();
   const [activeCard, setActiveCard] = useState<Card | null>(null);
-  const [activeSealed, setActiveSealed] = useState<Sealed | null>(null);
   const [sealed, setSealed] = useState<Array<Sealed & { created_at: string }>>([]);
+
 
   useEffect(() => {
     let cancelled = false;
