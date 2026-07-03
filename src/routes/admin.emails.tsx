@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { getEmailLogs } from "@/utils/emailLogs.functions";
 import { sendArteEmCardsDiscontinuedNotice } from "@/lib/admin-arte-em-cards-notice.functions";
+import ManualEmailComposer from "@/components/admin/ManualEmailComposer";
 
 export const Route = createFileRoute("/admin/emails")({
   head: () => ({ meta: [{ title: "Admin · E-mails" }] }),
