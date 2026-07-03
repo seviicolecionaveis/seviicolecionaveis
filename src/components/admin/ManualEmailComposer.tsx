@@ -211,24 +211,6 @@ export default function ManualEmailComposer({ onSent }: Props) {
             <span className="mb-1 block font-semibold">
               Destinatários * <span className="font-normal text-muted-foreground">— um por linha ou separados por vírgula/;</span>
             </span>
-            <textarea
-              value={recipientsRaw}
-              onChange={(e) => setRecipientsRaw(e.target.value)}
-              rows={5}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-mono"
-              placeholder="cliente1@email.com&#10;cliente2@email.com"
-            />
-            <span className="mt-1 block text-[11px] text-muted-foreground">
-              {valid.length} válido(s){invalid.length ? `, ${invalid.length} inválido(s): ${invalid.slice(0, 3).join(", ")}${invalid.length > 3 ? "..." : ""}` : ""}
-              {valid.length > 200 ? " — máximo 200 por envio." : ""}
-            </span>
-          </label>
-
-          <div className="flex flex-wrap items-center gap-2">
-          <label className="block text-xs">
-            <span className="mb-1 block font-semibold">
-              Destinatários * <span className="font-normal text-muted-foreground">— um por linha ou separados por vírgula/;</span>
-            </span>
             <div className="mb-2 flex flex-wrap gap-2">
               <button
                 type="button"
