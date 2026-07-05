@@ -667,6 +667,39 @@ function AdminCardsManagePage() {
             )}
           </div>
 
+          {(categoryFilter.length === 0 || categoryFilter.includes("Treinador")) && (
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-3 py-2">
+              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Subtipo Treinador:</span>
+              {TRAINER_SUBCATEGORIES.map((s) => {
+                const checked = trainerSubFilter.includes(s);
+                const count = rows.filter((r) => r.category === "Treinador" && r.trainer_subcategory === s).length;
+                return (
+                  <label key={s} className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e) =>
+                        setTrainerSubFilter((prev) =>
+                          e.target.checked ? [...prev, s] : prev.filter((x) => x !== s),
+                        )
+                      }
+                      className="rounded border-border accent-foreground"
+                    />
+                    <span>{s} <span className="text-muted-foreground">({count})</span></span>
+                  </label>
+                );
+              })}
+              {trainerSubFilter.length > 0 && (
+                <button
+                  onClick={() => setTrainerSubFilter([])}
+                  className="ml-auto text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="mb-4 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-3 py-2">
 
             <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
