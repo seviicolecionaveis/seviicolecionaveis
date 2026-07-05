@@ -101,6 +101,7 @@ function AdminCardsManagePage() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CardCategory[]>([]);
   const [pokemonTypeFilter, setPokemonTypeFilter] = useState<PokemonType[]>([]);
+  const [trainerSubFilter, setTrainerSubFilter] = useState<TrainerSubcategory[]>([]);
   const [noPriceOnly, setNoPriceOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
@@ -171,6 +172,7 @@ function AdminCardsManagePage() {
     return rows.filter((r) => {
       if (categoryFilter.length > 0 && !categoryFilter.includes(r.category)) return false;
       if (pokemonTypeFilter.length > 0 && (!r.pokemon_type || !pokemonTypeFilter.includes(r.pokemon_type))) return false;
+      if (trainerSubFilter.length > 0 && (r.category !== "Treinador" || !r.trainer_subcategory || !trainerSubFilter.includes(r.trainer_subcategory))) return false;
       if (noPriceOnly && r.base_price_cents != null) return false;
       if (!q) return true;
       return (
@@ -179,9 +181,9 @@ function AdminCardsManagePage() {
         r.card_number.toLowerCase().includes(q)
       );
     });
-  }, [rows, search, categoryFilter, pokemonTypeFilter, noPriceOnly]);
+  }, [rows, search, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly]);
 
-  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, pokemonTypeFilter, noPriceOnly]);
+  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredAll.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -664,6 +666,39 @@ function AdminCardsManagePage() {
               </button>
             )}
           </div>
+
+          {(categoryFilter.length === 0 || categoryFilter.includes("Treinador")) && (
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-3 py-2">
+              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Subtipo Treinador:</span>
+              {TRAINER_SUBCATEGORIES.map((s) => {
+                const checked = trainerSubFilter.includes(s);
+                const count = rows.filter((r) => r.category === "Treinador" && r.trainer_subcategory === s).length;
+                return (
+                  <label key={s} className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e) =>
+                        setTrainerSubFilter((prev) =>
+                          e.target.checked ? [...prev, s] : prev.filter((x) => x !== s),
+                        )
+                      }
+                      className="rounded border-border accent-foreground"
+                    />
+                    <span>{s} <span className="text-muted-foreground">({count})</span></span>
+                  </label>
+                );
+              })}
+              {trainerSubFilter.length > 0 && (
+                <button
+                  onClick={() => setTrainerSubFilter([])}
+                  className="ml-auto text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="mb-4 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-3 py-2">
 
