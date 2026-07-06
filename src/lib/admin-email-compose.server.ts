@@ -121,6 +121,7 @@ export async function sendAdminBroadcastServer(userId: string, payload: ComposeP
   const data = templateDataFrom(payload)
   const day = new Date().toISOString().slice(0, 10)
   const bucket = simpleHash(`${payload.subject}|${payload.body}|${payload.cta?.url ?? ''}|${day}`)
+  const batchId = `admin-broadcast-${bucket}-${Date.now()}`
 
   let enqueued = 0
   let skipped = 0
@@ -131,6 +132,7 @@ export async function sendAdminBroadcastServer(userId: string, payload: ComposeP
         recipientEmail: email,
         idempotencyKey: `admin-broadcast-${bucket}-${email}`,
         templateData: data,
+        batchId,
       })
       if (res.success) enqueued++
       else skipped++
@@ -141,6 +143,7 @@ export async function sendAdminBroadcastServer(userId: string, payload: ComposeP
   }
   return { enqueued, skipped, total: unique.length }
 }
+
 
 export async function listAllCustomerEmailsServer(
   userId: string,

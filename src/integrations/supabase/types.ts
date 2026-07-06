@@ -525,33 +525,45 @@ export type Database = {
       }
       email_send_log: {
         Row: {
+          batch_id: string | null
+          body_html: string | null
           created_at: string
           error_message: string | null
+          from_email: string | null
           id: string
           message_id: string | null
           metadata: Json | null
           recipient_email: string
           status: string
+          subject: string | null
           template_name: string
         }
         Insert: {
+          batch_id?: string | null
+          body_html?: string | null
           created_at?: string
           error_message?: string | null
+          from_email?: string | null
           id?: string
           message_id?: string | null
           metadata?: Json | null
           recipient_email: string
           status: string
+          subject?: string | null
           template_name: string
         }
         Update: {
+          batch_id?: string | null
+          body_html?: string | null
           created_at?: string
           error_message?: string | null
+          from_email?: string | null
           id?: string
           message_id?: string | null
           metadata?: Json | null
           recipient_email?: string
           status?: string
+          subject?: string | null
           template_name?: string
         }
         Relationships: []
