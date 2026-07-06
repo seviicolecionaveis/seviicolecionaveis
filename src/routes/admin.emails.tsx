@@ -271,7 +271,8 @@ function EmailsAdminPage() {
                   .map(([s, n]) => `${n} ${s}`)
                   .join(", ");
                 return (
-                  <>
+                  <Fragment key={g.key}>
+
                     <tr key={g.key} className="border-t border-border">
                       <td className="p-3">
                         {isGroup && (
