@@ -5,6 +5,8 @@ import {
   previewAdminBroadcast,
   sendAdminBroadcast,
 } from "@/lib/admin-email-compose.functions";
+import RichTextEditor from "@/components/admin/RichTextEditor";
+
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
