@@ -37,50 +37,45 @@ export function parseRecipients(raw: string): { valid: string[]; invalid: string
 }
 
 /**
- * Markdown-lite:
- * - Blank line = new paragraph
- * - Line starting with `## ` = heading
- * - **bold**, [text](https://url) inline
- * - Single line break = <br />
- */
-export function parseBody(body: string): BodyBlock[] {
-  const paragraphs = body.replace(/\r\n/g, '\n').split(/\n{2,}/)
-  const blocks: BodyBlock[] = []
-  for (const raw of paragraphs) {
-    const trimmed = raw.trim()
-    if (!trimmed) continue
-    if (trimmed.startsWith('## ')) {
-      blocks.push({ type: 'heading', text: trimmed.slice(3).trim() })
-      continue
-    }
-    const lines = trimmed.split('\n')
-    const inlines: InlineNode[] = []
-    lines.forEach((line, idx) => {
-      if (idx > 0) inlines.push({ kind: 'br' })
-      inlines.push(...parseInline(line))
-    })
-    blocks.push({ type: 'paragraph', inlines })
-  }
-  return blocks
+const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: [
+    'p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'a',
+    'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'blockquote', 'span', 'div',
+  ],
+  allowedAttributes: {
+    a: ['href', 'target', 'rel'],
+    '*': ['style'],
+    p: ['style'],
+    div: ['style'],
+    span: ['style'],
+    h1: ['style'], h2: ['style'], h3: ['style'], h4: ['style'],
+  },
+  allowedStyles: {
+    '*': {
+      'color': [/^#(0x)?[0-9a-fA-F]+$/, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/],
+      'text-align': [/^left$/, /^right$/, /^center$/, /^justify$/],
+      'font-weight': [/^\d+$/, /^bold$/, /^normal$/],
+    },
+  },
+  allowedSchemes: ['http', 'https', 'mailto'],
+  transformTags: {
+    a: (_tagName, attribs) => ({
+      tagName: 'a',
+      attribs: {
+        ...attribs,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        style: (attribs.style ? attribs.style + ';' : '') + 'color:#262626;text-decoration:underline;',
+      },
+    }),
+  },
 }
 
-function parseInline(text: string): InlineNode[] {
-  const nodes: InlineNode[] = []
-  const re = /\*\*([^*]+)\*\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g
-  let last = 0
-  let m: RegExpExecArray | null
-  while ((m = re.exec(text)) !== null) {
-    if (m.index > last) nodes.push({ kind: 'text', text: text.slice(last, m.index) })
-    if (m[1] != null) {
-      nodes.push({ kind: 'bold', text: m[1] })
-    } else if (m[2] != null && m[3] != null) {
-      nodes.push({ kind: 'link', text: m[2], href: m[3] })
-    }
-    last = m.index + m[0].length
-  }
-  if (last < text.length) nodes.push({ kind: 'text', text: text.slice(last) })
-  return nodes
+export function sanitizeBody(html: string): string {
+  return sanitizeHtml(html, SANITIZE_OPTIONS)
 }
+
+
 
 async function assertAdmin(userId: string) {
   const { data } = await supabaseAdmin
