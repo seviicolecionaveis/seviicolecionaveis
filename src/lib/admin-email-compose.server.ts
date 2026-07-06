@@ -36,7 +36,7 @@ export function parseRecipients(raw: string): { valid: string[]; invalid: string
   return { valid, invalid }
 }
 
-/**
+
 const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
     'p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'a',
