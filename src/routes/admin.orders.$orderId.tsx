@@ -618,7 +618,7 @@ function PartialCancelDialog({
 }) {
   const cancelledQty = item.cancelled_quantity ?? 0;
   const remaining = (item.quantity ?? 0) - cancelledQty;
-  const [qty, setQty] = useState(remaining);
+  const [qty, setQty] = useState(1);
   const [method, setMethod] = useState<"mercadopago" | "coupon" | "manual">(
     order.mercadopago_payment_id ? "mercadopago" : "coupon",
   );
