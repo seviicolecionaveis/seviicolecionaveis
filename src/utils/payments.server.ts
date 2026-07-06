@@ -406,6 +406,10 @@ function isAccessoryItem(it: { cardId?: string }) {
   return typeof it.cardId === "string" && it.cardId.startsWith("accessory:");
 }
 
+function isVideogameItem(it: { cardId?: string }) {
+  return typeof it.cardId === "string" && it.cardId.startsWith("videogame:");
+}
+
 async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]> {
   const resolved: T[] = [];
   for (const raw of items) {
@@ -460,6 +464,24 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
       const cents = Number(accessory.price_cents ?? 0);
       if (cents <= 0) {
         throw new Error(`Preço indisponível para o acessório "${it.name}".`);
+      }
+      resolved.push({ ...it, unitPrice: cents / 100 });
+      continue;
+    }
+    if (isVideogameItem(it)) {
+      const videogameId = it.cardId.slice("videogame:".length);
+      const { data: videogame, error: vErr } = await supabaseAdmin
+        .from("videogames")
+        .select("price_cents, active")
+        .eq("id", videogameId)
+        .maybeSingle();
+      if (vErr) throw new Error(vErr.message);
+      if (!videogame || videogame.active === false) {
+        throw new Error(`Videogame não encontrado ou indisponível: "${it.name}".`);
+      }
+      const cents = Number(videogame.price_cents ?? 0);
+      if (cents <= 0) {
+        throw new Error(`Preço indisponível para o videogame "${it.name}".`);
       }
       resolved.push({ ...it, unitPrice: cents / 100 });
       continue;
@@ -547,6 +569,21 @@ async function ensureAvailableStock(
         .from("accessories")
         .select("stock")
         .eq("id", accessoryId)
+        .maybeSingle();
+      const available = Number(data?.stock ?? 0);
+      if (available < it.quantity) {
+        throw new Error(
+          `Estoque insuficiente para "${it.name}". Disponível: ${available}, solicitado: ${it.quantity}.`,
+        );
+      }
+      continue;
+    }
+    if (isVideogameItem(it)) {
+      const videogameId = it.cardId.slice("videogame:".length);
+      const { data } = await supabaseAdmin
+        .from("videogames")
+        .select("stock")
+        .eq("id", videogameId)
         .maybeSingle();
       const available = Number(data?.stock ?? 0);
       if (available < it.quantity) {

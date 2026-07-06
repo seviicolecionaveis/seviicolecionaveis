@@ -163,6 +163,22 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
         }
         continue;
       }
+      // Videogame (own stock in the videogames table)
+      if (typeof it.card_id === "string" && it.card_id.startsWith("videogame:")) {
+        const videogameId = it.card_id.slice("videogame:".length);
+        if (UUID_RE.test(videogameId)) {
+          const { data: videogame } = await supabaseAdmin
+            .from("videogames")
+            .select("stock")
+            .eq("id", videogameId)
+            .maybeSingle();
+          if (videogame) {
+            const newStock = Math.max(0, (videogame.stock ?? 0) - it.quantity);
+            await supabaseAdmin.from("videogames").update({ stock: newStock }).eq("id", videogameId);
+          }
+        }
+        continue;
+      }
       // Magnet (Ímã) is a virtual finish — decrement from the underlying base
       // Foil/Normal cards (Foil first, then Normal) matching name/collection/number.
       if (it.finish === "Ímã") {

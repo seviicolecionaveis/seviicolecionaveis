@@ -13,6 +13,7 @@ const LINKS = [
   { to: "/imas", label: "Ímãs" },
   { to: "/acessorios", label: "Acessórios" },
   { to: "/produtos-lacrados", label: "Produtos Lacrados" },
+  { to: "/videogames", label: "Videogames" },
   { to: "/sobre", label: "Sobre" },
   { to: "/favoritos", label: "Favoritos" },
 ] as const;
