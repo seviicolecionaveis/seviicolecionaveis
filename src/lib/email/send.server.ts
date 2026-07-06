@@ -73,9 +73,12 @@ export async function sendTransactionalEmailServer(
       template_name: templateName,
       recipient_email: effectiveRecipient,
       status: 'suppressed',
+      from_email: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+      batch_id: params.batchId ?? null,
     })
     return { success: false, reason: 'email_suppressed' }
   }
+
 
   // 2. Get or create unsubscribe token
   const normalizedEmail = effectiveRecipient.toLowerCase()
