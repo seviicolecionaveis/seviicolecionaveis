@@ -300,6 +300,13 @@ export default function RichTextEditor({ value, onChange }: Props) {
         >
           ➡
         </ToolbarButton>
+        <ToolbarButton
+          title="Justificar texto"
+          active={editor.isActive({ textAlign: "justify" })}
+          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+        >
+          ≡
+        </ToolbarButton>
 
         <span className="mx-1 h-5 w-px bg-border" />
 
