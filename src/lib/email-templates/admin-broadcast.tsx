@@ -177,9 +177,7 @@ export const template = {
     subject: 'Comunicado Sevii',
     heading: 'Olá, colecionador!',
     previewText: 'Uma novidade rápida da Sevii.',
-    bodyBlocks: [
-      { type: 'paragraph', inlines: [{ kind: 'text', text: 'Este é um exemplo de mensagem.' }] },
-    ],
+    bodyHtml: '<p>Este é um exemplo de mensagem.</p>',
     cta: { label: 'Falar no WhatsApp', url: 'https://wa.me/5579981509552' },
   },
 } satisfies TemplateEntry
