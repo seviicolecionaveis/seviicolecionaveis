@@ -142,12 +142,18 @@ export async function sendTransactionalEmailServer(
   }
 
   // 5. Log pending + enqueue
+  const fromValue = `${SITE_NAME} <noreply@${FROM_DOMAIN}>`
+
   await supabase.from('email_send_log').insert({
     message_id: messageId,
     template_name: templateName,
     recipient_email: effectiveRecipient,
     status: 'pending',
     metadata: { idempotency_key: idempotencyKey },
+    subject: resolvedSubject,
+    body_html: html,
+    from_email: fromValue,
+    batch_id: params.batchId ?? null,
   })
 
   const { error: enqueueError } = await supabase.rpc('enqueue_email', {
@@ -155,7 +161,7 @@ export async function sendTransactionalEmailServer(
     payload: {
       message_id: messageId,
       to: effectiveRecipient,
-      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+      from: fromValue,
       sender_domain: SENDER_DOMAIN,
       subject: resolvedSubject,
       html,
@@ -176,9 +182,14 @@ export async function sendTransactionalEmailServer(
       recipient_email: effectiveRecipient,
       status: 'failed',
       error_message: 'Failed to enqueue email',
+      subject: resolvedSubject,
+      body_html: html,
+      from_email: fromValue,
+      batch_id: params.batchId ?? null,
     })
     return { success: false, error: 'enqueue_failed' }
   }
+
 
   console.log('[email] Enqueued', {
     templateName,
