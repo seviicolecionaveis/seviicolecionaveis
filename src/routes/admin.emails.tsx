@@ -347,7 +347,7 @@ function EmailsAdminPage() {
                                 const childKey = `${g.key}::${it.message_id}`;
                                 const childOpen = !!previewOpen[childKey];
                                 return (
-                                  <>
+                                  <Fragment key={childKey}>
                                     <tr key={childKey} className="border-t border-border/60">
                                       <td className="p-2">{it.recipient_email}</td>
                                       <td className="p-2"><StatusBadge s={it.status} /></td>
