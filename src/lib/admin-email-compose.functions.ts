@@ -15,7 +15,7 @@ function validate(input: Payload): Payload {
   const subject = String(input.subject ?? '').trim()
   const body = String(input.body ?? '').trim()
   if (subject.length < 1 || subject.length > 200) throw new Error('Assunto entre 1 e 200 caracteres')
-  if (body.length < 1 || body.length > 10000) throw new Error('Corpo entre 1 e 10.000 caracteres')
+  if (body.length < 1 || body.length > 20000) throw new Error('Corpo entre 1 e 20.000 caracteres')
   const heading = input.heading ? String(input.heading).trim().slice(0, 200) : null
   const previewText = input.previewText ? String(input.previewText).trim().slice(0, 200) : null
   let cta: Payload['cta'] = null

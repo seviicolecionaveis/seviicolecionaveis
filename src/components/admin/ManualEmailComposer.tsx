@@ -5,6 +5,8 @@ import {
   previewAdminBroadcast,
   sendAdminBroadcast,
 } from "@/lib/admin-email-compose.functions";
+import RichTextEditor from "@/components/admin/RichTextEditor";
+
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -35,8 +37,9 @@ export default function ManualEmailComposer({ onSent }: Props) {
   const [heading, setHeading] = useState("");
   const [previewText, setPreviewText] = useState("");
   const [body, setBody] = useState(
-    "Olá!\n\nEscreva sua mensagem aqui. Separe parágrafos com uma linha em branco.\n\nUse **negrito** e [links](https://www.seviicolecionaveis.com.br) quando quiser.",
+    "<p>Olá!</p><p>Escreva sua mensagem aqui usando a barra de formatação acima.</p>",
   );
+
   const [ctaLabel, setCtaLabel] = useState("");
   const [ctaUrl, setCtaUrl] = useState("");
   const [recipientsRaw, setRecipientsRaw] = useState("");
@@ -169,21 +172,16 @@ export default function ManualEmailComposer({ onSent }: Props) {
             />
           </label>
 
-          <label className="block text-xs">
+          <div className="text-xs">
             <span className="mb-1 block font-semibold">
-              Corpo * <span className="font-normal text-muted-foreground">— parágrafos separados por linha em branco. Use **negrito**, [texto](https://...) e ## Subtítulo.</span>
+              Corpo * <span className="font-normal text-muted-foreground">— use a barra de ferramentas para formatar (negrito, links, listas, cores, etc.)</span>
             </span>
-            <textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              rows={10}
-              maxLength={10000}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-mono"
-            />
+            <RichTextEditor value={body} onChange={setBody} />
             <span className="mt-1 block text-right text-[10px] text-muted-foreground">
-              {body.length}/10000
+              {body.length}/20000
             </span>
-          </label>
+          </div>
+
 
           <div className="grid gap-3 md:grid-cols-2">
             <label className="block text-xs">

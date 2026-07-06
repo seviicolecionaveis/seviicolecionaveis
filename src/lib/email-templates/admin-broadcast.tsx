@@ -16,40 +16,17 @@ import { LOGO_URL, SITE_NAME } from './_shared'
 
 const SITE_URL_WWW = 'https://www.seviicolecionaveis.com.br'
 
-export type BodyBlock =
-  | { type: 'heading'; text: string }
-  | { type: 'paragraph'; inlines: InlineNode[] }
-
-export type InlineNode =
-  | { kind: 'text'; text: string }
-  | { kind: 'bold'; text: string }
-  | { kind: 'link'; text: string; href: string }
-  | { kind: 'br' }
-
 export interface AdminBroadcastProps {
   previewText?: string | null
   heading?: string | null
-  bodyBlocks: BodyBlock[]
+  bodyHtml: string
   cta?: { label: string; url: string } | null
-}
-
-function renderInline(nodes: InlineNode[]): React.ReactNode {
-  return nodes.map((n, i) => {
-    if (n.kind === 'text') return <React.Fragment key={i}>{n.text}</React.Fragment>
-    if (n.kind === 'bold') return <strong key={i}>{n.text}</strong>
-    if (n.kind === 'br') return <br key={i} />
-    return (
-      <Link key={i} href={n.href} style={inlineLink}>
-        {n.text}
-      </Link>
-    )
-  })
 }
 
 const AdminBroadcastEmail: React.FC<AdminBroadcastProps> = ({
   previewText,
   heading,
-  bodyBlocks,
+  bodyHtml,
   cta,
 }) => (
   <Html lang="pt-BR" dir="ltr">
@@ -69,20 +46,7 @@ const AdminBroadcastEmail: React.FC<AdminBroadcastProps> = ({
             </Heading>
           ) : null}
 
-          {bodyBlocks.map((block, i) => {
-            if (block.type === 'heading') {
-              return (
-                <Heading key={i} as="h2" style={h2}>
-                  {block.text}
-                </Heading>
-              )
-            }
-            return (
-              <Text key={i} style={p}>
-                {renderInline(block.inlines)}
-              </Text>
-            )
-          })}
+          <div style={richBody} dangerouslySetInnerHTML={{ __html: bodyHtml }} />
 
           {cta ? (
             <Section style={{ textAlign: 'center', margin: '20px 0 4px' }}>
@@ -110,6 +74,7 @@ const AdminBroadcastEmail: React.FC<AdminBroadcastProps> = ({
     </Body>
   </Html>
 )
+
 
 const body: React.CSSProperties = {
   backgroundColor: '#ffffff',
@@ -167,6 +132,11 @@ const p: React.CSSProperties = {
   color: '#262626',
   textAlign: 'justify',
 }
+const richBody: React.CSSProperties = {
+  fontSize: '15px',
+  lineHeight: 1.7,
+  color: '#262626',
+}
 const inlineLink: React.CSSProperties = {
   color: '#262626',
   textDecoration: 'underline',
@@ -207,9 +177,7 @@ export const template = {
     subject: 'Comunicado Sevii',
     heading: 'Olá, colecionador!',
     previewText: 'Uma novidade rápida da Sevii.',
-    bodyBlocks: [
-      { type: 'paragraph', inlines: [{ kind: 'text', text: 'Este é um exemplo de mensagem.' }] },
-    ],
+    bodyHtml: '<p>Este é um exemplo de mensagem.</p>',
     cta: { label: 'Falar no WhatsApp', url: 'https://wa.me/5579981509552' },
   },
 } satisfies TemplateEntry
