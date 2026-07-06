@@ -1,12 +1,12 @@
 import * as React from 'react'
 import { render } from '@react-email/components'
+import sanitizeHtml from 'sanitize-html'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { sendTransactionalEmailSafe } from '@/lib/email/send.server'
 import {
   template as adminBroadcastTemplate,
-  type BodyBlock,
-  type InlineNode,
 } from '@/lib/email-templates/admin-broadcast'
+
 
 export interface ComposePayload {
   subject: string
