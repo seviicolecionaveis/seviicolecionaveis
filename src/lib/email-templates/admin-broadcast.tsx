@@ -132,6 +132,11 @@ const p: React.CSSProperties = {
   color: '#262626',
   textAlign: 'justify',
 }
+const richBody: React.CSSProperties = {
+  fontSize: '15px',
+  lineHeight: 1.7,
+  color: '#262626',
+}
 const inlineLink: React.CSSProperties = {
   color: '#262626',
   textDecoration: 'underline',
