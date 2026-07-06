@@ -37,8 +37,9 @@ export default function ManualEmailComposer({ onSent }: Props) {
   const [heading, setHeading] = useState("");
   const [previewText, setPreviewText] = useState("");
   const [body, setBody] = useState(
-    "Olá!\n\nEscreva sua mensagem aqui. Separe parágrafos com uma linha em branco.\n\nUse **negrito** e [links](https://www.seviicolecionaveis.com.br) quando quiser.",
+    "<p>Olá!</p><p>Escreva sua mensagem aqui usando a barra de formatação acima.</p>",
   );
+
   const [ctaLabel, setCtaLabel] = useState("");
   const [ctaUrl, setCtaUrl] = useState("");
   const [recipientsRaw, setRecipientsRaw] = useState("");
