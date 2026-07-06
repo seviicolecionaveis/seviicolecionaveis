@@ -25,7 +25,9 @@ export interface SendTransactionalParams {
   recipientEmail: string
   idempotencyKey?: string
   templateData?: Record<string, any>
+  batchId?: string
 }
+
 
 /**
  * Server-side helper to enqueue a transactional email.
