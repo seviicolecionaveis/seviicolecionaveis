@@ -92,7 +92,7 @@ function templateDataFrom(payload: ComposePayload) {
     subject: payload.subject,
     heading: payload.heading || null,
     previewText: payload.previewText || null,
-    bodyBlocks: parseBody(payload.body),
+    bodyHtml: sanitizeBody(payload.body),
     cta: payload.cta || null,
   }
 }
