@@ -375,7 +375,7 @@ function EmailsAdminPage() {
                                         </td>
                                       </tr>
                                     )}
-                                  </>
+                                  </Fragment>
                                 );
                               })}
                             </tbody>
