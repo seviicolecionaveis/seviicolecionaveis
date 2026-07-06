@@ -17,6 +17,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: "/admin/panels", label: "Painéis" },
       { to: "/admin/sealed", label: "Produtos Lacrados" },
       { to: "/admin/accessories", label: "Acessórios" },
+      { to: "/admin/videogames", label: "Videogames" },
     ],
   },
   {

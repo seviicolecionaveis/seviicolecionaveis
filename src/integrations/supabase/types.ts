@@ -1497,6 +1497,57 @@ export type Database = {
         }
         Relationships: []
       }
+      videogames: {
+        Row: {
+          active: boolean
+          condition: string
+          created_at: string
+          description: string | null
+          id: string
+          images: string[]
+          includes_box: boolean
+          platform: string
+          price_cents: number
+          region: string | null
+          sort_order: number
+          stock: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          includes_box?: boolean
+          platform?: string
+          price_cents?: number
+          region?: string | null
+          sort_order?: number
+          stock?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          includes_box?: boolean
+          platform?: string
+          price_cents?: number
+          region?: string | null
+          sort_order?: number
+          stock?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       wishlist: {
         Row: {
           card_key: string

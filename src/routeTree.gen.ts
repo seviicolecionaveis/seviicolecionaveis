@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VideogamesRouteImport } from './routes/videogames'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TiposDeCartaRouteImport } from './routes/tipos-de-carta'
 import { Route as SobreRouteImport } from './routes/sobre'
@@ -44,6 +45,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as ColecaoSlugRouteImport } from './routes/colecao.$slug'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as CartaSlugRouteImport } from './routes/carta.$slug'
+import { Route as AdminVideogamesRouteImport } from './routes/admin.videogames'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
 import { Route as AdminSealedRouteImport } from './routes/admin.sealed'
@@ -77,6 +79,11 @@ import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/p
 import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
 import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api/public/hooks/auto-cancel-unpaid'
 
+const VideogamesRoute = VideogamesRouteImport.update({
+  id: '/videogames',
+  path: '/videogames',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
@@ -251,6 +258,11 @@ const CartaSlugRoute = CartaSlugRouteImport.update({
   id: '/carta/$slug',
   path: '/carta/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminVideogamesRoute = AdminVideogamesRouteImport.update({
+  id: '/videogames',
+  path: '/videogames',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
@@ -450,6 +462,7 @@ export interface FileRoutesByFullPath {
   '/sobre': typeof SobreRoute
   '/tipos-de-carta': typeof TiposDeCartaRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/videogames': typeof VideogamesRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -465,6 +478,7 @@ export interface FileRoutesByFullPath {
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/videogames': typeof AdminVideogamesRoute
   '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
@@ -516,6 +530,7 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/tipos-de-carta': typeof TiposDeCartaRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/videogames': typeof VideogamesRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -531,6 +546,7 @@ export interface FileRoutesByTo {
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/videogames': typeof AdminVideogamesRoute
   '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
@@ -586,6 +602,7 @@ export interface FileRoutesById {
   '/sobre': typeof SobreRoute
   '/tipos-de-carta': typeof TiposDeCartaRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/videogames': typeof VideogamesRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -601,6 +618,7 @@ export interface FileRoutesById {
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/videogames': typeof AdminVideogamesRoute
   '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
@@ -657,6 +675,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/tipos-de-carta'
     | '/unsubscribe'
+    | '/videogames'
     | '/admin/accessories'
     | '/admin/banners'
     | '/admin/coupons'
@@ -672,6 +691,7 @@ export interface FileRouteTypes {
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/users'
+    | '/admin/videogames'
     | '/carta/$slug'
     | '/checkout/return'
     | '/colecao/$slug'
@@ -723,6 +743,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/tipos-de-carta'
     | '/unsubscribe'
+    | '/videogames'
     | '/admin/accessories'
     | '/admin/banners'
     | '/admin/coupons'
@@ -738,6 +759,7 @@ export interface FileRouteTypes {
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/users'
+    | '/admin/videogames'
     | '/carta/$slug'
     | '/checkout/return'
     | '/colecao/$slug'
@@ -792,6 +814,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/tipos-de-carta'
     | '/unsubscribe'
+    | '/videogames'
     | '/admin/accessories'
     | '/admin/banners'
     | '/admin/coupons'
@@ -807,6 +830,7 @@ export interface FileRouteTypes {
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/users'
+    | '/admin/videogames'
     | '/carta/$slug'
     | '/checkout/return'
     | '/colecao/$slug'
@@ -862,6 +886,7 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   TiposDeCartaRoute: typeof TiposDeCartaRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  VideogamesRoute: typeof VideogamesRoute
   CartaSlugRoute: typeof CartaSlugRoute
   ColecaoSlugRoute: typeof ColecaoSlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -886,6 +911,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/videogames': {
+      id: '/videogames'
+      path: '/videogames'
+      fullPath: '/videogames'
+      preLoaderRoute: typeof VideogamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/unsubscribe': {
       id: '/unsubscribe'
       path: '/unsubscribe'
@@ -1131,6 +1163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CartaSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/videogames': {
+      id: '/admin/videogames'
+      path: '/videogames'
+      fullPath: '/admin/videogames'
+      preLoaderRoute: typeof AdminVideogamesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -1374,6 +1413,7 @@ interface AdminRouteChildren {
   AdminSealedRoute: typeof AdminSealedRoute
   AdminShippingRoute: typeof AdminShippingRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  AdminVideogamesRoute: typeof AdminVideogamesRoute
   AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
 }
 
@@ -1393,6 +1433,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSealedRoute: AdminSealedRoute,
   AdminShippingRoute: AdminShippingRoute,
   AdminUsersRoute: AdminUsersRoute,
+  AdminVideogamesRoute: AdminVideogamesRoute,
   AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
 }
 
@@ -1473,6 +1514,7 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   TiposDeCartaRoute: TiposDeCartaRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  VideogamesRoute: VideogamesRoute,
   CartaSlugRoute: CartaSlugRoute,
   ColecaoSlugRoute: ColecaoSlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
@@ -1499,13 +1541,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
