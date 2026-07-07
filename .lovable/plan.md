@@ -1,46 +1,29 @@
-## Objetivo
+## Problema
 
-Criar uma seção completa de **Videogames** no site, começando com Nintendo Switch, seguindo exatamente o mesmo padrão já usado para Acessórios/Selados: tabela própria, admin, catálogo público, carrinho e checkout integrados.
+Ao enviar e-mails pelo compositor manual, os metadados (`subject`, `body_html`, `from_email`, `batch_id`) só são gravados na linha inicial `status='pending'` do `email_send_log`. O processador da fila insere depois uma nova linha `status='sent'` (mesmo `message_id`) **sem** esses campos.
 
-## O que vai ser feito
+A dedup em `getEmailLogs` mantém apenas a linha mais recente por `message_id` — que é a `sent`, sem `body_html`. Resultado: a pré-visualização sempre mostra "Corpo do e-mail não disponível (envio antigo)", inclusive para envios novos.
 
-### 1. Banco de dados
-Nova tabela `videogames` (espelha `accessories`) com campos:
-- `title`, `description`, `platform` (texto — começa em "Nintendo Switch", aberto para novas), `condition` (Novo / Seminovo / Usado), `region` (opcional), `includes_box`, `price_cents`, `stock`, `images[]`, `sort_order`, `active`.
-- RLS: leitura pública dos ativos; escrita restrita a admin.
-- GRANTs para `anon` (SELECT dos ativos), `authenticated` e `service_role`.
+## Correção
 
-### 2. Admin
-Nova página `/admin/videogames` (baseada em `admin.accessories.tsx`) com:
-- Listagem, criar, editar, arquivar/reativar, ordenar.
-- Upload de múltiplas imagens (bucket `card-images` já existente).
-- Campo de plataforma como select livre (Nintendo Switch por padrão, com opção de adicionar novas plataformas escrevendo).
-- Link no menu do admin.
+Alterar a dedup em `src/utils/emailLogs.functions.ts` para **mesclar** as linhas com o mesmo `message_id` em vez de descartar:
 
-### 3. Catálogo público
-- Rota `/videogames` listando os itens ativos, com filtro por plataforma e condição, ordenação por preço/relevância.
-- Modal de detalhes (`VideogameModal`) com galeria, descrição, condição, "Adicionar ao carrinho".
-- Link no menu principal (SiteNav) e no rodapé.
-- SEO próprio (title, description, og:*).
+- Manter `status` / `error_message` / `created_at` da linha mais recente (comportamento atual — reflete o estado atual do envio).
+- Fazer coalesce de `subject`, `body_html`, `from_email`, `batch_id` a partir de qualquer linha do mesmo `message_id` (a mais antiga, `pending`, contém esses campos).
 
-### 4. Carrinho e checkout
-- Item entra no carrinho com `cardId = videogame:<uuid>` (mesmo padrão de `accessory:<uuid>`).
-- `orders.server.ts` ganha um branch para debitar estoque da tabela `videogames` ao confirmar pagamento.
-- Aparece normalmente no e-mail de pedido recebido / atualizações de status.
+Nenhuma alteração de schema, backend de envio ou UI. Apenas a lógica de merge no server function.
 
-### 5. Extensibilidade futura
-- Como `platform` é texto livre, adicionar PS5 / Xbox / retro no futuro é só cadastrar itens novos com a plataforma desejada — sem migração.
+### Detalhes técnicos
 
-## Detalhes técnicos
+Substituir o bloco:
 
-- Arquivos novos: migração SQL, `src/routes/admin.videogames.tsx`, `src/routes/videogames.tsx`, `src/components/catalog/VideogameModal.tsx`.
-- Arquivos alterados: `src/lib/orders.server.ts` (branch `videogame:`), `src/components/SiteNav.tsx`, `src/components/SiteFooter.tsx`, `src/routes/admin.tsx` (link no menu admin), `src/utils/payments.server.ts` se necessário para exibir metadados.
-- Cart hook não precisa mudar — já é agnóstico ao tipo do item, o prefixo do `cardId` identifica.
+```ts
+const seen = new Map<string, EmailLogRow>();
+for (const r of rows) {
+  if (!seen.has(key)) seen.set(key, r);
+}
+```
 
-## Fora do escopo (posso fazer depois se quiser)
+por um merge que preenche campos faltantes a partir das demais linhas do mesmo `message_id` (rows já vem em ordem `created_at desc`, então a primeira ocupa status/erro/data; as demais só preenchem os campos ainda vazios).
 
-- Variações (ex.: cor do console) — hoje cada SKU seria uma linha separada.
-- Trade-in / compra de usados dos clientes.
-- Página de detalhe SEO-friendly por produto (`/videogames/$slug`) — hoje o padrão do site abre num modal, igual acessórios.
-
-Confirma que posso seguir?
+Envios antigos (anteriores à migração que adicionou as colunas) continuarão sem `body_html` — a mensagem "envio antigo" segue correta apenas para eles.
