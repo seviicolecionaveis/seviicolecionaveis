@@ -54,11 +54,23 @@ export const getEmailLogs = createServerFn({ method: "POST" })
     if (error) throw new Response(error.message, { status: 500 });
 
     // Deduplicate by message_id (keep latest = first, since desc order)
+    // Merge rows sharing the same message_id: latest row wins for status/error/date,
+    // but fill in subject/body_html/from_email/batch_id from any sibling row that has them
+    // (the initial 'pending' row carries those fields; the later 'sent' row does not).
     const seen = new Map<string, EmailLogRow>();
     for (const r of (rows ?? []) as EmailLogRow[]) {
       const key = r.message_id ?? (r as any).id;
-      if (!seen.has(key)) seen.set(key, r);
+      const existing = seen.get(key);
+      if (!existing) {
+        seen.set(key, { ...r });
+      } else {
+        existing.subject = existing.subject ?? r.subject ?? null;
+        existing.body_html = existing.body_html ?? r.body_html ?? null;
+        existing.from_email = existing.from_email ?? r.from_email ?? null;
+        existing.batch_id = existing.batch_id ?? r.batch_id ?? null;
+      }
     }
+
     let latest = Array.from(seen.values());
 
     // Filters
