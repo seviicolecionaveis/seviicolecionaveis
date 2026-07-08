@@ -867,6 +867,7 @@ export type Database = {
           shipping_method: string
           state: string
           status: string
+          stock_decremented: boolean
           stock_reservation_expires_at: string | null
           street: string
           stripe_payment_intent: string | null
@@ -919,6 +920,7 @@ export type Database = {
           shipping_method: string
           state: string
           status?: string
+          stock_decremented?: boolean
           stock_reservation_expires_at?: string | null
           street: string
           stripe_payment_intent?: string | null
@@ -971,6 +973,7 @@ export type Database = {
           shipping_method?: string
           state?: string
           status?: string
+          stock_decremented?: boolean
           stock_reservation_expires_at?: string | null
           street?: string
           stripe_payment_intent?: string | null
