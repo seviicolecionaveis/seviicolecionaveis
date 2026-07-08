@@ -225,6 +225,7 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
     .from("orders")
     .update({
       status: "paid",
+      stock_decremented: true,
       updated_at: new Date().toISOString(),
       ...(paymentRef?.stripePaymentIntent
         ? { stripe_payment_intent: paymentRef.stripePaymentIntent }
