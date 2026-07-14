@@ -237,6 +237,7 @@ export const EXTRA_COLLECTIONS = [
   "BLW - Black and White",
   "HIF - Destinos Ocultos",
   "M4 - Ninja Spinner",
+  "PBL - Escuridão Absoluta",
 ];
 
 export const COLLECTIONS = Array.from(
