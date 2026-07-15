@@ -352,6 +352,9 @@ export function CardModal({ card, onClose, magnetOnly = false }: Props) {
                 })}
               </div>
 
+              {!magnetOnly && <PriceHistoryChart cardId={card.id} />}
+
+
               {card.stock === 0 && (
                 <button
                   type="button"
