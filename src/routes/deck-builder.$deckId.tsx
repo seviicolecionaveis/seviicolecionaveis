@@ -200,6 +200,65 @@ function DeckEditor() {
     else toast.info("Nada disponível para adicionar (esgotado ou já no carrinho).");
   };
 
+  const onDuplicate = async () => {
+    if (!deck) return;
+    try {
+      const r = await dup({ data: { id: deck.id } });
+      toast.success("Deck duplicado");
+      nav({ to: "/deck-builder/$deckId", params: { deckId: r.id } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao duplicar");
+    }
+  };
+
+  const exportTxt = () => {
+    if (!deck) return;
+    const lines = deck.cards
+      .filter((dc) => dc.card)
+      .map((dc) => `${dc.quantity} ${dc.card!.name} ${dc.card!.collection} ${dc.card!.card_number}`);
+    const blob = new Blob([lines.join("\n") + "\n"], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${deck.name.replace(/[^\w-]+/g, "_")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const parseImport = (text: string): Array<{ query: string; quantity: number }> => {
+    return text
+      .split(/\r?\n/)
+      .map((raw) => raw.trim())
+      .filter((l) => l && !l.startsWith("//") && !/^(pok[eé]mon|trainer|treinador|energy|energia):?$/i.test(l))
+      .map((line) => {
+        const m = line.match(/^(\d+)\s*[xX]?\s+(.+)$/);
+        if (m) return { quantity: parseInt(m[1]!, 10), query: m[2]!.trim() };
+        return { quantity: 1, query: line };
+      });
+  };
+
+  const runImport = async () => {
+    if (!deck) return;
+    const entries = parseImport(importText);
+    if (entries.length === 0) {
+      toast.info("Cole ao menos uma linha (ex.: 4 Pikachu SVI 50).");
+      return;
+    }
+    setImporting(true);
+    try {
+      const r = await bulkImport({ data: { deck_id: deck.id, entries } });
+      toast.success(`${r.matched} carta(s) importada(s)${r.unmatched.length ? `. Não encontradas: ${r.unmatched.length}` : ""}`);
+      if (r.unmatched.length) console.warn("Não encontradas:", r.unmatched);
+      setImportOpen(false);
+      setImportText("");
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao importar");
+    } finally {
+      setImporting(false);
+    }
+  };
+
   if (authLoading || !user) return null;
   if (loading) return <div className="mx-auto max-w-5xl px-4 py-8 text-muted-foreground">Carregando…</div>;
   if (!deck) return (
