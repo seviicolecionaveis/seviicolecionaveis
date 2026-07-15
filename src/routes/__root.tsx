@@ -13,6 +13,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { WhatsAppGroupDialog } from "@/components/WhatsAppGroupDialog";
 import { GlobalHeaderActions } from "@/components/GlobalHeaderActions";
 import { CompareBar } from "@/components/CompareBar";
+import { PwaInstallBanner } from "@/components/PwaInstallBanner";
 
 function NotFoundComponent() {
   return (
@@ -156,6 +157,7 @@ function RootComponent() {
             <WhatsAppGroupDialog />
             <WhatsAppButton />
             <CompareBar />
+            <PwaInstallBanner />
         </CartProvider>
       </WishlistProvider>
     </AuthProvider>
