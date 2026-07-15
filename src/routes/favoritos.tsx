@@ -32,15 +32,72 @@ function FavoritesPage() {
   const { ids } = useWishlist();
   const { cards, loading } = useCardsCatalog();
   const [active, setActive] = useState<Card | null>(null);
+  const [shareToken, setShareToken] = useState<string | null>(null);
+  const [shareBusy, setShareBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const getToken = useServerFn(getMyShareToken);
+  const createToken = useServerFn(createShareToken);
+  const revokeToken = useServerFn(revokeShareToken);
 
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/auth" });
   }, [authLoading, user, nav]);
 
+  useEffect(() => {
+    if (!user) return;
+    getToken().then((r) => setShareToken(r.token)).catch(() => {});
+  }, [user, getToken]);
+
   const favs = useMemo(
     () => cards.filter((c) => ids.has(c.id)),
     [cards, ids],
   );
+
+  const shareUrl = shareToken ? `${typeof window !== "undefined" ? window.location.origin : ""}/lista-desejos/${shareToken}` : null;
+
+  const handleShare = async () => {
+    setShareBusy(true);
+    try {
+      const r = shareToken ? { token: shareToken } : await createToken();
+      setShareToken(r.token);
+      const url = `${window.location.origin}/lista-desejos/${r.token}`;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: "Minha lista de desejos", url });
+        } catch { /* cancelled */ }
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        toast.success("Link copiado!");
+      }
+    } catch (e) {
+      toast.error("Não foi possível gerar o link");
+    } finally {
+      setShareBusy(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success("Link copiado!");
+  };
+
+  const handleRevoke = async () => {
+    if (!confirm("Revogar o link atual? Quem tiver o link não poderá mais acessar.")) return;
+    setShareBusy(true);
+    try {
+      await revokeToken();
+      setShareToken(null);
+      toast.success("Link revogado");
+    } finally {
+      setShareBusy(false);
+    }
+  };
 
   if (authLoading || !user) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
