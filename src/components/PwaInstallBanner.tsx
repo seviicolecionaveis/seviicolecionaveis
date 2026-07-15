@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
-import { usePopupPreference } from "@/hooks/usePopupPreference";
+import { getPermanentlyDismissed, setPermanentlyDismissed } from "@/hooks/usePopupPreference";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
