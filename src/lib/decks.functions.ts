@@ -96,7 +96,12 @@ export const updateDeck = createServerFn({ method: "POST" })
     is_public?: boolean;
   }) => data)
   .handler(async ({ data, context }) => {
-    const patch: Record<string, unknown> = {};
+    const patch: {
+      name?: string;
+      description?: string | null;
+      format?: string | null;
+      is_public?: boolean;
+    } = {};
     if (data.name !== undefined) patch.name = data.name.trim();
     if (data.description !== undefined) patch.description = data.description?.toString().trim() || null;
     if (data.format !== undefined) patch.format = data.format?.toString().trim() || null;
