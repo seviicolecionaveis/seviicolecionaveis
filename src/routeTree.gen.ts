@@ -48,6 +48,7 @@ import { Route as DeckBuilderDeckIdRouteImport } from './routes/deck-builder.$de
 import { Route as ColecaoSlugRouteImport } from './routes/colecao.$slug'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as CartaSlugRouteImport } from './routes/carta.$slug'
+import { Route as BaralhoTokenRouteImport } from './routes/baralho.$token'
 import { Route as AdminVideogamesRouteImport } from './routes/admin.videogames'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
@@ -277,6 +278,11 @@ const CartaSlugRoute = CartaSlugRouteImport.update({
   path: '/carta/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BaralhoTokenRoute = BaralhoTokenRouteImport.update({
+  id: '/baralho/$token',
+  path: '/baralho/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminVideogamesRoute = AdminVideogamesRouteImport.update({
   id: '/videogames',
   path: '/videogames',
@@ -498,6 +504,7 @@ export interface FileRoutesByFullPath {
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videogames': typeof AdminVideogamesRoute
+  '/baralho/$token': typeof BaralhoTokenRoute
   '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
@@ -569,6 +576,7 @@ export interface FileRoutesByTo {
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videogames': typeof AdminVideogamesRoute
+  '/baralho/$token': typeof BaralhoTokenRoute
   '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
@@ -644,6 +652,7 @@ export interface FileRoutesById {
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videogames': typeof AdminVideogamesRoute
+  '/baralho/$token': typeof BaralhoTokenRoute
   '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
@@ -720,6 +729,7 @@ export interface FileRouteTypes {
     | '/admin/shipping'
     | '/admin/users'
     | '/admin/videogames'
+    | '/baralho/$token'
     | '/carta/$slug'
     | '/checkout/return'
     | '/colecao/$slug'
@@ -791,6 +801,7 @@ export interface FileRouteTypes {
     | '/admin/shipping'
     | '/admin/users'
     | '/admin/videogames'
+    | '/baralho/$token'
     | '/carta/$slug'
     | '/checkout/return'
     | '/colecao/$slug'
@@ -865,6 +876,7 @@ export interface FileRouteTypes {
     | '/admin/shipping'
     | '/admin/users'
     | '/admin/videogames'
+    | '/baralho/$token'
     | '/carta/$slug'
     | '/checkout/return'
     | '/colecao/$slug'
@@ -924,6 +936,7 @@ export interface RootRouteChildren {
   TiposDeCartaRoute: typeof TiposDeCartaRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   VideogamesRoute: typeof VideogamesRoute
+  BaralhoTokenRoute: typeof BaralhoTokenRoute
   CartaSlugRoute: typeof CartaSlugRoute
   ColecaoSlugRoute: typeof ColecaoSlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -1220,6 +1233,13 @@ declare module '@tanstack/react-router' {
       path: '/carta/$slug'
       fullPath: '/carta/$slug'
       preLoaderRoute: typeof CartaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/baralho/$token': {
+      id: '/baralho/$token'
+      path: '/baralho/$token'
+      fullPath: '/baralho/$token'
+      preLoaderRoute: typeof BaralhoTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/videogames': {
@@ -1587,6 +1607,7 @@ const rootRouteChildren: RootRouteChildren = {
   TiposDeCartaRoute: TiposDeCartaRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   VideogamesRoute: VideogamesRoute,
+  BaralhoTokenRoute: BaralhoTokenRoute,
   CartaSlugRoute: CartaSlugRoute,
   ColecaoSlugRoute: ColecaoSlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,

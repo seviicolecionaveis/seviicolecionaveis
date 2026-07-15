@@ -1,5 +1,5 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { getPublicDeck } from "@/lib/decks.functions";
+import { getPublicDeck, type PublicDeck } from "@/lib/decks.functions";
 import { Card as UICard, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Layers } from "lucide-react";
 
