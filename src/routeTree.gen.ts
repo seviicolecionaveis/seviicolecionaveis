@@ -41,6 +41,7 @@ import { Route as ProdutosLacradosSlugRouteImport } from './routes/produtos-lacr
 import { Route as PilhaSolicitarRouteImport } from './routes/pilha.solicitar'
 import { Route as PayOrderIdRouteImport } from './routes/pay.$orderId'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
+import { Route as ListaDesejosTokenRouteImport } from './routes/lista-desejos.$token'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ColecaoSlugRouteImport } from './routes/colecao.$slug'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
@@ -238,6 +239,11 @@ const OrdersOrderIdRoute = OrdersOrderIdRouteImport.update({
   id: '/$orderId',
   path: '/$orderId',
   getParentRoute: () => OrdersRoute,
+} as any)
+const ListaDesejosTokenRoute = ListaDesejosTokenRouteImport.update({
+  id: '/lista-desejos/$token',
+  path: '/lista-desejos/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
@@ -483,6 +489,7 @@ export interface FileRoutesByFullPath {
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/lista-desejos/$token': typeof ListaDesejosTokenRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
@@ -551,6 +558,7 @@ export interface FileRoutesByTo {
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/lista-desejos/$token': typeof ListaDesejosTokenRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
@@ -623,6 +631,7 @@ export interface FileRoutesById {
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/lista-desejos/$token': typeof ListaDesejosTokenRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
@@ -696,6 +705,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/colecao/$slug'
     | '/email/unsubscribe'
+    | '/lista-desejos/$token'
     | '/orders/$orderId'
     | '/pay/$orderId'
     | '/pilha/solicitar'
@@ -764,6 +774,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/colecao/$slug'
     | '/email/unsubscribe'
+    | '/lista-desejos/$token'
     | '/orders/$orderId'
     | '/pay/$orderId'
     | '/pilha/solicitar'
@@ -835,6 +846,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/colecao/$slug'
     | '/email/unsubscribe'
+    | '/lista-desejos/$token'
     | '/orders/$orderId'
     | '/pay/$orderId'
     | '/pilha/solicitar'
@@ -890,6 +902,7 @@ export interface RootRouteChildren {
   CartaSlugRoute: typeof CartaSlugRoute
   ColecaoSlugRoute: typeof ColecaoSlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ListaDesejosTokenRoute: typeof ListaDesejosTokenRoute
   PayOrderIdRoute: typeof PayOrderIdRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -1134,6 +1147,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/orders/$orderId'
       preLoaderRoute: typeof OrdersOrderIdRouteImport
       parentRoute: typeof OrdersRoute
+    }
+    '/lista-desejos/$token': {
+      id: '/lista-desejos/$token'
+      path: '/lista-desejos/$token'
+      fullPath: '/lista-desejos/$token'
+      preLoaderRoute: typeof ListaDesejosTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
@@ -1518,6 +1538,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartaSlugRoute: CartaSlugRoute,
   ColecaoSlugRoute: ColecaoSlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  ListaDesejosTokenRoute: ListaDesejosTokenRoute,
   PayOrderIdRoute: PayOrderIdRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,

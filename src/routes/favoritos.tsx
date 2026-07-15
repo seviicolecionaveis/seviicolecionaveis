@@ -1,11 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useAuth } from "@/hooks/useAuth";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
 import type { Card } from "@/data/cards";
+import { getMyShareToken, createShareToken, revokeShareToken } from "@/lib/wishlist-share.functions";
+import { Share2, Copy, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/favoritos")({
@@ -28,15 +32,72 @@ function FavoritesPage() {
   const { ids } = useWishlist();
   const { cards, loading } = useCardsCatalog();
   const [active, setActive] = useState<Card | null>(null);
+  const [shareToken, setShareToken] = useState<string | null>(null);
+  const [shareBusy, setShareBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const getToken = useServerFn(getMyShareToken);
+  const createToken = useServerFn(createShareToken);
+  const revokeToken = useServerFn(revokeShareToken);
 
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/auth" });
   }, [authLoading, user, nav]);
 
+  useEffect(() => {
+    if (!user) return;
+    getToken().then((r) => setShareToken(r.token)).catch(() => {});
+  }, [user, getToken]);
+
   const favs = useMemo(
     () => cards.filter((c) => ids.has(c.id)),
     [cards, ids],
   );
+
+  const shareUrl = shareToken ? `${typeof window !== "undefined" ? window.location.origin : ""}/lista-desejos/${shareToken}` : null;
+
+  const handleShare = async () => {
+    setShareBusy(true);
+    try {
+      const r = shareToken ? { token: shareToken } : await createToken();
+      setShareToken(r.token);
+      const url = `${window.location.origin}/lista-desejos/${r.token}`;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: "Minha lista de desejos", url });
+        } catch { /* cancelled */ }
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        toast.success("Link copiado!");
+      }
+    } catch (e) {
+      toast.error("Não foi possível gerar o link");
+    } finally {
+      setShareBusy(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success("Link copiado!");
+  };
+
+  const handleRevoke = async () => {
+    if (!confirm("Revogar o link atual? Quem tiver o link não poderá mais acessar.")) return;
+    setShareBusy(true);
+    try {
+      await revokeToken();
+      setShareToken(null);
+      toast.success("Link revogado");
+    } finally {
+      setShareBusy(false);
+    }
+  };
 
   if (authLoading || !user) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
@@ -57,9 +118,50 @@ function FavoritesPage() {
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <h1 className="text-2xl font-bold mb-2">Meus Favoritos</h1>
-        <p className="text-sm text-muted-foreground mb-8">
+        <p className="text-sm text-muted-foreground mb-4">
           {favs.length} {favs.length === 1 ? "carta salva" : "cartas salvas"}
         </p>
+
+        {favs.length > 0 && (
+          <div className="mb-8 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-secondary/40 p-3">
+            <button
+              type="button"
+              onClick={handleShare}
+              disabled={shareBusy}
+              className="inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-xs font-semibold text-background transition hover:bg-foreground/90 disabled:opacity-50"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              {shareToken ? "Compartilhar link" : "Gerar link público"}
+            </button>
+            {shareUrl && (
+              <>
+                <input
+                  readOnly
+                  value={shareUrl}
+                  onFocus={(e) => e.currentTarget.select()}
+                  className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1.5 text-xs font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="inline-flex items-center gap-1 rounded border border-border px-2 py-1.5 text-xs font-medium hover:bg-background"
+                >
+                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied ? "Copiado" : "Copiar"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRevoke}
+                  disabled={shareBusy}
+                  className="inline-flex items-center gap-1 rounded border border-border px-2 py-1.5 text-xs font-medium text-rose-600 hover:bg-background disabled:opacity-50"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Revogar
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
