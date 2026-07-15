@@ -145,11 +145,7 @@ function CollectionPage() {
           )}
         </div>
 
-        {!loading && collectionName && list.length > 0 && (
-          <CollectionCompleteWidget collection={collectionName} cards={list} />
-        )}
-
-        {!loading && collectionName && list.length > 0 && (
+        {!loading && collectionName && (
           <CollectionCompleteWidget collection={collectionName} cards={cards.filter((c) => collectionSlug(c.collection) === slug)} />
         )}
 
