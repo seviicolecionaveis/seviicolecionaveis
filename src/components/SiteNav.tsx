@@ -7,6 +7,7 @@ const CARTAS_GROUP = [
   { to: "/cartas", label: "Cartas" },
   { to: "/colecoes", label: "Coleções" },
   { to: "/mais-vendidas", label: "Mais vendidas" },
+  { to: "/deck-builder", label: "Deck Builder" },
 ] as const;
 
 const LINKS = [
