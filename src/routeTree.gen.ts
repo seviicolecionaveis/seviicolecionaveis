@@ -24,6 +24,7 @@ import { Route as ImasRouteImport } from './routes/imas'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EnviosRouteImport } from './routes/envios'
+import { Route as DeckBuilderRouteImport } from './routes/deck-builder'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as ComparadorRouteImport } from './routes/comparador'
 import { Route as ColecoesRouteImport } from './routes/colecoes'
@@ -153,6 +154,11 @@ const FaqRoute = FaqRouteImport.update({
 const EnviosRoute = EnviosRouteImport.update({
   id: '/envios',
   path: '/envios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeckBuilderRoute = DeckBuilderRouteImport.update({
+  id: '/deck-builder',
+  path: '/deck-builder',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContaRoute = ContaRouteImport.update({
@@ -454,6 +460,7 @@ export interface FileRoutesByFullPath {
   '/colecoes': typeof ColecoesRoute
   '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
+  '/deck-builder': typeof DeckBuilderRoute
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
@@ -526,6 +533,7 @@ export interface FileRoutesByTo {
   '/colecoes': typeof ColecoesRoute
   '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
+  '/deck-builder': typeof DeckBuilderRoute
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
@@ -596,6 +604,7 @@ export interface FileRoutesById {
   '/colecoes': typeof ColecoesRoute
   '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
+  '/deck-builder': typeof DeckBuilderRoute
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
@@ -670,6 +679,7 @@ export interface FileRouteTypes {
     | '/colecoes'
     | '/comparador'
     | '/conta'
+    | '/deck-builder'
     | '/envios'
     | '/faq'
     | '/favoritos'
@@ -742,6 +752,7 @@ export interface FileRouteTypes {
     | '/colecoes'
     | '/comparador'
     | '/conta'
+    | '/deck-builder'
     | '/envios'
     | '/faq'
     | '/favoritos'
@@ -811,6 +822,7 @@ export interface FileRouteTypes {
     | '/colecoes'
     | '/comparador'
     | '/conta'
+    | '/deck-builder'
     | '/envios'
     | '/faq'
     | '/favoritos'
@@ -884,6 +896,7 @@ export interface RootRouteChildren {
   ColecoesRoute: typeof ColecoesRoute
   ComparadorRoute: typeof ComparadorRoute
   ContaRoute: typeof ContaRoute
+  DeckBuilderRoute: typeof DeckBuilderRoute
   EnviosRoute: typeof EnviosRoute
   FaqRoute: typeof FaqRoute
   FavoritosRoute: typeof FavoritosRoute
@@ -1027,6 +1040,13 @@ declare module '@tanstack/react-router' {
       path: '/envios'
       fullPath: '/envios'
       preLoaderRoute: typeof EnviosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deck-builder': {
+      id: '/deck-builder'
+      path: '/deck-builder'
+      fullPath: '/deck-builder'
+      preLoaderRoute: typeof DeckBuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/conta': {
@@ -1520,6 +1540,7 @@ const rootRouteChildren: RootRouteChildren = {
   ColecoesRoute: ColecoesRoute,
   ComparadorRoute: ComparadorRoute,
   ContaRoute: ContaRoute,
+  DeckBuilderRoute: DeckBuilderRoute,
   EnviosRoute: EnviosRoute,
   FaqRoute: FaqRoute,
   FavoritosRoute: FavoritosRoute,
