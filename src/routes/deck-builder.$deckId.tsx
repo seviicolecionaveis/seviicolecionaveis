@@ -9,6 +9,8 @@ import {
   setDeckCardQuantity,
   removeDeckCard,
   searchCardsForDeck,
+  duplicateDeck,
+  bulkImportToDeck,
   type DeckDetail,
   type SearchResult,
 } from "@/lib/decks.functions";
@@ -18,8 +20,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card as UICard, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Minus, Plus, Trash2, Search, ArrowLeft, Copy, ShoppingCart, Share2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Minus, Plus, Trash2, Search, ArrowLeft, Copy, ShoppingCart, Share2, Upload, Download, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+
+const BASIC_ENERGIES = new Set(["grass energy","fire energy","water energy","lightning energy","psychic energy","fighting energy","darkness energy","metal energy","fairy energy","energia básica"]);
 
 export const Route = createFileRoute("/deck-builder/$deckId")({
   head: () => ({
@@ -48,6 +53,11 @@ function DeckEditor() {
   const setQty = useServerFn(setDeckCardQuantity);
   const removeCard = useServerFn(removeDeckCard);
   const search = useServerFn(searchCardsForDeck);
+  const dup = useServerFn(duplicateDeck);
+  const bulkImport = useServerFn(bulkImportToDeck);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [importing, setImporting] = useState(false);
 
   const [deck, setDeck] = useState<DeckDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -92,19 +102,30 @@ function DeckEditor() {
   }, [q, search]);
 
   const stats = useMemo(() => {
-    if (!deck) return { total: 0, byCategory: {} as Record<string, number>, priceCents: 0, missing: 0 };
+    if (!deck) return { total: 0, byCategory: {} as Record<string, number>, priceCents: 0, missing: 0, byName: [] as Array<{ name: string; qty: number }>, legalityIssues: [] as string[] };
     let total = 0;
     let priceCents = 0;
     let missing = 0;
     const byCategory: Record<string, number> = {};
+    const byNameMap: Record<string, number> = {};
     for (const dc of deck.cards) {
       total += dc.quantity;
       const cat = dc.card?.category ?? "?";
       byCategory[cat] = (byCategory[cat] ?? 0) + dc.quantity;
       if (dc.card?.base_price_cents != null) priceCents += dc.card.base_price_cents * dc.quantity;
       if (!dc.card || dc.card.stock < dc.quantity) missing += Math.max(0, dc.quantity - (dc.card?.stock ?? 0));
+      const nm = (dc.card?.name ?? "?").trim();
+      byNameMap[nm] = (byNameMap[nm] ?? 0) + dc.quantity;
     }
-    return { total, byCategory, priceCents, missing };
+    const byName = Object.entries(byNameMap).map(([name, qty]) => ({ name, qty })).sort((a, b) => b.qty - a.qty);
+    const legalityIssues: string[] = [];
+    if (total !== 60) legalityIssues.push(`O deck tem ${total} cartas (esperado: 60).`);
+    for (const { name, qty } of byName) {
+      if (qty > 4 && !BASIC_ENERGIES.has(name.toLowerCase())) {
+        legalityIssues.push(`"${name}" tem ${qty} cópias (máx 4).`);
+      }
+    }
+    return { total, byCategory, priceCents, missing, byName, legalityIssues };
   }, [deck]);
 
   const onAdd = async (r: SearchResult) => {
@@ -179,6 +200,65 @@ function DeckEditor() {
     else toast.info("Nada disponível para adicionar (esgotado ou já no carrinho).");
   };
 
+  const onDuplicate = async () => {
+    if (!deck) return;
+    try {
+      const r = await dup({ data: { id: deck.id } });
+      toast.success("Deck duplicado");
+      nav({ to: "/deck-builder/$deckId", params: { deckId: r.id } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao duplicar");
+    }
+  };
+
+  const exportTxt = () => {
+    if (!deck) return;
+    const lines = deck.cards
+      .filter((dc) => dc.card)
+      .map((dc) => `${dc.quantity} ${dc.card!.name} ${dc.card!.collection} ${dc.card!.card_number}`);
+    const blob = new Blob([lines.join("\n") + "\n"], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${deck.name.replace(/[^\w-]+/g, "_")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const parseImport = (text: string): Array<{ query: string; quantity: number }> => {
+    return text
+      .split(/\r?\n/)
+      .map((raw) => raw.trim())
+      .filter((l) => l && !l.startsWith("//") && !/^(pok[eé]mon|trainer|treinador|energy|energia):?$/i.test(l))
+      .map((line) => {
+        const m = line.match(/^(\d+)\s*[xX]?\s+(.+)$/);
+        if (m) return { quantity: parseInt(m[1]!, 10), query: m[2]!.trim() };
+        return { quantity: 1, query: line };
+      });
+  };
+
+  const runImport = async () => {
+    if (!deck) return;
+    const entries = parseImport(importText);
+    if (entries.length === 0) {
+      toast.info("Cole ao menos uma linha (ex.: 4 Pikachu SVI 50).");
+      return;
+    }
+    setImporting(true);
+    try {
+      const r = await bulkImport({ data: { deck_id: deck.id, entries } });
+      toast.success(`${r.matched} carta(s) importada(s)${r.unmatched.length ? `. Não encontradas: ${r.unmatched.length}` : ""}`);
+      if (r.unmatched.length) console.warn("Não encontradas:", r.unmatched);
+      setImportOpen(false);
+      setImportText("");
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao importar");
+    } finally {
+      setImporting(false);
+    }
+  };
+
   if (authLoading || !user) return null;
   if (loading) return <div className="mx-auto max-w-5xl px-4 py-8 text-muted-foreground">Carregando…</div>;
   if (!deck) return (
@@ -194,9 +274,29 @@ function DeckEditor() {
         <Button asChild variant="ghost" size="sm">
           <Link to="/deck-builder"><ArrowLeft className="h-4 w-4 mr-1" /> Meus decks</Link>
         </Button>
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={addMissingToCart} disabled={deck.cards.length === 0}>
-            <ShoppingCart className="h-4 w-4 mr-1" /> Adicionar faltantes ao carrinho
+        <div className="flex gap-2 flex-wrap">
+          <Dialog open={importOpen} onOpenChange={setImportOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm"><Upload className="h-4 w-4 mr-1" /> Importar</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Importar deck (texto)</DialogTitle></DialogHeader>
+              <p className="text-xs text-muted-foreground">Cole uma linha por carta, ex.: <code>4 Pikachu SVI 50</code>. Cabeçalhos como "Pokémon:" são ignorados.</p>
+              <Textarea rows={12} value={importText} onChange={(e) => setImportText(e.target.value)} placeholder="4 Pikachu SVI 50&#10;2 Professor's Research SVI 189&#10;..." />
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setImportOpen(false)}>Cancelar</Button>
+                <Button onClick={runImport} disabled={importing}>{importing ? "Importando…" : "Importar"}</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Button variant="outline" size="sm" onClick={exportTxt} disabled={deck.cards.length === 0}>
+            <Download className="h-4 w-4 mr-1" /> Exportar
+          </Button>
+          <Button variant="outline" size="sm" onClick={onDuplicate}>
+            <Copy className="h-4 w-4 mr-1" /> Duplicar
+          </Button>
+          <Button variant="secondary" size="sm" onClick={addMissingToCart} disabled={deck.cards.length === 0}>
+            <ShoppingCart className="h-4 w-4 mr-1" /> Faltantes ao carrinho
           </Button>
         </div>
       </div>
@@ -322,6 +422,34 @@ function DeckEditor() {
           )}
         </CardContent>
       </UICard>
+
+      {stats.total > 0 && (
+        <UICard>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <AlertTriangle className={`h-4 w-4 ${stats.legalityIssues.length ? "text-destructive" : "text-emerald-600"}`} />
+              Legalidade & estatísticas
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            {stats.legalityIssues.length === 0 ? (
+              <p className="text-emerald-700 dark:text-emerald-500">Deck válido: 60 cartas, no máximo 4 cópias por nome (energias básicas ilimitadas).</p>
+            ) : (
+              <ul className="list-disc pl-5 text-destructive space-y-1">
+                {stats.legalityIssues.map((m, i) => <li key={i}>{m}</li>)}
+              </ul>
+            )}
+            <div>
+              <div className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-1">Distribuição</div>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(stats.byCategory).map(([k, v]) => (
+                  <span key={k} className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs">{k}: <strong className="ml-1">{v}</strong></span>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </UICard>
+      )}
     </div>
   );
 }

@@ -232,6 +232,122 @@ export const removeDeckCard = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const duplicateDeck = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data, context }): Promise<{ id: string }> => {
+    const { data: src } = await context.supabase
+      .from("decks")
+      .select("name, description, format")
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (!src) throw new Error("Deck não encontrado");
+    const { data: newDeck, error } = await context.supabase
+      .from("decks")
+      .insert({
+        user_id: context.userId,
+        name: `${src.name} (cópia)`,
+        description: src.description,
+        format: src.format,
+      })
+      .select("id")
+      .single();
+    if (error || !newDeck) throw new Error(error?.message ?? "Falha ao duplicar");
+    const { data: srcCards } = await context.supabase
+      .from("deck_cards")
+      .select("card_id, quantity, category")
+      .eq("deck_id", data.id);
+    if (srcCards && srcCards.length > 0) {
+      const rows = srcCards.map((r) => ({
+        deck_id: newDeck.id,
+        card_id: r.card_id,
+        quantity: r.quantity,
+        category: r.category,
+      }));
+      const { error: e2 } = await context.supabase.from("deck_cards").insert(rows);
+      if (e2) throw new Error(e2.message);
+    }
+    return { id: newDeck.id };
+  });
+
+export type BulkImportResult = {
+  matched: number;
+  unmatched: string[];
+};
+
+export const bulkImportToDeck = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { deck_id: string; entries: Array<{ query: string; quantity: number }> }) => data)
+  .handler(async ({ data, context }): Promise<BulkImportResult> => {
+    const { data: deck } = await context.supabase
+      .from("decks")
+      .select("id")
+      .eq("id", data.deck_id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (!deck) throw new Error("Deck não encontrado");
+
+    const unmatched: string[] = [];
+    let matched = 0;
+
+    for (const entry of data.entries) {
+      const q = entry.query.trim();
+      if (!q) continue;
+      const qty = Math.min(60, Math.max(1, entry.quantity));
+      // Try match: split "Name SET NUM" heuristically
+      const parts = q.split(/\s+/);
+      let cardRow: { id: string } | null = null;
+      // Try last token as number
+      const maybeNum = parts[parts.length - 1];
+      if (/^\d+[a-z]?$/i.test(maybeNum) && parts.length >= 2) {
+        const maybeSet = parts[parts.length - 2];
+        const name = parts.slice(0, -2).join(" ");
+        const { data: rows } = await context.supabase
+          .from("cards")
+          .select("id, stock, base_price_cents")
+          .ilike("name", `%${name}%`)
+          .ilike("collection", `%${maybeSet}%`)
+          .eq("card_number", maybeNum)
+          .limit(1);
+        if (rows && rows.length) cardRow = rows[0];
+      }
+      if (!cardRow) {
+        // Fallback: search by name only, prefer in-stock and cheapest
+        const { data: rows } = await context.supabase
+          .from("cards")
+          .select("id, stock, base_price_cents")
+          .ilike("name", `%${q}%`)
+          .order("stock", { ascending: false })
+          .order("base_price_cents", { ascending: true, nullsFirst: false })
+          .limit(1);
+        if (rows && rows.length) cardRow = rows[0];
+      }
+      if (!cardRow) {
+        unmatched.push(q);
+        continue;
+      }
+      const { data: existing } = await context.supabase
+        .from("deck_cards")
+        .select("id, quantity")
+        .eq("deck_id", data.deck_id)
+        .eq("card_id", cardRow.id)
+        .maybeSingle();
+      if (existing) {
+        await context.supabase
+          .from("deck_cards")
+          .update({ quantity: Math.min(60, (existing.quantity ?? 0) + qty) })
+          .eq("id", existing.id);
+      } else {
+        await context.supabase
+          .from("deck_cards")
+          .insert({ deck_id: data.deck_id, card_id: cardRow.id, quantity: qty });
+      }
+      matched += 1;
+    }
+    return { matched, unmatched };
+  });
+
 export type PublicDeck = {
   name: string;
   description: string | null;
