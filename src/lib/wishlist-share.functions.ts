@@ -58,6 +58,9 @@ export type SharedWishlistCard = {
   image: string;
   base_price_cents: number | null;
   stock: number;
+  finish: string;
+  language: string;
+  condition: string;
 };
 
 export const getSharedWishlist = createServerFn({ method: "GET" })
