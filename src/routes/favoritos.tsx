@@ -118,9 +118,50 @@ function FavoritesPage() {
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <h1 className="text-2xl font-bold mb-2">Meus Favoritos</h1>
-        <p className="text-sm text-muted-foreground mb-8">
+        <p className="text-sm text-muted-foreground mb-4">
           {favs.length} {favs.length === 1 ? "carta salva" : "cartas salvas"}
         </p>
+
+        {favs.length > 0 && (
+          <div className="mb-8 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-secondary/40 p-3">
+            <button
+              type="button"
+              onClick={handleShare}
+              disabled={shareBusy}
+              className="inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-xs font-semibold text-background transition hover:bg-foreground/90 disabled:opacity-50"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              {shareToken ? "Compartilhar link" : "Gerar link público"}
+            </button>
+            {shareUrl && (
+              <>
+                <input
+                  readOnly
+                  value={shareUrl}
+                  onFocus={(e) => e.currentTarget.select()}
+                  className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1.5 text-xs font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="inline-flex items-center gap-1 rounded border border-border px-2 py-1.5 text-xs font-medium hover:bg-background"
+                >
+                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied ? "Copiado" : "Copiar"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRevoke}
+                  disabled={shareBusy}
+                  className="inline-flex items-center gap-1 rounded border border-border px-2 py-1.5 text-xs font-medium text-rose-600 hover:bg-background disabled:opacity-50"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Revogar
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
