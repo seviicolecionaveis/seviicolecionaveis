@@ -24,6 +24,7 @@ import { Route as ImasRouteImport } from './routes/imas'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EnviosRouteImport } from './routes/envios'
+import { Route as DeckBuilderRouteImport } from './routes/deck-builder'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as ComparadorRouteImport } from './routes/comparador'
 import { Route as ColecoesRouteImport } from './routes/colecoes'
@@ -43,9 +44,11 @@ import { Route as PayOrderIdRouteImport } from './routes/pay.$orderId'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as ListaDesejosTokenRouteImport } from './routes/lista-desejos.$token'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as DeckBuilderDeckIdRouteImport } from './routes/deck-builder.$deckId'
 import { Route as ColecaoSlugRouteImport } from './routes/colecao.$slug'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as CartaSlugRouteImport } from './routes/carta.$slug'
+import { Route as BaralhoTokenRouteImport } from './routes/baralho.$token'
 import { Route as AdminVideogamesRouteImport } from './routes/admin.videogames'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
@@ -155,6 +158,11 @@ const EnviosRoute = EnviosRouteImport.update({
   path: '/envios',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeckBuilderRoute = DeckBuilderRouteImport.update({
+  id: '/deck-builder',
+  path: '/deck-builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContaRoute = ContaRouteImport.update({
   id: '/conta',
   path: '/conta',
@@ -250,6 +258,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeckBuilderDeckIdRoute = DeckBuilderDeckIdRouteImport.update({
+  id: '/$deckId',
+  path: '/$deckId',
+  getParentRoute: () => DeckBuilderRoute,
+} as any)
 const ColecaoSlugRoute = ColecaoSlugRouteImport.update({
   id: '/colecao/$slug',
   path: '/colecao/$slug',
@@ -263,6 +276,11 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
 const CartaSlugRoute = CartaSlugRouteImport.update({
   id: '/carta/$slug',
   path: '/carta/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BaralhoTokenRoute = BaralhoTokenRouteImport.update({
+  id: '/baralho/$token',
+  path: '/baralho/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminVideogamesRoute = AdminVideogamesRouteImport.update({
@@ -454,6 +472,7 @@ export interface FileRoutesByFullPath {
   '/colecoes': typeof ColecoesRoute
   '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
+  '/deck-builder': typeof DeckBuilderRouteWithChildren
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
@@ -485,9 +504,11 @@ export interface FileRoutesByFullPath {
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videogames': typeof AdminVideogamesRoute
+  '/baralho/$token': typeof BaralhoTokenRoute
   '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
+  '/deck-builder/$deckId': typeof DeckBuilderDeckIdRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/lista-desejos/$token': typeof ListaDesejosTokenRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
@@ -526,6 +547,7 @@ export interface FileRoutesByTo {
   '/colecoes': typeof ColecoesRoute
   '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
+  '/deck-builder': typeof DeckBuilderRouteWithChildren
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
@@ -554,9 +576,11 @@ export interface FileRoutesByTo {
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videogames': typeof AdminVideogamesRoute
+  '/baralho/$token': typeof BaralhoTokenRoute
   '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
+  '/deck-builder/$deckId': typeof DeckBuilderDeckIdRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/lista-desejos/$token': typeof ListaDesejosTokenRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
@@ -596,6 +620,7 @@ export interface FileRoutesById {
   '/colecoes': typeof ColecoesRoute
   '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
+  '/deck-builder': typeof DeckBuilderRouteWithChildren
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
@@ -627,9 +652,11 @@ export interface FileRoutesById {
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videogames': typeof AdminVideogamesRoute
+  '/baralho/$token': typeof BaralhoTokenRoute
   '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
+  '/deck-builder/$deckId': typeof DeckBuilderDeckIdRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/lista-desejos/$token': typeof ListaDesejosTokenRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
@@ -670,6 +697,7 @@ export interface FileRouteTypes {
     | '/colecoes'
     | '/comparador'
     | '/conta'
+    | '/deck-builder'
     | '/envios'
     | '/faq'
     | '/favoritos'
@@ -701,9 +729,11 @@ export interface FileRouteTypes {
     | '/admin/shipping'
     | '/admin/users'
     | '/admin/videogames'
+    | '/baralho/$token'
     | '/carta/$slug'
     | '/checkout/return'
     | '/colecao/$slug'
+    | '/deck-builder/$deckId'
     | '/email/unsubscribe'
     | '/lista-desejos/$token'
     | '/orders/$orderId'
@@ -742,6 +772,7 @@ export interface FileRouteTypes {
     | '/colecoes'
     | '/comparador'
     | '/conta'
+    | '/deck-builder'
     | '/envios'
     | '/faq'
     | '/favoritos'
@@ -770,9 +801,11 @@ export interface FileRouteTypes {
     | '/admin/shipping'
     | '/admin/users'
     | '/admin/videogames'
+    | '/baralho/$token'
     | '/carta/$slug'
     | '/checkout/return'
     | '/colecao/$slug'
+    | '/deck-builder/$deckId'
     | '/email/unsubscribe'
     | '/lista-desejos/$token'
     | '/orders/$orderId'
@@ -811,6 +844,7 @@ export interface FileRouteTypes {
     | '/colecoes'
     | '/comparador'
     | '/conta'
+    | '/deck-builder'
     | '/envios'
     | '/faq'
     | '/favoritos'
@@ -842,9 +876,11 @@ export interface FileRouteTypes {
     | '/admin/shipping'
     | '/admin/users'
     | '/admin/videogames'
+    | '/baralho/$token'
     | '/carta/$slug'
     | '/checkout/return'
     | '/colecao/$slug'
+    | '/deck-builder/$deckId'
     | '/email/unsubscribe'
     | '/lista-desejos/$token'
     | '/orders/$orderId'
@@ -884,6 +920,7 @@ export interface RootRouteChildren {
   ColecoesRoute: typeof ColecoesRoute
   ComparadorRoute: typeof ComparadorRoute
   ContaRoute: typeof ContaRoute
+  DeckBuilderRoute: typeof DeckBuilderRouteWithChildren
   EnviosRoute: typeof EnviosRoute
   FaqRoute: typeof FaqRoute
   FavoritosRoute: typeof FavoritosRoute
@@ -899,6 +936,7 @@ export interface RootRouteChildren {
   TiposDeCartaRoute: typeof TiposDeCartaRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   VideogamesRoute: typeof VideogamesRoute
+  BaralhoTokenRoute: typeof BaralhoTokenRoute
   CartaSlugRoute: typeof CartaSlugRoute
   ColecaoSlugRoute: typeof ColecaoSlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -1027,6 +1065,13 @@ declare module '@tanstack/react-router' {
       path: '/envios'
       fullPath: '/envios'
       preLoaderRoute: typeof EnviosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deck-builder': {
+      id: '/deck-builder'
+      path: '/deck-builder'
+      fullPath: '/deck-builder'
+      preLoaderRoute: typeof DeckBuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/conta': {
@@ -1162,6 +1207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/deck-builder/$deckId': {
+      id: '/deck-builder/$deckId'
+      path: '/$deckId'
+      fullPath: '/deck-builder/$deckId'
+      preLoaderRoute: typeof DeckBuilderDeckIdRouteImport
+      parentRoute: typeof DeckBuilderRoute
+    }
     '/colecao/$slug': {
       id: '/colecao/$slug'
       path: '/colecao/$slug'
@@ -1181,6 +1233,13 @@ declare module '@tanstack/react-router' {
       path: '/carta/$slug'
       fullPath: '/carta/$slug'
       preLoaderRoute: typeof CartaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/baralho/$token': {
+      id: '/baralho/$token'
+      path: '/baralho/$token'
+      fullPath: '/baralho/$token'
+      preLoaderRoute: typeof BaralhoTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/videogames': {
@@ -1471,6 +1530,18 @@ const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
   CheckoutRouteChildren,
 )
 
+interface DeckBuilderRouteChildren {
+  DeckBuilderDeckIdRoute: typeof DeckBuilderDeckIdRoute
+}
+
+const DeckBuilderRouteChildren: DeckBuilderRouteChildren = {
+  DeckBuilderDeckIdRoute: DeckBuilderDeckIdRoute,
+}
+
+const DeckBuilderRouteWithChildren = DeckBuilderRoute._addFileChildren(
+  DeckBuilderRouteChildren,
+)
+
 interface OrdersRouteChildren {
   OrdersOrderIdRoute: typeof OrdersOrderIdRoute
   OrdersIndexRoute: typeof OrdersIndexRoute
@@ -1520,6 +1591,7 @@ const rootRouteChildren: RootRouteChildren = {
   ColecoesRoute: ColecoesRoute,
   ComparadorRoute: ComparadorRoute,
   ContaRoute: ContaRoute,
+  DeckBuilderRoute: DeckBuilderRouteWithChildren,
   EnviosRoute: EnviosRoute,
   FaqRoute: FaqRoute,
   FavoritosRoute: FavoritosRoute,
@@ -1535,6 +1607,7 @@ const rootRouteChildren: RootRouteChildren = {
   TiposDeCartaRoute: TiposDeCartaRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   VideogamesRoute: VideogamesRoute,
+  BaralhoTokenRoute: BaralhoTokenRoute,
   CartaSlugRoute: CartaSlugRoute,
   ColecaoSlugRoute: ColecaoSlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
