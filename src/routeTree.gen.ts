@@ -44,6 +44,7 @@ import { Route as PayOrderIdRouteImport } from './routes/pay.$orderId'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as ListaDesejosTokenRouteImport } from './routes/lista-desejos.$token'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as DeckBuilderDeckIdRouteImport } from './routes/deck-builder.$deckId'
 import { Route as ColecaoSlugRouteImport } from './routes/colecao.$slug'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as CartaSlugRouteImport } from './routes/carta.$slug'
@@ -256,6 +257,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeckBuilderDeckIdRoute = DeckBuilderDeckIdRouteImport.update({
+  id: '/$deckId',
+  path: '/$deckId',
+  getParentRoute: () => DeckBuilderRoute,
+} as any)
 const ColecaoSlugRoute = ColecaoSlugRouteImport.update({
   id: '/colecao/$slug',
   path: '/colecao/$slug',
@@ -460,7 +466,7 @@ export interface FileRoutesByFullPath {
   '/colecoes': typeof ColecoesRoute
   '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
-  '/deck-builder': typeof DeckBuilderRoute
+  '/deck-builder': typeof DeckBuilderRouteWithChildren
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
@@ -495,6 +501,7 @@ export interface FileRoutesByFullPath {
   '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
+  '/deck-builder/$deckId': typeof DeckBuilderDeckIdRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/lista-desejos/$token': typeof ListaDesejosTokenRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
@@ -533,7 +540,7 @@ export interface FileRoutesByTo {
   '/colecoes': typeof ColecoesRoute
   '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
-  '/deck-builder': typeof DeckBuilderRoute
+  '/deck-builder': typeof DeckBuilderRouteWithChildren
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
@@ -565,6 +572,7 @@ export interface FileRoutesByTo {
   '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
+  '/deck-builder/$deckId': typeof DeckBuilderDeckIdRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/lista-desejos/$token': typeof ListaDesejosTokenRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
@@ -604,7 +612,7 @@ export interface FileRoutesById {
   '/colecoes': typeof ColecoesRoute
   '/comparador': typeof ComparadorRoute
   '/conta': typeof ContaRoute
-  '/deck-builder': typeof DeckBuilderRoute
+  '/deck-builder': typeof DeckBuilderRouteWithChildren
   '/envios': typeof EnviosRoute
   '/faq': typeof FaqRoute
   '/favoritos': typeof FavoritosRoute
@@ -639,6 +647,7 @@ export interface FileRoutesById {
   '/carta/$slug': typeof CartaSlugRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
+  '/deck-builder/$deckId': typeof DeckBuilderDeckIdRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/lista-desejos/$token': typeof ListaDesejosTokenRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
@@ -714,6 +723,7 @@ export interface FileRouteTypes {
     | '/carta/$slug'
     | '/checkout/return'
     | '/colecao/$slug'
+    | '/deck-builder/$deckId'
     | '/email/unsubscribe'
     | '/lista-desejos/$token'
     | '/orders/$orderId'
@@ -784,6 +794,7 @@ export interface FileRouteTypes {
     | '/carta/$slug'
     | '/checkout/return'
     | '/colecao/$slug'
+    | '/deck-builder/$deckId'
     | '/email/unsubscribe'
     | '/lista-desejos/$token'
     | '/orders/$orderId'
@@ -857,6 +868,7 @@ export interface FileRouteTypes {
     | '/carta/$slug'
     | '/checkout/return'
     | '/colecao/$slug'
+    | '/deck-builder/$deckId'
     | '/email/unsubscribe'
     | '/lista-desejos/$token'
     | '/orders/$orderId'
@@ -896,7 +908,7 @@ export interface RootRouteChildren {
   ColecoesRoute: typeof ColecoesRoute
   ComparadorRoute: typeof ComparadorRoute
   ContaRoute: typeof ContaRoute
-  DeckBuilderRoute: typeof DeckBuilderRoute
+  DeckBuilderRoute: typeof DeckBuilderRouteWithChildren
   EnviosRoute: typeof EnviosRoute
   FaqRoute: typeof FaqRoute
   FavoritosRoute: typeof FavoritosRoute
@@ -1181,6 +1193,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/email/unsubscribe'
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/deck-builder/$deckId': {
+      id: '/deck-builder/$deckId'
+      path: '/$deckId'
+      fullPath: '/deck-builder/$deckId'
+      preLoaderRoute: typeof DeckBuilderDeckIdRouteImport
+      parentRoute: typeof DeckBuilderRoute
     }
     '/colecao/$slug': {
       id: '/colecao/$slug'
@@ -1491,6 +1510,18 @@ const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
   CheckoutRouteChildren,
 )
 
+interface DeckBuilderRouteChildren {
+  DeckBuilderDeckIdRoute: typeof DeckBuilderDeckIdRoute
+}
+
+const DeckBuilderRouteChildren: DeckBuilderRouteChildren = {
+  DeckBuilderDeckIdRoute: DeckBuilderDeckIdRoute,
+}
+
+const DeckBuilderRouteWithChildren = DeckBuilderRoute._addFileChildren(
+  DeckBuilderRouteChildren,
+)
+
 interface OrdersRouteChildren {
   OrdersOrderIdRoute: typeof OrdersOrderIdRoute
   OrdersIndexRoute: typeof OrdersIndexRoute
@@ -1540,7 +1571,7 @@ const rootRouteChildren: RootRouteChildren = {
   ColecoesRoute: ColecoesRoute,
   ComparadorRoute: ComparadorRoute,
   ContaRoute: ContaRoute,
-  DeckBuilderRoute: DeckBuilderRoute,
+  DeckBuilderRoute: DeckBuilderRouteWithChildren,
   EnviosRoute: EnviosRoute,
   FaqRoute: FaqRoute,
   FavoritosRoute: FavoritosRoute,
