@@ -274,9 +274,29 @@ function DeckEditor() {
         <Button asChild variant="ghost" size="sm">
           <Link to="/deck-builder"><ArrowLeft className="h-4 w-4 mr-1" /> Meus decks</Link>
         </Button>
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={addMissingToCart} disabled={deck.cards.length === 0}>
-            <ShoppingCart className="h-4 w-4 mr-1" /> Adicionar faltantes ao carrinho
+        <div className="flex gap-2 flex-wrap">
+          <Dialog open={importOpen} onOpenChange={setImportOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm"><Upload className="h-4 w-4 mr-1" /> Importar</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Importar deck (texto)</DialogTitle></DialogHeader>
+              <p className="text-xs text-muted-foreground">Cole uma linha por carta, ex.: <code>4 Pikachu SVI 50</code>. Cabeçalhos como "Pokémon:" são ignorados.</p>
+              <Textarea rows={12} value={importText} onChange={(e) => setImportText(e.target.value)} placeholder="4 Pikachu SVI 50&#10;2 Professor's Research SVI 189&#10;..." />
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setImportOpen(false)}>Cancelar</Button>
+                <Button onClick={runImport} disabled={importing}>{importing ? "Importando…" : "Importar"}</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Button variant="outline" size="sm" onClick={exportTxt} disabled={deck.cards.length === 0}>
+            <Download className="h-4 w-4 mr-1" /> Exportar
+          </Button>
+          <Button variant="outline" size="sm" onClick={onDuplicate}>
+            <Copy className="h-4 w-4 mr-1" /> Duplicar
+          </Button>
+          <Button variant="secondary" size="sm" onClick={addMissingToCart} disabled={deck.cards.length === 0}>
+            <ShoppingCart className="h-4 w-4 mr-1" /> Faltantes ao carrinho
           </Button>
         </div>
       </div>
