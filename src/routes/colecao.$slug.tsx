@@ -7,8 +7,10 @@ import { CardModal } from "@/components/catalog/CardModal";
 import { collectionSlug } from "@/lib/slug";
 import { getCollectionDescription } from "@/data/collectionDescriptions";
 import { SiteFooter } from "@/components/SiteFooter";
+import { CollectionCompleteWidget } from "@/components/catalog/CollectionCompleteWidget";
 import type { Card } from "@/data/cards";
 import logoUrl from "@/assets/logo.webp";
+
 
 export const Route = createFileRoute("/colecao/$slug")({
   loader: async ({ params }) => {
