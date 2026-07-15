@@ -202,6 +202,38 @@ export type Database = {
           },
         ]
       }
+      card_price_history: {
+        Row: {
+          card_id: string
+          id: string
+          price_cents: number
+          recorded_at: string
+          source: string
+        }
+        Insert: {
+          card_id: string
+          id?: string
+          price_cents: number
+          recorded_at?: string
+          source?: string
+        }
+        Update: {
+          card_id?: string
+          id?: string
+          price_cents?: number
+          recorded_at?: string
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_price_history_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       card_price_watch: {
         Row: {
           card_id: string

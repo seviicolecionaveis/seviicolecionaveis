@@ -1,29 +1,81 @@
-## Problema
+## Escopo
 
-Ao enviar e-mails pelo compositor manual, os metadados (`subject`, `body_html`, `from_email`, `batch_id`) só são gravados na linha inicial `status='pending'` do `email_send_log`. O processador da fila insere depois uma nova linha `status='sent'` (mesmo `message_id`) **sem** esses campos.
+Implementar as 5 features em ordem de dependência, cada uma isolada para poder revisar/pausar entre elas.
 
-A dedup em `getEmailLogs` mantém apenas a linha mais recente por `message_id` — que é a `sent`, sem `body_html`. Resultado: a pré-visualização sempre mostra "Corpo do e-mail não disponível (envio antigo)", inclusive para envios novos.
+---
 
-## Correção
+### 1. Bundle "Complete a coleção" (item 2)
 
-Alterar a dedup em `src/utils/emailLogs.functions.ts` para **mesclar** as linhas com o mesmo `message_id` em vez de descartar:
+**Como funciona pro cliente:**
+- Na página de cada coleção (`/colecao/$slug`), aparece um card no topo: "Você tem X de Y cartas desta coleção. Complete agora com R$ ZZ,ZZ (10% off)."
+- Botão adiciona todas as cartas faltantes em estoque ao carrinho de uma vez, aplicando desconto automático.
 
-- Manter `status` / `error_message` / `created_at` da linha mais recente (comportamento atual — reflete o estado atual do envio).
-- Fazer coalesce de `subject`, `body_html`, `from_email`, `batch_id` a partir de qualquer linha do mesmo `message_id` (a mais antiga, `pending`, contém esses campos).
+**Backend:**
+- Nova tabela `collection_bundles` (opcional — se quiser controle manual do desconto por coleção; caso contrário aplicar % fixo).
+- Server function `getCollectionCompletion({ collectionSlug })` que retorna: cartas do cliente (via `orders`), cartas faltantes em estoque, preço total e preço com desconto.
+- Cupom automático interno (não visível) aplicado no checkout quando o bundle é usado.
 
-Nenhuma alteração de schema, backend de envio ou UI. Apenas a lógica de merge no server function.
+**UI:** Novo componente `CollectionCompletionCard` em `src/components/catalog/`.
 
-### Detalhes técnicos
+---
 
-Substituir o bloco:
+### 2. Wishlist compartilhável (item 5)
 
-```ts
-const seen = new Map<string, EmailLogRow>();
-for (const r of rows) {
-  if (!seen.has(key)) seen.set(key, r);
-}
-```
+- Adicionar coluna `share_token` (uuid, único) na tabela `wishlist` ou criar tabela `wishlist_shares` (user_id, token, created_at).
+- Nova rota pública `/lista/$token` — mostra a wishlist do usuário sem exigir login.
+- Botão "Compartilhar minha lista" na aba de favoritos (`/favoritos`) que copia o link.
+- Meta OG dinâmico (nome do usuário + qtd cartas) pra ficar bonito no WhatsApp.
+- RLS: qualquer um pode ler wishlist pelo token; só o dono edita.
 
-por um merge que preenche campos faltantes a partir das demais linhas do mesmo `message_id` (rows já vem em ordem `created_at desc`, então a primeira ocupa status/erro/data; as demais só preenchem os campos ainda vazios).
+---
 
-Envios antigos (anteriores à migração que adicionou as colunas) continuarão sem `body_html` — a mensagem "envio antigo" segue correta apenas para eles.
+### 3. Deck builder (item 6)
+
+**Escopo mínimo (v1):**
+- Nova rota `/deck-builder` (autenticada).
+- Cliente monta um deck de até 60 cartas (regra do TCG) escolhendo do catálogo.
+- Persistência em nova tabela `decks` (id, user_id, name, format, created_at, updated_at) e `deck_cards` (deck_id, card_id, quantity).
+- Exibe: total de cartas, distribuição por tipo (usa `pokemon_type`/`category`), custo pra comprar as que faltam no estoque da loja.
+- Botão "Adicionar faltantes ao carrinho".
+- Compartilhamento por link público (mesma lógica da wishlist).
+
+**Não incluído no v1:** validação de regras oficiais (limite de 4 por carta com mesmo nome, etc.) — pode virar v2.
+
+---
+
+### 4. Histórico público de preço (item 7)
+
+- Já temos `card_price_watch` com histórico. Criar rota pública `/carta/$slug/preco` (ou seção dentro de `/carta/$slug`) com:
+  - Gráfico de linha (recharts, já instalado) mostrando `price_cents` ao longo do tempo.
+  - Preço atual, mínimo histórico, máximo histórico, variação 30d.
+  - Comparação: preço na Sevii vs preço no Liga Pokémon (via `card_prices`).
+- Server function pública que retorna apenas dados não sensíveis.
+- SEO: meta description dinâmica "Histórico de preço da carta X — R$ Y hoje".
+
+---
+
+### 5. PWA instalável (item 10)
+
+- Apenas manifest-only (não offline): "Adicionar à tela inicial" no celular.
+- Criar `public/manifest.webmanifest` com nome, ícones, theme color da marca (roxo Sevii), `display: standalone`.
+- Adicionar `<link rel="manifest">` e `<meta name="theme-color">` em `src/routes/__root.tsx`.
+- Gerar ícones (192x192, 512x512, apple-touch-icon 180x180) via imagegen com logo Sevii.
+- **Não** adicionar service worker (push notifications já usa um separado — não mexo nele).
+
+---
+
+## Ordem de execução
+
+Vou implementar **1 → 2 → 4 → 5 → 3** (deixando o deck builder por último por ser o mais complexo). Cada etapa termina com um checkpoint pra você testar antes da próxima.
+
+## Alterações no banco (resumo)
+
+- `wishlist`: adicionar `share_token uuid unique`
+- `decks`, `deck_cards`: novas tabelas com RLS + GRANTs
+- (Opcional) `collection_bundles`: se quiser desconto configurável por coleção
+
+## Estimativa de arquivos
+
+~15-20 arquivos novos, ~5 editados, 3 migrations.
+
+Posso começar?
