@@ -8,6 +8,7 @@ import { collectionSlug } from "@/lib/slug";
 import { getCollectionDescription } from "@/data/collectionDescriptions";
 import { SiteFooter } from "@/components/SiteFooter";
 import { CollectionCompleteWidget } from "@/components/catalog/CollectionCompleteWidget";
+import { useOwnedCollectionKeys } from "@/hooks/useOwnedCollectionKeys";
 import type { Card } from "@/data/cards";
 import logoUrl from "@/assets/logo.webp";
 
@@ -75,15 +76,21 @@ function CollectionPage() {
   const stats = useCardStats();
   const nav = useNavigate();
   const [active, setActive] = useState<Card | null>(null);
+  const [onlyMissing, setOnlyMissing] = useState(false);
 
   const collectionName = useMemo(
     () => cards.find((c) => collectionSlug(c.collection) === slug)?.collection ?? null,
     [cards, slug],
   );
 
+  const { ownedKeys, isSignedIn } = useOwnedCollectionKeys(collectionName);
+
   const list = useMemo(() => {
     const filtered = cards.filter((c) => collectionSlug(c.collection) === slug);
-    return [...filtered].sort((a, b) => {
+    const withMissing = onlyMissing && isSignedIn
+      ? filtered.filter((c) => !ownedKeys.has(c.id))
+      : filtered;
+    return [...withMissing].sort((a, b) => {
       const va = stats.views.get(a.id) ?? 0;
       const vb = stats.views.get(b.id) ?? 0;
       if (vb !== va) return vb - va;
@@ -91,7 +98,7 @@ function CollectionPage() {
       const numB = parseInt(b.number) || 0;
       return numA - numB;
     });
-  }, [cards, slug, stats]);
+  }, [cards, slug, stats, onlyMissing, isSignedIn, ownedKeys]);
 
   if (!loading && !collectionName) {
     return (
@@ -142,8 +149,27 @@ function CollectionPage() {
           <CollectionCompleteWidget collection={collectionName} cards={list} />
         )}
 
+        {!loading && collectionName && list.length > 0 && (
+          <CollectionCompleteWidget collection={collectionName} cards={cards.filter((c) => collectionSlug(c.collection) === slug)} />
+        )}
+
+        {isSignedIn && (
+          <div className="mb-4 flex items-center gap-2">
+            <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold uppercase tracking-widest">
+              <input
+                type="checkbox"
+                checked={onlyMissing}
+                onChange={(e) => setOnlyMissing(e.target.checked)}
+                className="h-4 w-4 rounded border-border"
+              />
+              Mostrar só faltantes
+            </label>
+          </div>
+        )}
+
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
+
 
         ) : (
           <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 xl:grid-cols-4">
