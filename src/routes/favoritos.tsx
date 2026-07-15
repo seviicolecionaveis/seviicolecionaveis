@@ -1,11 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useCardsCatalog } from "@/hooks/useCardsCatalog";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useAuth } from "@/hooks/useAuth";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
 import type { Card } from "@/data/cards";
+import { getMyShareToken, createShareToken, revokeShareToken } from "@/lib/wishlist-share.functions";
+import { Share2, Copy, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/favoritos")({
