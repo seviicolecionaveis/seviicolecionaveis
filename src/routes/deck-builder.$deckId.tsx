@@ -9,6 +9,8 @@ import {
   setDeckCardQuantity,
   removeDeckCard,
   searchCardsForDeck,
+  duplicateDeck,
+  bulkImportToDeck,
   type DeckDetail,
   type SearchResult,
 } from "@/lib/decks.functions";
@@ -18,8 +20,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card as UICard, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Minus, Plus, Trash2, Search, ArrowLeft, Copy, ShoppingCart, Share2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Minus, Plus, Trash2, Search, ArrowLeft, Copy, ShoppingCart, Share2, Upload, Download, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+
+const BASIC_ENERGIES = new Set(["grass energy","fire energy","water energy","lightning energy","psychic energy","fighting energy","darkness energy","metal energy","fairy energy","energia básica"]);
 
 export const Route = createFileRoute("/deck-builder/$deckId")({
   head: () => ({
@@ -48,6 +53,11 @@ function DeckEditor() {
   const setQty = useServerFn(setDeckCardQuantity);
   const removeCard = useServerFn(removeDeckCard);
   const search = useServerFn(searchCardsForDeck);
+  const dup = useServerFn(duplicateDeck);
+  const bulkImport = useServerFn(bulkImportToDeck);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [importing, setImporting] = useState(false);
 
   const [deck, setDeck] = useState<DeckDetail | null>(null);
   const [loading, setLoading] = useState(true);
