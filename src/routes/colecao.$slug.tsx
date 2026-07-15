@@ -138,8 +138,13 @@ function CollectionPage() {
           )}
         </div>
 
+        {!loading && collectionName && list.length > 0 && (
+          <CollectionCompleteWidget collection={collectionName} cards={list} />
+        )}
+
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
+
         ) : (
           <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 xl:grid-cols-4">
             {list.map((c) => (
