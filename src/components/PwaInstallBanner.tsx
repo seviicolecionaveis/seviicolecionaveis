@@ -49,7 +49,8 @@ export function PwaInstallBanner() {
 
   const onDismiss = () => {
     setVisible(false);
-    dismiss();
+    setPermanentlyDismissed("pwa-install", true);
+    setHidden(true);
   };
 
   return (
