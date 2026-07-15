@@ -41,7 +41,7 @@ function formatBRL(cents: number | null | undefined) {
 }
 
 function PublicDeckPage() {
-  const { deck } = Route.useLoaderData();
+  const { deck } = Route.useLoaderData() as { deck: PublicDeck };
   const total = deck.cards.reduce((s, dc) => s + dc.quantity, 0);
   const priceCents = deck.cards.reduce(
     (s, dc) => s + (dc.card?.base_price_cents ?? 0) * dc.quantity,
