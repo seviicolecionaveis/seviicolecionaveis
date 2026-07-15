@@ -2,6 +2,9 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { getSharedWishlist, type SharedWishlistCard } from "@/lib/wishlist-share.functions";
 import logoUrl from "@/assets/logo.webp";
 import { cardSlug } from "@/lib/slug";
+import { useCart } from "@/hooks/useCart";
+import { toast } from "sonner";
+import { ShoppingCart } from "lucide-react";
 
 export const Route = createFileRoute("/lista-desejos/$token")({
   loader: async ({ params }) => {
