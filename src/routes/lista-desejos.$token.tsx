@@ -42,7 +42,8 @@ export const Route = createFileRoute("/lista-desejos/$token")({
 });
 
 function SharedWishlistPage() {
-  const { ownerName, cards } = Route.useLoaderData();
+  const data = Route.useLoaderData() as { ownerName: string | null; cards: SharedWishlistCard[] };
+  const { ownerName, cards } = data;
   const title = ownerName ? `Lista de desejos de ${ownerName}` : "Lista de desejos compartilhada";
 
   return (
