@@ -102,19 +102,30 @@ function DeckEditor() {
   }, [q, search]);
 
   const stats = useMemo(() => {
-    if (!deck) return { total: 0, byCategory: {} as Record<string, number>, priceCents: 0, missing: 0 };
+    if (!deck) return { total: 0, byCategory: {} as Record<string, number>, priceCents: 0, missing: 0, byName: [] as Array<{ name: string; qty: number }>, legalityIssues: [] as string[] };
     let total = 0;
     let priceCents = 0;
     let missing = 0;
     const byCategory: Record<string, number> = {};
+    const byNameMap: Record<string, number> = {};
     for (const dc of deck.cards) {
       total += dc.quantity;
       const cat = dc.card?.category ?? "?";
       byCategory[cat] = (byCategory[cat] ?? 0) + dc.quantity;
       if (dc.card?.base_price_cents != null) priceCents += dc.card.base_price_cents * dc.quantity;
       if (!dc.card || dc.card.stock < dc.quantity) missing += Math.max(0, dc.quantity - (dc.card?.stock ?? 0));
+      const nm = (dc.card?.name ?? "?").trim();
+      byNameMap[nm] = (byNameMap[nm] ?? 0) + dc.quantity;
     }
-    return { total, byCategory, priceCents, missing };
+    const byName = Object.entries(byNameMap).map(([name, qty]) => ({ name, qty })).sort((a, b) => b.qty - a.qty);
+    const legalityIssues: string[] = [];
+    if (total !== 60) legalityIssues.push(`O deck tem ${total} cartas (esperado: 60).`);
+    for (const { name, qty } of byName) {
+      if (qty > 4 && !BASIC_ENERGIES.has(name.toLowerCase())) {
+        legalityIssues.push(`"${name}" tem ${qty} cópias (máx 4).`);
+      }
+    }
+    return { total, byCategory, priceCents, missing, byName, legalityIssues };
   }, [deck]);
 
   const onAdd = async (r: SearchResult) => {
