@@ -2,12 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
-import { listMyDecks, createDeck, deleteDeck, type DeckSummary } from "@/lib/decks.functions";
+import { listMyDecks, createDeck, deleteDeck, duplicateDeck, type DeckSummary } from "@/lib/decks.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card as UICard, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, ExternalLink, Layers } from "lucide-react";
+import { Plus, Trash2, ExternalLink, Layers, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/deck-builder")({
@@ -28,6 +28,7 @@ function DeckBuilderList() {
   const list = useServerFn(listMyDecks);
   const create = useServerFn(createDeck);
   const del = useServerFn(deleteDeck);
+  const dup = useServerFn(duplicateDeck);
 
   const [decks, setDecks] = useState<DeckSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,6 +75,16 @@ function DeckBuilderList() {
     await del({ data: { id } });
     toast.success("Deck apagado");
     reload();
+  };
+
+  const onDuplicate = async (id: string) => {
+    try {
+      const r = await dup({ data: { id } });
+      toast.success("Deck duplicado");
+      nav({ to: "/deck-builder/$deckId", params: { deckId: r.id } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao duplicar");
+    }
   };
 
   if (authLoading || !user) return null;
