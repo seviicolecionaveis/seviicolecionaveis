@@ -10,7 +10,11 @@ type BeforeInstallPromptEvent = Event & {
 export function PwaInstallBanner() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
-  const { hidden, dismiss } = usePopupPreference("pwa-install");
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    setHidden(getPermanentlyDismissed("pwa-install"));
+  }, []);
 
   useEffect(() => {
     if (hidden) return;
