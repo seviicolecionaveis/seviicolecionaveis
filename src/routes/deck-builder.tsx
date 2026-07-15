@@ -143,6 +143,9 @@ function DeckBuilderList() {
                         </Link>
                       </Button>
                     )}
+                    <Button size="icon" variant="ghost" onClick={() => onDuplicate(d.id)} title="Duplicar">
+                      <Copy className="h-4 w-4" />
+                    </Button>
                     <Button size="icon" variant="ghost" onClick={() => onDelete(d.id)} title="Apagar">
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
