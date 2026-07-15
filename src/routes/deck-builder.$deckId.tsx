@@ -422,6 +422,34 @@ function DeckEditor() {
           )}
         </CardContent>
       </UICard>
+
+      {stats.total > 0 && (
+        <UICard>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <AlertTriangle className={`h-4 w-4 ${stats.legalityIssues.length ? "text-destructive" : "text-emerald-600"}`} />
+              Legalidade & estatísticas
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            {stats.legalityIssues.length === 0 ? (
+              <p className="text-emerald-700 dark:text-emerald-500">Deck válido: 60 cartas, no máximo 4 cópias por nome (energias básicas ilimitadas).</p>
+            ) : (
+              <ul className="list-disc pl-5 text-destructive space-y-1">
+                {stats.legalityIssues.map((m, i) => <li key={i}>{m}</li>)}
+              </ul>
+            )}
+            <div>
+              <div className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-1">Distribuição</div>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(stats.byCategory).map(([k, v]) => (
+                  <span key={k} className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs">{k}: <strong className="ml-1">{v}</strong></span>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </UICard>
+      )}
     </div>
   );
 }
