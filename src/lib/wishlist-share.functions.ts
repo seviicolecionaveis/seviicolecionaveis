@@ -97,7 +97,7 @@ export const getSharedWishlist = createServerFn({ method: "GET" })
 
     const { data: cards } = await supabaseAdmin
       .from("cards")
-      .select("id, name, collection, card_number, image, base_price_cents, stock")
+      .select("id, name, collection, card_number, image, base_price_cents, stock, finish, language, condition")
       .in("id", cardIds);
 
     return {
