@@ -11,6 +11,7 @@ import { Plus, Check, Heart, Share2, ZoomIn, ZoomOut, Bell } from "lucide-react"
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { StockAlertDialog } from "@/components/StockAlertDialog";
+import { PriceHistoryChart } from "@/components/catalog/PriceHistoryChart";
 
 // Para cartas Pokémon, o acabamento "Ímã" é um produto interno disponível
 // automaticamente: R$10 se a carta possui Foil, senão R$9 se possui Normal.
