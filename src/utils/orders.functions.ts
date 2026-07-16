@@ -26,7 +26,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
   )
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
-    const { isAdmin, getOrderById, updateOrder, restoreStockIfPaid, deleteStockReservations } =
+    const { isAdmin, getOrderById, updateOrder, deleteStockReservations } =
       await import("@/lib/order-cancellation.server");
     const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
