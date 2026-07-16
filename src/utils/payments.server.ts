@@ -771,6 +771,7 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
   }));
   const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
   if (itemsErr) throw new Error(itemsErr.message);
+  await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
   await sendOrderReceivedEmail(order.id);
 
   // Vale-presente cobre o pedido inteiro: marca pago direto, sem gateway.
@@ -933,6 +934,7 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
   }));
   const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
   if (itemsErr) throw new Error(itemsErr.message);
+  await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
   await sendOrderReceivedEmail(order.id);
 
   // Vale-presente cobre o pedido inteiro: marca pago direto, sem Pix.
@@ -1118,6 +1120,7 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
   }));
   const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
   if (itemsErr) throw new Error(itemsErr.message);
+  await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
   await sendOrderReceivedEmail(order.id);
 
   // Vale-presente cobre o pedido inteiro: marca pago direto, sem cobrança no cartão.
@@ -1468,6 +1471,7 @@ export async function createAdminTestOrderServer(data: AdminTestInput, userId: s
   }));
   const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
   if (itemsErr) throw new Error(itemsErr.message);
+  await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
 
   await sendOrderReceivedEmail(order.id);
 
