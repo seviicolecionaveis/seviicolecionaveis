@@ -61,7 +61,8 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
     }
 
     if (statusChanged && data.status === "cancelled") {
-      await restoreStockIfPaid(order.id, order.status);
+      // Cancelamento manual pelo admin não devolve estoque — decisão do negócio.
+      // Estoque só volta automaticamente quando o cliente não confirma pagamento (cron auto-cancel-unpaid).
       await deleteStockReservations(order.id);
     }
 
