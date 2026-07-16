@@ -199,7 +199,7 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
-    const { isAdmin, restoreStockIfPaid, getOrderById, updateOrder, deleteStockReservations } =
+    const { isAdmin, getOrderById, updateOrder, deleteStockReservations } =
       await import("@/lib/order-cancellation.server");
     const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
@@ -209,7 +209,7 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
     );
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
     if (order.status === "cancelled") return { ok: true };
-    await restoreStockIfPaid(order.id, order.status);
+    // Cancelamento manual pelo admin não devolve estoque.
     await deleteStockReservations(order.id);
     await updateOrder(order.id, { status: "cancelled" });
     if (order.email) {
