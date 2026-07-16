@@ -703,6 +703,19 @@ function AdminCardsManagePage() {
           )}
 
           <div className="mb-4 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-3 py-2">
+            <span className="text-xs font-bold uppercase tracking-wider">Coleção:</span>
+            <select
+              value={collectionFilter}
+              onChange={(e) => setCollectionFilter(e.target.value)}
+              className="rounded border border-border bg-background px-2 py-1 text-xs"
+            >
+              <option value="">Todas ({rows.length})</option>
+              {collections.map((c) => {
+                const count = rows.filter((r) => r.collection === c).length;
+                if (count === 0) return null;
+                return <option key={c} value={c}>{c} ({count})</option>;
+              })}
+            </select>
 
             <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
               <input
@@ -714,9 +727,9 @@ function AdminCardsManagePage() {
               <span className="font-semibold">Sem preço</span>
               <span className="text-muted-foreground">({rows.filter((r) => r.base_price_cents == null).length})</span>
             </label>
-            {noPriceOnly && (
+            {(noPriceOnly || collectionFilter) && (
               <button
-                onClick={() => setNoPriceOnly(false)}
+                onClick={() => { setNoPriceOnly(false); setCollectionFilter(""); }}
                 className="ml-auto text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
               >
                 Limpar
