@@ -103,6 +103,7 @@ function AdminCardsManagePage() {
   const [pokemonTypeFilter, setPokemonTypeFilter] = useState<PokemonType[]>([]);
   const [trainerSubFilter, setTrainerSubFilter] = useState<TrainerSubcategory[]>([]);
   const [noPriceOnly, setNoPriceOnly] = useState(false);
+  const [collectionFilter, setCollectionFilter] = useState<string>("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -174,6 +175,7 @@ function AdminCardsManagePage() {
       if (pokemonTypeFilter.length > 0 && (!r.pokemon_type || !pokemonTypeFilter.includes(r.pokemon_type))) return false;
       if (trainerSubFilter.length > 0 && (r.category !== "Treinador" || !r.trainer_subcategory || !trainerSubFilter.includes(r.trainer_subcategory))) return false;
       if (noPriceOnly && r.base_price_cents != null) return false;
+      if (collectionFilter && r.collection !== collectionFilter) return false;
       if (!q) return true;
       return (
         r.name.toLowerCase().includes(q) ||
@@ -181,9 +183,9 @@ function AdminCardsManagePage() {
         r.card_number.toLowerCase().includes(q)
       );
     });
-  }, [rows, search, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly]);
+  }, [rows, search, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly, collectionFilter]);
 
-  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly]);
+  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly, collectionFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredAll.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -701,6 +703,19 @@ function AdminCardsManagePage() {
           )}
 
           <div className="mb-4 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-3 py-2">
+            <span className="text-xs font-bold uppercase tracking-wider">Coleção:</span>
+            <select
+              value={collectionFilter}
+              onChange={(e) => setCollectionFilter(e.target.value)}
+              className="rounded border border-border bg-background px-2 py-1 text-xs"
+            >
+              <option value="">Todas ({rows.length})</option>
+              {collections.map((c) => {
+                const count = rows.filter((r) => r.collection === c).length;
+                if (count === 0) return null;
+                return <option key={c} value={c}>{c} ({count})</option>;
+              })}
+            </select>
 
             <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
               <input
@@ -712,9 +727,9 @@ function AdminCardsManagePage() {
               <span className="font-semibold">Sem preço</span>
               <span className="text-muted-foreground">({rows.filter((r) => r.base_price_cents == null).length})</span>
             </label>
-            {noPriceOnly && (
+            {(noPriceOnly || collectionFilter) && (
               <button
-                onClick={() => setNoPriceOnly(false)}
+                onClick={() => { setNoPriceOnly(false); setCollectionFilter(""); }}
                 className="ml-auto text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
               >
                 Limpar
