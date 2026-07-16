@@ -103,6 +103,7 @@ function AdminCardsManagePage() {
   const [pokemonTypeFilter, setPokemonTypeFilter] = useState<PokemonType[]>([]);
   const [trainerSubFilter, setTrainerSubFilter] = useState<TrainerSubcategory[]>([]);
   const [noPriceOnly, setNoPriceOnly] = useState(false);
+  const [collectionFilter, setCollectionFilter] = useState<string>("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
