@@ -26,7 +26,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
   )
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
-    const { isAdmin, getOrderById, updateOrder, restoreStockIfPaid, deleteStockReservations } =
+    const { isAdmin, getOrderById, updateOrder, deleteStockReservations } =
       await import("@/lib/order-cancellation.server");
     const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
@@ -61,7 +61,8 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
     }
 
     if (statusChanged && data.status === "cancelled") {
-      await restoreStockIfPaid(order.id, order.status);
+      // Cancelamento manual pelo admin não devolve estoque — decisão do negócio.
+      // Estoque só volta automaticamente quando o cliente não confirma pagamento (cron auto-cancel-unpaid).
       await deleteStockReservations(order.id);
     }
 
@@ -135,7 +136,7 @@ export const approveOrderCancellation = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
-    const { isAdmin, restoreStockIfPaid, getOrderById, updateOrder, deleteStockReservations } =
+    const { isAdmin, getOrderById, updateOrder, deleteStockReservations } =
       await import("@/lib/order-cancellation.server");
     const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
@@ -144,7 +145,7 @@ export const approveOrderCancellation = createServerFn({ method: "POST" })
       "id, status, pre_cancel_status, email, recipient_name",
     );
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
-    await restoreStockIfPaid(order.id, order.pre_cancel_status ?? "");
+    // Cancelamento manual pelo admin não devolve estoque.
     await deleteStockReservations(order.id);
     await updateOrder(order.id, { status: "cancelled" });
     if (order.email) {
@@ -198,7 +199,7 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
-    const { isAdmin, restoreStockIfPaid, getOrderById, updateOrder, deleteStockReservations } =
+    const { isAdmin, getOrderById, updateOrder, deleteStockReservations } =
       await import("@/lib/order-cancellation.server");
     const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
@@ -208,7 +209,7 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
     );
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
     if (order.status === "cancelled") return { ok: true };
-    await restoreStockIfPaid(order.id, order.status);
+    // Cancelamento manual pelo admin não devolve estoque.
     await deleteStockReservations(order.id);
     await updateOrder(order.id, { status: "cancelled" });
     if (order.email) {
@@ -285,33 +286,8 @@ export const adminPartialCancelItem = createServerFn({ method: "POST" })
     const ratio = Math.max(0, Math.min(1, 1 - discount / subtotal));
     const refundCents = Math.round(baseCents * ratio);
 
-    // Restaura estoque (mesma lógica do restoreStockIfPaid, mas por item)
-    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (item.card_id && UUID_RE.test(item.card_id)) {
-      const { data: card } = await supabaseAdmin
-        .from("cards")
-        .select("stock")
-        .eq("id", item.card_id)
-        .maybeSingle();
-      if (card) {
-        await supabaseAdmin
-          .from("cards")
-          .update({ stock: (card.stock ?? 0) + data.quantity })
-          .eq("id", item.card_id);
-      }
-    } else if (typeof item.card_id === "string" && item.card_id.startsWith("panel:")) {
-      const pid = item.card_id.slice("panel:".length);
-      if (UUID_RE.test(pid)) {
-        const { data: p } = await supabaseAdmin.from("panels").select("stock").eq("id", pid).maybeSingle();
-        if (p) await supabaseAdmin.from("panels").update({ stock: (p.stock ?? 0) + data.quantity }).eq("id", pid);
-      }
-    } else if (typeof item.card_id === "string" && item.card_id.startsWith("sealed:")) {
-      const sid = item.card_id.slice("sealed:".length);
-      if (UUID_RE.test(sid)) {
-        const { data: s } = await supabaseAdmin.from("sealed_products").select("stock").eq("id", sid).maybeSingle();
-        if (s) await supabaseAdmin.from("sealed_products").update({ stock: (s.stock ?? 0) + data.quantity }).eq("id", sid);
-      }
-    }
+    // Cancelamento manual pelo admin NÃO devolve estoque — decisão do negócio.
+    // Estoque só é devolvido automaticamente quando o cliente não confirma pagamento (cron auto-cancel-unpaid).
 
     // Processa o reembolso conforme método escolhido.
     let couponCode: string | null = null;
