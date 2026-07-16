@@ -175,6 +175,7 @@ function AdminCardsManagePage() {
       if (pokemonTypeFilter.length > 0 && (!r.pokemon_type || !pokemonTypeFilter.includes(r.pokemon_type))) return false;
       if (trainerSubFilter.length > 0 && (r.category !== "Treinador" || !r.trainer_subcategory || !trainerSubFilter.includes(r.trainer_subcategory))) return false;
       if (noPriceOnly && r.base_price_cents != null) return false;
+      if (collectionFilter && r.collection !== collectionFilter) return false;
       if (!q) return true;
       return (
         r.name.toLowerCase().includes(q) ||
@@ -182,9 +183,9 @@ function AdminCardsManagePage() {
         r.card_number.toLowerCase().includes(q)
       );
     });
-  }, [rows, search, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly]);
+  }, [rows, search, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly, collectionFilter]);
 
-  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly]);
+  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly, collectionFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredAll.length / pageSize));
   const currentPage = Math.min(page, totalPages);
