@@ -529,9 +529,41 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
   return resolved;
 }
 
+async function getActiveReservationsByCard(
+  cardIds: string[],
+  excludeOrderId?: string,
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (cardIds.length === 0) return map;
+  const nowIso = new Date().toISOString();
+  const { data } = await supabaseAdmin
+    .from("stock_reservations")
+    .select("card_id, quantity, order_id")
+    .in("card_id", cardIds)
+    .gt("expires_at", nowIso);
+  for (const r of data ?? []) {
+    if (excludeOrderId && r.order_id === excludeOrderId) continue;
+    map.set(r.card_id, (map.get(r.card_id) ?? 0) + (r.quantity ?? 0));
+  }
+  return map;
+}
+
 async function ensureAvailableStock(
   items: { cardId: string; quantity: number; name: string; finish: string }[],
+  opts?: { excludeOrderId?: string },
 ) {
+  const realCardIds = items
+    .filter(
+      (it) =>
+        !isVirtualItem(it) &&
+        !isPanelItem(it) &&
+        !isSealedItem(it) &&
+        !isAccessoryItem(it) &&
+        !isVideogameItem(it),
+    )
+    .map((it) => it.cardId);
+  const reservations = await getActiveReservationsByCard(realCardIds, opts?.excludeOrderId);
+
   for (const it of items) {
     if (isPanelItem(it)) {
       const panelId = it.cardId.slice("panel:".length);
@@ -600,13 +632,48 @@ async function ensureAvailableStock(
       .eq("id", it.cardId)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    const available = Number(data?.stock ?? 0);
+    const rawStock = Number(data?.stock ?? 0);
+    const reserved = reservations.get(it.cardId) ?? 0;
+    const available = Math.max(0, rawStock - reserved);
     if (available < it.quantity) {
       throw new Error(
         `Estoque insuficiente para "${it.name}". Disponível: ${available}, solicitado: ${it.quantity}.`,
       );
     }
   }
+}
+
+/**
+ * Reserva estoque para um pedido pendente. Impede que outro cliente compre
+ * a mesma unidade enquanto este pedido aguarda confirmação de pagamento.
+ * Reservas são ignoradas quando expiram e removidas ao pagar (markOrderPaid)
+ * ou cancelar (cancelOrder / order-cancellation).
+ */
+async function reserveStockForOrder(
+  orderId: string,
+  userId: string,
+  items: { cardId: string; quantity: number; finish: string }[],
+  expiresAt: Date,
+) {
+  const rows = items
+    .filter(
+      (i) =>
+        !isVirtualItem(i) &&
+        !isPanelItem(i) &&
+        !isSealedItem(i) &&
+        !isAccessoryItem(i) &&
+        !isVideogameItem(i),
+    )
+    .map((i) => ({
+      user_id: userId,
+      order_id: orderId,
+      card_id: i.cardId,
+      quantity: i.quantity,
+      expires_at: expiresAt.toISOString(),
+    }));
+  if (rows.length === 0) return;
+  const { error } = await supabaseAdmin.from("stock_reservations").insert(rows);
+  if (error) console.error("[reserveStockForOrder] insert falhou:", error);
 }
 
 
