@@ -7,8 +7,8 @@ export type CardCategory = "Pokémon" | "Treinador" | "Energia";
 
 export const CARD_CATEGORIES: CardCategory[] = ["Pokémon", "Treinador", "Energia"];
 
-export type TrainerSubcategory = "Apoiador" | "Item" | "Ferramenta Pokémon" | "Estádio";
-export const TRAINER_SUBCATEGORIES: TrainerSubcategory[] = ["Apoiador", "Item", "Ferramenta Pokémon", "Estádio"];
+export type TrainerSubcategory = "Apoiador" | "Item" | "Ferramenta Pokémon" | "Estádio" | "Ace Spec";
+export const TRAINER_SUBCATEGORIES: TrainerSubcategory[] = ["Apoiador", "Item", "Ferramenta Pokémon", "Estádio", "Ace Spec"];
 
 export type PokemonType =
   | "Água"
