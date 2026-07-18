@@ -1,0 +1,2 @@
+ALTER TABLE public.cards DROP CONSTRAINT IF EXISTS cards_trainer_subcategory_check;
+ALTER TABLE public.cards ADD CONSTRAINT cards_trainer_subcategory_check CHECK (trainer_subcategory IS NULL OR trainer_subcategory IN ('Apoiador','Item','Ferramenta Pokémon','Estádio','Ace Spec'));
