@@ -1076,7 +1076,7 @@ function HistoryPanel({ rows }: { rows: CardRow[] }) {
   const totalAdded = rows.filter((r) => {
     if (!r.created_at) return false;
     const d = new Date(r.created_at);
-    return Date.now() - d.getTime() < 24 * 60 * 60 * 1000;
+    return Date.now() - d.getTime() < 48 * 60 * 60 * 1000;
   }).length;
 
   return (
@@ -1091,7 +1091,7 @@ function HistoryPanel({ rows }: { rows: CardRow[] }) {
           <div>
             <h2 className="text-sm font-bold">Histórico de cartas & estoque</h2>
             <p className="text-[11px] text-muted-foreground">
-              {totalAdded > 0 ? `${totalAdded} cadastrada${totalAdded > 1 ? "s" : ""} nas últimas 24h · ` : ""}
+              {totalAdded > 0 ? `${totalAdded} cadastrada${totalAdded > 1 ? "s" : ""} nas últimas 48h · ` : ""}
               clique para {open ? "ocultar" : "ver cadastros e alterações de estoque"}
             </p>
           </div>
