@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Authenticated can read price watch" ON public.card_price_watch;
