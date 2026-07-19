@@ -1010,85 +1010,235 @@ function AdminCardsManagePage() {
   );
 }
 
-function RecentlyAddedPanel({ rows }: { rows: CardRow[] }) {
-  const [open, setOpen] = useState(true);
-  const [limit, setLimit] = useState(10);
+interface StockChange {
+  id: string;
+  card_id: string | null;
+  card_name: string;
+  collection: string;
+  card_number: string;
+  finish: string | null;
+  language: string | null;
+  condition: string | null;
+  previous_stock: number;
+  new_stock: number;
+  delta: number;
+  changed_by: string | null;
+  changed_at: string;
+}
+
+function HistoryPanel({ rows }: { rows: CardRow[] }) {
+  const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<"added" | "stock">("added");
+  const [limit, setLimit] = useState(25);
+  const [query, setQuery] = useState("");
+  const [deltaFilter, setDeltaFilter] = useState<"all" | "add" | "sub">("all");
+  const [changes, setChanges] = useState<StockChange[]>([]);
+  const [loadingChanges, setLoadingChanges] = useState(false);
+
   const recent = useMemo(() => {
+    const q = query.trim().toLowerCase();
     return [...rows]
       .filter((r) => r.created_at)
+      .filter((r) => !q || `${r.name} ${r.collection} ${r.card_number}`.toLowerCase().includes(q))
       .sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""))
       .slice(0, limit);
-  }, [rows, limit]);
+  }, [rows, limit, query]);
+
+  useEffect(() => {
+    if (!open || tab !== "stock") return;
+    let cancel = false;
+    setLoadingChanges(true);
+    supabase
+      .from("card_stock_changes")
+      .select("*")
+      .order("changed_at", { ascending: false })
+      .limit(500)
+      .then(({ data }) => {
+        if (cancel) return;
+        setChanges((data as StockChange[]) ?? []);
+        setLoadingChanges(false);
+      });
+    return () => { cancel = true; };
+  }, [open, tab]);
+
+  const filteredChanges = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return changes
+      .filter((c) => {
+        if (deltaFilter === "add" && c.delta <= 0) return false;
+        if (deltaFilter === "sub" && c.delta >= 0) return false;
+        if (q && !`${c.card_name} ${c.collection} ${c.card_number}`.toLowerCase().includes(q)) return false;
+        return true;
+      })
+      .slice(0, limit);
+  }, [changes, deltaFilter, query, limit]);
+
+  const totalAdded = rows.filter((r) => {
+    if (!r.created_at) return false;
+    const d = new Date(r.created_at);
+    return Date.now() - d.getTime() < 24 * 60 * 60 * 1000;
+  }).length;
 
   return (
-    <section className="rounded-lg border border-border bg-card p-6">
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <div>
-          <h2 className="text-lg font-bold">Adicionadas recentemente</h2>
-          <p className="text-xs text-muted-foreground">
-            Histórico das últimas cartas cadastradas — útil para evitar duplicar registros.
-          </p>
+    <section className="rounded-lg border border-border bg-card">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-secondary/40 transition-colors rounded-lg"
+      >
+        <div className="flex items-center gap-3">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-brand-gold/15 text-brand-gold text-sm">📋</span>
+          <div>
+            <h2 className="text-sm font-bold">Histórico de cartas & estoque</h2>
+            <p className="text-[11px] text-muted-foreground">
+              {totalAdded > 0 ? `${totalAdded} cadastrada${totalAdded > 1 ? "s" : ""} nas últimas 24h · ` : ""}
+              clique para {open ? "ocultar" : "ver cadastros e alterações de estoque"}
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <select
-            value={limit}
-            onChange={(e) => setLimit(parseInt(e.target.value))}
-            className="rounded border border-border bg-background px-2 py-1 text-xs"
-          >
-            <option value={10}>Últimas 10</option>
-            <option value={25}>Últimas 25</option>
-            <option value={50}>Últimas 50</option>
-            <option value={100}>Últimas 100</option>
-          </select>
-          <button
-            onClick={() => setOpen((v) => !v)}
-            className="rounded border border-border bg-background px-2 py-1 text-xs font-semibold hover:bg-secondary"
-          >
-            {open ? "Ocultar" : "Mostrar"}
-          </button>
-        </div>
-      </div>
+        <span className="text-xs text-muted-foreground">{open ? "▲" : "▼"}</span>
+      </button>
 
       {open && (
-        recent.length === 0 ? (
-          <p className="text-xs text-muted-foreground">Nenhuma carta com data de criação registrada ainda.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className="text-left text-muted-foreground">
-                <tr className="border-b border-border">
-                  <th className="py-2 pr-3 font-semibold">Data / hora</th>
-                  <th className="py-2 pr-3 font-semibold">Carta</th>
-                  <th className="py-2 pr-3 font-semibold">Coleção</th>
-                  <th className="py-2 pr-3 font-semibold">Variante</th>
-                  <th className="py-2 pr-3 font-semibold">Estoque</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recent.map((r) => {
-                  const dt = r.created_at ? new Date(r.created_at) : null;
-                  return (
-                    <tr key={r.id} className="border-b border-border/50 last:border-0">
-                      <td className="py-2 pr-3 whitespace-nowrap tabular-nums">
-                        {dt ? dt.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—"}
-                      </td>
-                      <td className="py-2 pr-3">
-                        <div className="font-semibold">{r.name}</div>
-                        <div className="text-muted-foreground">{r.card_number}</div>
-                      </td>
-                      <td className="py-2 pr-3">{r.collection}</td>
-                      <td className="py-2 pr-3 text-muted-foreground">
-                        {r.finish} · {r.language} · {r.condition ?? "NM"}
-                      </td>
-                      <td className="py-2 pr-3 tabular-nums">{r.stock}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        <div className="border-t border-border p-4 space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex rounded-md border border-border overflow-hidden text-xs">
+              <button
+                onClick={() => setTab("added")}
+                className={`px-3 py-1.5 font-semibold ${tab === "added" ? "bg-primary text-primary-foreground" : "bg-background hover:bg-secondary"}`}
+              >
+                Adicionadas
+              </button>
+              <button
+                onClick={() => setTab("stock")}
+                className={`px-3 py-1.5 font-semibold ${tab === "stock" ? "bg-primary text-primary-foreground" : "bg-background hover:bg-secondary"}`}
+              >
+                Alterações de estoque
+              </button>
+            </div>
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar por nome, coleção ou número..."
+              className="flex-1 min-w-[200px] rounded border border-border bg-background px-2 py-1.5 text-xs"
+            />
+            {tab === "stock" && (
+              <select
+                value={deltaFilter}
+                onChange={(e) => setDeltaFilter(e.target.value as "all" | "add" | "sub")}
+                className="rounded border border-border bg-background px-2 py-1.5 text-xs"
+              >
+                <option value="all">Todas</option>
+                <option value="add">Apenas adições (+)</option>
+                <option value="sub">Apenas subtrações (−)</option>
+              </select>
+            )}
+            <select
+              value={limit}
+              onChange={(e) => setLimit(parseInt(e.target.value))}
+              className="rounded border border-border bg-background px-2 py-1.5 text-xs"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={250}>250</option>
+            </select>
           </div>
-        )
+
+          {tab === "added" ? (
+            recent.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-2">Nenhuma carta encontrada.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="text-left text-muted-foreground">
+                    <tr className="border-b border-border">
+                      <th className="py-2 pr-3 font-semibold">Data / hora</th>
+                      <th className="py-2 pr-3 font-semibold">Carta</th>
+                      <th className="py-2 pr-3 font-semibold">Coleção</th>
+                      <th className="py-2 pr-3 font-semibold">Variante</th>
+                      <th className="py-2 pr-3 font-semibold">Estoque</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recent.map((r) => {
+                      const dt = r.created_at ? new Date(r.created_at) : null;
+                      return (
+                        <tr key={r.id} className="border-b border-border/50 last:border-0">
+                          <td className="py-2 pr-3 whitespace-nowrap tabular-nums">
+                            {dt ? dt.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—"}
+                          </td>
+                          <td className="py-2 pr-3">
+                            <div className="font-semibold">{r.name}</div>
+                            <div className="text-muted-foreground">{r.card_number}</div>
+                          </td>
+                          <td className="py-2 pr-3">{r.collection}</td>
+                          <td className="py-2 pr-3 text-muted-foreground">
+                            {r.finish} · {r.language} · {r.condition ?? "NM"}
+                          </td>
+                          <td className="py-2 pr-3 tabular-nums">{r.stock}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )
+          ) : loadingChanges ? (
+            <p className="text-xs text-muted-foreground py-2">Carregando histórico...</p>
+          ) : filteredChanges.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-2">Nenhuma alteração de estoque encontrada.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead className="text-left text-muted-foreground">
+                  <tr className="border-b border-border">
+                    <th className="py-2 pr-3 font-semibold">Data / hora</th>
+                    <th className="py-2 pr-3 font-semibold">Carta</th>
+                    <th className="py-2 pr-3 font-semibold">Coleção</th>
+                    <th className="py-2 pr-3 font-semibold">Variante</th>
+                    <th className="py-2 pr-3 font-semibold text-right">Antes</th>
+                    <th className="py-2 pr-3 font-semibold text-right">Depois</th>
+                    <th className="py-2 pr-3 font-semibold text-right">Δ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredChanges.map((c) => {
+                    const dt = new Date(c.changed_at);
+                    const positive = c.delta > 0;
+                    return (
+                      <tr key={c.id} className="border-b border-border/50 last:border-0">
+                        <td className="py-2 pr-3 whitespace-nowrap tabular-nums">
+                          {dt.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                        </td>
+                        <td className="py-2 pr-3">
+                          <div className="font-semibold">{c.card_name}</div>
+                          <div className="text-muted-foreground">{c.card_number}</div>
+                        </td>
+                        <td className="py-2 pr-3">{c.collection}</td>
+                        <td className="py-2 pr-3 text-muted-foreground">
+                          {c.finish ?? "—"} · {c.language ?? "—"} · {c.condition ?? "—"}
+                        </td>
+                        <td className="py-2 pr-3 tabular-nums text-right">{c.previous_stock}</td>
+                        <td className="py-2 pr-3 tabular-nums text-right">{c.new_stock}</td>
+                        <td className={`py-2 pr-3 tabular-nums text-right font-semibold ${positive ? "text-condition-mint" : "text-destructive"}`}>
+                          {positive ? "+" : ""}{c.delta}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Exibindo {filteredChanges.length} de {changes.length} alterações carregadas (últimas 500).
+              </p>
+            </div>
+          )}
+        </div>
       )}
     </section>
   );
 }
+
