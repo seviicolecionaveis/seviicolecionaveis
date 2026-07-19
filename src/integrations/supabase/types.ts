@@ -447,6 +447,57 @@ export type Database = {
         }
         Relationships: []
       }
+      card_stock_changes: {
+        Row: {
+          card_id: string | null
+          card_name: string
+          card_number: string
+          changed_at: string
+          changed_by: string | null
+          collection: string
+          condition: string | null
+          delta: number
+          finish: string | null
+          id: string
+          language: string | null
+          new_stock: number
+          previous_stock: number
+          reason: string | null
+        }
+        Insert: {
+          card_id?: string | null
+          card_name: string
+          card_number: string
+          changed_at?: string
+          changed_by?: string | null
+          collection: string
+          condition?: string | null
+          delta: number
+          finish?: string | null
+          id?: string
+          language?: string | null
+          new_stock: number
+          previous_stock: number
+          reason?: string | null
+        }
+        Update: {
+          card_id?: string | null
+          card_name?: string
+          card_number?: string
+          changed_at?: string
+          changed_by?: string | null
+          collection?: string
+          condition?: string | null
+          delta?: number
+          finish?: string | null
+          id?: string
+          language?: string | null
+          new_stock?: number
+          previous_stock?: number
+          reason?: string | null
+        }
+        Relationships: []
+      }
       cards: {
         Row: {
           base_price_cents: number | null
