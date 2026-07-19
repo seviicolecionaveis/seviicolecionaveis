@@ -406,7 +406,7 @@ function AdminCardsManagePage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
-        <RecentlyAddedPanel rows={rows} />
+        <HistoryPanel rows={rows} />
         <section className="rounded-lg border border-border bg-card p-6">
           <h1 className="text-xl font-bold mb-1">{editingId ? "Editar carta" : "Adicionar nova carta"}</h1>
           <p className="text-xs text-muted-foreground mb-4">
