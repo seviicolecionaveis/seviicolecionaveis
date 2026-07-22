@@ -6,7 +6,8 @@ import { useCardsCatalog, cardCreatedAt } from "@/hooks/useCardsCatalog";
 import { useCardStats } from "@/hooks/useCardStats";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
-import { Filters, type FilterState } from "@/components/catalog/Filters";
+import { Filters, type FilterState, type IllustratorOption } from "@/components/catalog/Filters";
+import { useIllustrators } from "@/lib/illustrators";
 import { HeaderActions } from "@/components/HeaderActions";
 import { CartDrawer } from "@/components/CartDrawer";
 import { BannerCarousel } from "@/components/BannerCarousel";
@@ -31,6 +32,7 @@ const DEFAULT_FILTERS: FilterState = {
   priceMin: "",
   priceMax: "",
   numberQuery: "",
+  illustratorIds: [],
 };
 
 type Sort = "relevance" | "price-asc" | "price-desc" | "name" | "number-asc" | "number-desc" | "newest" | "oldest";
@@ -57,6 +59,18 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const [cartOpen, setCartOpen] = useState(false);
   const stats = useCardStats();
+  const { illustrators } = useIllustrators();
+
+  const illustratorOptions: IllustratorOption[] = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const c of CARDS) {
+      if (c.illustratorId) counts.set(c.illustratorId, (counts.get(c.illustratorId) ?? 0) + 1);
+    }
+    return illustrators
+      .map((i) => ({ id: i.id, name: i.name, count: counts.get(i.id) ?? 0 }))
+      .filter((o) => o.count > 0)
+      .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+  }, [illustrators, CARDS]);
 
   const shuffleSeed = useMemo(() => Math.random(), []);
   const filtered = useMemo(() => {
@@ -72,6 +86,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
       if (filters.categories.length && !filters.categories.includes(c.category)) return false;
       if (filters.trainerSubcategories.length && (c.category !== "Treinador" || !c.trainerSubcategory || !filters.trainerSubcategories.includes(c.trainerSubcategory))) return false;
       if (filters.pokemonTypes.length && (!c.pokemonType || !filters.pokemonTypes.includes(c.pokemonType))) return false;
+      if (filters.illustratorIds.length && (!c.illustratorId || !filters.illustratorIds.includes(c.illustratorId))) return false;
       if (filters.finishes.length && !c.variants.some((v) => filters.finishes.includes(v.finish))) return false;
       if (filters.collection && c.collection !== filters.collection) return false;
       if (filters.languages.length && !c.languages.some((l) => filters.languages.includes(l.language))) return false;
@@ -239,7 +254,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
       <main className="mx-auto max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:flex">
         <aside className="hidden lg:block w-64 shrink-0">
           <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2">
-            <Filters filters={filters} onChange={setFilters} onReset={reset} />
+            <Filters filters={filters} onChange={setFilters} onReset={reset} illustratorOptions={illustratorOptions} />
           </div>
         </aside>
 
@@ -253,7 +268,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <Filters filters={filters} onChange={setFilters} onReset={reset} />
+              <Filters filters={filters} onChange={setFilters} onReset={reset} illustratorOptions={illustratorOptions} />
             </div>
           </div>
         )}
