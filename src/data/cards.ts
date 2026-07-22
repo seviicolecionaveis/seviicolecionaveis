@@ -60,6 +60,7 @@ export interface RawCard {
   category?: CardCategory;
   trainerSubcategory?: TrainerSubcategory | null;
   pokemonType?: PokemonType | null;
+  illustratorId?: string | null;
 }
 
 export interface FinishVariant {
@@ -90,6 +91,7 @@ export interface Card {
   category: CardCategory;
   trainerSubcategory?: TrainerSubcategory | null;
   pokemonType?: PokemonType | null;
+  illustratorId?: string | null;
 }
 
 const RAW: RawCard[] = (rawCards as any[]).map((c) => ({

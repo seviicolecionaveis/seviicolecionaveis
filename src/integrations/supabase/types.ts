@@ -509,6 +509,7 @@ export type Database = {
           created_by: string | null
           finish: Database["public"]["Enums"]["card_finish"]
           id: string
+          illustrator_id: string | null
           image: string
           language: Database["public"]["Enums"]["card_language"]
           name: string
@@ -527,6 +528,7 @@ export type Database = {
           created_by?: string | null
           finish: Database["public"]["Enums"]["card_finish"]
           id?: string
+          illustrator_id?: string | null
           image?: string
           language: Database["public"]["Enums"]["card_language"]
           name: string
@@ -545,6 +547,7 @@ export type Database = {
           created_by?: string | null
           finish?: Database["public"]["Enums"]["card_finish"]
           id?: string
+          illustrator_id?: string | null
           image?: string
           language?: Database["public"]["Enums"]["card_language"]
           name?: string
@@ -553,7 +556,15 @@ export type Database = {
           trainer_subcategory?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cards_illustrator_id_fkey"
+            columns: ["illustrator_id"]
+            isOneToOne: false
+            referencedRelation: "illustrators"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       coupons: {
         Row: {
@@ -832,6 +843,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      illustrators: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       loyalty_points_ledger: {
         Row: {

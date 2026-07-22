@@ -8,6 +8,7 @@ import type { Condition, Finish, Language, PokemonType, TrainerSubcategory } fro
 import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS, POKEMON_TYPES, TRAINER_SUBCATEGORIES } from "@/data/cards";
 import { notifyStockBack } from "@/lib/stock-alerts.functions";
 import { cardSlug } from "@/lib/slug";
+import { IllustratorCombobox } from "@/components/admin/IllustratorCombobox";
 
 export const Route = createFileRoute("/admin/manage-cards")({
   head: () => ({ meta: [{ title: "Gerenciar cartas — Admin" }] }),
@@ -54,6 +55,7 @@ interface CardRow {
   category: CardCategory;
   trainer_subcategory: TrainerSubcategory | null;
   pokemon_type: PokemonType | null;
+  illustrator_id: string | null;
   stock: number;
   base_price_cents: number | null;
   image: string;
@@ -73,6 +75,7 @@ interface FormState {
   category: CardCategory;
   trainer_subcategory: TrainerSubcategory | "";
   pokemon_type: PokemonType | "";
+  illustrator_id: string | null;
   stock: string;
   price: string;
   image: string;
@@ -88,6 +91,7 @@ const EMPTY_FORM: FormState = {
   category: "Pokémon",
   trainer_subcategory: "",
   pokemon_type: "",
+  illustrator_id: null,
   stock: "1",
   price: "",
   image: "",
@@ -229,6 +233,7 @@ function AdminCardsManagePage() {
       category: form.category,
       trainer_subcategory: form.category === "Treinador" && form.trainer_subcategory ? form.trainer_subcategory : null,
       pokemon_type: form.category === "Pokémon" && form.pokemon_type ? form.pokemon_type : null,
+      illustrator_id: form.illustrator_id,
       stock: Math.max(0, parseInt(form.stock) || 0),
       base_price_cents: priceCents,
       image: form.image.trim(),
@@ -262,6 +267,7 @@ function AdminCardsManagePage() {
       category: r.category ?? "Pokémon",
       trainer_subcategory: r.trainer_subcategory ?? "",
       pokemon_type: r.pokemon_type ?? "",
+      illustrator_id: r.illustrator_id ?? null,
       stock: String(r.stock),
       price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
       image: r.image,
@@ -291,6 +297,7 @@ function AdminCardsManagePage() {
       category: r.category ?? "Pokémon",
       trainer_subcategory: r.trainer_subcategory ?? "",
       pokemon_type: r.pokemon_type ?? "",
+      illustrator_id: r.illustrator_id ?? null,
       stock: String(r.stock),
       price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
       image: r.image,
@@ -345,6 +352,7 @@ function AdminCardsManagePage() {
       category: quickForm.category,
       trainer_subcategory: quickForm.category === "Treinador" && quickForm.trainer_subcategory ? quickForm.trainer_subcategory : null,
       pokemon_type: quickForm.category === "Pokémon" && quickForm.pokemon_type ? quickForm.pokemon_type : null,
+      illustrator_id: quickForm.illustrator_id,
       stock: newStock,
       base_price_cents: quickForm.price.trim() === "" ? null : Math.round(parseFloat(quickForm.price.replace(",", ".")) * 100),
       image: quickForm.image.trim(),
@@ -376,6 +384,7 @@ function AdminCardsManagePage() {
           category: next.category ?? "Pokémon",
           trainer_subcategory: next.trainer_subcategory ?? "",
           pokemon_type: next.pokemon_type ?? "",
+          illustrator_id: next.illustrator_id ?? null,
           stock: String(next.stock),
           price: next.base_price_cents != null ? (next.base_price_cents / 100).toFixed(2) : "",
           image: next.image,
@@ -521,6 +530,16 @@ function AdminCardsManagePage() {
                 {POKEMON_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             </label>
+
+            <label className="text-xs space-y-1 sm:col-span-2">
+              <span className="font-semibold">Ilustrador</span>
+              <IllustratorCombobox
+                value={form.illustrator_id}
+                onChange={(id) => setForm({ ...form, illustrator_id: id })}
+              />
+            </label>
+
+
 
 
 
@@ -869,6 +888,13 @@ function AdminCardsManagePage() {
                         </label>
                       </div>
                       <label className="mt-3 block text-xs space-y-1">
+                        <span className="font-semibold">Ilustrador</span>
+                        <IllustratorCombobox
+                          value={quickForm.illustrator_id}
+                          onChange={(id) => setQuickForm({ ...quickForm, illustrator_id: id })}
+                        />
+                      </label>
+                      <label className="mt-3 block text-xs space-y-1">
                         <span className="font-semibold">Imagem</span>
                         <div className="flex gap-2 items-start">
                           <input
@@ -941,6 +967,7 @@ function AdminCardsManagePage() {
                               category: r.category ?? "Pokémon",
                               trainer_subcategory: r.trainer_subcategory ?? "",
                               pokemon_type: r.pokemon_type ?? "",
+                              illustrator_id: r.illustrator_id ?? null,
                               stock: "1",
                               price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
                               image: r.image,

@@ -1,4 +1,11 @@
+import { useMemo, useState } from "react";
 import { CARD_CATEGORIES, COLLECTIONS, FINISHES, LANGUAGES, POKEMON_TYPES, TRAINER_SUBCATEGORIES, type CardCategory, type Condition, type Finish, type Language, type PokemonType, type TrainerSubcategory } from "@/data/cards";
+
+export interface IllustratorOption {
+  id: string;
+  name: string;
+  count: number;
+}
 
 export interface FilterState {
   categories: CardCategory[];
@@ -12,12 +19,14 @@ export interface FilterState {
   priceMin: string;
   priceMax: string;
   numberQuery: string;
+  illustratorIds: string[];
 }
 
 interface Props {
   filters: FilterState;
   onChange: (next: FilterState) => void;
   onReset: () => void;
+  illustratorOptions?: IllustratorOption[];
 }
 
 const finishClass: Record<Finish, string> = {
@@ -38,7 +47,15 @@ const finishClass: Record<Finish, string> = {
   Liga: "bg-type-fighting/15 text-type-fighting border-type-fighting/40",
 };
 
-export function Filters({ filters, onChange, onReset }: Props) {
+export function Filters({ filters, onChange, onReset, illustratorOptions = [] }: Props) {
+  const [illQuery, setIllQuery] = useState("");
+  const filteredIllustrators = useMemo(() => {
+    const q = illQuery.trim().toLowerCase();
+    const sorted = [...illustratorOptions].sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    if (!q) return sorted;
+    return sorted.filter((i) => i.name.toLowerCase().includes(q));
+  }, [illustratorOptions, illQuery]);
+  const selectedIllustrators = illustratorOptions.filter((i) => filters.illustratorIds.includes(i.id));
   const toggle = <T,>(arr: T[], v: T): T[] =>
     arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 
@@ -232,6 +249,70 @@ export function Filters({ filters, onChange, onReset }: Props) {
           Cartas sem preço cadastrado serão ocultadas ao usar este filtro.
         </p>
       </section>
+
+      {illustratorOptions.length > 0 && (
+        <section>
+          <h4 className="mb-3 inline-block rounded bg-foreground px-2 py-1 text-xs font-bold uppercase tracking-widest text-background">
+            Ilustrador
+          </h4>
+          {selectedIllustrators.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {selectedIllustrators.map((i) => (
+                <button
+                  key={i.id}
+                  onClick={() =>
+                    onChange({
+                      ...filters,
+                      illustratorIds: filters.illustratorIds.filter((x) => x !== i.id),
+                    })
+                  }
+                  className="rounded-full border border-foreground bg-foreground px-2 py-0.5 text-[10px] font-medium text-background"
+                  title="Remover"
+                >
+                  {i.name} ×
+                </button>
+              ))}
+            </div>
+          )}
+          <input
+            type="text"
+            value={illQuery}
+            onChange={(e) => setIllQuery(e.target.value)}
+            placeholder="Buscar ilustrador..."
+            className="mb-2 w-full rounded-md border border-border bg-background p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold"
+          />
+          <div className="max-h-56 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+            {filteredIllustrators.length === 0 && (
+              <p className="text-[11px] text-muted-foreground">Nenhum ilustrador encontrado.</p>
+            )}
+            {filteredIllustrators.map((i) => {
+              const active = filters.illustratorIds.includes(i.id);
+              return (
+                <label
+                  key={i.id}
+                  className="flex cursor-pointer items-center gap-2 text-xs hover:text-foreground"
+                >
+                  <input
+                    type="checkbox"
+                    checked={active}
+                    onChange={() =>
+                      onChange({
+                        ...filters,
+                        illustratorIds: active
+                          ? filters.illustratorIds.filter((x) => x !== i.id)
+                          : [...filters.illustratorIds, i.id],
+                      })
+                    }
+                    className="rounded border-border accent-foreground"
+                  />
+                  <span className="flex-1 truncate">{i.name}</span>
+                  <span className="text-muted-foreground">({i.count})</span>
+                </label>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <section>
         <label className="flex items-center gap-2 text-sm cursor-pointer">
