@@ -32,7 +32,7 @@ function PresaleIndex() {
           <p className="text-muted-foreground">Nenhuma pré-venda no momento.</p>
         ) : (
           <ul className="space-y-3">
-            {pages.map((p) => (
+            {pages.map((p: { id: string; slug: string; title: string }) => (
               <li key={p.id}>
                 <Link
                   to="/pre-venda/$slug"
