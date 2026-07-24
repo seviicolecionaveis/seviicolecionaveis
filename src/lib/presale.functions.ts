@@ -21,6 +21,11 @@ function publicClient() {
   });
 }
 
+export type PaymentOption =
+  | { metodo: "pix"; valor_cents: number }
+  | { metodo: "cartao_vista"; valor_cents: number }
+  | { metodo: "cartao_credito"; valor_total_cents: number; parcelas: number };
+
 export type PublicPresaleProduct = {
   id: string;
   name: string;
@@ -34,6 +39,7 @@ export type PublicPresaleProduct = {
   whatsapp_button_text: string;
   whatsapp_message_template: string;
   sort_order: number;
+  payment_options: PaymentOption[];
 };
 
 export type PublicPresalePage = {
