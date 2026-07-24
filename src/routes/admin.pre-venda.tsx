@@ -9,7 +9,8 @@ import {
   adminTogglePresalePage,
   adminDeletePresalePage,
 } from "@/lib/admin-presale.functions";
-import { Plus, Trash2, Pencil, ArrowUp, ArrowDown, Upload } from "lucide-react";
+import { Plus, Trash2, Pencil, ArrowUp, ArrowDown, Upload, X } from "lucide-react";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 
 export const Route = createFileRoute("/admin/pre-venda")({
   head: () => ({ meta: [{ title: "Pré-Venda — Admin" }] }),
@@ -31,7 +32,7 @@ type ProductForm = {
   id?: string;
   name: string;
   description: string;
-  image_url: string | null;
+  image_urls: string[];
   price_cents: number;
   quantity: number;
   language: string;
@@ -44,7 +45,7 @@ type ProductForm = {
 const emptyProduct = (): ProductForm => ({
   name: "",
   description: "",
-  image_url: null,
+  image_urls: [],
   price_cents: 0,
   quantity: 0,
   language: "PT",
@@ -230,7 +231,9 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
               id: p.id,
               name: p.name,
               description: p.description ?? "",
-              image_url: p.image_url,
+              image_urls: Array.isArray(p.image_urls) && p.image_urls.length > 0
+                ? p.image_urls
+                : (p.image_url ? [p.image_url] : []),
               price_cents: p.price_cents,
               quantity: p.quantity,
               language: p.language ?? "",
@@ -259,18 +262,50 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
     });
   };
 
-  const uploadImage = async (idx: number, file: File) => {
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `presale/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage
-      .from("card-images")
-      .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
-    if (error) {
-      alert(`Erro ao subir imagem: ${error.message}`);
-      return;
+  const uploadImages = async (idx: number, files: FileList | File[]) => {
+    const arr = Array.from(files);
+    const uploaded: string[] = [];
+    for (const file of arr) {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `presale/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("card-images")
+        .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+      if (error) {
+        alert(`Erro ao subir imagem: ${error.message}`);
+        continue;
+      }
+      const { data } = supabase.storage.from("card-images").getPublicUrl(path);
+      uploaded.push(data.publicUrl);
     }
-    const { data } = supabase.storage.from("card-images").getPublicUrl(path);
-    updateProduct(idx, { image_url: data.publicUrl });
+    if (uploaded.length > 0) {
+      setProducts((curr) =>
+        curr.map((p, i) =>
+          i === idx ? { ...p, image_urls: [...p.image_urls, ...uploaded].slice(0, 20) } : p,
+        ),
+      );
+    }
+  };
+
+  const removeImage = (idx: number, imgIdx: number) => {
+    setProducts((curr) =>
+      curr.map((p, i) =>
+        i === idx ? { ...p, image_urls: p.image_urls.filter((_, j) => j !== imgIdx) } : p,
+      ),
+    );
+  };
+
+  const moveImage = (idx: number, imgIdx: number, dir: -1 | 1) => {
+    setProducts((curr) =>
+      curr.map((p, i) => {
+        if (i !== idx) return p;
+        const j = imgIdx + dir;
+        if (j < 0 || j >= p.image_urls.length) return p;
+        const next = p.image_urls.slice();
+        [next[imgIdx], next[j]] = [next[j], next[imgIdx]];
+        return { ...p, image_urls: next };
+      }),
+    );
   };
 
   const save = async () => {
@@ -297,7 +332,7 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
             id: p.id,
             name: p.name.trim(),
             description: p.description,
-            image_url: p.image_url,
+            image_urls: p.image_urls,
             price_cents: Math.round(Number(p.price_cents) || 0),
             quantity: Math.round(Number(p.quantity) || 0),
             language: p.language?.trim() || null,
@@ -440,27 +475,77 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-[180px_1fr]">
-                <div>
-                  {p.image_url ? (
-                    <img src={p.image_url} alt="" className="w-full aspect-square object-cover rounded-md border border-border" />
-                  ) : (
+              <div className="grid gap-4 md:grid-cols-[220px_1fr]">
+                <div className="space-y-2">
+                  {p.image_urls.length === 0 ? (
                     <div className="w-full aspect-square rounded-md border border-dashed border-border grid place-items-center text-xs text-muted-foreground">
-                      Sem imagem
+                      Sem imagens
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      {p.image_urls.map((url, imgIdx) => (
+                        <div key={url + imgIdx} className="relative group">
+                          <img
+                            src={url}
+                            alt=""
+                            className={`w-full aspect-square object-cover rounded-md border ${
+                              imgIdx === 0 ? "border-[#2563eb] border-2" : "border-border"
+                            }`}
+                          />
+                          {imgIdx === 0 && (
+                            <span className="absolute top-1 left-1 rounded bg-[#2563eb] text-white text-[9px] px-1 py-0.5 font-bold">
+                              CAPA
+                            </span>
+                          )}
+                          <div className="absolute inset-x-1 bottom-1 flex justify-between opacity-0 group-hover:opacity-100 transition">
+                            <button
+                              type="button"
+                              onClick={() => moveImage(idx, imgIdx, -1)}
+                              disabled={imgIdx === 0}
+                              className="rounded bg-black/60 text-white p-0.5 disabled:opacity-30"
+                              aria-label="Mover para trás"
+                            >
+                              <ArrowUp className="h-3 w-3 -rotate-90" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeImage(idx, imgIdx)}
+                              className="rounded bg-red-600 text-white p-0.5"
+                              aria-label="Remover"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => moveImage(idx, imgIdx, 1)}
+                              disabled={imgIdx === p.image_urls.length - 1}
+                              className="rounded bg-black/60 text-white p-0.5 disabled:opacity-30"
+                              aria-label="Mover para frente"
+                            >
+                              <ArrowDown className="h-3 w-3 -rotate-90" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
-                  <label className="mt-2 inline-flex items-center gap-1 text-xs cursor-pointer rounded-md border border-border px-2 py-1.5 hover:bg-secondary">
-                    <Upload className="h-3 w-3" /> {p.image_url ? "Trocar" : "Enviar imagem"}
+                  <label className="inline-flex items-center gap-1 text-xs cursor-pointer rounded-md border border-border px-2 py-1.5 hover:bg-secondary w-full justify-center">
+                    <Upload className="h-3 w-3" /> Adicionar imagens
                     <input
                       type="file"
                       accept="image/*"
+                      multiple
                       className="hidden"
                       onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) uploadImage(idx, f);
+                        const files = e.target.files;
+                        if (files && files.length > 0) uploadImages(idx, files);
+                        e.target.value = "";
                       }}
                     />
                   </label>
+                  <p className="text-[10px] text-muted-foreground text-center">
+                    A primeira imagem é a capa. Passe o mouse para reordenar ou remover.
+                  </p>
                 </div>
 
                 <div className="space-y-3">
@@ -472,15 +557,13 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
                       className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
                     />
                   </label>
-                  <label className="block text-sm">
+                  <div className="block text-sm">
                     <span className="block mb-1 text-xs font-semibold text-muted-foreground">Descrição</span>
-                    <textarea
+                    <RichTextEditor
                       value={p.description}
-                      onChange={(e) => updateProduct(idx, { description: e.target.value })}
-                      rows={3}
-                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                      onChange={(html) => updateProduct(idx, { description: html })}
                     />
-                  </label>
+                  </div>
                   <div className="grid gap-3 md:grid-cols-4">
                     <label className="block text-sm">
                       <span className="block mb-1 text-xs font-semibold text-muted-foreground">Preço (R$)</span>
