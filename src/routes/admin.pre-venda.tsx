@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
+import logoUrl from "@/assets/logo.webp";
 import {
   adminListPresalePages,
   adminGetPresalePage,
@@ -15,6 +18,26 @@ export const Route = createFileRoute("/admin/pre-venda")({
   head: () => ({ meta: [{ title: "Pré-Venda — Admin" }] }),
   component: AdminPresalePage,
 });
+
+function AdminShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+          <Link to="/" className="flex items-center gap-3">
+            <img src={logoUrl} alt="Sevii Colecionáveis" width={224} height={56} className="h-12 w-auto sm:h-14" />
+          </Link>
+          <SiteNav className="hidden md:flex" />
+        </div>
+        <div className="md:hidden border-t border-border px-4 py-3">
+          <SiteNav className="-mx-1 overflow-x-auto" />
+        </div>
+      </header>
+      {children}
+      <SiteFooter />
+    </div>
+  );
+}
 
 type PageRow = {
   id: string;
