@@ -1,6 +1,10 @@
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { getActivePresalePageBySlug, type PublicPresaleProduct } from "@/lib/presale.functions";
+import { createFileRoute, notFound, Link, useRouter } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, ArrowLeft, ZoomIn, X } from "lucide-react";
+import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { getActivePresalePageBySlug, type PublicPresaleProduct } from "@/lib/presale.functions";
+import logoUrl from "@/assets/logo.webp";
 
 const WHATSAPP_NUMBER = "5579981509552";
 
@@ -16,7 +20,8 @@ export const Route = createFileRoute("/pre-venda/$slug")({
     }
     const title = `${loaderData.page.title} — Pré-Venda | Sevii Colecionáveis`;
     const desc = `Reserve agora: ${loaderData.page.title}. Pré-venda oficial na Sevii Colecionáveis.`;
-    const img = loaderData.page.products.find((p) => p.image_url)?.image_url ?? undefined;
+    const coverFromArray = loaderData.page.products.find((p) => p.image_urls && p.image_urls.length)?.image_urls?.[0];
+    const img = coverFromArray ?? loaderData.page.products.find((p) => p.image_url)?.image_url ?? undefined;
     const meta: Array<Record<string, string>> = [
       { title },
       { name: "description", content: desc },
@@ -35,15 +40,37 @@ export const Route = createFileRoute("/pre-venda/$slug")({
   notFoundComponent: PresaleNotFound,
 });
 
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+          <Link to="/" className="flex items-center gap-3">
+            <img src={logoUrl} alt="Sevii Colecionáveis" width={224} height={56} className="h-12 w-auto sm:h-14" />
+          </Link>
+          <SiteNav className="hidden md:flex" />
+        </div>
+        <div className="md:hidden border-t border-border px-4 py-3">
+          <SiteNav className="-mx-1 overflow-x-auto" />
+        </div>
+      </header>
+      {children}
+      <SiteFooter />
+    </div>
+  );
+}
+
 function PresaleNotFound() {
   return (
-    <div className="min-h-screen grid place-items-center bg-background px-4">
-      <div className="text-center space-y-3">
-        <h1 className="text-2xl font-bold">Pré-venda indisponível</h1>
-        <p className="text-muted-foreground">Esta pré-venda não está mais ativa.</p>
-        <Link to="/pre-venda" className="text-sm underline">Ver pré-vendas ativas</Link>
-      </div>
-    </div>
+    <Shell>
+      <main className="grid min-h-[50vh] place-items-center px-4">
+        <div className="text-center space-y-3">
+          <h1 className="text-2xl font-bold">Pré-venda indisponível</h1>
+          <p className="text-muted-foreground">Esta pré-venda não está mais ativa.</p>
+          <Link to="/pre-venda" className="text-sm underline">Ver pré-vendas ativas</Link>
+        </div>
+      </main>
+    </Shell>
   );
 }
 
@@ -63,49 +90,188 @@ function formatDate(iso: string | null) {
 function PresalePage() {
   const { page } = Route.useLoaderData();
   return (
-    <div className="min-h-screen bg-background">
-      <main className="mx-auto max-w-5xl px-4 py-10">
-        <Link to="/pre-venda" className="text-xs text-muted-foreground hover:text-foreground">← Todas as pré-vendas</Link>
-        <h1 className="text-3xl md:text-4xl font-bold mt-3 mb-8">{page.title}</h1>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          {page.products.map((p: PublicPresaleProduct) => {
-            const msg = p.whatsapp_message_template.replaceAll("[nome do produto]", p.name);
-            const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-            const dateLabel = formatDate(p.available_from);
-            return (
-              <article key={p.id} className="rounded-2xl border border-border bg-card overflow-hidden flex flex-col">
-                {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} className="w-full aspect-[4/3] object-cover" loading="lazy" />
-                ) : (
-                  <div className="w-full aspect-[4/3] bg-secondary" />
-                )}
-                <div className="p-5 flex flex-col gap-3 flex-1">
-                  <h2 className="text-xl font-bold">{p.name}</h2>
-                  {p.description && (
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{p.description}</p>
-                  )}
-                  <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
-                    {p.language && <span className="rounded-full bg-secondary px-2 py-0.5">{p.language}</span>}
-                    {p.release_year && <span className="rounded-full bg-secondary px-2 py-0.5">{p.release_year}</span>}
-                    {dateLabel && <span className="rounded-full bg-secondary px-2 py-0.5">Disponível: {dateLabel}</span>}
-                  </div>
-                  <p className="text-2xl font-bold tabular-nums mt-1">{formatBRL(p.price_cents)}</p>
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-auto inline-flex items-center justify-center rounded-full bg-[#2563eb] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#1d4ed8] transition"
-                  >
-                    {p.whatsapp_button_text}
-                  </a>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+    <Shell>
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 space-y-12">
+        {page.products.map((p: PublicPresaleProduct) => (
+          <PresaleProductBlock key={p.id} product={p} pageTitle={page.title} />
+        ))}
+        {page.products.length === 0 && (
+          <p className="text-sm text-muted-foreground">Nenhum produto disponível nesta pré-venda.</p>
+        )}
       </main>
-      <SiteFooter />
-    </div>
+    </Shell>
+  );
+}
+
+function PresaleProductBlock({ product: p, pageTitle }: { product: PublicPresaleProduct; pageTitle: string }) {
+  const router = useRouter();
+  const [idx, setIdx] = useState(0);
+  const [zoomOpen, setZoomOpen] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
+
+  useEffect(() => { setIdx(0); setZoomOpen(false); setZoomed(false); }, [p.id]);
+
+  const imgs = (p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : []));
+  const dateLabel = formatDate(p.available_from);
+  const msg = p.whatsapp_message_template.replaceAll("[nome do produto]", p.name);
+  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+
+  return (
+    <section>
+      <nav aria-label="breadcrumb" className="mb-4 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+        <Link to="/pre-venda" className="hover:text-foreground">{pageTitle}</Link>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <span className="text-foreground line-clamp-1">{p.name}</span>
+      </nav>
+
+      <button
+        type="button"
+        onClick={() => router.history.back()}
+        className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" /> Voltar para Pré-Vendas
+      </button>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        <div>
+          <button
+            type="button"
+            onClick={() => imgs.length > 0 && setZoomOpen(true)}
+            className="group relative block aspect-square w-full overflow-hidden rounded-lg bg-secondary"
+            aria-label="Ampliar imagem"
+          >
+            {imgs[idx] ? (
+              <img src={imgs[idx]} alt={p.name} className="h-full w-full object-cover" />
+            ) : (
+              <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">Sem imagem</div>
+            )}
+            {imgs.length > 0 && (
+              <span className="pointer-events-none absolute right-2 top-2 rounded-full bg-background/80 p-1.5 opacity-90 shadow group-hover:bg-background">
+                <ZoomIn className="h-4 w-4" />
+              </span>
+            )}
+            {imgs.length > 1 && (
+              <>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => { e.stopPropagation(); setIdx((i) => (i - 1 + imgs.length) % imgs.length); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); setIdx((i) => (i - 1 + imgs.length) % imgs.length); } }}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1.5 hover:bg-background"
+                  aria-label="Imagem anterior"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </span>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => { e.stopPropagation(); setIdx((i) => (i + 1) % imgs.length); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); setIdx((i) => (i + 1) % imgs.length); } }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1.5 hover:bg-background"
+                  aria-label="Próxima imagem"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </span>
+              </>
+            )}
+          </button>
+          {imgs.length > 1 && (
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+              {imgs.map((url, i) => (
+                <button
+                  key={`${url}-${i}`}
+                  onClick={() => setIdx(i)}
+                  className={`h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 ${i === idx ? "border-primary" : "border-transparent opacity-70"}`}
+                >
+                  <img src={url} alt="" className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold sm:text-3xl">{p.name}</h1>
+          {p.description && (
+            <p className="mt-3 text-sm text-muted-foreground whitespace-pre-line">{p.description}</p>
+          )}
+
+          {(() => {
+            const specs: Array<[string, string | null | undefined]> = [
+              ["Idioma", p.language],
+              ["Ano", p.release_year ? String(p.release_year) : null],
+              ["Disponibilidade", dateLabel],
+            ];
+            const filled = specs.filter(([, v]) => v && String(v).trim());
+            if (filled.length === 0) return null;
+            return (
+              <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
+                {filled.map(([k, v]) => (
+                  <div key={k} className="contents">
+                    <dt className="font-semibold text-muted-foreground">{k}:</dt>
+                    <dd className="text-foreground">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            );
+          })()}
+
+          <div className="mt-5 text-3xl font-bold">{formatBRL(p.price_cents)}</div>
+
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-flex items-center justify-center rounded-md bg-[#2563eb] px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#1d4ed8] transition"
+          >
+            {p.whatsapp_button_text}
+          </a>
+        </div>
+      </div>
+
+      {zoomOpen && imgs[idx] && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 p-4"
+          onClick={() => setZoomOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setZoomOpen(false); }}
+            className="absolute right-4 top-4 z-10 rounded-full bg-background/90 p-2 hover:bg-background"
+            aria-label="Fechar"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          {imgs.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setIdx((i) => (i - 1 + imgs.length) % imgs.length); setZoomed(false); }}
+                className="absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-background/90 p-2 hover:bg-background"
+                aria-label="Imagem anterior"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setIdx((i) => (i + 1) % imgs.length); setZoomed(false); }}
+                className="absolute right-16 top-1/2 z-10 -translate-y-1/2 rounded-full bg-background/90 p-2 hover:bg-background"
+                aria-label="Próxima imagem"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </>
+          )}
+          <div className="relative max-h-[90vh] max-w-[90vw] overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={imgs[idx]}
+              alt={p.name}
+              onClick={() => setZoomed((z) => !z)}
+              className={`select-none transition-transform duration-200 ${zoomed ? "scale-[2] cursor-zoom-out" : "cursor-zoom-in"} max-h-[90vh] max-w-[90vw] object-contain`}
+            />
+          </div>
+        </div>
+      )}
+    </section>
   );
 }

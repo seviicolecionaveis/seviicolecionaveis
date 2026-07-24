@@ -1299,6 +1299,7 @@ export type Database = {
           description: string
           id: string
           image_url: string | null
+          image_urls: string[]
           language: string | null
           name: string
           page_id: string
@@ -1316,6 +1317,7 @@ export type Database = {
           description?: string
           id?: string
           image_url?: string | null
+          image_urls?: string[]
           language?: string | null
           name: string
           page_id: string
@@ -1333,6 +1335,7 @@ export type Database = {
           description?: string
           id?: string
           image_url?: string | null
+          image_urls?: string[]
           language?: string | null
           name?: string
           page_id?: string
