@@ -179,8 +179,9 @@ function AdminPage() {
     }
   }, [authLoading, user, isAdmin, nav]);
 
-  const load = async () => {
-    setLoading(true);
+  const loadRef = useRef<(showSpinner?: boolean) => Promise<void>>(async () => {});
+  loadRef.current = async (showSpinner = false) => {
+    if (showSpinner) setLoading(true);
     const { data } = await supabase
       .from("orders")
       .select("*, order_items(*)")
@@ -190,20 +191,33 @@ function AdminPage() {
   };
 
   useEffect(() => {
-    if (isAdmin && isOrdersRoute) load();
+    if (isAdmin && isOrdersRoute) loadRef.current(true);
   }, [isAdmin, isOrdersRoute]);
 
   useEffect(() => {
     if (!isAdmin || !isOrdersRoute) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleReload = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => { loadRef.current(false); }, 400);
+    };
     const channel = supabase
       .channel("admin-orders-list")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
-        () => { load(); },
+        scheduleReload,
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "order_items" },
+        scheduleReload,
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      if (timer) clearTimeout(timer);
+      supabase.removeChannel(channel);
+    };
   }, [isAdmin, isOrdersRoute]);
 
   useEffect(() => {
