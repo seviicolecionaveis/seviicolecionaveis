@@ -145,6 +145,7 @@ export const adminUpsertPresalePage = createServerFn({ method: "POST" })
         whatsapp_button_text: p.whatsapp_button_text,
         whatsapp_message_template: p.whatsapp_message_template,
         sort_order: i,
+        payment_options: p.payment_options ?? [],
       };
       if (p.id) {
         await supabaseAdmin.from("presale_products").update(row).eq("id", p.id);
