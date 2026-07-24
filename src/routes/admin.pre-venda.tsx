@@ -222,7 +222,7 @@ function AdminPresalePage() {
           </div>
         )}
       </main>
-    </div>
+    </AdminShell>
   );
 }
 
