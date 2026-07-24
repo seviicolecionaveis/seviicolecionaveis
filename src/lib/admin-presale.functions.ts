@@ -7,6 +7,7 @@ const ProductSchema = z.object({
   name: z.string().trim().min(1).max(200),
   description: z.string().max(5000).default(""),
   image_url: z.string().url().nullable().optional(),
+  image_urls: z.array(z.string().url()).default([]),
   price_cents: z.number().int().min(0).max(100_000_000),
   quantity: z.number().int().min(0).max(1_000_000).default(0),
   language: z.string().trim().max(20).nullable().optional(),
