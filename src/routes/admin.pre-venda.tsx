@@ -647,6 +647,81 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
                       />
                     </label>
                   </div>
+
+                  <div className="rounded-lg border border-border bg-background/50 p-3 space-y-3">
+                    <p className="text-xs font-semibold text-muted-foreground">Formas de pagamento</p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked disabled className="h-4 w-4 accent-foreground" />
+                      <span className="font-medium">Pix</span>
+                      <span className="text-xs text-muted-foreground">
+                        (usa o valor do campo "Preço": R$ {(p.price_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })})
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={p.pay_cartao_vista_enabled}
+                          onChange={(e) => updateProduct(idx, { pay_cartao_vista_enabled: e.target.checked })}
+                          className="h-4 w-4 accent-foreground"
+                        />
+                        <span className="font-medium">Cartão à vista</span>
+                      </label>
+                      {p.pay_cartao_vista_enabled && (
+                        <label className="block text-sm pl-6">
+                          <span className="block mb-1 text-xs text-muted-foreground">Valor à vista (R$)</span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={p.pay_cartao_vista_cents / 100}
+                            onChange={(e) => updateProduct(idx, { pay_cartao_vista_cents: Math.round(Number(e.target.value) * 100) })}
+                            className="w-40 rounded-md border border-border bg-background px-3 py-2 text-sm tabular-nums"
+                          />
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={p.pay_cartao_credito_enabled}
+                          onChange={(e) => updateProduct(idx, { pay_cartao_credito_enabled: e.target.checked })}
+                          className="h-4 w-4 accent-foreground"
+                        />
+                        <span className="font-medium">Cartão no crédito (parcelado)</span>
+                      </label>
+                      {p.pay_cartao_credito_enabled && (
+                        <div className="pl-6 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                          <label className="block text-sm">
+                            <span className="block mb-1 text-xs text-muted-foreground">Valor total (R$)</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={p.pay_cartao_credito_cents / 100}
+                              onChange={(e) => updateProduct(idx, { pay_cartao_credito_cents: Math.round(Number(e.target.value) * 100) })}
+                              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm tabular-nums"
+                            />
+                          </label>
+                          <label className="block text-sm">
+                            <span className="block mb-1 text-xs text-muted-foreground">Parcelas</span>
+                            <input
+                              type="number"
+                              min={1}
+                              max={12}
+                              value={p.pay_cartao_credito_parcelas}
+                              onChange={(e) => updateProduct(idx, { pay_cartao_credito_parcelas: Math.max(1, Math.min(12, Number(e.target.value) || 1)) })}
+                              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm tabular-nums"
+                            />
+                          </label>
+                          <p className="text-xs text-muted-foreground pb-2">
+                            {p.pay_cartao_credito_parcelas}x de R$ {((p.pay_cartao_credito_cents / Math.max(1, p.pay_cartao_credito_parcelas)) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <label className="block text-sm">
                     <span className="block mb-1 text-xs font-semibold text-muted-foreground">
                       Data de disponibilidade (informativa)
