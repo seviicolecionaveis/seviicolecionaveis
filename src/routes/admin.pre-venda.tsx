@@ -231,7 +231,9 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
               id: p.id,
               name: p.name,
               description: p.description ?? "",
-              image_url: p.image_url,
+              image_urls: Array.isArray(p.image_urls) && p.image_urls.length > 0
+                ? p.image_urls
+                : (p.image_url ? [p.image_url] : []),
               price_cents: p.price_cents,
               quantity: p.quantity,
               language: p.language ?? "",
@@ -260,18 +262,50 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
     });
   };
 
-  const uploadImage = async (idx: number, file: File) => {
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `presale/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage
-      .from("card-images")
-      .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
-    if (error) {
-      alert(`Erro ao subir imagem: ${error.message}`);
-      return;
+  const uploadImages = async (idx: number, files: FileList | File[]) => {
+    const arr = Array.from(files);
+    const uploaded: string[] = [];
+    for (const file of arr) {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `presale/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("card-images")
+        .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+      if (error) {
+        alert(`Erro ao subir imagem: ${error.message}`);
+        continue;
+      }
+      const { data } = supabase.storage.from("card-images").getPublicUrl(path);
+      uploaded.push(data.publicUrl);
     }
-    const { data } = supabase.storage.from("card-images").getPublicUrl(path);
-    updateProduct(idx, { image_url: data.publicUrl });
+    if (uploaded.length > 0) {
+      setProducts((curr) =>
+        curr.map((p, i) =>
+          i === idx ? { ...p, image_urls: [...p.image_urls, ...uploaded].slice(0, 20) } : p,
+        ),
+      );
+    }
+  };
+
+  const removeImage = (idx: number, imgIdx: number) => {
+    setProducts((curr) =>
+      curr.map((p, i) =>
+        i === idx ? { ...p, image_urls: p.image_urls.filter((_, j) => j !== imgIdx) } : p,
+      ),
+    );
+  };
+
+  const moveImage = (idx: number, imgIdx: number, dir: -1 | 1) => {
+    setProducts((curr) =>
+      curr.map((p, i) => {
+        if (i !== idx) return p;
+        const j = imgIdx + dir;
+        if (j < 0 || j >= p.image_urls.length) return p;
+        const next = p.image_urls.slice();
+        [next[imgIdx], next[j]] = [next[j], next[imgIdx]];
+        return { ...p, image_urls: next };
+      }),
+    );
   };
 
   const save = async () => {
