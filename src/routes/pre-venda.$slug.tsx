@@ -69,7 +69,7 @@ function PresalePage() {
         <h1 className="text-3xl md:text-4xl font-bold mt-3 mb-8">{page.title}</h1>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {page.products.map((p) => {
+          {page.products.map((p: PublicPresaleProduct) => {
             const msg = p.whatsapp_message_template.replaceAll("[nome do produto]", p.name);
             const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
             const dateLabel = formatDate(p.available_from);
