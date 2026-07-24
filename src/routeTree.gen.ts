@@ -36,9 +36,11 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProdutosLacradosIndexRouteImport } from './routes/produtos-lacrados.index'
+import { Route as PreVendaIndexRouteImport } from './routes/pre-venda.index'
 import { Route as PilhaIndexRouteImport } from './routes/pilha.index'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
 import { Route as ProdutosLacradosSlugRouteImport } from './routes/produtos-lacrados.$slug'
+import { Route as PreVendaSlugRouteImport } from './routes/pre-venda.$slug'
 import { Route as PilhaSolicitarRouteImport } from './routes/pilha.solicitar'
 import { Route as PayOrderIdRouteImport } from './routes/pay.$orderId'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
@@ -53,6 +55,7 @@ import { Route as AdminVideogamesRouteImport } from './routes/admin.videogames'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
 import { Route as AdminSealedRouteImport } from './routes/admin.sealed'
+import { Route as AdminPreVendaRouteImport } from './routes/admin.pre-venda'
 import { Route as AdminPilhaRouteImport } from './routes/admin.pilha'
 import { Route as AdminPanelsRouteImport } from './routes/admin.panels'
 import { Route as AdminOfertasRelampagoRouteImport } from './routes/admin.ofertas-relampago'
@@ -218,6 +221,11 @@ const ProdutosLacradosIndexRoute = ProdutosLacradosIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProdutosLacradosRoute,
 } as any)
+const PreVendaIndexRoute = PreVendaIndexRouteImport.update({
+  id: '/pre-venda/',
+  path: '/pre-venda/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PilhaIndexRoute = PilhaIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -232,6 +240,11 @@ const ProdutosLacradosSlugRoute = ProdutosLacradosSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => ProdutosLacradosRoute,
+} as any)
+const PreVendaSlugRoute = PreVendaSlugRouteImport.update({
+  id: '/pre-venda/$slug',
+  path: '/pre-venda/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PilhaSolicitarRoute = PilhaSolicitarRouteImport.update({
   id: '/solicitar',
@@ -301,6 +314,11 @@ const AdminShippingRoute = AdminShippingRouteImport.update({
 const AdminSealedRoute = AdminSealedRouteImport.update({
   id: '/sealed',
   path: '/sealed',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPreVendaRoute = AdminPreVendaRouteImport.update({
+  id: '/pre-venda',
+  path: '/pre-venda',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPilhaRoute = AdminPilhaRouteImport.update({
@@ -500,6 +518,7 @@ export interface FileRoutesByFullPath {
   '/admin/ofertas-relampago': typeof AdminOfertasRelampagoRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
+  '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
@@ -514,9 +533,11 @@ export interface FileRoutesByFullPath {
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
+  '/pre-venda/$slug': typeof PreVendaSlugRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
+  '/pre-venda/': typeof PreVendaIndexRoute
   '/produtos-lacrados/': typeof ProdutosLacradosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -572,6 +593,7 @@ export interface FileRoutesByTo {
   '/admin/ofertas-relampago': typeof AdminOfertasRelampagoRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
+  '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
@@ -586,9 +608,11 @@ export interface FileRoutesByTo {
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
+  '/pre-venda/$slug': typeof PreVendaSlugRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/orders': typeof OrdersIndexRoute
   '/pilha': typeof PilhaIndexRoute
+  '/pre-venda': typeof PreVendaIndexRoute
   '/produtos-lacrados': typeof ProdutosLacradosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -648,6 +672,7 @@ export interface FileRoutesById {
   '/admin/ofertas-relampago': typeof AdminOfertasRelampagoRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
+  '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
@@ -662,9 +687,11 @@ export interface FileRoutesById {
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
+  '/pre-venda/$slug': typeof PreVendaSlugRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
+  '/pre-venda/': typeof PreVendaIndexRoute
   '/produtos-lacrados/': typeof ProdutosLacradosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -725,6 +752,7 @@ export interface FileRouteTypes {
     | '/admin/ofertas-relampago'
     | '/admin/panels'
     | '/admin/pilha'
+    | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/users'
@@ -739,9 +767,11 @@ export interface FileRouteTypes {
     | '/orders/$orderId'
     | '/pay/$orderId'
     | '/pilha/solicitar'
+    | '/pre-venda/$slug'
     | '/produtos-lacrados/$slug'
     | '/orders/'
     | '/pilha/'
+    | '/pre-venda/'
     | '/produtos-lacrados/'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
@@ -797,6 +827,7 @@ export interface FileRouteTypes {
     | '/admin/ofertas-relampago'
     | '/admin/panels'
     | '/admin/pilha'
+    | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/users'
@@ -811,9 +842,11 @@ export interface FileRouteTypes {
     | '/orders/$orderId'
     | '/pay/$orderId'
     | '/pilha/solicitar'
+    | '/pre-venda/$slug'
     | '/produtos-lacrados/$slug'
     | '/orders'
     | '/pilha'
+    | '/pre-venda'
     | '/produtos-lacrados'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
@@ -872,6 +905,7 @@ export interface FileRouteTypes {
     | '/admin/ofertas-relampago'
     | '/admin/panels'
     | '/admin/pilha'
+    | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/users'
@@ -886,9 +920,11 @@ export interface FileRouteTypes {
     | '/orders/$orderId'
     | '/pay/$orderId'
     | '/pilha/solicitar'
+    | '/pre-venda/$slug'
     | '/produtos-lacrados/$slug'
     | '/orders/'
     | '/pilha/'
+    | '/pre-venda/'
     | '/produtos-lacrados/'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
@@ -942,6 +978,8 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ListaDesejosTokenRoute: typeof ListaDesejosTokenRoute
   PayOrderIdRoute: typeof PayOrderIdRoute
+  PreVendaSlugRoute: typeof PreVendaSlugRoute
+  PreVendaIndexRoute: typeof PreVendaIndexRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksAutoCancelUnpaidRoute: typeof ApiPublicHooksAutoCancelUnpaidRoute
@@ -1151,6 +1189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProdutosLacradosIndexRouteImport
       parentRoute: typeof ProdutosLacradosRoute
     }
+    '/pre-venda/': {
+      id: '/pre-venda/'
+      path: '/pre-venda'
+      fullPath: '/pre-venda/'
+      preLoaderRoute: typeof PreVendaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pilha/': {
       id: '/pilha/'
       path: '/'
@@ -1171,6 +1216,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/produtos-lacrados/$slug'
       preLoaderRoute: typeof ProdutosLacradosSlugRouteImport
       parentRoute: typeof ProdutosLacradosRoute
+    }
+    '/pre-venda/$slug': {
+      id: '/pre-venda/$slug'
+      path: '/pre-venda/$slug'
+      fullPath: '/pre-venda/$slug'
+      preLoaderRoute: typeof PreVendaSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/pilha/solicitar': {
       id: '/pilha/solicitar'
@@ -1268,6 +1320,13 @@ declare module '@tanstack/react-router' {
       path: '/sealed'
       fullPath: '/admin/sealed'
       preLoaderRoute: typeof AdminSealedRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pre-venda': {
+      id: '/admin/pre-venda'
+      path: '/pre-venda'
+      fullPath: '/admin/pre-venda'
+      preLoaderRoute: typeof AdminPreVendaRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/pilha': {
@@ -1489,6 +1548,7 @@ interface AdminRouteChildren {
   AdminOfertasRelampagoRoute: typeof AdminOfertasRelampagoRoute
   AdminPanelsRoute: typeof AdminPanelsRoute
   AdminPilhaRoute: typeof AdminPilhaRoute
+  AdminPreVendaRoute: typeof AdminPreVendaRoute
   AdminSealedRoute: typeof AdminSealedRoute
   AdminShippingRoute: typeof AdminShippingRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -1509,6 +1569,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminOfertasRelampagoRoute: AdminOfertasRelampagoRoute,
   AdminPanelsRoute: AdminPanelsRoute,
   AdminPilhaRoute: AdminPilhaRoute,
+  AdminPreVendaRoute: AdminPreVendaRoute,
   AdminSealedRoute: AdminSealedRoute,
   AdminShippingRoute: AdminShippingRoute,
   AdminUsersRoute: AdminUsersRoute,
@@ -1613,6 +1674,8 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ListaDesejosTokenRoute: ListaDesejosTokenRoute,
   PayOrderIdRoute: PayOrderIdRoute,
+  PreVendaSlugRoute: PreVendaSlugRoute,
+  PreVendaIndexRoute: PreVendaIndexRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksAutoCancelUnpaidRoute: ApiPublicHooksAutoCancelUnpaidRoute,
@@ -1635,13 +1698,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
