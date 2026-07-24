@@ -62,6 +62,12 @@ type ProductForm = {
   available_from: string;
   whatsapp_button_text: string;
   whatsapp_message_template: string;
+  // Payment options
+  pay_cartao_vista_enabled: boolean;
+  pay_cartao_vista_cents: number;
+  pay_cartao_credito_enabled: boolean;
+  pay_cartao_credito_cents: number;
+  pay_cartao_credito_parcelas: number;
 };
 
 const emptyProduct = (): ProductForm => ({
@@ -75,6 +81,11 @@ const emptyProduct = (): ProductForm => ({
   available_from: "",
   whatsapp_button_text: "Quero reservar o meu!",
   whatsapp_message_template: 'Olá! Vim do site e gostaria de reservar o meu "[nome do produto]".',
+  pay_cartao_vista_enabled: false,
+  pay_cartao_vista_cents: 0,
+  pay_cartao_credito_enabled: false,
+  pay_cartao_credito_cents: 0,
+  pay_cartao_credito_parcelas: 3,
 });
 
 function statusBadge(p: PageRow): { label: string; className: string } {
