@@ -260,19 +260,29 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
       }
       setProducts(
         (prods && prods.length > 0
-          ? prods.map((p: any) => ({
-              id: p.id,
-              name: p.name,
-              description: p.description ?? "",
-              image_urls: (p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : [])),
-              price_cents: p.price_cents,
-              quantity: p.quantity,
-              language: p.language ?? "",
-              release_year: p.release_year ?? "",
-              available_from: p.available_from ?? "",
-              whatsapp_button_text: p.whatsapp_button_text,
-              whatsapp_message_template: p.whatsapp_message_template,
-            }))
+          ? prods.map((p: any) => {
+              const opts: any[] = Array.isArray(p.payment_options) ? p.payment_options : [];
+              const vista = opts.find((o) => o?.metodo === "cartao_vista");
+              const cred = opts.find((o) => o?.metodo === "cartao_credito");
+              return {
+                id: p.id,
+                name: p.name,
+                description: p.description ?? "",
+                image_urls: (p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : [])),
+                price_cents: p.price_cents,
+                quantity: p.quantity,
+                language: p.language ?? "",
+                release_year: p.release_year ?? "",
+                available_from: p.available_from ?? "",
+                whatsapp_button_text: p.whatsapp_button_text,
+                whatsapp_message_template: p.whatsapp_message_template,
+                pay_cartao_vista_enabled: !!vista,
+                pay_cartao_vista_cents: vista?.valor_cents ?? 0,
+                pay_cartao_credito_enabled: !!cred,
+                pay_cartao_credito_cents: cred?.valor_total_cents ?? 0,
+                pay_cartao_credito_parcelas: cred?.parcelas ?? 3,
+              } satisfies ProductForm;
+            })
           : [emptyProduct()]),
       );
       setLoading(false);
