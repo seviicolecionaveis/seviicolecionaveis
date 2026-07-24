@@ -230,7 +230,7 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
               id: p.id,
               name: p.name,
               description: p.description ?? "",
-              image_url: p.image_url,
+              image_urls: (p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : [])),
               price_cents: p.price_cents,
               quantity: p.quantity,
               language: p.language ?? "",
