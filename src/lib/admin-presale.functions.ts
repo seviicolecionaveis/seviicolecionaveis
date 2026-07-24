@@ -2,6 +2,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+const PaymentOptionSchema = z.discriminatedUnion("metodo", [
+  z.object({ metodo: z.literal("pix"), valor_cents: z.number().int().min(0).max(100_000_000) }),
+  z.object({ metodo: z.literal("cartao_vista"), valor_cents: z.number().int().min(0).max(100_000_000) }),
+  z.object({
+    metodo: z.literal("cartao_credito"),
+    valor_total_cents: z.number().int().min(0).max(100_000_000),
+    parcelas: z.number().int().min(1).max(12),
+  }),
+]);
+
 const ProductSchema = z.object({
   id: z.string().uuid().optional(),
   name: z.string().trim().min(1).max(200),
@@ -21,6 +31,7 @@ const ProductSchema = z.object({
     .max(2000)
     .default('Olá! Vim do site e gostaria de reservar o meu "[nome do produto]".'),
   sort_order: z.number().int().default(0),
+  payment_options: z.array(PaymentOptionSchema).default([]),
 });
 
 const PageUpsertSchema = z.object({
@@ -134,6 +145,7 @@ export const adminUpsertPresalePage = createServerFn({ method: "POST" })
         whatsapp_button_text: p.whatsapp_button_text,
         whatsapp_message_template: p.whatsapp_message_template,
         sort_order: i,
+        payment_options: p.payment_options ?? [],
       };
       if (p.id) {
         await supabaseAdmin.from("presale_products").update(row).eq("id", p.id);

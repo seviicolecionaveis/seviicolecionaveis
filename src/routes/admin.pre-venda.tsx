@@ -62,6 +62,12 @@ type ProductForm = {
   available_from: string;
   whatsapp_button_text: string;
   whatsapp_message_template: string;
+  // Payment options
+  pay_cartao_vista_enabled: boolean;
+  pay_cartao_vista_cents: number;
+  pay_cartao_credito_enabled: boolean;
+  pay_cartao_credito_cents: number;
+  pay_cartao_credito_parcelas: number;
 };
 
 const emptyProduct = (): ProductForm => ({
@@ -75,6 +81,11 @@ const emptyProduct = (): ProductForm => ({
   available_from: "",
   whatsapp_button_text: "Quero reservar o meu!",
   whatsapp_message_template: 'Olá! Vim do site e gostaria de reservar o meu "[nome do produto]".',
+  pay_cartao_vista_enabled: false,
+  pay_cartao_vista_cents: 0,
+  pay_cartao_credito_enabled: false,
+  pay_cartao_credito_cents: 0,
+  pay_cartao_credito_parcelas: 3,
 });
 
 function statusBadge(p: PageRow): { label: string; className: string } {
@@ -249,19 +260,29 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
       }
       setProducts(
         (prods && prods.length > 0
-          ? prods.map((p: any) => ({
-              id: p.id,
-              name: p.name,
-              description: p.description ?? "",
-              image_urls: (p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : [])),
-              price_cents: p.price_cents,
-              quantity: p.quantity,
-              language: p.language ?? "",
-              release_year: p.release_year ?? "",
-              available_from: p.available_from ?? "",
-              whatsapp_button_text: p.whatsapp_button_text,
-              whatsapp_message_template: p.whatsapp_message_template,
-            }))
+          ? prods.map((p: any) => {
+              const opts: any[] = Array.isArray(p.payment_options) ? p.payment_options : [];
+              const vista = opts.find((o) => o?.metodo === "cartao_vista");
+              const cred = opts.find((o) => o?.metodo === "cartao_credito");
+              return {
+                id: p.id,
+                name: p.name,
+                description: p.description ?? "",
+                image_urls: (p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : [])),
+                price_cents: p.price_cents,
+                quantity: p.quantity,
+                language: p.language ?? "",
+                release_year: p.release_year ?? "",
+                available_from: p.available_from ?? "",
+                whatsapp_button_text: p.whatsapp_button_text,
+                whatsapp_message_template: p.whatsapp_message_template,
+                pay_cartao_vista_enabled: !!vista,
+                pay_cartao_vista_cents: vista?.valor_cents ?? 0,
+                pay_cartao_credito_enabled: !!cred,
+                pay_cartao_credito_cents: cred?.valor_total_cents ?? 0,
+                pay_cartao_credito_parcelas: cred?.parcelas ?? 3,
+              } satisfies ProductForm;
+            })
           : [emptyProduct()]),
       );
       setLoading(false);
@@ -331,21 +352,36 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
           starts_at: fromDateTimeLocal(startsAt),
           ends_at: fromDateTimeLocal(endsAt),
           sort_order: 0,
-          products: products.map((p, i) => ({
-            id: p.id,
-            name: p.name.trim(),
-            description: p.description,
-            image_url: p.image_urls[0] ?? null,
-            image_urls: p.image_urls,
-            price_cents: Math.round(Number(p.price_cents) || 0),
-            quantity: Math.round(Number(p.quantity) || 0),
-            language: p.language?.trim() || null,
-            release_year: p.release_year === "" ? null : Number(p.release_year),
-            available_from: p.available_from || null,
-            whatsapp_button_text: p.whatsapp_button_text.trim(),
-            whatsapp_message_template: p.whatsapp_message_template.trim(),
-            sort_order: i,
-          })),
+          products: products.map((p, i) => {
+            const price = Math.round(Number(p.price_cents) || 0);
+            const payment_options: any[] = [{ metodo: "pix", valor_cents: price }];
+            if (p.pay_cartao_vista_enabled) {
+              payment_options.push({ metodo: "cartao_vista", valor_cents: Math.round(Number(p.pay_cartao_vista_cents) || 0) });
+            }
+            if (p.pay_cartao_credito_enabled) {
+              payment_options.push({
+                metodo: "cartao_credito",
+                valor_total_cents: Math.round(Number(p.pay_cartao_credito_cents) || 0),
+                parcelas: Math.max(1, Math.min(12, Math.round(Number(p.pay_cartao_credito_parcelas) || 1))),
+              });
+            }
+            return {
+              id: p.id,
+              name: p.name.trim(),
+              description: p.description,
+              image_url: p.image_urls[0] ?? null,
+              image_urls: p.image_urls,
+              price_cents: price,
+              quantity: Math.round(Number(p.quantity) || 0),
+              language: p.language?.trim() || null,
+              release_year: p.release_year === "" ? null : Number(p.release_year),
+              available_from: p.available_from || null,
+              whatsapp_button_text: p.whatsapp_button_text.trim(),
+              whatsapp_message_template: p.whatsapp_message_template.trim(),
+              sort_order: i,
+              payment_options,
+            };
+          }),
         },
       });
       if (!res.success) {
@@ -610,6 +646,81 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm tabular-nums"
                       />
                     </label>
+                  </div>
+
+                  <div className="rounded-lg border border-border bg-background/50 p-3 space-y-3">
+                    <p className="text-xs font-semibold text-muted-foreground">Formas de pagamento</p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked disabled className="h-4 w-4 accent-foreground" />
+                      <span className="font-medium">Pix</span>
+                      <span className="text-xs text-muted-foreground">
+                        (usa o valor do campo "Preço": R$ {(p.price_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })})
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={p.pay_cartao_vista_enabled}
+                          onChange={(e) => updateProduct(idx, { pay_cartao_vista_enabled: e.target.checked })}
+                          className="h-4 w-4 accent-foreground"
+                        />
+                        <span className="font-medium">Cartão à vista</span>
+                      </label>
+                      {p.pay_cartao_vista_enabled && (
+                        <label className="block text-sm pl-6">
+                          <span className="block mb-1 text-xs text-muted-foreground">Valor à vista (R$)</span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={p.pay_cartao_vista_cents / 100}
+                            onChange={(e) => updateProduct(idx, { pay_cartao_vista_cents: Math.round(Number(e.target.value) * 100) })}
+                            className="w-40 rounded-md border border-border bg-background px-3 py-2 text-sm tabular-nums"
+                          />
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={p.pay_cartao_credito_enabled}
+                          onChange={(e) => updateProduct(idx, { pay_cartao_credito_enabled: e.target.checked })}
+                          className="h-4 w-4 accent-foreground"
+                        />
+                        <span className="font-medium">Cartão no crédito (parcelado)</span>
+                      </label>
+                      {p.pay_cartao_credito_enabled && (
+                        <div className="pl-6 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                          <label className="block text-sm">
+                            <span className="block mb-1 text-xs text-muted-foreground">Valor total (R$)</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={p.pay_cartao_credito_cents / 100}
+                              onChange={(e) => updateProduct(idx, { pay_cartao_credito_cents: Math.round(Number(e.target.value) * 100) })}
+                              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm tabular-nums"
+                            />
+                          </label>
+                          <label className="block text-sm">
+                            <span className="block mb-1 text-xs text-muted-foreground">Parcelas</span>
+                            <input
+                              type="number"
+                              min={1}
+                              max={12}
+                              value={p.pay_cartao_credito_parcelas}
+                              onChange={(e) => updateProduct(idx, { pay_cartao_credito_parcelas: Math.max(1, Math.min(12, Number(e.target.value) || 1)) })}
+                              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm tabular-nums"
+                            />
+                          </label>
+                          <p className="text-xs text-muted-foreground pb-2">
+                            {p.pay_cartao_credito_parcelas}x de R$ {((p.pay_cartao_credito_cents / Math.max(1, p.pay_cartao_credito_parcelas)) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <label className="block text-sm">
                     <span className="block mb-1 text-xs font-semibold text-muted-foreground">

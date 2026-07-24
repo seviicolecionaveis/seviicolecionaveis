@@ -103,6 +103,45 @@ function PresalePage() {
   );
 }
 
+function PaymentOptionsBlock({ product }: { product: PublicPresaleProduct }) {
+  const opts = Array.isArray(product.payment_options) ? product.payment_options : [];
+  const pix = opts.find((o) => o.metodo === "pix") as { metodo: "pix"; valor_cents: number } | undefined;
+  const vista = opts.find((o) => o.metodo === "cartao_vista") as { metodo: "cartao_vista"; valor_cents: number } | undefined;
+  const credito = opts.find((o) => o.metodo === "cartao_credito") as { metodo: "cartao_credito"; valor_total_cents: number; parcelas: number } | undefined;
+  const pixValue = pix?.valor_cents ?? product.price_cents;
+  const hasExtra = !!vista || !!credito;
+
+  return (
+    <div className="mt-5 space-y-2">
+      <div>
+        <div className="text-3xl font-bold">{formatBRL(pixValue)}</div>
+        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">no Pix</div>
+      </div>
+      {hasExtra && (
+        <ul className="mt-3 divide-y divide-border rounded-lg border border-border bg-background/60">
+          {vista && (
+            <li className="flex items-center justify-between gap-4 px-3 py-2 text-sm">
+              <span className="text-muted-foreground">Cartão à vista</span>
+              <span className="font-semibold">{formatBRL(vista.valor_cents)}</span>
+            </li>
+          )}
+          {credito && (
+            <li className="flex items-center justify-between gap-4 px-3 py-2 text-sm">
+              <span className="text-muted-foreground">Cartão no crédito</span>
+              <span className="text-right">
+                <span className="font-semibold">
+                  em até {credito.parcelas}x de {formatBRL(Math.round(credito.valor_total_cents / Math.max(1, credito.parcelas)))}
+                </span>
+                <span className="block text-xs text-muted-foreground">total {formatBRL(credito.valor_total_cents)}</span>
+              </span>
+            </li>
+          )}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function PresaleProductBlock({ product: p, pageTitle }: { product: PublicPresaleProduct; pageTitle: string }) {
   const router = useRouter();
   const [idx, setIdx] = useState(0);
@@ -210,7 +249,7 @@ function PresaleProductBlock({ product: p, pageTitle }: { product: PublicPresale
             )}
 
 
-            <div className="mt-5 text-3xl font-bold">{formatBRL(p.price_cents)}</div>
+            <PaymentOptionsBlock product={p} />
 
             <a
               href={href}
