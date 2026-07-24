@@ -1,6 +1,6 @@
 import { createFileRoute, notFound, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, ArrowLeft, ZoomIn, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowLeft, ZoomIn, X, MessageCircle } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { getActivePresalePageBySlug, type PublicPresaleProduct } from "@/lib/presale.functions";
@@ -91,7 +91,7 @@ function PresalePage() {
   const { page } = Route.useLoaderData();
   return (
     <Shell>
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 space-y-12">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 space-y-10 pb-28 md:pb-8">
         {page.products.map((p: PublicPresaleProduct) => (
           <PresaleProductBlock key={p.id} product={p} pageTitle={page.title} />
         ))}
@@ -127,100 +127,121 @@ function PresaleProductBlock({ product: p, pageTitle }: { product: PublicPresale
       <button
         type="button"
         onClick={() => router.history.back()}
-        className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" /> Voltar para Pré-Vendas
       </button>
 
-      <div className="grid gap-8 md:grid-cols-2">
-        <div>
-          <button
-            type="button"
-            onClick={() => imgs.length > 0 && setZoomOpen(true)}
-            className="group relative block aspect-square w-full overflow-hidden rounded-lg bg-secondary"
-            aria-label="Ampliar imagem"
-          >
-            {imgs[idx] ? (
-              <img src={imgs[idx]} alt={p.name} className="h-full w-full object-cover" />
-            ) : (
-              <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">Sem imagem</div>
-            )}
-            {imgs.length > 0 && (
-              <span className="pointer-events-none absolute right-2 top-2 rounded-full bg-background/80 p-1.5 opacity-90 shadow group-hover:bg-background">
-                <ZoomIn className="h-4 w-4" />
-              </span>
-            )}
+      <div className="rounded-2xl bg-card/95 backdrop-blur-sm shadow-sm ring-1 ring-border p-5 sm:p-8">
+        <div className="grid gap-8 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:items-start">
+          <div>
+            <button
+              type="button"
+              onClick={() => imgs.length > 0 && setZoomOpen(true)}
+              className="group relative block aspect-square w-full overflow-hidden rounded-lg bg-secondary md:max-h-[480px]"
+              aria-label="Ampliar imagem"
+            >
+              {imgs[idx] ? (
+                <img src={imgs[idx]} alt={p.name} className="h-full w-full object-cover" />
+              ) : (
+                <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">Sem imagem</div>
+              )}
+              {imgs.length > 0 && (
+                <span className="pointer-events-none absolute right-2 top-2 rounded-full bg-background/80 p-1.5 opacity-90 shadow group-hover:bg-background">
+                  <ZoomIn className="h-4 w-4" />
+                </span>
+              )}
+              {imgs.length > 1 && (
+                <>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => { e.stopPropagation(); setIdx((i) => (i - 1 + imgs.length) % imgs.length); }}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); setIdx((i) => (i - 1 + imgs.length) % imgs.length); } }}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1.5 hover:bg-background"
+                    aria-label="Imagem anterior"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </span>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => { e.stopPropagation(); setIdx((i) => (i + 1) % imgs.length); }}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); setIdx((i) => (i + 1) % imgs.length); } }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1.5 hover:bg-background"
+                    aria-label="Próxima imagem"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </span>
+                </>
+              )}
+            </button>
             {imgs.length > 1 && (
-              <>
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={(e) => { e.stopPropagation(); setIdx((i) => (i - 1 + imgs.length) % imgs.length); }}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); setIdx((i) => (i - 1 + imgs.length) % imgs.length); } }}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1.5 hover:bg-background"
-                  aria-label="Imagem anterior"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </span>
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={(e) => { e.stopPropagation(); setIdx((i) => (i + 1) % imgs.length); }}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); setIdx((i) => (i + 1) % imgs.length); } }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1.5 hover:bg-background"
-                  aria-label="Próxima imagem"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </span>
-              </>
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                {imgs.map((url, i) => (
+                  <button
+                    key={`${url}-${i}`}
+                    onClick={() => setIdx(i)}
+                    className={`h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 ${i === idx ? "border-primary" : "border-transparent opacity-70"}`}
+                  >
+                    <img src={url} alt="" className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
             )}
-          </button>
-          {imgs.length > 1 && (
-            <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-              {imgs.map((url, i) => (
-                <button
-                  key={`${url}-${i}`}
-                  onClick={() => setIdx(i)}
-                  className={`h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 ${i === idx ? "border-primary" : "border-transparent opacity-70"}`}
-                >
-                  <img src={url} alt="" className="h-full w-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+          </div>
 
-        <div className="flex flex-col">
-          {(() => {
-            const parts: string[] = [];
-            if (p.language) parts.push(p.language);
-            if (p.release_year) parts.push(String(p.release_year));
-            if (dateLabel) parts.push(`Disponível em ${dateLabel}`);
-            if (parts.length === 0) return null;
-            return (
-              <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground/80">
-                {parts.join(" · ")}
-              </p>
-            );
-          })()}
-          <h1 className="text-2xl font-bold sm:text-3xl">{p.name}</h1>
-          {p.description && (
-            <p className="mt-3 text-sm text-muted-foreground whitespace-pre-line">{p.description}</p>
-          )}
+          <div className="flex flex-col md:sticky md:top-24 md:self-start">
+            {(() => {
+              const parts: string[] = [];
+              if (p.language) parts.push(p.language);
+              if (p.release_year) parts.push(String(p.release_year));
+              if (dateLabel) parts.push(`Disponível em ${dateLabel}`);
+              if (parts.length === 0) return null;
+              return (
+                <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground/80">
+                  {parts.join(" · ")}
+                </p>
+              );
+            })()}
+            <h1 className="text-2xl font-bold sm:text-3xl">{p.name}</h1>
+            {p.description && (
+              <p className="mt-3 text-sm text-muted-foreground whitespace-pre-line">{p.description}</p>
+            )}
 
 
-          <div className="mt-5 text-3xl font-bold">{formatBRL(p.price_cents)}</div>
+            <div className="mt-5 text-3xl font-bold">{formatBRL(p.price_cents)}</div>
 
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-flex items-center justify-center rounded-md bg-[#2563eb] px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#1d4ed8] transition"
-          >
-            {p.whatsapp_button_text}
-          </a>
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 hidden md:inline-flex items-center justify-center gap-2 rounded-md bg-[#2563eb] px-5 py-3.5 text-base font-bold text-white shadow-sm hover:bg-[#1d4ed8] transition"
+            >
+              <MessageCircle className="h-5 w-5" />
+              {p.whatsapp_button_text}
+            </a>
+          </div>
         </div>
       </div>
+
+      {/* Mobile sticky CTA */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur p-3 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Pré-venda</div>
+          <div className="truncate text-lg font-bold">{formatBRL(p.price_cents)}</div>
+        </div>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 inline-flex items-center justify-center gap-2 rounded-md bg-[#2563eb] px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#1d4ed8] transition"
+        >
+          <MessageCircle className="h-4 w-4" />
+          {p.whatsapp_button_text}
+        </a>
+      </div>
+
 
       {zoomOpen && imgs[idx] && (
         <div
