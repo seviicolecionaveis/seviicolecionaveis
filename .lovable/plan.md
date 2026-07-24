@@ -1,56 +1,85 @@
-# Sistema de Ilustrador (Illustrator)
+# Sistema de Pré-Venda
+
+Estrutura em 3 partes: botão no header, página pública e painel admin com agendamento automático.
 
 ## 1. Banco de dados
 
-Migração única criando:
+Nova migration com duas tabelas:
 
-- `public.illustrators`
-  - `id uuid pk default gen_random_uuid()`
-  - `name text not null unique`
-  - `created_at timestamptz not null default now()`
-- GRANTs: `SELECT` para `anon` e `authenticated` (lista é pública, aparece no filtro do site); `INSERT` para `authenticated` (validado por policy de admin); `ALL` para `service_role`.
-- RLS habilitado:
-  - `SELECT` para todos (`using (true)`)
-  - `INSERT/UPDATE/DELETE` restritos a admin via `has_role(auth.uid(), 'admin')`
-- `public.cards.illustrator_id uuid null references public.illustrators(id) on delete set null`
-- Índice `idx_cards_illustrator_id` parcial (where not null).
-- Seed com os ~230 nomes fornecidos (`INSERT ... ON CONFLICT (name) DO NOTHING`).
+**`presale_pages`** — cada página de pré-venda
+- `slug` (único, para URL `/pre-venda/$slug`)
+- `title`
+- `is_active` (toggle manual)
+- `starts_at` / `ends_at` (agendamento opcional; nulos = sem limite)
+- `sort_order`
 
-## 2. Server functions
+**`presale_products`** — produtos dentro de cada página
+- `page_id` (FK → presale_pages, cascade delete)
+- `name`, `description`, `image_url`
+- `price_cents`
+- `quantity` (interno, só admin)
+- `language` (PT/EN/JP/…)
+- `release_year`
+- `available_from` (data prevista de entrega, informativa)
+- `whatsapp_button_text` (default: "Quero reservar o meu!")
+- `whatsapp_message_template` (default: `Olá! Vim do site e gostaria de reservar o meu "[nome do produto]".`)
+- `sort_order`
 
-Novo arquivo `src/lib/illustrators.functions.ts`:
+**RLS / GRANTs:**
+- `anon` + `authenticated`: SELECT apenas em páginas ativas e dentro da janela `starts_at`/`ends_at`, e nos produtos dessas páginas — mas **sem** a coluna `quantity` exposta ao público (via view `presale_products_public` que omite `quantity`, ou policy + fetch com colunas explícitas).
+- Admin: ALL via `has_role(auth.uid(), 'admin')`.
+- Storage: imagens no bucket existente `card-images` (subpasta `presale/`).
 
-- `listIllustrators()` — público; retorna `{ id, name, card_count }` ordenado por nome. Usa client publishable no servidor com um LEFT JOIN agregado (view/RPC simples ou duas queries + merge).
-- `createIllustrator({ name })` — admin only (`requireSupabaseAuth` + checagem de role via `context.supabase`); trim + case-insensitive uniqueness; devolve linha existente se já houver.
+## 2. Página pública
 
-Tipos regenerados automaticamente após a migração.
+**Rota nova:** `src/routes/pre-venda.$slug.tsx`
+- Loader busca a página pelo slug via server fn pública (client publishable), valida ativa + janela; caso contrário, `notFound()`.
+- Renderiza lista de produtos: imagem, descrição, preço, idioma/ano/data prevista, botão azul "Quero reservar o meu!" → `https://wa.me/5579981509552?text=<mensagem urlencoded com [nome do produto] substituído>`.
+- `head()` com título/description/OG por página.
+- **Nunca renderiza `quantity`.**
 
-## 3. Admin — cadastro/edição de cartas (`src/routes/admin.manage-cards.tsx`)
+**Rota índice:** `src/routes/pre-venda.index.tsx`
+- Lista todas as pré-vendas ativas no momento.
+- Se houver apenas 1 ativa, redireciona para `/pre-venda/$slug`.
+- Se 0 ativas, mostra estado vazio ("Nenhuma pré-venda no momento").
 
-- Novo campo "Ilustrador" no formulário de criar/editar carta e no Quick Edit.
-- Componente `IllustratorCombobox` (novo, em `src/components/admin/IllustratorCombobox.tsx`) usando `Command`/`Popover` do shadcn já presentes no projeto:
-  - Busca por texto (filtro client-side sobre a lista carregada).
-  - Item "+ Criar '<texto>'" quando não há match exato — chama `createIllustrator` e seleciona automaticamente.
-  - Opção de limpar seleção.
-- Salva `illustrator_id` no insert/update de cartas (adicionar campo ao payload existente).
+## 3. Botão no header
 
-## 4. Catálogo público — filtro
+Editar `src/components/SiteNav.tsx` (ou onde vive a barra entre busca e menu) — adicionar botão "Pré-Venda":
+- Cor: azul da marca (usar token existente ou adicionar `--brand-blue` em `src/styles.css` se ainda não houver).
+- Estilo destacado (fundo sólido azul, texto branco, leve `shadow`/`hover`) para se sobressair sobre os demais links.
+- `<Link to="/pre-venda">` — a rota índice cuida do "mais recente vs listagem".
+- Só aparece quando existe ao menos uma pré-venda ativa (checagem leve via hook/query cacheada, para não poluir header quando não há campanha).
 
-- Em `src/components/catalog/Filters.tsx`, adicionar seção "Ilustrador":
-  - Multi-select com busca (mesmo `IllustratorCombobox` em modo multi, ou um `Command` inline com checkboxes) exibindo `Nome (N)` — contagem vinda de `listIllustrators`.
-  - Chips dos selecionados removíveis.
-- Estender `FilterState` com `illustratorIds: string[]` e propagar em `useCardsCatalog` para filtrar as cartas por `illustrator_id`.
-- Contagem total de cartas encontradas continua usando o mecanismo atual.
-- Reset limpa também `illustratorIds`.
+## 4. Painel Admin
 
-## 5. UX / detalhes
+**Nova rota:** `src/routes/admin.pre-venda.tsx` + adicionar em `NAV_GROUPS` de `src/routes/admin.tsx` no grupo **Marketing**.
 
-- Ordem alfabética (pt-BR, `localeCompare`) em dropdown do admin e no filtro.
-- Contagem por ilustrador exibida no filtro do site (não no admin).
-- Componentes shadcn existentes; sem novas dependências.
-- Sem alterações em SEO/rotas.
+**Listagem:**
+- Todas as páginas com badge de status (Ativa / Agendada / Encerrada / Desativada — derivado de `is_active` + janela de datas).
+- Ações: editar, duplicar, ativar/desativar (toggle), excluir.
 
-## Fora de escopo
+**Form de página:**
+- Slug, título, toggle `is_active`, datepickers `starts_at`/`ends_at`.
+- Sub-form repetível de produtos com todos os campos acima (incluindo `quantity` visível só aqui), upload de imagem via storage, reordenação.
 
-- Página dedicada por ilustrador (`/ilustrador/$slug`) — posso adicionar depois se quiser.
-- Exibir ilustrador na página pública da carta (posso incluir se pedir; hoje não está listado).
+**Server fns:** `src/lib/presale.functions.ts` (público: listar ativas, obter por slug — sem quantity) + `src/lib/admin-presale.functions.ts` (admin CRUD com `requireSupabaseAuth` + checagem `has_role`).
+
+## 5. Ativação automática (sem cron)
+
+Não requer job — a validação de janela é feita **na leitura**:
+- Fetches públicos aplicam `WHERE is_active = true AND (starts_at IS NULL OR starts_at <= now()) AND (ends_at IS NULL OR ends_at > now())`.
+- Isso garante ativação/desativação no horário sem intervenção. O botão do header consulta a mesma regra.
+
+## Detalhes técnicos
+
+- Encoding da mensagem WhatsApp: `encodeURIComponent` no client, com substituição de `[nome do produto]`.
+- Preços em `cents` (padrão do projeto).
+- Imagens: reutilizar bucket `card-images` público existente.
+- `quantity` **nunca** é retornado pelas server fns/queries públicas (projeção explícita de colunas).
+- SEO: `head()` por página com `og:image` = imagem do primeiro produto (URL absoluta https).
+
+## Fora do escopo (confirmar depois)
+
+- Não cria checkout/pagamento — reserva é 100% via WhatsApp.
+- Não decrementa `quantity` automaticamente (é controle interno; admin ajusta manualmente conforme confirmações no WhatsApp).
