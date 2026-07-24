@@ -91,7 +91,7 @@ function PresalePage() {
   const { page } = Route.useLoaderData();
   return (
     <Shell>
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 space-y-12">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 space-y-10 pb-28 md:pb-8">
         {page.products.map((p: PublicPresaleProduct) => (
           <PresaleProductBlock key={p.id} product={p} pageTitle={page.title} />
         ))}
