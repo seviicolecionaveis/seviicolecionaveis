@@ -1256,6 +1256,104 @@ export type Database = {
         }
         Relationships: []
       }
+      presale_pages: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          slug: string
+          sort_order: number
+          starts_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          slug: string
+          sort_order?: number
+          starts_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          slug?: string
+          sort_order?: number
+          starts_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      presale_products: {
+        Row: {
+          available_from: string | null
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          language: string | null
+          name: string
+          page_id: string
+          price_cents: number
+          quantity: number
+          release_year: number | null
+          sort_order: number
+          updated_at: string
+          whatsapp_button_text: string
+          whatsapp_message_template: string
+        }
+        Insert: {
+          available_from?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          language?: string | null
+          name: string
+          page_id: string
+          price_cents?: number
+          quantity?: number
+          release_year?: number | null
+          sort_order?: number
+          updated_at?: string
+          whatsapp_button_text?: string
+          whatsapp_message_template?: string
+        }
+        Update: {
+          available_from?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          language?: string | null
+          name?: string
+          page_id?: string
+          price_cents?: number
+          quantity?: number
+          release_year?: number | null
+          sort_order?: number
+          updated_at?: string
+          whatsapp_button_text?: string
+          whatsapp_message_template?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presale_products_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "presale_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       price_update_runs: {
         Row: {
           error_count: number
