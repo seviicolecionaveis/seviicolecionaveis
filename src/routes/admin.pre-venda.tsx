@@ -270,7 +270,22 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
       return;
     }
     const { data } = supabase.storage.from("card-images").getPublicUrl(path);
-    updateProduct(idx, { image_url: data.publicUrl });
+    setProducts((curr) => curr.map((p, i) => (i === idx ? { ...p, image_urls: [...p.image_urls, data.publicUrl] } : p)));
+  };
+
+  const removeImage = (idx: number, imgIdx: number) => {
+    setProducts((curr) => curr.map((p, i) => (i === idx ? { ...p, image_urls: p.image_urls.filter((_, k) => k !== imgIdx) } : p)));
+  };
+
+  const moveImage = (idx: number, imgIdx: number, dir: -1 | 1) => {
+    setProducts((curr) => curr.map((p, i) => {
+      if (i !== idx) return p;
+      const j = imgIdx + dir;
+      if (j < 0 || j >= p.image_urls.length) return p;
+      const next = p.image_urls.slice();
+      [next[imgIdx], next[j]] = [next[j], next[imgIdx]];
+      return { ...p, image_urls: next };
+    }));
   };
 
   const save = async () => {
