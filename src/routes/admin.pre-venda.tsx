@@ -456,17 +456,60 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-[180px_1fr]">
+              <div className="grid gap-4 md:grid-cols-[220px_1fr]">
                 <div>
-                  {p.image_url ? (
-                    <img src={p.image_url} alt="" className="w-full aspect-square object-cover rounded-md border border-border" />
-                  ) : (
+                  {p.image_urls.length === 0 ? (
                     <div className="w-full aspect-square rounded-md border border-dashed border-border grid place-items-center text-xs text-muted-foreground">
                       Sem imagem
                     </div>
+                  ) : (
+                    <>
+                      <img
+                        src={p.image_urls[0]}
+                        alt=""
+                        className="w-full aspect-square object-cover rounded-md border-2 border-primary"
+                      />
+                      <p className="mt-1 text-[10px] font-semibold uppercase text-primary">Capa</p>
+                      {p.image_urls.length > 1 && (
+                        <div className="mt-2 grid grid-cols-3 gap-1.5">
+                          {p.image_urls.slice(1).map((url, k) => (
+                            <div key={`${url}-${k}`} className="relative group">
+                              <img src={url} alt="" className="w-full aspect-square object-cover rounded-md border border-border" />
+                              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-black/50 rounded-md flex items-center justify-center gap-1 transition">
+                                <button
+                                  type="button"
+                                  onClick={() => moveImage(idx, k + 1, -1)}
+                                  className="rounded-full bg-white/90 p-1"
+                                  aria-label="Mover para esquerda"
+                                >
+                                  <ArrowUp className="h-3 w-3 -rotate-90" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(idx, k + 1)}
+                                  className="rounded-full bg-white/90 p-1 text-red-600"
+                                  aria-label="Remover"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {p.image_urls.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeImage(idx, 0)}
+                          className="mt-1 text-[10px] text-red-600 hover:underline"
+                        >
+                          Remover capa
+                        </button>
+                      )}
+                    </>
                   )}
                   <label className="mt-2 inline-flex items-center gap-1 text-xs cursor-pointer rounded-md border border-border px-2 py-1.5 hover:bg-secondary">
-                    <Upload className="h-3 w-3" /> {p.image_url ? "Trocar" : "Enviar imagem"}
+                    <Upload className="h-3 w-3" /> Adicionar imagem
                     <input
                       type="file"
                       accept="image/*"
@@ -474,9 +517,11 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
                       onChange={(e) => {
                         const f = e.target.files?.[0];
                         if (f) uploadImage(idx, f);
+                        e.target.value = "";
                       }}
                     />
                   </label>
+                  <p className="mt-1 text-[10px] text-muted-foreground">A primeira imagem é a capa.</p>
                 </div>
 
                 <div className="space-y-3">
