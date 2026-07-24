@@ -352,21 +352,36 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
           starts_at: fromDateTimeLocal(startsAt),
           ends_at: fromDateTimeLocal(endsAt),
           sort_order: 0,
-          products: products.map((p, i) => ({
-            id: p.id,
-            name: p.name.trim(),
-            description: p.description,
-            image_url: p.image_urls[0] ?? null,
-            image_urls: p.image_urls,
-            price_cents: Math.round(Number(p.price_cents) || 0),
-            quantity: Math.round(Number(p.quantity) || 0),
-            language: p.language?.trim() || null,
-            release_year: p.release_year === "" ? null : Number(p.release_year),
-            available_from: p.available_from || null,
-            whatsapp_button_text: p.whatsapp_button_text.trim(),
-            whatsapp_message_template: p.whatsapp_message_template.trim(),
-            sort_order: i,
-          })),
+          products: products.map((p, i) => {
+            const price = Math.round(Number(p.price_cents) || 0);
+            const payment_options: any[] = [{ metodo: "pix", valor_cents: price }];
+            if (p.pay_cartao_vista_enabled) {
+              payment_options.push({ metodo: "cartao_vista", valor_cents: Math.round(Number(p.pay_cartao_vista_cents) || 0) });
+            }
+            if (p.pay_cartao_credito_enabled) {
+              payment_options.push({
+                metodo: "cartao_credito",
+                valor_total_cents: Math.round(Number(p.pay_cartao_credito_cents) || 0),
+                parcelas: Math.max(1, Math.min(12, Math.round(Number(p.pay_cartao_credito_parcelas) || 1))),
+              });
+            }
+            return {
+              id: p.id,
+              name: p.name.trim(),
+              description: p.description,
+              image_url: p.image_urls[0] ?? null,
+              image_urls: p.image_urls,
+              price_cents: price,
+              quantity: Math.round(Number(p.quantity) || 0),
+              language: p.language?.trim() || null,
+              release_year: p.release_year === "" ? null : Number(p.release_year),
+              available_from: p.available_from || null,
+              whatsapp_button_text: p.whatsapp_button_text.trim(),
+              whatsapp_message_template: p.whatsapp_message_template.trim(),
+              sort_order: i,
+              payment_options,
+            };
+          }),
         },
       });
       if (!res.success) {
