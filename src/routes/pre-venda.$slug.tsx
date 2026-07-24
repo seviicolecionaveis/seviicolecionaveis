@@ -191,30 +191,23 @@ function PresaleProductBlock({ product: p, pageTitle }: { product: PublicPresale
         </div>
 
         <div className="flex flex-col">
+          {(() => {
+            const parts: string[] = [];
+            if (p.language) parts.push(p.language);
+            if (p.release_year) parts.push(String(p.release_year));
+            if (dateLabel) parts.push(`Disponível em ${dateLabel}`);
+            if (parts.length === 0) return null;
+            return (
+              <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground/80">
+                {parts.join(" · ")}
+              </p>
+            );
+          })()}
           <h1 className="text-2xl font-bold sm:text-3xl">{p.name}</h1>
           {p.description && (
             <p className="mt-3 text-sm text-muted-foreground whitespace-pre-line">{p.description}</p>
           )}
 
-          {(() => {
-            const specs: Array<[string, string | null | undefined]> = [
-              ["Idioma", p.language],
-              ["Ano", p.release_year ? String(p.release_year) : null],
-              ["Disponibilidade", dateLabel],
-            ];
-            const filled = specs.filter(([, v]) => v && String(v).trim());
-            if (filled.length === 0) return null;
-            return (
-              <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
-                {filled.map(([k, v]) => (
-                  <div key={k} className="contents">
-                    <dt className="font-semibold text-muted-foreground">{k}:</dt>
-                    <dd className="text-foreground">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-            );
-          })()}
 
           <div className="mt-5 text-3xl font-bold">{formatBRL(p.price_cents)}</div>
 
