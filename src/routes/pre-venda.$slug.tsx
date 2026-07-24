@@ -1,5 +1,5 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { getActivePresalePageBySlug } from "@/lib/presale.functions";
+import { getActivePresalePageBySlug, type PublicPresaleProduct } from "@/lib/presale.functions";
 import { SiteFooter } from "@/components/SiteFooter";
 
 const WHATSAPP_NUMBER = "5579981509552";
