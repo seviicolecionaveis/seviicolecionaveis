@@ -1303,6 +1303,7 @@ export type Database = {
           language: string | null
           name: string
           page_id: string
+          payment_options: Json
           price_cents: number
           quantity: number
           release_year: number | null
@@ -1321,6 +1322,7 @@ export type Database = {
           language?: string | null
           name: string
           page_id: string
+          payment_options?: Json
           price_cents?: number
           quantity?: number
           release_year?: number | null
@@ -1339,6 +1341,7 @@ export type Database = {
           language?: string | null
           name?: string
           page_id?: string
+          payment_options?: Json
           price_cents?: number
           quantity?: number
           release_year?: number | null

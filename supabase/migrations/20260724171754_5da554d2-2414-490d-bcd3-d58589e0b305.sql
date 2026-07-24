@@ -1,0 +1,1 @@
+ALTER TABLE public.presale_products ADD COLUMN IF NOT EXISTS payment_options jsonb NOT NULL DEFAULT '[]'::jsonb;
