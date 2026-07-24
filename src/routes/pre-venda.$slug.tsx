@@ -1,6 +1,6 @@
 import { createFileRoute, notFound, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, ArrowLeft, ZoomIn, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowLeft, ZoomIn, X, MessageCircle } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { getActivePresalePageBySlug, type PublicPresaleProduct } from "@/lib/presale.functions";
