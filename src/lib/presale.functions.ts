@@ -26,6 +26,7 @@ export type PublicPresaleProduct = {
   name: string;
   description: string;
   image_url: string | null;
+  image_urls: string[];
   price_cents: number;
   language: string | null;
   release_year: number | null;
