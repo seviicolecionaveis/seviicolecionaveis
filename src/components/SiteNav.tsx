@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { PresaleNavButton } from "@/components/PresaleNavButton";
 
 const CARTAS_GROUP = [
   { to: "/cartas", label: "Cartas" },
@@ -34,6 +35,7 @@ export function SiteNav({ className = "" }: { className?: string }) {
 
   return (
     <nav className={`items-center gap-1 ${className}`}>
+      <PresaleNavButton className="mr-1" />
       <Popover open={cartasOpen} onOpenChange={setCartasOpen}>
         <PopoverTrigger asChild>
           <button
