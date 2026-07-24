@@ -79,7 +79,7 @@ export const getActivePresalePageBySlug = createServerFn({ method: "POST" })
     const { data: products, error: pErr } = await supabase
       .from("presale_products")
       .select(
-        "id, name, description, image_url, image_urls, price_cents, language, release_year, available_from, whatsapp_button_text, whatsapp_message_template, sort_order",
+        "id, name, description, image_url, image_urls, price_cents, language, release_year, available_from, whatsapp_button_text, whatsapp_message_template, sort_order, payment_options",
       )
       .eq("page_id", page.id)
       .order("sort_order", { ascending: true });
@@ -87,5 +87,5 @@ export const getActivePresalePageBySlug = createServerFn({ method: "POST" })
       console.error("[presale] products failed", pErr);
       return { page: { ...page, products: [] } };
     }
-    return { page: { ...page, products: (products ?? []) as PublicPresaleProduct[] } };
+    return { page: { ...page, products: (products ?? []) as unknown as PublicPresaleProduct[] } };
   });
