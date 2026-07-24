@@ -1,4 +1,6 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import sanitizeHtml from "sanitize-html";
 import { getActivePresalePageBySlug, type PublicPresaleProduct } from "@/lib/presale.functions";
 import { SiteFooter } from "@/components/SiteFooter";
 
