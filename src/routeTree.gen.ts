@@ -55,6 +55,7 @@ import { Route as AdminVideogamesRouteImport } from './routes/admin.videogames'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
 import { Route as AdminSealedRouteImport } from './routes/admin.sealed'
+import { Route as AdminPreVendaRouteImport } from './routes/admin.pre-venda'
 import { Route as AdminPilhaRouteImport } from './routes/admin.pilha'
 import { Route as AdminPanelsRouteImport } from './routes/admin.panels'
 import { Route as AdminOfertasRelampagoRouteImport } from './routes/admin.ofertas-relampago'
@@ -315,6 +316,11 @@ const AdminSealedRoute = AdminSealedRouteImport.update({
   path: '/sealed',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPreVendaRoute = AdminPreVendaRouteImport.update({
+  id: '/pre-venda',
+  path: '/pre-venda',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPilhaRoute = AdminPilhaRouteImport.update({
   id: '/pilha',
   path: '/pilha',
@@ -512,6 +518,7 @@ export interface FileRoutesByFullPath {
   '/admin/ofertas-relampago': typeof AdminOfertasRelampagoRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
+  '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
@@ -586,6 +593,7 @@ export interface FileRoutesByTo {
   '/admin/ofertas-relampago': typeof AdminOfertasRelampagoRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
+  '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
@@ -664,6 +672,7 @@ export interface FileRoutesById {
   '/admin/ofertas-relampago': typeof AdminOfertasRelampagoRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
+  '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/users': typeof AdminUsersRoute
@@ -743,6 +752,7 @@ export interface FileRouteTypes {
     | '/admin/ofertas-relampago'
     | '/admin/panels'
     | '/admin/pilha'
+    | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/users'
@@ -817,6 +827,7 @@ export interface FileRouteTypes {
     | '/admin/ofertas-relampago'
     | '/admin/panels'
     | '/admin/pilha'
+    | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/users'
@@ -894,6 +905,7 @@ export interface FileRouteTypes {
     | '/admin/ofertas-relampago'
     | '/admin/panels'
     | '/admin/pilha'
+    | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/users'
@@ -1310,6 +1322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSealedRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/pre-venda': {
+      id: '/admin/pre-venda'
+      path: '/pre-venda'
+      fullPath: '/admin/pre-venda'
+      preLoaderRoute: typeof AdminPreVendaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/pilha': {
       id: '/admin/pilha'
       path: '/pilha'
@@ -1529,6 +1548,7 @@ interface AdminRouteChildren {
   AdminOfertasRelampagoRoute: typeof AdminOfertasRelampagoRoute
   AdminPanelsRoute: typeof AdminPanelsRoute
   AdminPilhaRoute: typeof AdminPilhaRoute
+  AdminPreVendaRoute: typeof AdminPreVendaRoute
   AdminSealedRoute: typeof AdminSealedRoute
   AdminShippingRoute: typeof AdminShippingRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -1549,6 +1569,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminOfertasRelampagoRoute: AdminOfertasRelampagoRoute,
   AdminPanelsRoute: AdminPanelsRoute,
   AdminPilhaRoute: AdminPilhaRoute,
+  AdminPreVendaRoute: AdminPreVendaRoute,
   AdminSealedRoute: AdminSealedRoute,
   AdminShippingRoute: AdminShippingRoute,
   AdminUsersRoute: AdminUsersRoute,
