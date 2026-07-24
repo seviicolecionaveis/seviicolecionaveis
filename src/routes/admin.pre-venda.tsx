@@ -31,7 +31,7 @@ type ProductForm = {
   id?: string;
   name: string;
   description: string;
-  image_url: string | null;
+  image_urls: string[];
   price_cents: number;
   quantity: number;
   language: string;
@@ -44,7 +44,7 @@ type ProductForm = {
 const emptyProduct = (): ProductForm => ({
   name: "",
   description: "",
-  image_url: null,
+  image_urls: [],
   price_cents: 0,
   quantity: 0,
   language: "PT",
