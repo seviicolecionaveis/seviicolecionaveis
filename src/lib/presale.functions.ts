@@ -26,7 +26,6 @@ export type PublicPresaleProduct = {
   name: string;
   description: string;
   image_url: string | null;
-  image_urls: string[];
   price_cents: number;
   language: string | null;
   release_year: number | null;
@@ -73,7 +72,7 @@ export const getActivePresalePageBySlug = createServerFn({ method: "POST" })
     const { data: products, error: pErr } = await supabase
       .from("presale_products")
       .select(
-        "id, name, description, image_url, image_urls, price_cents, language, release_year, available_from, whatsapp_button_text, whatsapp_message_template, sort_order",
+        "id, name, description, image_url, price_cents, language, release_year, available_from, whatsapp_button_text, whatsapp_message_template, sort_order",
       )
       .eq("page_id", page.id)
       .order("sort_order", { ascending: true });

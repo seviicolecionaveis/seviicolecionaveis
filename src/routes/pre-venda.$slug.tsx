@@ -1,6 +1,4 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import sanitizeHtml from "sanitize-html";
 import { getActivePresalePageBySlug, type PublicPresaleProduct } from "@/lib/presale.functions";
 import { SiteFooter } from "@/components/SiteFooter";
 
@@ -62,56 +60,6 @@ function formatDate(iso: string | null) {
   }
 }
 
-const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
-  allowedTags: ["p", "br", "strong", "b", "em", "i", "u", "s", "strike", "a", "ul", "ol", "li", "h2", "h3", "h4", "blockquote", "span", "div"],
-  allowedAttributes: {
-    a: ["href", "target", "rel"],
-    "*": ["style"],
-  },
-  allowedStyles: {
-    "*": {
-      color: [/^#(0x)?[0-9a-fA-F]+$/, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/],
-      "text-align": [/^left$/, /^right$/, /^center$/, /^justify$/],
-      "font-weight": [/^\d+$/, /^bold$/, /^normal$/],
-    },
-  },
-  allowedSchemes: ["http", "https", "mailto"],
-  transformTags: {
-    a: (_t, attribs) => ({
-      tagName: "a",
-      attribs: { ...attribs, target: "_blank", rel: "noopener noreferrer" },
-    }),
-  },
-};
-
-function ProductGallery({ images, alt }: { images: string[]; alt: string }) {
-  const [idx, setIdx] = useState(0);
-  if (images.length === 0) return <div className="w-full aspect-[4/3] bg-secondary" />;
-  const active = images[Math.min(idx, images.length - 1)];
-  return (
-    <div>
-      <img src={active} alt={alt} className="w-full aspect-[4/3] object-cover" loading="lazy" />
-      {images.length > 1 && (
-        <div className="flex gap-2 p-2 overflow-x-auto bg-muted/30">
-          {images.map((src, i) => (
-            <button
-              key={src + i}
-              type="button"
-              onClick={() => setIdx(i)}
-              className={`shrink-0 h-14 w-14 rounded-md overflow-hidden border-2 transition ${
-                i === idx ? "border-[#2563eb]" : "border-transparent opacity-70 hover:opacity-100"
-              }`}
-              aria-label={`Imagem ${i + 1}`}
-            >
-              <img src={src} alt="" className="h-full w-full object-cover" />
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function PresalePage() {
   const { page } = Route.useLoaderData();
   return (
@@ -125,20 +73,17 @@ function PresalePage() {
             const msg = p.whatsapp_message_template.replaceAll("[nome do produto]", p.name);
             const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
             const dateLabel = formatDate(p.available_from);
-            const images = (p.image_urls && p.image_urls.length > 0)
-              ? p.image_urls
-              : (p.image_url ? [p.image_url] : []);
-            const descHtml = p.description ? sanitizeHtml(p.description, SANITIZE_OPTIONS) : "";
             return (
               <article key={p.id} className="rounded-2xl border border-border bg-card overflow-hidden flex flex-col">
-                <ProductGallery images={images} alt={p.name} />
+                {p.image_url ? (
+                  <img src={p.image_url} alt={p.name} className="w-full aspect-[4/3] object-cover" loading="lazy" />
+                ) : (
+                  <div className="w-full aspect-[4/3] bg-secondary" />
+                )}
                 <div className="p-5 flex flex-col gap-3 flex-1">
                   <h2 className="text-xl font-bold">{p.name}</h2>
-                  {descHtml && (
-                    <div
-                      className="prose prose-sm max-w-none text-muted-foreground"
-                      dangerouslySetInnerHTML={{ __html: descHtml }}
-                    />
+                  {p.description && (
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{p.description}</p>
                   )}
                   <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
                     {p.language && <span className="rounded-full bg-secondary px-2 py-0.5">{p.language}</span>}
