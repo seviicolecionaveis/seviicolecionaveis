@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DontShowAgainCheckbox } from "@/components/DontShowAgainCheckbox";
 import { getPermanentlyDismissed, useDontShowAgain } from "@/hooks/usePopupPreference";
@@ -30,19 +29,8 @@ export function PresalePopup() {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent
-        className="p-0 overflow-hidden sm:max-w-[420px] bg-transparent border-0 shadow-none"
-        hideCloseButton
-      >
-        <div className="relative rounded-xl overflow-hidden bg-background shadow-2xl">
-          <button
-            type="button"
-            onClick={() => handleClose(false)}
-            aria-label="Fechar"
-            className="absolute right-2 top-2 z-10 rounded-full bg-background/90 p-1.5 text-foreground shadow hover:bg-background"
-          >
-            <X className="h-4 w-4" />
-          </button>
+      <DialogContent className="p-0 gap-0 overflow-hidden sm:max-w-[420px] border-0">
+        <div className="relative">
           <Link
             to="/pre-venda/$slug"
             params={{ slug: TARGET_SLUG }}
