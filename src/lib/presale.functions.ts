@@ -73,7 +73,7 @@ export const getActivePresalePageBySlug = createServerFn({ method: "POST" })
     const { data: products, error: pErr } = await supabase
       .from("presale_products")
       .select(
-        "id, name, description, image_url, price_cents, language, release_year, available_from, whatsapp_button_text, whatsapp_message_template, sort_order",
+        "id, name, description, image_url, image_urls, price_cents, language, release_year, available_from, whatsapp_button_text, whatsapp_message_template, sort_order",
       )
       .eq("page_id", page.id)
       .order("sort_order", { ascending: true });
