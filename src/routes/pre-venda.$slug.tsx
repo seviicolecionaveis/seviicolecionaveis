@@ -92,7 +92,7 @@ function PresalePage() {
   return (
     <Shell>
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 space-y-12">
-        {page.products.map((p) => (
+        {page.products.map((p: PublicPresaleProduct) => (
           <PresaleProductBlock key={p.id} product={p} pageTitle={page.title} />
         ))}
         {page.products.length === 0 && (
