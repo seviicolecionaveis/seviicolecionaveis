@@ -647,6 +647,6 @@ function PresalePageEditor({ id, onDone, onCancel }: { id: string | null; onDone
           ))}
         </section>
       </main>
-    </div>
+    </AdminShell>
   );
 }
