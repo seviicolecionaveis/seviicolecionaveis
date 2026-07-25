@@ -54,6 +54,7 @@ interface CardRow {
   condition: Condition;
   category: CardCategory;
   trainer_subcategory: TrainerSubcategory | null;
+  liga_subcategory: LigaSubcategory | null;
   pokemon_type: PokemonType | null;
   illustrator_id: string | null;
   stock: number;
