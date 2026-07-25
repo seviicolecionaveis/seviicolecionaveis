@@ -973,7 +973,7 @@ function AdminCardsManagePage() {
                               condition: r.condition ?? "NM",
                               category: r.category ?? "Pokémon",
                               trainer_subcategory: r.trainer_subcategory ?? "",
-      liga_subcategory: (r as any).liga_subcategory ?? "",
+                              liga_subcategory: (r as any).liga_subcategory ?? "",
                               pokemon_type: r.pokemon_type ?? "",
                               illustrator_id: r.illustrator_id ?? null,
                               stock: "1",
