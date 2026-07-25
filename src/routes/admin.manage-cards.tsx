@@ -235,6 +235,7 @@ function AdminCardsManagePage() {
       condition: form.condition,
       category: form.category,
       trainer_subcategory: form.category === "Treinador" && form.trainer_subcategory ? form.trainer_subcategory : null,
+      liga_subcategory: form.finish === "Liga" && form.liga_subcategory ? form.liga_subcategory : null,
       pokemon_type: form.category === "Pokémon" && form.pokemon_type ? form.pokemon_type : null,
       illustrator_id: form.illustrator_id,
       stock: Math.max(0, parseInt(form.stock) || 0),
