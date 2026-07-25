@@ -357,6 +357,7 @@ function AdminCardsManagePage() {
       condition: quickForm.condition,
       category: quickForm.category,
       trainer_subcategory: quickForm.category === "Treinador" && quickForm.trainer_subcategory ? quickForm.trainer_subcategory : null,
+      liga_subcategory: quickForm.finish === "Liga" && quickForm.liga_subcategory ? quickForm.liga_subcategory : null,
       pokemon_type: quickForm.category === "Pokémon" && quickForm.pokemon_type ? quickForm.pokemon_type : null,
       illustrator_id: quickForm.illustrator_id,
       stock: newStock,
