@@ -75,6 +75,7 @@ interface FormState {
   condition: Condition;
   category: CardCategory;
   trainer_subcategory: TrainerSubcategory | "";
+  liga_subcategory: LigaSubcategory | "";
   pokemon_type: PokemonType | "";
   illustrator_id: string | null;
   stock: string;
