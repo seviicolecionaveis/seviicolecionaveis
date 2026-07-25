@@ -483,12 +483,29 @@ function AdminCardsManagePage() {
               <span className="font-semibold">Acabamento (Finish) *</span>
               <select
                 value={form.finish}
-                onChange={(e) => setForm({ ...form, finish: e.target.value as Finish })}
+                onChange={(e) => {
+                  const finish = e.target.value as Finish;
+                  setForm({ ...form, finish, liga_subcategory: finish === "Liga" ? form.liga_subcategory : "" });
+                }}
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
               >
                 {FINISHES.map((f) => <option key={f} value={f}>{f}</option>)}
               </select>
             </label>
+
+            {form.finish === "Liga" && (
+              <label className="text-xs space-y-1">
+                <span className="font-semibold">Subtipo Liga</span>
+                <select
+                  value={form.liga_subcategory}
+                  onChange={(e) => setForm({ ...form, liga_subcategory: e.target.value as LigaSubcategory | "" })}
+                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">— Selecionar —</option>
+                  {LIGA_SUBCATEGORIES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </label>
+            )}
 
             <label className="text-xs space-y-1">
               <span className="font-semibold">Condição *</span>
