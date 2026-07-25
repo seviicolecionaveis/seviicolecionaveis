@@ -92,6 +92,7 @@ const EMPTY_FORM: FormState = {
   condition: "NM",
   category: "Pokémon",
   trainer_subcategory: "",
+  liga_subcategory: "",
   pokemon_type: "",
   illustrator_id: null,
   stock: "1",
