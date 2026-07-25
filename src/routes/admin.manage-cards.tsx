@@ -4,8 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateCardsCache } from "@/hooks/useCardsCatalog";
-import type { Condition, Finish, Language, PokemonType, TrainerSubcategory } from "@/data/cards";
-import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS, POKEMON_TYPES, TRAINER_SUBCATEGORIES } from "@/data/cards";
+import type { Condition, Finish, Language, LigaSubcategory, PokemonType, TrainerSubcategory } from "@/data/cards";
+import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS, LIGA_SUBCATEGORIES, POKEMON_TYPES, TRAINER_SUBCATEGORIES } from "@/data/cards";
 import { notifyStockBack } from "@/lib/stock-alerts.functions";
 import { cardSlug } from "@/lib/slug";
 import { IllustratorCombobox } from "@/components/admin/IllustratorCombobox";
@@ -54,6 +54,7 @@ interface CardRow {
   condition: Condition;
   category: CardCategory;
   trainer_subcategory: TrainerSubcategory | null;
+  liga_subcategory: LigaSubcategory | null;
   pokemon_type: PokemonType | null;
   illustrator_id: string | null;
   stock: number;
@@ -74,6 +75,7 @@ interface FormState {
   condition: Condition;
   category: CardCategory;
   trainer_subcategory: TrainerSubcategory | "";
+  liga_subcategory: LigaSubcategory | "";
   pokemon_type: PokemonType | "";
   illustrator_id: string | null;
   stock: string;
@@ -90,6 +92,7 @@ const EMPTY_FORM: FormState = {
   condition: "NM",
   category: "Pokémon",
   trainer_subcategory: "",
+  liga_subcategory: "",
   pokemon_type: "",
   illustrator_id: null,
   stock: "1",
@@ -232,6 +235,7 @@ function AdminCardsManagePage() {
       condition: form.condition,
       category: form.category,
       trainer_subcategory: form.category === "Treinador" && form.trainer_subcategory ? form.trainer_subcategory : null,
+      liga_subcategory: form.finish === "Liga" && form.liga_subcategory ? form.liga_subcategory : null,
       pokemon_type: form.category === "Pokémon" && form.pokemon_type ? form.pokemon_type : null,
       illustrator_id: form.illustrator_id,
       stock: Math.max(0, parseInt(form.stock) || 0),
@@ -266,6 +270,7 @@ function AdminCardsManagePage() {
       condition: r.condition ?? "NM",
       category: r.category ?? "Pokémon",
       trainer_subcategory: r.trainer_subcategory ?? "",
+      liga_subcategory: (r as any).liga_subcategory ?? "",
       pokemon_type: r.pokemon_type ?? "",
       illustrator_id: r.illustrator_id ?? null,
       stock: String(r.stock),
@@ -296,6 +301,7 @@ function AdminCardsManagePage() {
       condition: r.condition ?? "NM",
       category: r.category ?? "Pokémon",
       trainer_subcategory: r.trainer_subcategory ?? "",
+      liga_subcategory: (r as any).liga_subcategory ?? "",
       pokemon_type: r.pokemon_type ?? "",
       illustrator_id: r.illustrator_id ?? null,
       stock: String(r.stock),
@@ -351,6 +357,7 @@ function AdminCardsManagePage() {
       condition: quickForm.condition,
       category: quickForm.category,
       trainer_subcategory: quickForm.category === "Treinador" && quickForm.trainer_subcategory ? quickForm.trainer_subcategory : null,
+      liga_subcategory: quickForm.finish === "Liga" && quickForm.liga_subcategory ? quickForm.liga_subcategory : null,
       pokemon_type: quickForm.category === "Pokémon" && quickForm.pokemon_type ? quickForm.pokemon_type : null,
       illustrator_id: quickForm.illustrator_id,
       stock: newStock,
@@ -383,6 +390,7 @@ function AdminCardsManagePage() {
           condition: next.condition ?? "NM",
           category: next.category ?? "Pokémon",
           trainer_subcategory: next.trainer_subcategory ?? "",
+          liga_subcategory: (next as any).liga_subcategory ?? "",
           pokemon_type: next.pokemon_type ?? "",
           illustrator_id: next.illustrator_id ?? null,
           stock: String(next.stock),
@@ -475,12 +483,29 @@ function AdminCardsManagePage() {
               <span className="font-semibold">Acabamento (Finish) *</span>
               <select
                 value={form.finish}
-                onChange={(e) => setForm({ ...form, finish: e.target.value as Finish })}
+                onChange={(e) => {
+                  const finish = e.target.value as Finish;
+                  setForm({ ...form, finish, liga_subcategory: finish === "Liga" ? form.liga_subcategory : "" });
+                }}
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
               >
                 {FINISHES.map((f) => <option key={f} value={f}>{f}</option>)}
               </select>
             </label>
+
+            {form.finish === "Liga" && (
+              <label className="text-xs space-y-1">
+                <span className="font-semibold">Subtipo Liga</span>
+                <select
+                  value={form.liga_subcategory}
+                  onChange={(e) => setForm({ ...form, liga_subcategory: e.target.value as LigaSubcategory | "" })}
+                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">— Selecionar —</option>
+                  {LIGA_SUBCATEGORIES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </label>
+            )}
 
             <label className="text-xs space-y-1">
               <span className="font-semibold">Condição *</span>
@@ -852,6 +877,19 @@ function AdminCardsManagePage() {
                             </select>
                           </label>
                         )}
+                        {quickForm.finish === "Liga" && (
+                          <label className="text-xs space-y-1">
+                            <span className="font-semibold">Subtipo Liga</span>
+                            <select
+                              value={quickForm.liga_subcategory}
+                              onChange={(e) => setQuickForm({ ...quickForm, liga_subcategory: e.target.value as LigaSubcategory | "" })}
+                              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                            >
+                              <option value="">— Selecionar —</option>
+                              {LIGA_SUBCATEGORIES.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </label>
+                        )}
                         <label className="text-xs space-y-1">
                           <span className="font-semibold">Tipo Pokémon</span>
                           <select
@@ -966,6 +1004,7 @@ function AdminCardsManagePage() {
                               condition: r.condition ?? "NM",
                               category: r.category ?? "Pokémon",
                               trainer_subcategory: r.trainer_subcategory ?? "",
+                              liga_subcategory: (r as any).liga_subcategory ?? "",
                               pokemon_type: r.pokemon_type ?? "",
                               illustrator_id: r.illustrator_id ?? null,
                               stock: "1",

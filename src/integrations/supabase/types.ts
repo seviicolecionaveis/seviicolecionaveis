@@ -512,6 +512,7 @@ export type Database = {
           illustrator_id: string | null
           image: string
           language: Database["public"]["Enums"]["card_language"]
+          liga_subcategory: string | null
           name: string
           pokemon_type: string | null
           stock: number
@@ -531,6 +532,7 @@ export type Database = {
           illustrator_id?: string | null
           image?: string
           language: Database["public"]["Enums"]["card_language"]
+          liga_subcategory?: string | null
           name: string
           pokemon_type?: string | null
           stock?: number
@@ -550,6 +552,7 @@ export type Database = {
           illustrator_id?: string | null
           image?: string
           language?: Database["public"]["Enums"]["card_language"]
+          liga_subcategory?: string | null
           name?: string
           pokemon_type?: string | null
           stock?: number
