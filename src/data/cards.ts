@@ -10,6 +10,9 @@ export const CARD_CATEGORIES: CardCategory[] = ["Pokémon", "Treinador", "Energi
 export type TrainerSubcategory = "Apoiador" | "Item" | "Ferramenta Pokémon" | "Estádio" | "Ace Spec";
 export const TRAINER_SUBCATEGORIES: TrainerSubcategory[] = ["Apoiador", "Item", "Ferramenta Pokémon", "Estádio", "Ace Spec"];
 
+export type LigaSubcategory = "Double Rare" | "Foil" | "Normal";
+export const LIGA_SUBCATEGORIES: LigaSubcategory[] = ["Double Rare", "Foil", "Normal"];
+
 export type PokemonType =
   | "Água"
   | "Planta"
