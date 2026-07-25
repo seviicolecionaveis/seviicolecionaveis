@@ -877,6 +877,19 @@ function AdminCardsManagePage() {
                             </select>
                           </label>
                         )}
+                        {quickForm.finish === "Liga" && (
+                          <label className="text-xs space-y-1">
+                            <span className="font-semibold">Subtipo Liga</span>
+                            <select
+                              value={quickForm.liga_subcategory}
+                              onChange={(e) => setQuickForm({ ...quickForm, liga_subcategory: e.target.value as LigaSubcategory | "" })}
+                              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                            >
+                              <option value="">— Selecionar —</option>
+                              {LIGA_SUBCATEGORIES.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </label>
+                        )}
                         <label className="text-xs space-y-1">
                           <span className="font-semibold">Tipo Pokémon</span>
                           <select
