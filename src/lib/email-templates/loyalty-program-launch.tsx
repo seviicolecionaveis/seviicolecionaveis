@@ -24,7 +24,7 @@ const LoyaltyProgramLaunchEmail: React.FC<LoyaltyProgramLaunchProps> = ({
           Como funciona
         </Heading>
         <ul style={{ paddingLeft: '20px', margin: '0', color: '#431407', fontSize: '14px', lineHeight: '1.7' }}>
-          <li><strong>💰 R$ 1 = 10 pontos</strong> em cada pedido pago</li>
+          <li><strong>💰 1 ponto a cada R$ 5,00</strong> em cada pedido pago</li>
           <li><strong>🎁 100 pontos = R$ 5,00</strong> de desconto no checkout</li>
           <li><strong>🎂 Aniversário:</strong> ganhe <strong>100 pontos</strong> no seu dia (cadastre sua data de nascimento na conta)</li>
           <li><strong>✨ Níveis:</strong> Bronze → Prata → Ouro. Quanto mais compra, mais pontos ganha por real</li>

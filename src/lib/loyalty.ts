@@ -1,6 +1,7 @@
 // Loyalty / Programa de Pontos Sevii — constantes e helpers puros (isomórficos).
 
-export const POINTS_PER_REAL = 1;           // R$ 1 = 1 ponto (base Bronze) — 100 pts = R$5 → 5% retorno
+export const REAIS_PER_POINT = 5;           // R$ 5 gastos = 1 ponto (base Bronze) — 100 pts = R$5 → 1% de retorno
+export const POINTS_PER_REAL = 1 / REAIS_PER_POINT;
 export const POINTS_PER_REDEEM_BLOCK = 100; // múltiplos de 100 pontos
 export const CENTS_PER_REDEEM_BLOCK = 500;  // 100 pontos = R$ 5,00
 export const MIN_REDEEM_POINTS = 100;
@@ -49,8 +50,8 @@ export function multiplierLabel(bp: number): string {
  */
 export function pointsEarnedFromCents(baseAfterDiscountCents: number, multiplierBp: number = 10000): number {
   if (!baseAfterDiscountCents || baseAfterDiscountCents <= 0) return 0;
-  // R$ 1 = 1 pt → centavos/100 = pts (base). Multiplicador via bp.
-  const base = baseAfterDiscountCents / 100;
+  // R$ 5 = 1 pt → centavos/500 = pts (base). Multiplicador via bp.
+  const base = baseAfterDiscountCents / (100 * REAIS_PER_POINT);
   return Math.floor((base * multiplierBp) / 10000);
 }
 

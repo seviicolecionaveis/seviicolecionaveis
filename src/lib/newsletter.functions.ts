@@ -225,7 +225,7 @@ function launchHtml() {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f9fc;border:1px solid #cfeaf3;border-radius:10px;">
             <tr><td style="padding:16px 18px;font-size:14px;line-height:1.6;">
               <strong style="color:#20a5c9;">Como funciona</strong><br />
-              • <strong>R$ 1,00 = 10 pontos</strong> em todo pedido pago<br />
+              • <strong>1 ponto a cada R$ 5,00</strong> em todo pedido pago<br />
               • <strong>100 pontos = R$ 5,00</strong> de desconto<br />
               • <strong>+50 pts</strong> de boas-vindas ao criar conta<br />
               • <strong>+100 pts</strong> no seu aniversário 🎂<br />

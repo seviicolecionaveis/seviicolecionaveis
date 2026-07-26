@@ -48,7 +48,7 @@ async function applyWalletDeductionForOrder(orderId: string) {
 
 /**
  * Credita e debita pontos do programa de fidelidade quando um pedido é pago.
- * - Crédito: 10 pontos por R$ 1,00 sobre o subtotal após descontos
+ * - Crédito: 1 ponto a cada R$ 5,00 sobre o subtotal após descontos
  * - Débito: pontos resgatados no checkout (lançados como entrada negativa)
  * Idempotente via índice único (order_id, reason).
  */
