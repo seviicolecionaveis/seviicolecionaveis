@@ -236,6 +236,15 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
     })
     .eq("id", orderId);
 
+  // Programa de Pontos: credita pontos ganhos e debita pontos resgatados.
+  // Roda ANTES do débito de carteira porque precisa ler wallet_deduction_cents
+  // (compras pagas totalmente com créditos não acumulam pontos).
+  try {
+    await applyLoyaltyForOrder(orderId);
+  } catch (e) {
+    console.error("[markOrderPaid] applyLoyaltyForOrder falhou:", e);
+  }
+
   // Débito de vale-presente carteira (só agora, quando o pagamento confirma).
   try {
     await applyWalletDeductionForOrder(orderId);
@@ -243,12 +252,6 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
     console.error("[markOrderPaid] applyWalletDeductionForOrder falhou:", e);
   }
 
-  // Programa de Pontos: credita pontos ganhos e debita pontos resgatados.
-  try {
-    await applyLoyaltyForOrder(orderId);
-  } catch (e) {
-    console.error("[markOrderPaid] applyLoyaltyForOrder falhou:", e);
-  }
 
 
 
