@@ -243,6 +243,7 @@ export const EXTRA_COLLECTIONS = [
   "HIF - Destinos Ocultos",
   "M4 - Ninja Spinner",
   "PBL - Escuridão Absoluta",
+  "PZ8 - Play! Pokémon Prize Pack Series Eight",
 ];
 
 export const COLLECTIONS = Array.from(
