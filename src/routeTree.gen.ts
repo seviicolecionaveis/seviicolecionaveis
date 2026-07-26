@@ -17,6 +17,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeladosRouteImport } from './routes/selados'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProdutosLacradosRouteImport } from './routes/produtos-lacrados'
+import { Route as PreviewPontosRouteImport } from './routes/preview-pontos'
 import { Route as PilhaRouteImport } from './routes/pilha'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as MaisVendidasRouteImport } from './routes/mais-vendidas'
@@ -124,6 +125,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const ProdutosLacradosRoute = ProdutosLacradosRouteImport.update({
   id: '/produtos-lacrados',
   path: '/produtos-lacrados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreviewPontosRoute = PreviewPontosRouteImport.update({
+  id: '/preview-pontos',
+  path: '/preview-pontos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PilhaRoute = PilhaRouteImport.update({
@@ -498,6 +504,7 @@ export interface FileRoutesByFullPath {
   '/mais-vendidas': typeof MaisVendidasRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pilha': typeof PilhaRouteWithChildren
+  '/preview-pontos': typeof PreviewPontosRoute
   '/produtos-lacrados': typeof ProdutosLacradosRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
@@ -574,6 +581,7 @@ export interface FileRoutesByTo {
   '/favoritos': typeof FavoritosRoute
   '/imas': typeof ImasRoute
   '/mais-vendidas': typeof MaisVendidasRoute
+  '/preview-pontos': typeof PreviewPontosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -652,6 +660,7 @@ export interface FileRoutesById {
   '/mais-vendidas': typeof MaisVendidasRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pilha': typeof PilhaRouteWithChildren
+  '/preview-pontos': typeof PreviewPontosRoute
   '/produtos-lacrados': typeof ProdutosLacradosRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
@@ -732,6 +741,7 @@ export interface FileRouteTypes {
     | '/mais-vendidas'
     | '/orders'
     | '/pilha'
+    | '/preview-pontos'
     | '/produtos-lacrados'
     | '/reset-password'
     | '/selados'
@@ -808,6 +818,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/imas'
     | '/mais-vendidas'
+    | '/preview-pontos'
     | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
@@ -885,6 +896,7 @@ export interface FileRouteTypes {
     | '/mais-vendidas'
     | '/orders'
     | '/pilha'
+    | '/preview-pontos'
     | '/produtos-lacrados'
     | '/reset-password'
     | '/selados'
@@ -964,6 +976,7 @@ export interface RootRouteChildren {
   MaisVendidasRoute: typeof MaisVendidasRoute
   OrdersRoute: typeof OrdersRouteWithChildren
   PilhaRoute: typeof PilhaRouteWithChildren
+  PreviewPontosRoute: typeof PreviewPontosRoute
   ProdutosLacradosRoute: typeof ProdutosLacradosRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   SeladosRoute: typeof SeladosRoute
@@ -1054,6 +1067,13 @@ declare module '@tanstack/react-router' {
       path: '/produtos-lacrados'
       fullPath: '/produtos-lacrados'
       preLoaderRoute: typeof ProdutosLacradosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preview-pontos': {
+      id: '/preview-pontos'
+      path: '/preview-pontos'
+      fullPath: '/preview-pontos'
+      preLoaderRoute: typeof PreviewPontosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pilha': {
@@ -1660,6 +1680,7 @@ const rootRouteChildren: RootRouteChildren = {
   MaisVendidasRoute: MaisVendidasRoute,
   OrdersRoute: OrdersRouteWithChildren,
   PilhaRoute: PilhaRouteWithChildren,
+  PreviewPontosRoute: PreviewPontosRoute,
   ProdutosLacradosRoute: ProdutosLacradosRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   SeladosRoute: SeladosRoute,
