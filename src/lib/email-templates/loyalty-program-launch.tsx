@@ -25,10 +25,12 @@ const LoyaltyProgramLaunchEmail: React.FC<LoyaltyProgramLaunchProps> = ({
         </Heading>
         <ul style={{ paddingLeft: '20px', margin: '0', color: '#431407', fontSize: '14px', lineHeight: '1.7' }}>
           <li><strong>💰 1 ponto a cada R$ 5,00</strong> em cada pedido pago</li>
-          <li><strong>🎁 100 pontos = R$ 5,00</strong> de desconto no checkout</li>
+          <li><strong>🎁 100 pontos = R$ 5,00</strong> de desconto no checkout (resgate mínimo de 100 pontos)</li>
           <li><strong>🎂 Aniversário:</strong> ganhe <strong>100 pontos</strong> no seu dia (cadastre sua data de nascimento na conta)</li>
           <li><strong>✨ Níveis:</strong> Bronze → Prata → Ouro. Quanto mais compra, mais pontos ganha por real</li>
-          <li><strong>⏳ Validade:</strong> pontos expiram após 12 meses de inatividade</li>
+          <li><strong>⏳ Validade:</strong> pontos válidos por 12 meses a partir do crédito</li>
+          <li><strong>🚚 Frete não acumula pontos</strong>, assim como compras pagas totalmente com créditos</li>
+
         </ul>
       </Section>
 

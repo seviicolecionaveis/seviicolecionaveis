@@ -8,6 +8,8 @@ import {
   CENTS_PER_REDEEM_BLOCK,
   POINTS_PER_REDEEM_BLOCK,
   EXPIRATION_MONTHS,
+  MIN_REDEEM_POINTS,
+
   TIERS,
   tierFromLifetime,
   nextTier,
@@ -143,9 +145,11 @@ export function LoyaltyPointsCard({ onGoToProfile }: { onGoToProfile?: () => voi
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li className="flex gap-2"><ShoppingBag className="h-4 w-4 mt-0.5 shrink-0" /> Ganhe <strong className="text-foreground">1 ponto a cada R$ {REAIS_PER_POINT},00</strong> em cada pedido pago (× multiplicador do seu nível).</li>
           <li className="flex gap-2"><Gift className="h-4 w-4 mt-0.5 shrink-0" /> {POINTS_PER_REDEEM_BLOCK} pontos = <strong className="text-foreground">R$ {(CENTS_PER_REDEEM_BLOCK / 100).toFixed(2)}</strong> de desconto.</li>
-          <li className="flex gap-2"><Sparkles className="h-4 w-4 mt-0.5 shrink-0" /> Use no checkout em múltiplos de {POINTS_PER_REDEEM_BLOCK}.</li>
+          <li className="flex gap-2"><Sparkles className="h-4 w-4 mt-0.5 shrink-0" /> Resgate mínimo de <strong className="text-foreground">{MIN_REDEEM_POINTS} pontos</strong>, em múltiplos de {POINTS_PER_REDEEM_BLOCK}.</li>
           <li className="flex gap-2"><Cake className="h-4 w-4 mt-0.5 shrink-0" /> 100 pontos extras no seu aniversário.</li>
-          <li className="flex gap-2"><Clock className="h-4 w-4 mt-0.5 shrink-0" /> Pontos expiram após <strong className="text-foreground">{EXPIRATION_MONTHS} meses</strong>.</li>
+          <li className="flex gap-2"><Clock className="h-4 w-4 mt-0.5 shrink-0" /> Pontos válidos por <strong className="text-foreground">{EXPIRATION_MONTHS} meses</strong> a partir da data em que foram creditados.</li>
+          <li className="flex gap-2"><ShoppingBag className="h-4 w-4 mt-0.5 shrink-0" /> O <strong className="text-foreground">frete não acumula pontos</strong> e compras pagas totalmente com créditos/vale-presente também não geram pontos.</li>
+
         </ul>
       </div>
 

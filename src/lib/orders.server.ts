@@ -49,19 +49,32 @@ async function applyWalletDeductionForOrder(orderId: string) {
 /**
  * Credita e debita pontos do programa de fidelidade quando um pedido é pago.
  * - Crédito: 1 ponto a cada R$ 5,00 sobre o subtotal após descontos
+ *   (frete NÃO acumula pontos; valor pago com créditos/vale-presente também não)
  * - Débito: pontos resgatados no checkout (lançados como entrada negativa)
  * Idempotente via índice único (order_id, reason).
  */
 async function applyLoyaltyForOrder(orderId: string) {
   const { data: order } = await supabaseAdmin
     .from("orders")
-    .select("id, user_id, subtotal_cents, discount_cents, points_redeemed, points_discount_cents, points_earned")
+    .select(
+      "id, user_id, subtotal_cents, discount_cents, coupon_discount_cents, pix_discount_cents, bundle_discount_cents, wallet_deduction_cents, points_redeemed, points_discount_cents, points_earned",
+    )
     .eq("id", orderId)
     .maybeSingle();
   if (!order || !order.user_id) return;
 
   const { pointsEarnedFromCents } = await import("@/lib/loyalty");
-  const base = Math.max(0, (order.subtotal_cents ?? 0) - (order.discount_cents ?? 0));
+
+  // Base = apenas produtos (frete fica de fora, pois subtotal_cents não o inclui),
+  // menos todos os descontos e menos o valor coberto por créditos de vale-presente.
+  const discountSum =
+    (order.coupon_discount_cents ?? 0) +
+    (order.pix_discount_cents ?? 0) +
+    (order.bundle_discount_cents ?? 0) +
+    (order.points_discount_cents ?? 0);
+  const discountTotal = Math.max(order.discount_cents ?? 0, discountSum);
+  const wallet = order.wallet_deduction_cents ?? 0;
+  const base = Math.max(0, (order.subtotal_cents ?? 0) - discountTotal - wallet);
 
   // Multiplicador por tier do usuário (10000 = 1.00x).
   let multiplierBp = 10000;
@@ -69,6 +82,7 @@ async function applyLoyaltyForOrder(orderId: string) {
   if (typeof mp === "number" && mp > 0) multiplierBp = mp;
 
   const earned = pointsEarnedFromCents(base, multiplierBp);
+
 
   if (earned > 0 && (order.points_earned ?? 0) === 0) {
     const { error } = await supabaseAdmin.from("loyalty_points_ledger").insert({
@@ -236,6 +250,15 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
     })
     .eq("id", orderId);
 
+  // Programa de Pontos: credita pontos ganhos e debita pontos resgatados.
+  // Roda ANTES do débito de carteira porque precisa ler wallet_deduction_cents
+  // (compras pagas totalmente com créditos não acumulam pontos).
+  try {
+    await applyLoyaltyForOrder(orderId);
+  } catch (e) {
+    console.error("[markOrderPaid] applyLoyaltyForOrder falhou:", e);
+  }
+
   // Débito de vale-presente carteira (só agora, quando o pagamento confirma).
   try {
     await applyWalletDeductionForOrder(orderId);
@@ -243,12 +266,6 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
     console.error("[markOrderPaid] applyWalletDeductionForOrder falhou:", e);
   }
 
-  // Programa de Pontos: credita pontos ganhos e debita pontos resgatados.
-  try {
-    await applyLoyaltyForOrder(orderId);
-  } catch (e) {
-    console.error("[markOrderPaid] applyLoyaltyForOrder falhou:", e);
-  }
 
 
 
