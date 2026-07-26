@@ -1,0 +1,2 @@
+ALTER TABLE public.cards DROP CONSTRAINT IF EXISTS cards_name_collection_card_number_finish_language_condition_key;
+CREATE UNIQUE INDEX cards_unique_variant_key ON public.cards (name, collection, card_number, finish, language, condition, COALESCE(liga_subcategory, ''));
