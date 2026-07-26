@@ -50,8 +50,8 @@ export function multiplierLabel(bp: number): string {
  */
 export function pointsEarnedFromCents(baseAfterDiscountCents: number, multiplierBp: number = 10000): number {
   if (!baseAfterDiscountCents || baseAfterDiscountCents <= 0) return 0;
-  // R$ 1 = 1 pt → centavos/100 = pts (base). Multiplicador via bp.
-  const base = baseAfterDiscountCents / 100;
+  // R$ 5 = 1 pt → centavos/500 = pts (base). Multiplicador via bp.
+  const base = baseAfterDiscountCents / (100 * REAIS_PER_POINT);
   return Math.floor((base * multiplierBp) / 10000);
 }
 
