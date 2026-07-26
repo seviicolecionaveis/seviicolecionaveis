@@ -4,7 +4,7 @@ import { getMyLoyaltyStatus } from "@/lib/loyalty.functions";
 import {
   REASON_LABEL,
   formatPoints,
-  POINTS_PER_REAL,
+  REAIS_PER_POINT,
   CENTS_PER_REDEEM_BLOCK,
   POINTS_PER_REDEEM_BLOCK,
   EXPIRATION_MONTHS,
