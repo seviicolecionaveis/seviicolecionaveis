@@ -250,7 +250,7 @@ function AdminCardsManagePage() {
       : await supabase.from("cards").insert(payload);
     setSaving(false);
     if (error) {
-      setMsg({ type: "err", text: error.message.includes("duplicate") ? "Essa combinação já existe (nome+coleção+número+finish+idioma+condição)." : error.message });
+      setMsg({ type: "err", text: error.message.includes("duplicate") ? "Essa combinação já existe (nome+coleção+número+finish+idioma+condição+subtipo Liga)." : error.message });
       return;
     }
     setMsg({ type: "ok", text: editingId ? "Carta atualizada!" : "Carta adicionada!" });
