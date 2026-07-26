@@ -141,7 +141,7 @@ export function LoyaltyPointsCard({ onGoToProfile }: { onGoToProfile?: () => voi
       <div className="rounded-xl border border-border bg-card p-5">
         <h3 className="text-sm font-bold uppercase tracking-widest mb-3">Como funciona</h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
-          <li className="flex gap-2"><ShoppingBag className="h-4 w-4 mt-0.5 shrink-0" /> Ganhe <strong className="text-foreground">{POINTS_PER_REAL} pontos por R$ 1,00</strong> em cada pedido pago (× multiplicador do seu nível).</li>
+          <li className="flex gap-2"><ShoppingBag className="h-4 w-4 mt-0.5 shrink-0" /> Ganhe <strong className="text-foreground">1 ponto a cada R$ {REAIS_PER_POINT},00</strong> em cada pedido pago (× multiplicador do seu nível).</li>
           <li className="flex gap-2"><Gift className="h-4 w-4 mt-0.5 shrink-0" /> {POINTS_PER_REDEEM_BLOCK} pontos = <strong className="text-foreground">R$ {(CENTS_PER_REDEEM_BLOCK / 100).toFixed(2)}</strong> de desconto.</li>
           <li className="flex gap-2"><Sparkles className="h-4 w-4 mt-0.5 shrink-0" /> Use no checkout em múltiplos de {POINTS_PER_REDEEM_BLOCK}.</li>
           <li className="flex gap-2"><Cake className="h-4 w-4 mt-0.5 shrink-0" /> 100 pontos extras no seu aniversário.</li>
