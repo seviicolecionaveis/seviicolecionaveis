@@ -244,6 +244,10 @@ export const EXTRA_COLLECTIONS = [
   "M4 - Ninja Spinner",
   "PBL - Escuridão Absoluta",
   "PZ8 - Play! Pokémon Prize Pack Series Eight",
+  "PZ7 - Play! Pokémon Prize Pack Series Seven",
+  "PZ6 - Play! Pokémon Prize Pack Series Six",
+  "PZ5 - Play! Pokémon Prize Pack Series Five",
+  "PZ4 - Play! Pokémon Prize Pack Series Four",
 ];
 
 export const COLLECTIONS = Array.from(
