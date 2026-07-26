@@ -8,6 +8,8 @@ import {
   CENTS_PER_REDEEM_BLOCK,
   POINTS_PER_REDEEM_BLOCK,
   EXPIRATION_MONTHS,
+  MIN_REDEEM_POINTS,
+
   TIERS,
   tierFromLifetime,
   nextTier,
