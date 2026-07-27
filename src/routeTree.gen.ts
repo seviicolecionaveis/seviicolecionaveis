@@ -26,6 +26,7 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EnviosRouteImport } from './routes/envios'
 import { Route as DeckBuilderRouteImport } from './routes/deck-builder'
 import { Route as ContaRouteImport } from './routes/conta'
+import { Route as ComunidadeRouteImport } from './routes/comunidade'
 import { Route as ComparadorRouteImport } from './routes/comparador'
 import { Route as ColecoesRouteImport } from './routes/colecoes'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -169,6 +170,11 @@ const DeckBuilderRoute = DeckBuilderRouteImport.update({
 const ContaRoute = ContaRouteImport.update({
   id: '/conta',
   path: '/conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComunidadeRoute = ComunidadeRouteImport.update({
+  id: '/comunidade',
+  path: '/comunidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComparadorRoute = ComparadorRouteImport.update({
@@ -489,6 +495,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRouteWithChildren
   '/colecoes': typeof ColecoesRoute
   '/comparador': typeof ComparadorRoute
+  '/comunidade': typeof ComunidadeRoute
   '/conta': typeof ContaRoute
   '/deck-builder': typeof DeckBuilderRouteWithChildren
   '/envios': typeof EnviosRoute
@@ -567,6 +574,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRouteWithChildren
   '/colecoes': typeof ColecoesRoute
   '/comparador': typeof ComparadorRoute
+  '/comunidade': typeof ComunidadeRoute
   '/conta': typeof ContaRoute
   '/deck-builder': typeof DeckBuilderRouteWithChildren
   '/envios': typeof EnviosRoute
@@ -643,6 +651,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRouteWithChildren
   '/colecoes': typeof ColecoesRoute
   '/comparador': typeof ComparadorRoute
+  '/comunidade': typeof ComunidadeRoute
   '/conta': typeof ContaRoute
   '/deck-builder': typeof DeckBuilderRouteWithChildren
   '/envios': typeof EnviosRoute
@@ -723,6 +732,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/colecoes'
     | '/comparador'
+    | '/comunidade'
     | '/conta'
     | '/deck-builder'
     | '/envios'
@@ -801,6 +811,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/colecoes'
     | '/comparador'
+    | '/comunidade'
     | '/conta'
     | '/deck-builder'
     | '/envios'
@@ -876,6 +887,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/colecoes'
     | '/comparador'
+    | '/comunidade'
     | '/conta'
     | '/deck-builder'
     | '/envios'
@@ -955,6 +967,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ColecoesRoute: typeof ColecoesRoute
   ComparadorRoute: typeof ComparadorRoute
+  ComunidadeRoute: typeof ComunidadeRoute
   ContaRoute: typeof ContaRoute
   DeckBuilderRoute: typeof DeckBuilderRouteWithChildren
   EnviosRoute: typeof EnviosRoute
@@ -1117,6 +1130,13 @@ declare module '@tanstack/react-router' {
       path: '/conta'
       fullPath: '/conta'
       preLoaderRoute: typeof ContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comunidade': {
+      id: '/comunidade'
+      path: '/comunidade'
+      fullPath: '/comunidade'
+      preLoaderRoute: typeof ComunidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/comparador': {
@@ -1651,6 +1671,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRouteWithChildren,
   ColecoesRoute: ColecoesRoute,
   ComparadorRoute: ComparadorRoute,
+  ComunidadeRoute: ComunidadeRoute,
   ContaRoute: ContaRoute,
   DeckBuilderRoute: DeckBuilderRouteWithChildren,
   EnviosRoute: EnviosRoute,
