@@ -42,7 +42,7 @@ const GROUPS: Group[] = [
     title: "Grupo de Avisos",
     description:
       "Receba todas as novidades da Sevii em primeira mão: lançamentos, promoções, eventos, pré-vendas e comunicados importantes.",
-    link: null,
+    link: "https://chat.whatsapp.com/LfG18YtcQMJ8PBjNz5IogS",
   },
   {
     icon: Gavel,
