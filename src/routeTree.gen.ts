@@ -9,207 +9,87 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VideogamesRouteImport } from './routes/videogames'
-import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
-import { Route as TiposDeCartaRouteImport } from './routes/tipos-de-carta'
-import { Route as SobreRouteImport } from './routes/sobre'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SeladosRouteImport } from './routes/selados'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as ProdutosLacradosRouteImport } from './routes/produtos-lacrados'
-import { Route as PilhaRouteImport } from './routes/pilha'
-import { Route as OrdersRouteImport } from './routes/orders'
-import { Route as MaisVendidasRouteImport } from './routes/mais-vendidas'
-import { Route as ImasRouteImport } from './routes/imas'
-import { Route as FavoritosRouteImport } from './routes/favoritos'
-import { Route as FaqRouteImport } from './routes/faq'
-import { Route as EnviosRouteImport } from './routes/envios'
-import { Route as DeckBuilderRouteImport } from './routes/deck-builder'
-import { Route as ContaRouteImport } from './routes/conta'
-import { Route as ComunidadeRouteImport } from './routes/comunidade'
-import { Route as ComparadorRouteImport } from './routes/comparador'
-import { Route as ColecoesRouteImport } from './routes/colecoes'
-import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as CartasRouteImport } from './routes/cartas'
-import { Route as AvisosRouteImport } from './routes/avisos'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProdutosLacradosIndexRouteImport } from './routes/produtos-lacrados.index'
-import { Route as PreVendaIndexRouteImport } from './routes/pre-venda.index'
-import { Route as PilhaIndexRouteImport } from './routes/pilha.index'
-import { Route as OrdersIndexRouteImport } from './routes/orders.index'
-import { Route as ProdutosLacradosSlugRouteImport } from './routes/produtos-lacrados.$slug'
-import { Route as PreVendaSlugRouteImport } from './routes/pre-venda.$slug'
-import { Route as PilhaSolicitarRouteImport } from './routes/pilha.solicitar'
-import { Route as PayOrderIdRouteImport } from './routes/pay.$orderId'
-import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
-import { Route as ListaDesejosTokenRouteImport } from './routes/lista-desejos.$token'
-import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
-import { Route as DeckBuilderDeckIdRouteImport } from './routes/deck-builder.$deckId'
-import { Route as ColecaoSlugRouteImport } from './routes/colecao.$slug'
-import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
-import { Route as CartaSlugRouteImport } from './routes/carta.$slug'
-import { Route as BaralhoTokenRouteImport } from './routes/baralho.$token'
-import { Route as AdminVideogamesRouteImport } from './routes/admin.videogames'
-import { Route as AdminUsersRouteImport } from './routes/admin.users'
-import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
-import { Route as AdminSealedRouteImport } from './routes/admin.sealed'
-import { Route as AdminPreVendaRouteImport } from './routes/admin.pre-venda'
-import { Route as AdminPilhaRouteImport } from './routes/admin.pilha'
-import { Route as AdminPanelsRouteImport } from './routes/admin.panels'
-import { Route as AdminOfertasRelampagoRouteImport } from './routes/admin.ofertas-relampago'
-import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-cards'
-import { Route as AdminLoyaltyRouteImport } from './routes/admin.loyalty'
-import { Route as AdminLeiloesRouteImport } from './routes/admin.leiloes'
-import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
-import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
-import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
-import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
-import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as AcessoriosRouteImport } from './routes/acessorios'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AvisosRouteImport } from './routes/avisos'
+import { Route as CartasRouteImport } from './routes/cartas'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as ColecoesRouteImport } from './routes/colecoes'
+import { Route as ComparadorRouteImport } from './routes/comparador'
+import { Route as ComunidadeRouteImport } from './routes/comunidade'
+import { Route as ContaRouteImport } from './routes/conta'
+import { Route as DeckBuilderRouteImport } from './routes/deck-builder'
+import { Route as EnviosRouteImport } from './routes/envios'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as FavoritosRouteImport } from './routes/favoritos'
+import { Route as ImasRouteImport } from './routes/imas'
+import { Route as MaisVendidasRouteImport } from './routes/mais-vendidas'
+import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as PilhaRouteImport } from './routes/pilha'
+import { Route as ProdutosLacradosRouteImport } from './routes/produtos-lacrados'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SeladosRouteImport } from './routes/selados'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as TiposDeCartaRouteImport } from './routes/tipos-de-carta'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
+import { Route as VideogamesRouteImport } from './routes/videogames'
 import { Route as AdminAccessoriesRouteImport } from './routes/admin.accessories'
-import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
-import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
+import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
+import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
+import { Route as AdminLeiloesRouteImport } from './routes/admin.leiloes'
+import { Route as AdminLoyaltyRouteImport } from './routes/admin.loyalty'
+import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-cards'
+import { Route as AdminOfertasRelampagoRouteImport } from './routes/admin.ofertas-relampago'
+import { Route as AdminPanelsRouteImport } from './routes/admin.panels'
+import { Route as AdminPilhaRouteImport } from './routes/admin.pilha'
+import { Route as AdminPreVendaRouteImport } from './routes/admin.pre-venda'
+import { Route as AdminSealedRouteImport } from './routes/admin.sealed'
+import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminVideogamesRouteImport } from './routes/admin.videogames'
+import { Route as BaralhoTokenRouteImport } from './routes/baralho.$token'
+import { Route as CartaSlugRouteImport } from './routes/carta.$slug'
+import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as ColecaoSlugRouteImport } from './routes/colecao.$slug'
+import { Route as DeckBuilderDeckIdRouteImport } from './routes/deck-builder.$deckId'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as ListaDesejosTokenRouteImport } from './routes/lista-desejos.$token'
+import { Route as OrdersIndexRouteImport } from './routes/orders.index'
+import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
+import { Route as PayOrderIdRouteImport } from './routes/pay.$orderId'
+import { Route as PilhaIndexRouteImport } from './routes/pilha.index'
+import { Route as PilhaSolicitarRouteImport } from './routes/pilha.solicitar'
+import { Route as PreVendaIndexRouteImport } from './routes/pre-venda.index'
+import { Route as PreVendaSlugRouteImport } from './routes/pre-venda.$slug'
+import { Route as ProdutosLacradosIndexRouteImport } from './routes/produtos-lacrados.index'
+import { Route as ProdutosLacradosSlugRouteImport } from './routes/produtos-lacrados.$slug'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
-import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
-import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
-import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
-import { Route as ApiPublicPaymentsMercadopagoWebhookRouteImport } from './routes/api/public/payments/mercadopago-webhook'
-import { Route as ApiPublicMelhorenvioCallbackRouteImport } from './routes/api/public/melhorenvio/callback'
-import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
-import { Route as ApiPublicHooksStockBackCheckRouteImport } from './routes/api/public/hooks/stock-back-check'
-import { Route as ApiPublicHooksStackRemindersRouteImport } from './routes/api/public/hooks/stack-reminders'
-import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/public/hooks/price-drop-check'
-import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
+import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api/public/hooks/auto-cancel-unpaid'
+import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
+import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/public/hooks/price-drop-check'
+import { Route as ApiPublicHooksStackRemindersRouteImport } from './routes/api/public/hooks/stack-reminders'
+import { Route as ApiPublicHooksStockBackCheckRouteImport } from './routes/api/public/hooks/stock-back-check'
+import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
+import { Route as ApiPublicMelhorenvioCallbackRouteImport } from './routes/api/public/melhorenvio/callback'
+import { Route as ApiPublicPaymentsMercadopagoWebhookRouteImport } from './routes/api/public/payments/mercadopago-webhook'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 
-const VideogamesRoute = VideogamesRouteImport.update({
-  id: '/videogames',
-  path: '/videogames',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UnsubscribeRoute = UnsubscribeRouteImport.update({
-  id: '/unsubscribe',
-  path: '/unsubscribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TiposDeCartaRoute = TiposDeCartaRouteImport.update({
-  id: '/tipos-de-carta',
-  path: '/tipos-de-carta',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SobreRoute = SobreRouteImport.update({
-  id: '/sobre',
-  path: '/sobre',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SeladosRoute = SeladosRouteImport.update({
-  id: '/selados',
-  path: '/selados',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProdutosLacradosRoute = ProdutosLacradosRouteImport.update({
-  id: '/produtos-lacrados',
-  path: '/produtos-lacrados',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PilhaRoute = PilhaRouteImport.update({
-  id: '/pilha',
-  path: '/pilha',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OrdersRoute = OrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MaisVendidasRoute = MaisVendidasRouteImport.update({
-  id: '/mais-vendidas',
-  path: '/mais-vendidas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImasRoute = ImasRouteImport.update({
-  id: '/imas',
-  path: '/imas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FavoritosRoute = FavoritosRouteImport.update({
-  id: '/favoritos',
-  path: '/favoritos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FaqRoute = FaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnviosRoute = EnviosRouteImport.update({
-  id: '/envios',
-  path: '/envios',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DeckBuilderRoute = DeckBuilderRouteImport.update({
-  id: '/deck-builder',
-  path: '/deck-builder',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContaRoute = ContaRouteImport.update({
-  id: '/conta',
-  path: '/conta',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ComunidadeRoute = ComunidadeRouteImport.update({
-  id: '/comunidade',
-  path: '/comunidade',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ComparadorRoute = ComparadorRouteImport.update({
-  id: '/comparador',
-  path: '/comparador',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ColecoesRoute = ColecoesRouteImport.update({
-  id: '/colecoes',
-  path: '/colecoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CartasRoute = CartasRouteImport.update({
-  id: '/cartas',
-  path: '/cartas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AvisosRoute = AvisosRouteImport.update({
-  id: '/avisos',
-  path: '/avisos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AcessoriosRoute = AcessoriosRouteImport.update({
@@ -217,164 +97,134 @@ const AcessoriosRoute = AcessoriosRouteImport.update({
   path: '/acessorios',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProdutosLacradosIndexRoute = ProdutosLacradosIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ProdutosLacradosRoute,
-} as any)
-const PreVendaIndexRoute = PreVendaIndexRouteImport.update({
-  id: '/pre-venda/',
-  path: '/pre-venda/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PilhaIndexRoute = PilhaIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => PilhaRoute,
-} as any)
-const OrdersIndexRoute = OrdersIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => OrdersRoute,
-} as any)
-const ProdutosLacradosSlugRoute = ProdutosLacradosSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => ProdutosLacradosRoute,
-} as any)
-const PreVendaSlugRoute = PreVendaSlugRouteImport.update({
-  id: '/pre-venda/$slug',
-  path: '/pre-venda/$slug',
+const AvisosRoute = AvisosRouteImport.update({
+  id: '/avisos',
+  path: '/avisos',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PilhaSolicitarRoute = PilhaSolicitarRouteImport.update({
-  id: '/solicitar',
-  path: '/solicitar',
-  getParentRoute: () => PilhaRoute,
-} as any)
-const PayOrderIdRoute = PayOrderIdRouteImport.update({
-  id: '/pay/$orderId',
-  path: '/pay/$orderId',
+const CartasRoute = CartasRouteImport.update({
+  id: '/cartas',
+  path: '/cartas',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OrdersOrderIdRoute = OrdersOrderIdRouteImport.update({
-  id: '/$orderId',
-  path: '/$orderId',
-  getParentRoute: () => OrdersRoute,
-} as any)
-const ListaDesejosTokenRoute = ListaDesejosTokenRouteImport.update({
-  id: '/lista-desejos/$token',
-  path: '/lista-desejos/$token',
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: '/email/unsubscribe',
-  path: '/email/unsubscribe',
+const ColecoesRoute = ColecoesRouteImport.update({
+  id: '/colecoes',
+  path: '/colecoes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DeckBuilderDeckIdRoute = DeckBuilderDeckIdRouteImport.update({
-  id: '/$deckId',
-  path: '/$deckId',
-  getParentRoute: () => DeckBuilderRoute,
-} as any)
-const ColecaoSlugRoute = ColecaoSlugRouteImport.update({
-  id: '/colecao/$slug',
-  path: '/colecao/$slug',
+const ComparadorRoute = ComparadorRouteImport.update({
+  id: '/comparador',
+  path: '/comparador',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
-  id: '/return',
-  path: '/return',
-  getParentRoute: () => CheckoutRoute,
-} as any)
-const CartaSlugRoute = CartaSlugRouteImport.update({
-  id: '/carta/$slug',
-  path: '/carta/$slug',
+const ComunidadeRoute = ComunidadeRouteImport.update({
+  id: '/comunidade',
+  path: '/comunidade',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BaralhoTokenRoute = BaralhoTokenRouteImport.update({
-  id: '/baralho/$token',
-  path: '/baralho/$token',
+const ContaRoute = ContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminVideogamesRoute = AdminVideogamesRouteImport.update({
-  id: '/videogames',
-  path: '/videogames',
-  getParentRoute: () => AdminRoute,
+const DeckBuilderRoute = DeckBuilderRouteImport.update({
+  id: '/deck-builder',
+  path: '/deck-builder',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminUsersRoute = AdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AdminRoute,
+const EnviosRoute = EnviosRouteImport.update({
+  id: '/envios',
+  path: '/envios',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminShippingRoute = AdminShippingRouteImport.update({
-  id: '/shipping',
-  path: '/shipping',
-  getParentRoute: () => AdminRoute,
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminSealedRoute = AdminSealedRouteImport.update({
-  id: '/sealed',
-  path: '/sealed',
-  getParentRoute: () => AdminRoute,
+const FavoritosRoute = FavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminPreVendaRoute = AdminPreVendaRouteImport.update({
-  id: '/pre-venda',
-  path: '/pre-venda',
-  getParentRoute: () => AdminRoute,
+const ImasRoute = ImasRouteImport.update({
+  id: '/imas',
+  path: '/imas',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminPilhaRoute = AdminPilhaRouteImport.update({
+const MaisVendidasRoute = MaisVendidasRouteImport.update({
+  id: '/mais-vendidas',
+  path: '/mais-vendidas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersRoute = OrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PilhaRoute = PilhaRouteImport.update({
   id: '/pilha',
   path: '/pilha',
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminPanelsRoute = AdminPanelsRouteImport.update({
-  id: '/panels',
-  path: '/panels',
-  getParentRoute: () => AdminRoute,
+const ProdutosLacradosRoute = ProdutosLacradosRouteImport.update({
+  id: '/produtos-lacrados',
+  path: '/produtos-lacrados',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminOfertasRelampagoRoute = AdminOfertasRelampagoRouteImport.update({
-  id: '/ofertas-relampago',
-  path: '/ofertas-relampago',
-  getParentRoute: () => AdminRoute,
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminManageCardsRoute = AdminManageCardsRouteImport.update({
-  id: '/manage-cards',
-  path: '/manage-cards',
-  getParentRoute: () => AdminRoute,
+const SeladosRoute = SeladosRouteImport.update({
+  id: '/selados',
+  path: '/selados',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminLoyaltyRoute = AdminLoyaltyRouteImport.update({
-  id: '/loyalty',
-  path: '/loyalty',
-  getParentRoute: () => AdminRoute,
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminLeiloesRoute = AdminLeiloesRouteImport.update({
-  id: '/leiloes',
-  path: '/leiloes',
-  getParentRoute: () => AdminRoute,
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIntegrationsRoute = AdminIntegrationsRouteImport.update({
-  id: '/integrations',
-  path: '/integrations',
-  getParentRoute: () => AdminRoute,
+const TiposDeCartaRoute = TiposDeCartaRouteImport.update({
+  id: '/tipos-de-carta',
+  path: '/tipos-de-carta',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminEmailsRoute = AdminEmailsRouteImport.update({
-  id: '/emails',
-  path: '/emails',
-  getParentRoute: () => AdminRoute,
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminDashboardRoute = AdminDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AdminRoute,
+const VideogamesRoute = VideogamesRouteImport.update({
+  id: '/videogames',
+  path: '/videogames',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminCouponsRoute = AdminCouponsRouteImport.update({
-  id: '/coupons',
-  path: '/coupons',
+const AdminAccessoriesRoute = AdminAccessoriesRouteImport.update({
+  id: '/accessories',
+  path: '/accessories',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminBannersRoute = AdminBannersRouteImport.update({
@@ -382,94 +232,180 @@ const AdminBannersRoute = AdminBannersRouteImport.update({
   path: '/banners',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAccessoriesRoute = AdminAccessoriesRouteImport.update({
-  id: '/accessories',
-  path: '/accessories',
+const AdminCouponsRoute = AdminCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
   getParentRoute: () => AdminRoute,
 } as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEmailsRoute = AdminEmailsRouteImport.update({
+  id: '/emails',
+  path: '/emails',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminIntegrationsRoute = AdminIntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLeiloesRoute = AdminLeiloesRouteImport.update({
+  id: '/leiloes',
+  path: '/leiloes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoyaltyRoute = AdminLoyaltyRouteImport.update({
+  id: '/loyalty',
+  path: '/loyalty',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminManageCardsRoute = AdminManageCardsRouteImport.update({
+  id: '/manage-cards',
+  path: '/manage-cards',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOfertasRelampagoRoute = AdminOfertasRelampagoRouteImport.update({
+  id: '/ofertas-relampago',
+  path: '/ofertas-relampago',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPanelsRoute = AdminPanelsRouteImport.update({
+  id: '/panels',
+  path: '/panels',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPilhaRoute = AdminPilhaRouteImport.update({
+  id: '/pilha',
+  path: '/pilha',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPreVendaRoute = AdminPreVendaRouteImport.update({
+  id: '/pre-venda',
+  path: '/pre-venda',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSealedRoute = AdminSealedRouteImport.update({
+  id: '/sealed',
+  path: '/sealed',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminShippingRoute = AdminShippingRouteImport.update({
+  id: '/shipping',
+  path: '/shipping',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminVideogamesRoute = AdminVideogamesRouteImport.update({
+  id: '/videogames',
+  path: '/videogames',
+  getParentRoute: () => AdminRoute,
+} as any)
+const BaralhoTokenRoute = BaralhoTokenRouteImport.update({
+  id: '/baralho/$token',
+  path: '/baralho/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
-  id: '/api/public/sitemap.xml',
-  path: '/api/public/sitemap.xml',
+const CartaSlugRoute = CartaSlugRouteImport.update({
+  id: '/carta/$slug',
+  path: '/carta/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
+  id: '/return',
+  path: '/return',
+  getParentRoute: () => CheckoutRoute,
+} as any)
+const ColecaoSlugRoute = ColecaoSlugRouteImport.update({
+  id: '/colecao/$slug',
+  path: '/colecao/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeckBuilderDeckIdRoute = DeckBuilderDeckIdRouteImport.update({
+  id: '/$deckId',
+  path: '/$deckId',
+  getParentRoute: () => DeckBuilderRoute,
+} as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListaDesejosTokenRoute = ListaDesejosTokenRouteImport.update({
+  id: '/lista-desejos/$token',
+  path: '/lista-desejos/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersIndexRoute = OrdersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OrdersRoute,
+} as any)
+const OrdersOrderIdRoute = OrdersOrderIdRouteImport.update({
+  id: '/$orderId',
+  path: '/$orderId',
+  getParentRoute: () => OrdersRoute,
+} as any)
+const PayOrderIdRoute = PayOrderIdRouteImport.update({
+  id: '/pay/$orderId',
+  path: '/pay/$orderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PilhaIndexRoute = PilhaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PilhaRoute,
+} as any)
+const PilhaSolicitarRoute = PilhaSolicitarRouteImport.update({
+  id: '/solicitar',
+  path: '/solicitar',
+  getParentRoute: () => PilhaRoute,
+} as any)
+const PreVendaIndexRoute = PreVendaIndexRouteImport.update({
+  id: '/pre-venda/',
+  path: '/pre-venda/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreVendaSlugRoute = PreVendaSlugRouteImport.update({
+  id: '/pre-venda/$slug',
+  path: '/pre-venda/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosLacradosIndexRoute = ProdutosLacradosIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProdutosLacradosRoute,
+} as any)
+const ProdutosLacradosSlugRoute = ProdutosLacradosSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ProdutosLacradosRoute,
 } as any)
 const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
   id: '/orders/$orderId',
   path: '/orders/$orderId',
   getParentRoute: () => AdminRoute,
 } as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailTransactionalPreviewRoute =
-  LovableEmailTransactionalPreviewRouteImport.update({
-    id: '/lovable/email/transactional/preview',
-    path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
+const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
+  id: '/api/public/sitemap.xml',
+  path: '/api/public/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicPaymentsWebhookRoute =
-  ApiPublicPaymentsWebhookRouteImport.update({
-    id: '/api/public/payments/webhook',
-    path: '/api/public/payments/webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicPaymentsMercadopagoWebhookRoute =
-  ApiPublicPaymentsMercadopagoWebhookRouteImport.update({
-    id: '/api/public/payments/mercadopago-webhook',
-    path: '/api/public/payments/mercadopago-webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicMelhorenvioCallbackRoute =
-  ApiPublicMelhorenvioCallbackRouteImport.update({
-    id: '/api/public/melhorenvio/callback',
-    path: '/api/public/melhorenvio/callback',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksUpdatePricesRoute =
-  ApiPublicHooksUpdatePricesRouteImport.update({
-    id: '/api/public/hooks/update-prices',
-    path: '/api/public/hooks/update-prices',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksStockBackCheckRoute =
-  ApiPublicHooksStockBackCheckRouteImport.update({
-    id: '/api/public/hooks/stock-back-check',
-    path: '/api/public/hooks/stock-back-check',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksStackRemindersRoute =
-  ApiPublicHooksStackRemindersRouteImport.update({
-    id: '/api/public/hooks/stack-reminders',
-    path: '/api/public/hooks/stack-reminders',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksPriceDropCheckRoute =
-  ApiPublicHooksPriceDropCheckRouteImport.update({
-    id: '/api/public/hooks/price-drop-check',
-    path: '/api/public/hooks/price-drop-check',
+const ApiPublicHooksAutoCancelUnpaidRoute =
+  ApiPublicHooksAutoCancelUnpaidRouteImport.update({
+    id: '/api/public/hooks/auto-cancel-unpaid',
+    path: '/api/public/hooks/auto-cancel-unpaid',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksExpireLoyaltyPointsRoute =
@@ -478,10 +414,74 @@ const ApiPublicHooksExpireLoyaltyPointsRoute =
     path: '/api/public/hooks/expire-loyalty-points',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicHooksAutoCancelUnpaidRoute =
-  ApiPublicHooksAutoCancelUnpaidRouteImport.update({
-    id: '/api/public/hooks/auto-cancel-unpaid',
-    path: '/api/public/hooks/auto-cancel-unpaid',
+const ApiPublicHooksPriceDropCheckRoute =
+  ApiPublicHooksPriceDropCheckRouteImport.update({
+    id: '/api/public/hooks/price-drop-check',
+    path: '/api/public/hooks/price-drop-check',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksStackRemindersRoute =
+  ApiPublicHooksStackRemindersRouteImport.update({
+    id: '/api/public/hooks/stack-reminders',
+    path: '/api/public/hooks/stack-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksStockBackCheckRoute =
+  ApiPublicHooksStockBackCheckRouteImport.update({
+    id: '/api/public/hooks/stock-back-check',
+    path: '/api/public/hooks/stock-back-check',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksUpdatePricesRoute =
+  ApiPublicHooksUpdatePricesRouteImport.update({
+    id: '/api/public/hooks/update-prices',
+    path: '/api/public/hooks/update-prices',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicMelhorenvioCallbackRoute =
+  ApiPublicMelhorenvioCallbackRouteImport.update({
+    id: '/api/public/melhorenvio/callback',
+    path: '/api/public/melhorenvio/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPaymentsMercadopagoWebhookRoute =
+  ApiPublicPaymentsMercadopagoWebhookRouteImport.update({
+    id: '/api/public/payments/mercadopago-webhook',
+    path: '/api/public/payments/mercadopago-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -1013,179 +1013,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/videogames': {
-      id: '/videogames'
-      path: '/videogames'
-      fullPath: '/videogames'
-      preLoaderRoute: typeof VideogamesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/unsubscribe': {
-      id: '/unsubscribe'
-      path: '/unsubscribe'
-      fullPath: '/unsubscribe'
-      preLoaderRoute: typeof UnsubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tipos-de-carta': {
-      id: '/tipos-de-carta'
-      path: '/tipos-de-carta'
-      fullPath: '/tipos-de-carta'
-      preLoaderRoute: typeof TiposDeCartaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sobre': {
-      id: '/sobre'
-      path: '/sobre'
-      fullPath: '/sobre'
-      preLoaderRoute: typeof SobreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/selados': {
-      id: '/selados'
-      path: '/selados'
-      fullPath: '/selados'
-      preLoaderRoute: typeof SeladosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/produtos-lacrados': {
-      id: '/produtos-lacrados'
-      path: '/produtos-lacrados'
-      fullPath: '/produtos-lacrados'
-      preLoaderRoute: typeof ProdutosLacradosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pilha': {
-      id: '/pilha'
-      path: '/pilha'
-      fullPath: '/pilha'
-      preLoaderRoute: typeof PilhaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/orders': {
-      id: '/orders'
-      path: '/orders'
-      fullPath: '/orders'
-      preLoaderRoute: typeof OrdersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mais-vendidas': {
-      id: '/mais-vendidas'
-      path: '/mais-vendidas'
-      fullPath: '/mais-vendidas'
-      preLoaderRoute: typeof MaisVendidasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/imas': {
-      id: '/imas'
-      path: '/imas'
-      fullPath: '/imas'
-      preLoaderRoute: typeof ImasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/favoritos': {
-      id: '/favoritos'
-      path: '/favoritos'
-      fullPath: '/favoritos'
-      preLoaderRoute: typeof FavoritosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/faq': {
-      id: '/faq'
-      path: '/faq'
-      fullPath: '/faq'
-      preLoaderRoute: typeof FaqRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/envios': {
-      id: '/envios'
-      path: '/envios'
-      fullPath: '/envios'
-      preLoaderRoute: typeof EnviosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/deck-builder': {
-      id: '/deck-builder'
-      path: '/deck-builder'
-      fullPath: '/deck-builder'
-      preLoaderRoute: typeof DeckBuilderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/conta': {
-      id: '/conta'
-      path: '/conta'
-      fullPath: '/conta'
-      preLoaderRoute: typeof ContaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/comunidade': {
-      id: '/comunidade'
-      path: '/comunidade'
-      fullPath: '/comunidade'
-      preLoaderRoute: typeof ComunidadeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/comparador': {
-      id: '/comparador'
-      path: '/comparador'
-      fullPath: '/comparador'
-      preLoaderRoute: typeof ComparadorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/colecoes': {
-      id: '/colecoes'
-      path: '/colecoes'
-      fullPath: '/colecoes'
-      preLoaderRoute: typeof ColecoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cartas': {
-      id: '/cartas'
-      path: '/cartas'
-      fullPath: '/cartas'
-      preLoaderRoute: typeof CartasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/avisos': {
-      id: '/avisos'
-      path: '/avisos'
-      fullPath: '/avisos'
-      preLoaderRoute: typeof AvisosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/acessorios': {
@@ -1195,228 +1027,186 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AcessoriosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/produtos-lacrados/': {
-      id: '/produtos-lacrados/'
-      path: '/'
-      fullPath: '/produtos-lacrados/'
-      preLoaderRoute: typeof ProdutosLacradosIndexRouteImport
-      parentRoute: typeof ProdutosLacradosRoute
-    }
-    '/pre-venda/': {
-      id: '/pre-venda/'
-      path: '/pre-venda'
-      fullPath: '/pre-venda/'
-      preLoaderRoute: typeof PreVendaIndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pilha/': {
-      id: '/pilha/'
-      path: '/'
-      fullPath: '/pilha/'
-      preLoaderRoute: typeof PilhaIndexRouteImport
-      parentRoute: typeof PilhaRoute
-    }
-    '/orders/': {
-      id: '/orders/'
-      path: '/'
-      fullPath: '/orders/'
-      preLoaderRoute: typeof OrdersIndexRouteImport
-      parentRoute: typeof OrdersRoute
-    }
-    '/produtos-lacrados/$slug': {
-      id: '/produtos-lacrados/$slug'
-      path: '/$slug'
-      fullPath: '/produtos-lacrados/$slug'
-      preLoaderRoute: typeof ProdutosLacradosSlugRouteImport
-      parentRoute: typeof ProdutosLacradosRoute
-    }
-    '/pre-venda/$slug': {
-      id: '/pre-venda/$slug'
-      path: '/pre-venda/$slug'
-      fullPath: '/pre-venda/$slug'
-      preLoaderRoute: typeof PreVendaSlugRouteImport
+    '/avisos': {
+      id: '/avisos'
+      path: '/avisos'
+      fullPath: '/avisos'
+      preLoaderRoute: typeof AvisosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pilha/solicitar': {
-      id: '/pilha/solicitar'
-      path: '/solicitar'
-      fullPath: '/pilha/solicitar'
-      preLoaderRoute: typeof PilhaSolicitarRouteImport
-      parentRoute: typeof PilhaRoute
-    }
-    '/pay/$orderId': {
-      id: '/pay/$orderId'
-      path: '/pay/$orderId'
-      fullPath: '/pay/$orderId'
-      preLoaderRoute: typeof PayOrderIdRouteImport
+    '/cartas': {
+      id: '/cartas'
+      path: '/cartas'
+      fullPath: '/cartas'
+      preLoaderRoute: typeof CartasRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/orders/$orderId': {
-      id: '/orders/$orderId'
-      path: '/$orderId'
-      fullPath: '/orders/$orderId'
-      preLoaderRoute: typeof OrdersOrderIdRouteImport
-      parentRoute: typeof OrdersRoute
-    }
-    '/lista-desejos/$token': {
-      id: '/lista-desejos/$token'
-      path: '/lista-desejos/$token'
-      fullPath: '/lista-desejos/$token'
-      preLoaderRoute: typeof ListaDesejosTokenRouteImport
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/email/unsubscribe': {
-      id: '/email/unsubscribe'
-      path: '/email/unsubscribe'
-      fullPath: '/email/unsubscribe'
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+    '/colecoes': {
+      id: '/colecoes'
+      path: '/colecoes'
+      fullPath: '/colecoes'
+      preLoaderRoute: typeof ColecoesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/deck-builder/$deckId': {
-      id: '/deck-builder/$deckId'
-      path: '/$deckId'
-      fullPath: '/deck-builder/$deckId'
-      preLoaderRoute: typeof DeckBuilderDeckIdRouteImport
-      parentRoute: typeof DeckBuilderRoute
-    }
-    '/colecao/$slug': {
-      id: '/colecao/$slug'
-      path: '/colecao/$slug'
-      fullPath: '/colecao/$slug'
-      preLoaderRoute: typeof ColecaoSlugRouteImport
+    '/comparador': {
+      id: '/comparador'
+      path: '/comparador'
+      fullPath: '/comparador'
+      preLoaderRoute: typeof ComparadorRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/checkout/return': {
-      id: '/checkout/return'
-      path: '/return'
-      fullPath: '/checkout/return'
-      preLoaderRoute: typeof CheckoutReturnRouteImport
-      parentRoute: typeof CheckoutRoute
-    }
-    '/carta/$slug': {
-      id: '/carta/$slug'
-      path: '/carta/$slug'
-      fullPath: '/carta/$slug'
-      preLoaderRoute: typeof CartaSlugRouteImport
+    '/comunidade': {
+      id: '/comunidade'
+      path: '/comunidade'
+      fullPath: '/comunidade'
+      preLoaderRoute: typeof ComunidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/baralho/$token': {
-      id: '/baralho/$token'
-      path: '/baralho/$token'
-      fullPath: '/baralho/$token'
-      preLoaderRoute: typeof BaralhoTokenRouteImport
+    '/conta': {
+      id: '/conta'
+      path: '/conta'
+      fullPath: '/conta'
+      preLoaderRoute: typeof ContaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/videogames': {
-      id: '/admin/videogames'
-      path: '/videogames'
-      fullPath: '/admin/videogames'
-      preLoaderRoute: typeof AdminVideogamesRouteImport
-      parentRoute: typeof AdminRoute
+    '/deck-builder': {
+      id: '/deck-builder'
+      path: '/deck-builder'
+      fullPath: '/deck-builder'
+      preLoaderRoute: typeof DeckBuilderRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/users': {
-      id: '/admin/users'
-      path: '/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AdminUsersRouteImport
-      parentRoute: typeof AdminRoute
+    '/envios': {
+      id: '/envios'
+      path: '/envios'
+      fullPath: '/envios'
+      preLoaderRoute: typeof EnviosRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/shipping': {
-      id: '/admin/shipping'
-      path: '/shipping'
-      fullPath: '/admin/shipping'
-      preLoaderRoute: typeof AdminShippingRouteImport
-      parentRoute: typeof AdminRoute
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/sealed': {
-      id: '/admin/sealed'
-      path: '/sealed'
-      fullPath: '/admin/sealed'
-      preLoaderRoute: typeof AdminSealedRouteImport
-      parentRoute: typeof AdminRoute
+    '/favoritos': {
+      id: '/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof FavoritosRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/pre-venda': {
-      id: '/admin/pre-venda'
-      path: '/pre-venda'
-      fullPath: '/admin/pre-venda'
-      preLoaderRoute: typeof AdminPreVendaRouteImport
-      parentRoute: typeof AdminRoute
+    '/imas': {
+      id: '/imas'
+      path: '/imas'
+      fullPath: '/imas'
+      preLoaderRoute: typeof ImasRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/pilha': {
-      id: '/admin/pilha'
+    '/mais-vendidas': {
+      id: '/mais-vendidas'
+      path: '/mais-vendidas'
+      fullPath: '/mais-vendidas'
+      preLoaderRoute: typeof MaisVendidasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders': {
+      id: '/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pilha': {
+      id: '/pilha'
       path: '/pilha'
-      fullPath: '/admin/pilha'
-      preLoaderRoute: typeof AdminPilhaRouteImport
-      parentRoute: typeof AdminRoute
+      fullPath: '/pilha'
+      preLoaderRoute: typeof PilhaRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/panels': {
-      id: '/admin/panels'
-      path: '/panels'
-      fullPath: '/admin/panels'
-      preLoaderRoute: typeof AdminPanelsRouteImport
-      parentRoute: typeof AdminRoute
+    '/produtos-lacrados': {
+      id: '/produtos-lacrados'
+      path: '/produtos-lacrados'
+      fullPath: '/produtos-lacrados'
+      preLoaderRoute: typeof ProdutosLacradosRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/ofertas-relampago': {
-      id: '/admin/ofertas-relampago'
-      path: '/ofertas-relampago'
-      fullPath: '/admin/ofertas-relampago'
-      preLoaderRoute: typeof AdminOfertasRelampagoRouteImport
-      parentRoute: typeof AdminRoute
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/manage-cards': {
-      id: '/admin/manage-cards'
-      path: '/manage-cards'
-      fullPath: '/admin/manage-cards'
-      preLoaderRoute: typeof AdminManageCardsRouteImport
-      parentRoute: typeof AdminRoute
+    '/selados': {
+      id: '/selados'
+      path: '/selados'
+      fullPath: '/selados'
+      preLoaderRoute: typeof SeladosRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/loyalty': {
-      id: '/admin/loyalty'
-      path: '/loyalty'
-      fullPath: '/admin/loyalty'
-      preLoaderRoute: typeof AdminLoyaltyRouteImport
-      parentRoute: typeof AdminRoute
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/leiloes': {
-      id: '/admin/leiloes'
-      path: '/leiloes'
-      fullPath: '/admin/leiloes'
-      preLoaderRoute: typeof AdminLeiloesRouteImport
-      parentRoute: typeof AdminRoute
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/integrations': {
-      id: '/admin/integrations'
-      path: '/integrations'
-      fullPath: '/admin/integrations'
-      preLoaderRoute: typeof AdminIntegrationsRouteImport
-      parentRoute: typeof AdminRoute
+    '/tipos-de-carta': {
+      id: '/tipos-de-carta'
+      path: '/tipos-de-carta'
+      fullPath: '/tipos-de-carta'
+      preLoaderRoute: typeof TiposDeCartaRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/emails': {
-      id: '/admin/emails'
-      path: '/emails'
-      fullPath: '/admin/emails'
-      preLoaderRoute: typeof AdminEmailsRouteImport
-      parentRoute: typeof AdminRoute
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/dashboard': {
-      id: '/admin/dashboard'
-      path: '/dashboard'
-      fullPath: '/admin/dashboard'
-      preLoaderRoute: typeof AdminDashboardRouteImport
-      parentRoute: typeof AdminRoute
+    '/videogames': {
+      id: '/videogames'
+      path: '/videogames'
+      fullPath: '/videogames'
+      preLoaderRoute: typeof VideogamesRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/coupons': {
-      id: '/admin/coupons'
-      path: '/coupons'
-      fullPath: '/admin/coupons'
-      preLoaderRoute: typeof AdminCouponsRouteImport
+    '/admin/accessories': {
+      id: '/admin/accessories'
+      path: '/accessories'
+      fullPath: '/admin/accessories'
+      preLoaderRoute: typeof AdminAccessoriesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/banners': {
@@ -1426,26 +1216,222 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBannersRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/accessories': {
-      id: '/admin/accessories'
-      path: '/accessories'
-      fullPath: '/admin/accessories'
-      preLoaderRoute: typeof AdminAccessoriesRouteImport
+    '/admin/coupons': {
+      id: '/admin/coupons'
+      path: '/coupons'
+      fullPath: '/admin/coupons'
+      preLoaderRoute: typeof AdminCouponsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/emails': {
+      id: '/admin/emails'
+      path: '/emails'
+      fullPath: '/admin/emails'
+      preLoaderRoute: typeof AdminEmailsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/integrations': {
+      id: '/admin/integrations'
+      path: '/integrations'
+      fullPath: '/admin/integrations'
+      preLoaderRoute: typeof AdminIntegrationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/leiloes': {
+      id: '/admin/leiloes'
+      path: '/leiloes'
+      fullPath: '/admin/leiloes'
+      preLoaderRoute: typeof AdminLeiloesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/loyalty': {
+      id: '/admin/loyalty'
+      path: '/loyalty'
+      fullPath: '/admin/loyalty'
+      preLoaderRoute: typeof AdminLoyaltyRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/manage-cards': {
+      id: '/admin/manage-cards'
+      path: '/manage-cards'
+      fullPath: '/admin/manage-cards'
+      preLoaderRoute: typeof AdminManageCardsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/ofertas-relampago': {
+      id: '/admin/ofertas-relampago'
+      path: '/ofertas-relampago'
+      fullPath: '/admin/ofertas-relampago'
+      preLoaderRoute: typeof AdminOfertasRelampagoRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/panels': {
+      id: '/admin/panels'
+      path: '/panels'
+      fullPath: '/admin/panels'
+      preLoaderRoute: typeof AdminPanelsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pilha': {
+      id: '/admin/pilha'
+      path: '/pilha'
+      fullPath: '/admin/pilha'
+      preLoaderRoute: typeof AdminPilhaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pre-venda': {
+      id: '/admin/pre-venda'
+      path: '/pre-venda'
+      fullPath: '/admin/pre-venda'
+      preLoaderRoute: typeof AdminPreVendaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/sealed': {
+      id: '/admin/sealed'
+      path: '/sealed'
+      fullPath: '/admin/sealed'
+      preLoaderRoute: typeof AdminSealedRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/shipping': {
+      id: '/admin/shipping'
+      path: '/shipping'
+      fullPath: '/admin/shipping'
+      preLoaderRoute: typeof AdminShippingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/videogames': {
+      id: '/admin/videogames'
+      path: '/videogames'
+      fullPath: '/admin/videogames'
+      preLoaderRoute: typeof AdminVideogamesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/baralho/$token': {
+      id: '/baralho/$token'
+      path: '/baralho/$token'
+      fullPath: '/baralho/$token'
+      preLoaderRoute: typeof BaralhoTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/sitemap.xml': {
-      id: '/api/public/sitemap.xml'
-      path: '/api/public/sitemap.xml'
-      fullPath: '/api/public/sitemap.xml'
-      preLoaderRoute: typeof ApiPublicSitemapDotxmlRouteImport
+    '/carta/$slug': {
+      id: '/carta/$slug'
+      path: '/carta/$slug'
+      fullPath: '/carta/$slug'
+      preLoaderRoute: typeof CartaSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/checkout/return': {
+      id: '/checkout/return'
+      path: '/return'
+      fullPath: '/checkout/return'
+      preLoaderRoute: typeof CheckoutReturnRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
+    '/colecao/$slug': {
+      id: '/colecao/$slug'
+      path: '/colecao/$slug'
+      fullPath: '/colecao/$slug'
+      preLoaderRoute: typeof ColecaoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deck-builder/$deckId': {
+      id: '/deck-builder/$deckId'
+      path: '/$deckId'
+      fullPath: '/deck-builder/$deckId'
+      preLoaderRoute: typeof DeckBuilderDeckIdRouteImport
+      parentRoute: typeof DeckBuilderRoute
+    }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lista-desejos/$token': {
+      id: '/lista-desejos/$token'
+      path: '/lista-desejos/$token'
+      fullPath: '/lista-desejos/$token'
+      preLoaderRoute: typeof ListaDesejosTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders/': {
+      id: '/orders/'
+      path: '/'
+      fullPath: '/orders/'
+      preLoaderRoute: typeof OrdersIndexRouteImport
+      parentRoute: typeof OrdersRoute
+    }
+    '/orders/$orderId': {
+      id: '/orders/$orderId'
+      path: '/$orderId'
+      fullPath: '/orders/$orderId'
+      preLoaderRoute: typeof OrdersOrderIdRouteImport
+      parentRoute: typeof OrdersRoute
+    }
+    '/pay/$orderId': {
+      id: '/pay/$orderId'
+      path: '/pay/$orderId'
+      fullPath: '/pay/$orderId'
+      preLoaderRoute: typeof PayOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pilha/': {
+      id: '/pilha/'
+      path: '/'
+      fullPath: '/pilha/'
+      preLoaderRoute: typeof PilhaIndexRouteImport
+      parentRoute: typeof PilhaRoute
+    }
+    '/pilha/solicitar': {
+      id: '/pilha/solicitar'
+      path: '/solicitar'
+      fullPath: '/pilha/solicitar'
+      preLoaderRoute: typeof PilhaSolicitarRouteImport
+      parentRoute: typeof PilhaRoute
+    }
+    '/pre-venda/': {
+      id: '/pre-venda/'
+      path: '/pre-venda'
+      fullPath: '/pre-venda/'
+      preLoaderRoute: typeof PreVendaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pre-venda/$slug': {
+      id: '/pre-venda/$slug'
+      path: '/pre-venda/$slug'
+      fullPath: '/pre-venda/$slug'
+      preLoaderRoute: typeof PreVendaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produtos-lacrados/': {
+      id: '/produtos-lacrados/'
+      path: '/'
+      fullPath: '/produtos-lacrados/'
+      preLoaderRoute: typeof ProdutosLacradosIndexRouteImport
+      parentRoute: typeof ProdutosLacradosRoute
+    }
+    '/produtos-lacrados/$slug': {
+      id: '/produtos-lacrados/$slug'
+      path: '/$slug'
+      fullPath: '/produtos-lacrados/$slug'
+      preLoaderRoute: typeof ProdutosLacradosSlugRouteImport
+      parentRoute: typeof ProdutosLacradosRoute
     }
     '/admin/orders/$orderId': {
       id: '/admin/orders/$orderId'
@@ -1454,88 +1440,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrdersOrderIdRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+    '/api/public/sitemap.xml': {
+      id: '/api/public/sitemap.xml'
+      path: '/api/public/sitemap.xml'
+      fullPath: '/api/public/sitemap.xml'
+      preLoaderRoute: typeof ApiPublicSitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/transactional/preview': {
-      id: '/lovable/email/transactional/preview'
-      path: '/lovable/email/transactional/preview'
-      fullPath: '/lovable/email/transactional/preview'
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/auth/webhook': {
-      id: '/lovable/email/auth/webhook'
-      path: '/lovable/email/auth/webhook'
-      fullPath: '/lovable/email/auth/webhook'
-      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/payments/webhook': {
-      id: '/api/public/payments/webhook'
-      path: '/api/public/payments/webhook'
-      fullPath: '/api/public/payments/webhook'
-      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/payments/mercadopago-webhook': {
-      id: '/api/public/payments/mercadopago-webhook'
-      path: '/api/public/payments/mercadopago-webhook'
-      fullPath: '/api/public/payments/mercadopago-webhook'
-      preLoaderRoute: typeof ApiPublicPaymentsMercadopagoWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/melhorenvio/callback': {
-      id: '/api/public/melhorenvio/callback'
-      path: '/api/public/melhorenvio/callback'
-      fullPath: '/api/public/melhorenvio/callback'
-      preLoaderRoute: typeof ApiPublicMelhorenvioCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/update-prices': {
-      id: '/api/public/hooks/update-prices'
-      path: '/api/public/hooks/update-prices'
-      fullPath: '/api/public/hooks/update-prices'
-      preLoaderRoute: typeof ApiPublicHooksUpdatePricesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/stock-back-check': {
-      id: '/api/public/hooks/stock-back-check'
-      path: '/api/public/hooks/stock-back-check'
-      fullPath: '/api/public/hooks/stock-back-check'
-      preLoaderRoute: typeof ApiPublicHooksStockBackCheckRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/stack-reminders': {
-      id: '/api/public/hooks/stack-reminders'
-      path: '/api/public/hooks/stack-reminders'
-      fullPath: '/api/public/hooks/stack-reminders'
-      preLoaderRoute: typeof ApiPublicHooksStackRemindersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/price-drop-check': {
-      id: '/api/public/hooks/price-drop-check'
-      path: '/api/public/hooks/price-drop-check'
-      fullPath: '/api/public/hooks/price-drop-check'
-      preLoaderRoute: typeof ApiPublicHooksPriceDropCheckRouteImport
+    '/api/public/hooks/auto-cancel-unpaid': {
+      id: '/api/public/hooks/auto-cancel-unpaid'
+      path: '/api/public/hooks/auto-cancel-unpaid'
+      fullPath: '/api/public/hooks/auto-cancel-unpaid'
+      preLoaderRoute: typeof ApiPublicHooksAutoCancelUnpaidRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/expire-loyalty-points': {
@@ -1545,11 +1468,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksExpireLoyaltyPointsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/auto-cancel-unpaid': {
-      id: '/api/public/hooks/auto-cancel-unpaid'
-      path: '/api/public/hooks/auto-cancel-unpaid'
-      fullPath: '/api/public/hooks/auto-cancel-unpaid'
-      preLoaderRoute: typeof ApiPublicHooksAutoCancelUnpaidRouteImport
+    '/api/public/hooks/price-drop-check': {
+      id: '/api/public/hooks/price-drop-check'
+      path: '/api/public/hooks/price-drop-check'
+      fullPath: '/api/public/hooks/price-drop-check'
+      preLoaderRoute: typeof ApiPublicHooksPriceDropCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/stack-reminders': {
+      id: '/api/public/hooks/stack-reminders'
+      path: '/api/public/hooks/stack-reminders'
+      fullPath: '/api/public/hooks/stack-reminders'
+      preLoaderRoute: typeof ApiPublicHooksStackRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/stock-back-check': {
+      id: '/api/public/hooks/stock-back-check'
+      path: '/api/public/hooks/stock-back-check'
+      fullPath: '/api/public/hooks/stock-back-check'
+      preLoaderRoute: typeof ApiPublicHooksStockBackCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/update-prices': {
+      id: '/api/public/hooks/update-prices'
+      path: '/api/public/hooks/update-prices'
+      fullPath: '/api/public/hooks/update-prices'
+      preLoaderRoute: typeof ApiPublicHooksUpdatePricesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/melhorenvio/callback': {
+      id: '/api/public/melhorenvio/callback'
+      path: '/api/public/melhorenvio/callback'
+      fullPath: '/api/public/melhorenvio/callback'
+      preLoaderRoute: typeof ApiPublicMelhorenvioCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/payments/mercadopago-webhook': {
+      id: '/api/public/payments/mercadopago-webhook'
+      path: '/api/public/payments/mercadopago-webhook'
+      fullPath: '/api/public/payments/mercadopago-webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsMercadopagoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
