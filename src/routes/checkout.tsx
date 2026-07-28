@@ -421,7 +421,7 @@ function CheckoutPage() {
           : `Retirada em mãos: ${PICKUP_LABELS[pickupPoint]}. Horário: tarde das 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.`
         : "";
     const combined = [pickupLine, favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
-    return combined || null;
+    return combined ? combined.slice(0, 2000) : null;
   };
 
   const handleAddressSubmit = async (e: React.FormEvent) => {
