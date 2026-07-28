@@ -47,6 +47,15 @@ const ComunidadeLaunchEmail: React.FC<ComunidadeLaunchProps> = ({ recipientName 
       encomendas e todas as novidades antes de qualquer outro canal.
     </Text>
 
+    <Section style={{ margin: '24px 0' }}>
+      <Img
+        src={`${SITE_URL}${charmanderAsset.url}`}
+        alt="Comunidade Sevii Colecionáveis"
+        width="512"
+        style={{ display: 'block', width: '100%', maxWidth: '512px', height: 'auto', borderRadius: '12px', margin: '0 auto' }}
+      />
+    </Section>
+
     <Section
       style={{
         backgroundColor: '#fafafa',
