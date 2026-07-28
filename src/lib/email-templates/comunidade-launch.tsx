@@ -1,7 +1,8 @@
 import * as React from 'react'
-import { Section, Text, Heading, Button, Hr } from '@react-email/components'
+import { Section, Text, Heading, Button, Hr, Img } from '@react-email/components'
 import type { TemplateEntry } from './registry'
 import { EmailLayout, styles, SITE_URL } from './_shared'
+import charmanderAsset from '@/assets/sevii-comunidade-charmander.png.asset.json'
 
 interface ComunidadeLaunchProps {
   recipientName?: string
