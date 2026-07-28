@@ -1,7 +1,8 @@
 import * as React from 'react'
-import { Section, Text, Heading, Button, Hr } from '@react-email/components'
+import { Section, Text, Heading, Button, Hr, Img } from '@react-email/components'
 import type { TemplateEntry } from './registry'
 import { EmailLayout, styles, SITE_URL } from './_shared'
+import charmanderAsset from '@/assets/sevii-comunidade-charmander.png.asset.json'
 
 interface ComunidadeLaunchProps {
   recipientName?: string
@@ -45,6 +46,15 @@ const ComunidadeLaunchEmail: React.FC<ComunidadeLaunchProps> = ({ recipientName 
       grupos oficiais de WhatsApp reunidos em um só lugar. É lá que rolam os leilões, as
       encomendas e todas as novidades antes de qualquer outro canal.
     </Text>
+
+    <Section style={{ margin: '24px 0' }}>
+      <Img
+        src={`${SITE_URL}${charmanderAsset.url}`}
+        alt="Comunidade Sevii Colecionáveis"
+        width="512"
+        style={{ display: 'block', width: '100%', maxWidth: '512px', height: 'auto', borderRadius: '12px', margin: '0 auto' }}
+      />
+    </Section>
 
     <Section
       style={{
