@@ -84,6 +84,7 @@ const NAV_LINKS: { to: string; label: string }[] = [
   { to: "/sobre", label: "Sobre nós" },
   { to: "/faq", label: "Perguntas frequentes" },
   { to: "/favoritos", label: "Favoritos" },
+  { to: "/comunidade", label: "Comunidade" },
 ];
 
 export function SiteFooter() {
