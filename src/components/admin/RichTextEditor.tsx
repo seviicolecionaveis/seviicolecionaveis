@@ -155,6 +155,7 @@ function LinkDialog({
 
 export default function RichTextEditor({ value, onChange }: Props) {
   const [linkOpen, setLinkOpen] = useState(false);
+  const [imageOpen, setImageOpen] = useState(false);
   const [colorOpen, setColorOpen] = useState(false);
 
   const editor = useEditor({
