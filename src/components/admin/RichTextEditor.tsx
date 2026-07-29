@@ -153,6 +153,165 @@ function LinkDialog({
   );
 }
 
+function ImageDialog({
+  editor,
+  onClose,
+}: {
+  editor: Editor;
+  onClose: () => void;
+}) {
+  const [url, setUrl] = useState("");
+  const [alt, setAlt] = useState("");
+  const [width, setWidth] = useState("100");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function upload(file: File) {
+    if (!file.type.startsWith("image/")) {
+      setError("Selecione um arquivo de imagem.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Imagem muito grande (máximo 5 MB).");
+      return;
+    }
+    setError(null);
+    setBusy(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `email/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("card-images")
+        .upload(path, file, { cacheControl: "31536000", upsert: false });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("card-images").getPublicUrl(path);
+      setUrl(data.publicUrl);
+    } catch (e: any) {
+      setError(e?.message ?? "Falha no upload da imagem.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const apply = () => {
+    const src = url.trim();
+    if (!/^https?:\/\//.test(src)) {
+      setError("Envie um arquivo ou informe uma URL http(s).");
+      return;
+    }
+    const pct = Math.min(100, Math.max(10, Number(width) || 100));
+    editor
+      .chain()
+      .focus()
+      .setImage({
+        src,
+        alt: alt.trim() || undefined,
+        // @ts-expect-error tiptap image accepts extra attrs via HTMLAttributes merge
+        style: `max-width:${pct}%;height:auto;display:block;margin:16px auto;border-radius:8px;`,
+      })
+      .run();
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm space-y-3 rounded-xl border border-border bg-card p-4 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="text-sm font-semibold">Inserir imagem</p>
+
+        <div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) upload(f);
+              e.target.value = "";
+            }}
+          />
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => fileRef.current?.click()}
+            className="w-full rounded-md border border-dashed border-border px-3 py-3 text-xs font-semibold hover:bg-secondary disabled:opacity-40"
+          >
+            {busy ? "Enviando..." : "Escolher arquivo do computador"}
+          </button>
+        </div>
+
+        <label className="block text-xs">
+          <span className="mb-1 block font-semibold">Ou cole a URL da imagem</span>
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+            placeholder="https://..."
+          />
+        </label>
+
+        {url && /^https?:\/\//.test(url) && (
+          <img
+            src={url}
+            alt="Prévia"
+            className="max-h-40 w-full rounded-md border border-border object-contain"
+          />
+        )}
+
+        <div className="grid grid-cols-2 gap-2">
+          <label className="block text-xs">
+            <span className="mb-1 block font-semibold">Largura (%)</span>
+            <input
+              type="number"
+              min={10}
+              max={100}
+              value={width}
+              onChange={(e) => setWidth(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+            />
+          </label>
+          <label className="block text-xs">
+            <span className="mb-1 block font-semibold">Texto alternativo</span>
+            <input
+              value={alt}
+              onChange={(e) => setAlt(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+              placeholder="Descrição"
+            />
+          </label>
+        </div>
+
+        {error && <p className="text-xs text-destructive">{error}</p>}
+
+        <div className="flex justify-end gap-2 pt-1">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-secondary"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={apply}
+            disabled={busy}
+            className="rounded-md bg-foreground px-3 py-1.5 text-xs font-semibold text-background hover:opacity-90 disabled:opacity-40"
+          >
+            Inserir
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function RichTextEditor({ value, onChange }: Props) {
   const [linkOpen, setLinkOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
