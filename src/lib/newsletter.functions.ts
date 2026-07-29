@@ -206,6 +206,76 @@ export const sendLoyaltyLaunchCampaign = createServerFn({ method: "POST" })
     return { ok: true as const, campaignId: campaign.id };
   });
 
+// Admin: send "Comunidade Sevii" announcement campaign to Newsletter + Clientes lists
+export const sendComunidadeCampaign = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z
+      .object({
+        senderEmail: z.string().trim().email().max(255),
+        senderName: z.string().trim().min(1).max(80),
+        subject: z
+          .string()
+          .trim()
+          .min(1)
+          .max(150)
+          .default("A Comunidade Sevii está no ar! 🎉"),
+      })
+      .parse(d)
+  )
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context, data }) => {
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const { data: role } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!role) throw new Response("Acesso negado", { status: 403 });
+
+    const {
+      ensureNewsletterListId,
+      ensureCustomersListId,
+      ensureSender,
+      createEmailCampaign,
+      sendCampaignNow,
+    } = await import("./brevo.server");
+    const { renderComunidadeCampaignHtml } = await import(
+      "./comunidade-campaign.server"
+    );
+
+    const sender = await ensureSender({
+      name: data.senderName,
+      email: data.senderEmail,
+    });
+    if (!sender.active) {
+      return {
+        ok: false as const,
+        reason:
+          "Remetente não verificado na Brevo. Confira o e-mail enviado pela Brevo para validar o remetente e tente novamente.",
+      };
+    }
+
+    const newsletterListId = await ensureNewsletterListId();
+    const customersListId = await ensureCustomersListId();
+
+    const html = await renderComunidadeCampaignHtml();
+    const campaign = await createEmailCampaign({
+      name: `Comunidade Sevii — lançamento ${new Date()
+        .toISOString()
+        .slice(0, 16)}`,
+      subject: data.subject,
+      htmlContent: html,
+      sender: { id: sender.id, name: data.senderName, email: data.senderEmail },
+      listIds: [newsletterListId, customersListId],
+      replyTo: data.senderEmail,
+    });
+    await sendCampaignNow(campaign.id);
+    return { ok: true as const, campaignId: campaign.id };
+  });
+
 function launchHtml() {
   return `<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8" />
