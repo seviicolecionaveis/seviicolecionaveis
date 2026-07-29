@@ -552,6 +552,7 @@ export default function RichTextEditor({ value, onChange }: Props) {
       <EditorContent editor={editor} />
 
       {linkOpen && <LinkDialog editor={editor} onClose={() => setLinkOpen(false)} />}
+      {imageOpen && <ImageDialog editor={editor} onClose={() => setImageOpen(false)} />}
     </div>
   );
 }
