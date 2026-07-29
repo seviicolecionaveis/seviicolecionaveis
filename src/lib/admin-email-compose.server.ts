@@ -39,11 +39,12 @@ export function parseRecipients(raw: string): { valid: string[]; invalid: string
 
 const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
-    'p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'a',
+    'p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'a', 'img',
     'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'blockquote', 'span', 'div',
   ],
   allowedAttributes: {
     a: ['href', 'target', 'rel'],
+    img: ['src', 'alt', 'width', 'height', 'style'],
     '*': ['style'],
     p: ['style'],
     div: ['style'],
@@ -55,6 +56,11 @@ const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
       'color': [/^#(0x)?[0-9a-fA-F]+$/, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/],
       'text-align': [/^left$/, /^right$/, /^center$/, /^justify$/],
       'font-weight': [/^\d+$/, /^bold$/, /^normal$/],
+      'max-width': [/^\d{1,3}%$/, /^\d{1,4}px$/],
+      'height': [/^auto$/],
+      'display': [/^block$/, /^inline-block$/],
+      'margin': [/^[\dpxauto\s]+$/],
+      'border-radius': [/^\d{1,3}px$/],
     },
   },
   allowedSchemes: ['http', 'https', 'mailto'],
