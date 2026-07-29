@@ -428,6 +428,13 @@ export default function RichTextEditor({ value, onChange }: Props) {
         >
           🔗
         </ToolbarButton>
+        <ToolbarButton
+          title="Inserir imagem"
+          active={editor.isActive("image")}
+          onClick={() => setImageOpen(true)}
+        >
+          🖼
+        </ToolbarButton>
 
         <span className="mx-1 h-5 w-px bg-border" />
 
