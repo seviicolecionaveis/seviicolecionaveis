@@ -148,10 +148,10 @@ function ComunidadePage() {
       <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
         <div className="overflow-hidden rounded-2xl border border-border">
           <img
-            src={bannerUrl}
+            src={bannerAsset.url}
             alt="Ilustração da comunidade Sevii Colecionáveis"
-            width={1600}
-            height={600}
+            width={2208}
+            height={448}
             className="h-40 w-full object-cover sm:h-56"
           />
         </div>
