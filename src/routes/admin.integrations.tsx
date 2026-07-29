@@ -12,6 +12,7 @@ import {
   getBrevoStatus,
   syncExistingCustomers,
   sendLoyaltyLaunchCampaign,
+  sendComunidadeCampaign,
 } from "@/lib/newsletter.functions";
 
 export const Route = createFileRoute("/admin/integrations")({
@@ -221,13 +222,17 @@ function BrevoSection() {
   const fetchBrevoStatus = useServerFn(getBrevoStatus);
   const doSync = useServerFn(syncExistingCustomers);
   const doSendCampaign = useServerFn(sendLoyaltyLaunchCampaign);
+  const doSendComunidade = useServerFn(sendComunidadeCampaign);
 
   const [status, setStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<null | "sync" | "campaign">(null);
+  const [busy, setBusy] = useState<null | "sync" | "campaign" | "comunidade">(null);
   const [senderName, setSenderName] = useState("Sevii Colecionáveis");
   const [senderEmail, setSenderEmail] = useState("seviicolecionaveis@gmail.com");
   const [subject, setSubject] = useState("🎉 Novidade: Programa de Pontos Sevii");
+  const [comunidadeSubject, setComunidadeSubject] = useState(
+    "A Comunidade Sevii está no ar! 🎉"
+  );
 
   const reload = async () => {
     try {
@@ -270,6 +275,30 @@ function BrevoSection() {
       });
       if (r.ok) {
         toast.success("Campanha enviada! 🎉");
+      } else {
+        toast.error(r.reason ?? "Falha ao enviar.");
+      }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao enviar campanha.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function onSendComunidade() {
+    if (
+      !confirm(
+        "Enviar a campanha de lançamento da Comunidade Sevii para as listas Newsletter + Clientes na Brevo?"
+      )
+    )
+      return;
+    setBusy("comunidade");
+    try {
+      const r = await doSendComunidade({
+        data: { senderName, senderEmail, subject: comunidadeSubject },
+      });
+      if (r.ok) {
+        toast.success("Campanha da Comunidade enviada! 🎉");
       } else {
         toast.error(r.reason ?? "Falha ao enviar.");
       }
@@ -387,6 +416,29 @@ function BrevoSection() {
                 className="rounded-md bg-[#20a5c9] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:opacity-90 disabled:opacity-40"
               >
                 {busy === "campaign" ? "Enviando..." : "Enviar campanha agora"}
+              </button>
+            </div>
+
+            <div className="rounded-md border border-border p-3 space-y-2">
+              <h3 className="text-sm font-bold">Campanha — Comunidade Sevii</h3>
+              <p className="text-xs text-muted-foreground">
+                Envia o anúncio da página <strong>/comunidade</strong> (grupos oficiais de
+                WhatsApp) para Newsletter + Clientes, usando o mesmo remetente acima.
+              </p>
+              <label className="text-xs block">
+                <span className="block mb-1 text-muted-foreground">Assunto</span>
+                <input
+                  value={comunidadeSubject}
+                  onChange={(e) => setComunidadeSubject(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+                />
+              </label>
+              <button
+                onClick={onSendComunidade}
+                disabled={busy !== null}
+                className="rounded-md bg-[#25D366] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:opacity-90 disabled:opacity-40"
+              >
+                {busy === "comunidade" ? "Enviando..." : "Enviar campanha da Comunidade"}
               </button>
             </div>
           </div>
