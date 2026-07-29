@@ -170,6 +170,13 @@ export default function RichTextEditor({ value, onChange }: Props) {
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       TextStyle,
       Color,
+      Image.configure({
+        inline: false,
+        allowBase64: false,
+        HTMLAttributes: {
+          style: "max-width:100%;height:auto;display:block;margin:16px auto;border-radius:8px;",
+        },
+      }),
     ],
     content: value || "<p></p>",
     editorProps: {
