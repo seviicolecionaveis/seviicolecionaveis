@@ -4,7 +4,7 @@ import { Megaphone, Gavel, ShoppingBag, MessagesSquare, Sparkles, Instagram, Mes
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/SiteFooter";
 import logoUrl from "@/assets/logo.webp";
-import bannerUrl from "@/assets/comunidade-banner.jpg";
+import bannerAsset from "@/assets/banner-comunidade.png.asset.json";
 
 const TITLE = "Comunidade Sevii | Grupos Oficiais da Sevii Colecionáveis";
 const DESCRIPTION =
