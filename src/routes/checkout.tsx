@@ -45,6 +45,12 @@ export const Route = createFileRoute("/checkout")({
 });
 
 
+const cepDigits = (v: string) => (v || "").replace(/\D/g, "").slice(0, 8);
+const maskCep = (v: string) => {
+  const d = cepDigits(v);
+  return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
+};
+
 
 interface Form {
   firstName: string;
@@ -365,7 +371,7 @@ function CheckoutPage() {
     await supabase.from("addresses").insert({
       user_id: user.id,
       recipient_name: fullName,
-      cep: form.cep,
+      cep: maskCep(form.cep),
       street: form.street,
       number: form.number,
       complement: form.complement || null,
@@ -380,7 +386,7 @@ function CheckoutPage() {
     recipientName: fullName,
     cpf: form.cpf || null,
     phone: form.phone,
-    cep: form.cep,
+    cep: maskCep(form.cep),
     street: form.street,
     number: form.number,
     complement: form.complement || null,
@@ -506,6 +512,10 @@ function CheckoutPage() {
     if (cpfDigits.length !== 11) {
       return "Informe um CPF válido (11 dígitos).";
     }
+    if (cepDigits(form.cep).length !== 8) {
+      return "Informe um CEP válido com 8 dígitos (ex.: 49000-000).";
+    }
+
     if (shipping === "fixed" && !selectedQuote) {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
     }
@@ -667,7 +677,7 @@ function CheckoutPage() {
               <Field label="Telefone / WhatsApp" required value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(11) 90000-0000" />
             </div>
             <div className="grid sm:grid-cols-[160px_1fr] gap-4">
-              <Field label="CEP" required value={form.cep} onChange={(v) => setForm({ ...form, cep: v })} onBlur={() => lookupCep(form.cep)} placeholder="00000-000" />
+              <Field label="CEP" required value={form.cep} onChange={(v) => setForm({ ...form, cep: maskCep(v) })} onBlur={() => lookupCep(form.cep)} placeholder="00000-000" />
               <Field label="Rua / Logradouro" required value={form.street} onChange={(v) => setForm({ ...form, street: v })} />
             </div>
             <div className="grid sm:grid-cols-[120px_1fr] gap-4">
