@@ -667,7 +667,7 @@ function CheckoutPage() {
               <Field label="Telefone / WhatsApp" required value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(11) 90000-0000" />
             </div>
             <div className="grid sm:grid-cols-[160px_1fr] gap-4">
-              <Field label="CEP" required value={form.cep} onChange={(v) => setForm({ ...form, cep: v })} onBlur={() => lookupCep(form.cep)} placeholder="00000-000" />
+              <Field label="CEP" required value={form.cep} onChange={(v) => setForm({ ...form, cep: maskCep(v) })} onBlur={() => lookupCep(form.cep)} placeholder="00000-000" />
               <Field label="Rua / Logradouro" required value={form.street} onChange={(v) => setForm({ ...form, street: v })} />
             </div>
             <div className="grid sm:grid-cols-[120px_1fr] gap-4">
