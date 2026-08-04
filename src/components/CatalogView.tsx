@@ -201,21 +201,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
             <span className="sr-only">Sevii Colecionáveis</span>
           </Link>
 
-          <SiteNav className="hidden md:flex" />
-
-          <div className="relative hidden flex-1 max-w-xs lg:block">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <label htmlFor="catalog-search" className="sr-only">Buscar cartas</label>
-            <input
-              id="catalog-search"
-              type="search"
-              aria-label="Buscar cartas no catálogo"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar por nome, coleção, numeração..."
-              className="w-full rounded-full bg-secondary pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold"
-            />
-          </div>
+          <SiteNav className="hidden min-w-0 md:flex" />
 
           <div className="flex items-center gap-1">
             <button
@@ -227,22 +213,23 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
           </div>
         </div>
 
-        <div className="lg:hidden border-t border-border px-4 py-3 space-y-3">
+        <div className="border-t border-border px-4 py-3 space-y-3 sm:px-6">
           <SiteNav className="md:hidden -mx-1 overflow-x-auto" />
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <label htmlFor="catalog-search-mobile" className="sr-only">Buscar cartas</label>
+          <div className="relative w-full lg:max-w-md">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <label htmlFor="catalog-search" className="sr-only">Buscar cartas</label>
             <input
-              id="catalog-search-mobile"
+              id="catalog-search"
               type="search"
               aria-label="Buscar cartas no catálogo"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar..."
-              className="w-full rounded-full bg-secondary pl-10 pr-4 py-2 text-sm focus:outline-none"
+              placeholder="Buscar por nome, coleção, numeração..."
+              className="h-10 w-full min-w-0 rounded-full bg-secondary pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-gold"
             />
           </div>
         </div>
+
       </header>
 
       {showBanners && query.trim() === "" && <BannerCarousel />}
