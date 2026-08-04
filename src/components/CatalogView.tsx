@@ -215,7 +215,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
 
         <div className="border-t border-border px-4 py-3 space-y-3 sm:px-6">
           <SiteNav className="md:hidden -mx-1 overflow-x-auto" />
-          <div className="relative w-full lg:max-w-md">
+          <div className="relative mx-auto w-full lg:max-w-md">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <label htmlFor="catalog-search" className="sr-only">Buscar cartas</label>
             <input
