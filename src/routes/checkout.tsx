@@ -371,7 +371,7 @@ function CheckoutPage() {
     await supabase.from("addresses").insert({
       user_id: user.id,
       recipient_name: fullName,
-      cep: form.cep,
+      cep: maskCep(form.cep),
       street: form.street,
       number: form.number,
       complement: form.complement || null,
@@ -386,7 +386,7 @@ function CheckoutPage() {
     recipientName: fullName,
     cpf: form.cpf || null,
     phone: form.phone,
-    cep: form.cep,
+    cep: maskCep(form.cep),
     street: form.street,
     number: form.number,
     complement: form.complement || null,
