@@ -506,6 +506,10 @@ function CheckoutPage() {
     if (cpfDigits.length !== 11) {
       return "Informe um CPF válido (11 dígitos).";
     }
+    if (cepDigits(form.cep).length !== 8) {
+      return "Informe um CEP válido com 8 dígitos (ex.: 49000-000).";
+    }
+
     if (shipping === "fixed" && !selectedQuote) {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
     }
