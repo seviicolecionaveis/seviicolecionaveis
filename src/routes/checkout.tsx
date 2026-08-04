@@ -45,6 +45,12 @@ export const Route = createFileRoute("/checkout")({
 });
 
 
+const cepDigits = (v: string) => (v || "").replace(/\D/g, "").slice(0, 8);
+const maskCep = (v: string) => {
+  const d = cepDigits(v);
+  return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
+};
+
 
 interface Form {
   firstName: string;
