@@ -155,7 +155,7 @@ function RootComponent() {
           <AnalyticsTracker />
             <Outlet />
             <GlobalHeaderActions />
-            <WhatsAppGroupDialog />
+            {/* Pop-up da comunidade agora é gerenciado em Admin → Pop-ups */}
             <WhatsAppButton />
             <CompareBar />
             <PwaInstallBanner />
