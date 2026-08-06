@@ -16,7 +16,7 @@ import { copyToClipboard } from "@/lib/clipboard";
 import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/pilha/solicitar")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: { items?: string }): { items?: string } => ({
     items: typeof search.items === "string" ? search.items : undefined,
   }),
   head: () => ({

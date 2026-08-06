@@ -48,6 +48,7 @@ import { Route as AdminManageCardsRouteImport } from './routes/admin.manage-card
 import { Route as AdminOfertasRelampagoRouteImport } from './routes/admin.ofertas-relampago'
 import { Route as AdminPanelsRouteImport } from './routes/admin.panels'
 import { Route as AdminPilhaRouteImport } from './routes/admin.pilha'
+import { Route as AdminPopupsRouteImport } from './routes/admin.popups'
 import { Route as AdminPreVendaRouteImport } from './routes/admin.pre-venda'
 import { Route as AdminSealedRouteImport } from './routes/admin.sealed'
 import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
@@ -280,6 +281,11 @@ const AdminPanelsRoute = AdminPanelsRouteImport.update({
 const AdminPilhaRoute = AdminPilhaRouteImport.update({
   id: '/pilha',
   path: '/pilha',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPopupsRoute = AdminPopupsRouteImport.update({
+  id: '/popups',
+  path: '/popups',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPreVendaRoute = AdminPreVendaRouteImport.update({
@@ -525,6 +531,7 @@ export interface FileRoutesByFullPath {
   '/admin/ofertas-relampago': typeof AdminOfertasRelampagoRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
+  '/admin/popups': typeof AdminPopupsRoute
   '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
@@ -601,6 +608,7 @@ export interface FileRoutesByTo {
   '/admin/ofertas-relampago': typeof AdminOfertasRelampagoRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
+  '/admin/popups': typeof AdminPopupsRoute
   '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
@@ -681,6 +689,7 @@ export interface FileRoutesById {
   '/admin/ofertas-relampago': typeof AdminOfertasRelampagoRoute
   '/admin/panels': typeof AdminPanelsRoute
   '/admin/pilha': typeof AdminPilhaRoute
+  '/admin/popups': typeof AdminPopupsRoute
   '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
@@ -762,6 +771,7 @@ export interface FileRouteTypes {
     | '/admin/ofertas-relampago'
     | '/admin/panels'
     | '/admin/pilha'
+    | '/admin/popups'
     | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
@@ -838,6 +848,7 @@ export interface FileRouteTypes {
     | '/admin/ofertas-relampago'
     | '/admin/panels'
     | '/admin/pilha'
+    | '/admin/popups'
     | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
@@ -917,6 +928,7 @@ export interface FileRouteTypes {
     | '/admin/ofertas-relampago'
     | '/admin/panels'
     | '/admin/pilha'
+    | '/admin/popups'
     | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
@@ -1286,6 +1298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPilhaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/popups': {
+      id: '/admin/popups'
+      path: '/popups'
+      fullPath: '/admin/popups'
+      preLoaderRoute: typeof AdminPopupsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/pre-venda': {
       id: '/admin/pre-venda'
       path: '/pre-venda'
@@ -1568,6 +1587,7 @@ interface AdminRouteChildren {
   AdminOfertasRelampagoRoute: typeof AdminOfertasRelampagoRoute
   AdminPanelsRoute: typeof AdminPanelsRoute
   AdminPilhaRoute: typeof AdminPilhaRoute
+  AdminPopupsRoute: typeof AdminPopupsRoute
   AdminPreVendaRoute: typeof AdminPreVendaRoute
   AdminSealedRoute: typeof AdminSealedRoute
   AdminShippingRoute: typeof AdminShippingRoute
@@ -1589,6 +1609,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminOfertasRelampagoRoute: AdminOfertasRelampagoRoute,
   AdminPanelsRoute: AdminPanelsRoute,
   AdminPilhaRoute: AdminPilhaRoute,
+  AdminPopupsRoute: AdminPopupsRoute,
   AdminPreVendaRoute: AdminPreVendaRoute,
   AdminSealedRoute: AdminSealedRoute,
   AdminShippingRoute: AdminShippingRoute,
@@ -1719,13 +1740,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
