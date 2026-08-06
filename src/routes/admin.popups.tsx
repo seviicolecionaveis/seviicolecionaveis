@@ -85,6 +85,47 @@ const EMPTY: Draft = {
 const toLocalInput = (iso: string | null) =>
   iso ? new Date(iso).toISOString().slice(0, 16) : "";
 
+function ColorField({
+  label,
+  value,
+  onChange,
+  fallback,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  fallback: string;
+}) {
+  return (
+    <label className="block text-xs">
+      <span className="mb-1 block font-semibold">{label}</span>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={value || fallback}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-9 w-10 cursor-pointer rounded-md border border-border bg-background p-1"
+        />
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="padrão"
+          className="w-full rounded-md border border-border bg-background px-2 py-2 text-xs font-mono"
+        />
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="rounded-md border border-border px-2 py-1 text-[10px] font-semibold hover:bg-secondary"
+          >
+            Limpar
+          </button>
+        )}
+      </div>
+    </label>
+  );
+}
+
 function PopupsAdminPage() {
   const { isAdmin, loading: authLoading } = useAuth();
   const [rows, setRows] = useState<Popup[]>([]);
@@ -455,6 +496,22 @@ function PopupsAdminPage() {
                     ))}
                   </select>
                 </label>
+                {draft.icon_key !== "none" && (
+                  <div className="grid grid-cols-2 gap-2 sm:col-span-2">
+                    <ColorField
+                      label="Cor de fundo do ícone"
+                      value={draft.icon_bg_color}
+                      onChange={(v) => setDraft({ ...draft, icon_bg_color: v })}
+                      fallback="#f1f5f9"
+                    />
+                    <ColorField
+                      label="Cor do ícone"
+                      value={draft.icon_color}
+                      onChange={(v) => setDraft({ ...draft, icon_color: v })}
+                      fallback="#111827"
+                    />
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-2">
                   <label className="block text-xs">
                     <span className="mb-1 block font-semibold">Início (opcional)</span>
@@ -577,6 +634,23 @@ function PopupsAdminPage() {
                     cupom em um pedido, o pop-up não é mais exibido para ele.
                   </span>
                 </label>
+              )}
+
+              {draft.is_promo_code && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <ColorField
+                    label="Cor de fundo do cupom"
+                    value={draft.promo_bg_color}
+                    onChange={(v) => setDraft({ ...draft, promo_bg_color: v })}
+                    fallback="#fef9c3"
+                  />
+                  <ColorField
+                    label="Cor do texto/borda do cupom"
+                    value={draft.promo_text_color}
+                    onChange={(v) => setDraft({ ...draft, promo_text_color: v })}
+                    fallback="#b45309"
+                  />
+                </div>
               )}
 
               <div className="rounded-lg border border-border bg-secondary/40 p-4">
