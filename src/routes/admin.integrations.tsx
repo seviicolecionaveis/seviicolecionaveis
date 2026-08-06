@@ -17,7 +17,7 @@ import {
 
 export const Route = createFileRoute("/admin/integrations")({
   head: () => ({ meta: [{ title: "Integrações — Sevii Admin" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: { melhorenvio?: string; reason?: string }): { melhorenvio?: string; reason?: string } => ({
     melhorenvio: typeof s.melhorenvio === "string" ? s.melhorenvio : undefined,
     reason: typeof s.reason === "string" ? s.reason : undefined,
   }),

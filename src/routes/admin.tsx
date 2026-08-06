@@ -86,7 +86,7 @@ function AdminNavMenu({ group, currentPath }: { group: NavGroup; currentPath: st
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Sevii Colecionáveis" }] }),
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: { focus?: string }): { focus?: string } => ({
     focus: typeof search.focus === "string" ? search.focus : undefined,
   }),
   component: AdminPage,
