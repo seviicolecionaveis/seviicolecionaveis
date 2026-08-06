@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import { PopupPreview, PopupPreviewModal } from "@/components/admin/PopupPreview";
 
 export const Route = createFileRoute("/admin/popups")({
   head: () => ({ meta: [{ title: "Admin · Pop-ups" }] }),
@@ -48,6 +49,7 @@ function PopupsAdminPage() {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<Popup | null>(null);
   const dragId = useRef<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -234,6 +236,12 @@ function PopupsAdminPage() {
                   Em /avisos
                 </label>
                 <button
+                  onClick={() => setPreview(p)}
+                  className="rounded-md border border-border px-3 py-1.5 text-[11px] font-semibold hover:bg-secondary"
+                >
+                  Prévia
+                </button>
+                <button
                   onClick={() =>
                     setDraft({
                       id: p.id,
@@ -249,6 +257,7 @@ function PopupsAdminPage() {
                 >
                   Editar
                 </button>
+
                 <button
                   onClick={() => remove(p)}
                   className="rounded-md border border-border px-3 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-50"
@@ -263,7 +272,7 @@ function PopupsAdminPage() {
 
       {draft && (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4">
-          <div className="my-8 w-full max-w-2xl rounded-xl bg-card p-5 shadow-xl">
+          <div className="my-8 w-full max-w-3xl rounded-xl bg-card p-5 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-sm font-semibold">
                 {draft.id ? "Editar pop-up" : "Novo pop-up"}
@@ -370,6 +379,24 @@ function PopupsAdminPage() {
                 </label>
               </div>
 
+              <div className="rounded-lg border border-border bg-secondary/40 p-4">
+                <p className="mb-3 text-xs font-semibold">
+                  Prévia ao vivo{" "}
+                  <span className="font-normal text-muted-foreground">
+                    — como aparece para o visitante
+                  </span>
+                </p>
+                <PopupPreview
+                  popup={{
+                    title: draft.title,
+                    body_html: draft.body_html,
+                    image_url: draft.image_url.trim() || null,
+                    link_url: draft.link_url.trim() || null,
+                  }}
+                />
+              </div>
+
+
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   onClick={() => setDraft(null)}
@@ -389,6 +416,11 @@ function PopupsAdminPage() {
           </div>
         </div>
       )}
+
+      {preview && (
+        <PopupPreviewModal popup={preview} onClose={() => setPreview(null)} />
+      )}
     </div>
+
   );
 }
