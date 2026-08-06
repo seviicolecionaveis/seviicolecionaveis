@@ -94,14 +94,49 @@ function BannersAdmin() {
     await load();
   };
 
-  const move = async (id: string, dir: -1 | 1) => {
+  const move = (id: string, dir: -1 | 1) => {
     const idx = banners.findIndex((b) => b.id === id);
-    const swap = banners[idx + dir];
-    if (!swap) return;
-    await supabase.from("banners").update({ sort_order: swap.sort_order }).eq("id", id);
-    await supabase.from("banners").update({ sort_order: banners[idx].sort_order }).eq("id", swap.id);
-    await load();
+    const to = idx + dir;
+    if (idx < 0 || to < 0 || to >= banners.length) return;
+    const next = [...banners];
+    const [moved] = next.splice(idx, 1);
+    next.splice(to, 0, moved!);
+    setBanners(next);
+    setOrderDirty(true);
   };
+
+  const onDrop = (targetId: string) => {
+    const from = banners.findIndex((b) => b.id === dragId.current);
+    const to = banners.findIndex((b) => b.id === targetId);
+    dragId.current = null;
+    setDragOverId(null);
+    if (from < 0 || to < 0 || from === to) return;
+    const next = [...banners];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved!);
+    setBanners(next);
+    setOrderDirty(true);
+  };
+
+  const saveOrder = async () => {
+    setSavingOrder(true);
+    try {
+      const results = await Promise.all(
+        banners.map((b, i) =>
+          supabase.from("banners").update({ sort_order: i }).eq("id", b.id),
+        ),
+      );
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+      toast.success("Ordem dos banners salva.");
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao salvar a ordem.");
+    } finally {
+      setSavingOrder(false);
+    }
+  };
+
 
   if (authLoading || !isAdmin) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
