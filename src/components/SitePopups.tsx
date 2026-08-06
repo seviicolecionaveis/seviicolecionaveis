@@ -1,98 +1,38 @@
 import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { DontShowAgainCheckbox } from "@/components/DontShowAgainCheckbox";
-import { PromoCodeBlock } from "@/components/PromoCodeBlock";
-import { getPermanentlyDismissed, setPermanentlyDismissed, useDontShowAgain } from "@/hooks/usePopupPreference";
+import { PopupCard, type PopupCardData } from "@/components/PopupCard";
+import { getPermanentlyDismissed, setPermanentlyDismissed } from "@/hooks/usePopupPreference";
 import { supabase } from "@/integrations/supabase/client";
 
-export type SitePopup = {
-  id: string;
-  title: string;
-  body_html: string;
-  image_url: string | null;
-  link_url: string | null;
-  is_promo_code: boolean;
-  promo_code: string | null;
-};
+export type SitePopup = PopupCardData & { id: string };
 
 const SESSION_PREFIX = "site-popup-session:";
-
-function PopupDialog({ popup, onClosed }: { popup: SitePopup; onClosed: () => void }) {
-  const [open, setOpen] = useState(true);
-  const { dontShowAgain, setDontShowAgain, commit } = useDontShowAgain(popup.id);
-
-  const handleOpenChange = (next: boolean) => {
-    setOpen(next);
-    if (!next) {
-      commit();
-      onClosed();
-    }
-  };
-
-  const image = popup.image_url ? (
-    <img src={popup.image_url} alt={popup.title} className="block w-full h-auto" />
-  ) : null;
-
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 gap-0 overflow-hidden sm:max-w-[440px] border-0 [&>button]:right-3 [&>button]:top-3 [&>button]:z-10 [&>button]:grid [&>button]:h-9 [&>button]:w-9 [&>button]:place-items-center [&>button]:rounded-full [&>button]:bg-white [&>button]:text-black [&>button]:opacity-100 [&>button]:shadow-lg [&>button]:ring-1 [&>button]:ring-black/10 [&>button:hover]:bg-white [&>button:hover]:scale-105 [&>button]:transition-transform [&>button_svg]:h-[1.2rem] [&>button_svg]:w-[1.2rem]">
-        <div className="relative max-h-[85vh] overflow-y-auto">
-          {image &&
-            (popup.link_url ? (
-              <a
-                href={popup.link_url}
-                onClick={() => handleOpenChange(false)}
-                className="block"
-                target={/^https?:\/\//.test(popup.link_url) && !popup.link_url.includes(typeof window !== "undefined" ? window.location.host : "") ? "_blank" : undefined}
-                rel="noopener noreferrer"
-              >
-                {image}
-              </a>
-            ) : (
-              image
-            ))}
-
-          {popup.is_promo_code && popup.promo_code?.trim() && (
-            <PromoCodeBlock code={popup.promo_code.trim()} />
-          )}
-
-          {popup.body_html?.trim() && (
-            <div
-              className="prose prose-sm max-w-none px-5 pt-4 text-sm text-foreground [&_a]:underline [&_img]:max-w-full"
-              dangerouslySetInnerHTML={{ __html: popup.body_html }}
-            />
-          )}
-
-          <div className="px-4 py-3 bg-background">
-            <DontShowAgainCheckbox
-              checked={dontShowAgain}
-              onCheckedChange={setDontShowAgain}
-              id={`popup-dsa-${popup.id}`}
-            />
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 export function SitePopups() {
   const [queue, setQueue] = useState<SitePopup[]>([]);
   const [index, setIndex] = useState(0);
-  const [ready, setReady] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [dsa, setDsa] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      const nowIso = new Date().toISOString();
       const { data } = await supabase
         .from("site_popups")
-        .select("id, title, body_html, image_url, link_url, is_promo_code, promo_code")
+        .select(
+          "id, title, body_html, image_url, link_url, is_promo_code, promo_code, icon_key, button_enabled, button_label, button_action, button_target, starts_at, ends_at",
+        )
         .eq("active", true)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
       if (cancelled) return;
-      let list = (data ?? []).filter(
+
+      let list = ((data ?? []) as any[]).filter(
         (p) =>
+          (!p.starts_at || p.starts_at <= nowIso) &&
+          (!p.ends_at || p.ends_at >= nowIso) &&
           !getPermanentlyDismissed(p.id) &&
           !sessionStorage.getItem(SESSION_PREFIX + p.id),
       ) as SitePopup[];
@@ -117,29 +57,80 @@ export function SitePopups() {
           list = list.filter((p) => {
             const code = p.is_promo_code ? p.promo_code?.trim().toUpperCase() : null;
             if (!code || !used.has(code)) return true;
-            // Never show this coupon popup to this user again.
             setPermanentlyDismissed(p.id, true);
             return false;
           });
         }
       }
 
+      if (list.length === 0) return;
       list.forEach((p) => sessionStorage.setItem(SESSION_PREFIX + p.id, "1"));
       setQueue(list);
-      setTimeout(() => !cancelled && setReady(true), 900);
+      setTimeout(() => !cancelled && setOpen(true), 900);
     })();
     return () => {
       cancelled = true;
     };
   }, []);
 
-  if (!ready || index >= queue.length) return null;
-  const current = queue[index]!;
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (!next) {
+      Object.entries(dsa).forEach(([id, v]) => v && setPermanentlyDismissed(id, true));
+    }
+  };
+
+  if (queue.length === 0) return null;
+  const current = queue[Math.min(index, queue.length - 1)]!;
+  const multiple = queue.length > 1;
+
   return (
-    <PopupDialog
-      key={current.id}
-      popup={current}
-      onClosed={() => setIndex((i) => i + 1)}
-    />
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="p-0 gap-0 overflow-hidden sm:max-w-[440px] border-0 [&>button]:right-3 [&>button]:top-3 [&>button]:z-10 [&>button]:grid [&>button]:h-9 [&>button]:w-9 [&>button]:place-items-center [&>button]:rounded-full [&>button]:bg-white [&>button]:text-black [&>button]:opacity-100 [&>button]:shadow-lg [&>button]:ring-1 [&>button]:ring-black/10 [&>button:hover]:bg-white [&>button:hover]:scale-105 [&>button]:transition-transform [&>button_svg]:h-[1.2rem] [&>button_svg]:w-[1.2rem]">
+        <div className="relative max-h-[85vh] overflow-y-auto">
+          <PopupCard
+            key={current.id}
+            popup={current}
+            onClose={() => handleOpenChange(false)}
+            dontShowAgain={!!dsa[current.id]}
+            onDontShowAgainChange={(v) => setDsa((s) => ({ ...s, [current.id]: v }))}
+          />
+
+          {multiple && (
+            <div className="flex items-center justify-between gap-3 border-t border-border bg-background px-4 py-3">
+              <button
+                type="button"
+                aria-label="Anterior"
+                onClick={() => setIndex((i) => (i - 1 + queue.length) % queue.length)}
+                className="grid h-8 w-8 place-items-center rounded-full border border-border hover:bg-secondary"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div className="flex items-center gap-1.5">
+                {queue.map((p, i) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    aria-label={`Ir para o pop-up ${i + 1}`}
+                    onClick={() => setIndex(i)}
+                    className={`h-2 rounded-full transition-all ${
+                      i === index ? "w-5 bg-foreground" : "w-2 bg-muted-foreground/40"
+                    }`}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                aria-label="Próximo"
+                onClick={() => setIndex((i) => (i + 1) % queue.length)}
+                className="grid h-8 w-8 place-items-center rounded-full border border-border hover:bg-secondary"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
