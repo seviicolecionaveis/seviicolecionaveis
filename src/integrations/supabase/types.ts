@@ -1683,6 +1683,45 @@ export type Database = {
           },
         ]
       }
+      site_popups: {
+        Row: {
+          active: boolean
+          body_html: string
+          created_at: string
+          id: string
+          image_url: string | null
+          link_url: string | null
+          show_on_notices: boolean
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          body_html?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          link_url?: string | null
+          show_on_notices?: boolean
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          body_html?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          link_url?: string | null
+          show_on_notices?: boolean
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stock_alerts: {
         Row: {
           card_collection: string
