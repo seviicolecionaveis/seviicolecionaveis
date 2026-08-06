@@ -15,6 +15,10 @@ export type PopupCardData = {
   button_label?: string | null;
   button_action?: string | null;
   button_target?: string | null;
+  icon_bg_color?: string | null;
+  icon_color?: string | null;
+  promo_bg_color?: string | null;
+  promo_text_color?: string | null;
 };
 
 type Props = {
