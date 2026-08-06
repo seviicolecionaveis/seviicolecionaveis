@@ -22,7 +22,7 @@ export function SitePopups() {
       const { data } = await supabase
         .from("site_popups")
         .select(
-          "id, title, body_html, image_url, link_url, is_promo_code, promo_code, icon_key, button_enabled, button_label, button_action, button_target, starts_at, ends_at",
+          "id, title, body_html, image_url, link_url, is_promo_code, promo_code, icon_key, button_enabled, button_label, button_action, button_target, icon_bg_color, icon_color, promo_bg_color, promo_text_color, starts_at, ends_at",
         )
         .eq("active", true)
         .order("sort_order", { ascending: true })
