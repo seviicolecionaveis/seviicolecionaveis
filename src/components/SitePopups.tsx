@@ -32,7 +32,7 @@ function PopupDialog({ popup, onClosed }: { popup: SitePopup; onClosed: () => vo
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 gap-0 overflow-hidden sm:max-w-[440px] border-0">
+      <DialogContent className="p-0 gap-0 overflow-hidden sm:max-w-[440px] border-0 [&>button]:right-3 [&>button]:top-3 [&>button]:z-10 [&>button]:grid [&>button]:h-9 [&>button]:w-9 [&>button]:place-items-center [&>button]:rounded-full [&>button]:bg-white [&>button]:text-black [&>button]:opacity-100 [&>button]:shadow-lg [&>button]:ring-1 [&>button]:ring-black/10 [&>button:hover]:bg-white [&>button:hover]:scale-105 [&>button]:transition-transform [&>button_svg]:h-[1.2rem] [&>button_svg]:w-[1.2rem]">
         <div className="relative max-h-[85vh] overflow-y-auto">
           {image &&
             (popup.link_url ? (
