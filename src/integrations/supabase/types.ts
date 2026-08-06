@@ -1690,7 +1690,9 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          is_promo_code: boolean
           link_url: string | null
+          promo_code: string | null
           show_on_notices: boolean
           sort_order: number
           title: string
@@ -1702,7 +1704,9 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_promo_code?: boolean
           link_url?: string | null
+          promo_code?: string | null
           show_on_notices?: boolean
           sort_order?: number
           title: string
@@ -1714,7 +1718,9 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_promo_code?: boolean
           link_url?: string | null
+          promo_code?: string | null
           show_on_notices?: boolean
           sort_order?: number
           title?: string
