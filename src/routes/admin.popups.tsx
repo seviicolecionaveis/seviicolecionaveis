@@ -416,6 +416,11 @@ function PopupsAdminPage() {
           </div>
         </div>
       )}
+
+      {preview && (
+        <PopupPreviewModal popup={preview} onClose={() => setPreview(null)} />
+      )}
     </div>
+
   );
 }
