@@ -52,6 +52,10 @@ type Draft = {
   button_label: string;
   button_action: string;
   button_target: string;
+  icon_bg_color: string;
+  icon_color: string;
+  promo_bg_color: string;
+  promo_text_color: string;
   starts_at: string;
   ends_at: string;
 };
