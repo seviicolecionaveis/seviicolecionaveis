@@ -62,7 +62,9 @@ function PopupNotices() {
     void (async () => {
       const { data } = await supabase
         .from("site_popups")
-        .select("id, title, body_html, image_url, link_url, is_promo_code, promo_code, created_at")
+        .select(
+          "id, title, body_html, image_url, link_url, is_promo_code, promo_code, promo_bg_color, promo_text_color, created_at",
+        )
         .eq("active", true)
         .eq("show_on_notices", true)
         .order("sort_order", { ascending: true });
