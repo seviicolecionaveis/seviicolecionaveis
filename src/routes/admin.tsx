@@ -36,6 +36,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: "/admin/emails", label: "E-mails" },
       { to: "/admin/loyalty", label: "Pontos / Fidelidade" },
       { to: "/admin/ofertas-relampago", label: "Ofertas Relâmpago" },
+      { to: "/admin/popups", label: "Pop-ups" },
       { to: "/admin/pre-venda", label: "Pré-Venda" },
     ],
   },
