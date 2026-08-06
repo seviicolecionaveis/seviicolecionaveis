@@ -15,6 +15,8 @@ export type PopupCardData = {
   button_label?: string | null;
   button_action?: string | null;
   button_target?: string | null;
+  button_bg_color?: string | null;
+  button_text_color?: string | null;
   icon_bg_color?: string | null;
   icon_color?: string | null;
   promo_bg_color?: string | null;
@@ -50,6 +52,14 @@ export function PopupCard({
     ? resolvePopupButtonHref(popup.button_action, popup.button_target)
     : null;
   const buttonLabel = popup.button_label?.trim() || "Saiba mais";
+
+  const buttonStyle = {
+    ...(popup.button_bg_color ? { backgroundColor: popup.button_bg_color } : {}),
+    ...(popup.button_text_color ? { color: popup.button_text_color } : {}),
+  };
+  const buttonClass = `block w-full rounded-md px-4 py-2.5 text-center text-sm font-semibold hover:opacity-90 ${
+    popup.button_bg_color ? "" : "bg-foreground"
+  } ${popup.button_text_color ? "" : "text-background"}`;
 
   return (
     <div>
@@ -103,7 +113,8 @@ export function PopupCard({
               onClick={() => onClose?.()}
               target={isExternal(href) ? "_blank" : undefined}
               rel="noopener noreferrer"
-              className="block w-full rounded-md bg-foreground px-4 py-2.5 text-center text-sm font-semibold text-background hover:opacity-90"
+              style={buttonStyle}
+              className={buttonClass}
             >
               {buttonLabel}
             </a>
@@ -111,7 +122,8 @@ export function PopupCard({
             <button
               type="button"
               onClick={() => onClose?.()}
-              className="block w-full rounded-md bg-foreground px-4 py-2.5 text-center text-sm font-semibold text-background hover:opacity-90"
+              style={buttonStyle}
+              className={buttonClass}
             >
               {buttonLabel}
             </button>

@@ -1688,9 +1688,11 @@ export type Database = {
           active: boolean
           body_html: string
           button_action: string
+          button_bg_color: string | null
           button_enabled: boolean
           button_label: string | null
           button_target: string | null
+          button_text_color: string | null
           created_at: string
           ends_at: string | null
           icon_bg_color: string | null
@@ -1713,9 +1715,11 @@ export type Database = {
           active?: boolean
           body_html?: string
           button_action?: string
+          button_bg_color?: string | null
           button_enabled?: boolean
           button_label?: string | null
           button_target?: string | null
+          button_text_color?: string | null
           created_at?: string
           ends_at?: string | null
           icon_bg_color?: string | null
@@ -1738,9 +1742,11 @@ export type Database = {
           active?: boolean
           body_html?: string
           button_action?: string
+          button_bg_color?: string | null
           button_enabled?: boolean
           button_label?: string | null
           button_target?: string | null
+          button_text_color?: string | null
           created_at?: string
           ends_at?: string | null
           icon_bg_color?: string | null
