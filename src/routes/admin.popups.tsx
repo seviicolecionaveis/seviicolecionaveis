@@ -88,7 +88,9 @@ function PopupsAdminPage() {
   const toggle = async (p: Popup, field: "active" | "show_on_notices") => {
     const value = !p[field];
     setRows((rs) => rs.map((r) => (r.id === p.id ? { ...r, [field]: value } : r)));
-    const { error } = await supabase.from("site_popups").update({ [field]: value }).eq("id", p.id);
+    const patch =
+      field === "active" ? { active: value } : { show_on_notices: value };
+    const { error } = await supabase.from("site_popups").update(patch).eq("id", p.id);
     if (error) {
       toast.error(error.message);
       void load();
