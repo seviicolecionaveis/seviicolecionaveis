@@ -379,6 +379,24 @@ function PopupsAdminPage() {
                 </label>
               </div>
 
+              <div className="rounded-lg border border-border bg-secondary/40 p-4">
+                <p className="mb-3 text-xs font-semibold">
+                  Prévia ao vivo{" "}
+                  <span className="font-normal text-muted-foreground">
+                    — como aparece para o visitante
+                  </span>
+                </p>
+                <PopupPreview
+                  popup={{
+                    title: draft.title,
+                    body_html: draft.body_html,
+                    image_url: draft.image_url.trim() || null,
+                    link_url: draft.link_url.trim() || null,
+                  }}
+                />
+              </div>
+
+
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   onClick={() => setDraft(null)}
