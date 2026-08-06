@@ -596,6 +596,20 @@ function PopupsAdminPage() {
                         />
                       </label>
                     )}
+                    <div className="grid grid-cols-2 gap-2 sm:col-span-2">
+                      <ColorField
+                        label="Cor de fundo do botão"
+                        value={draft.button_bg_color}
+                        onChange={(v) => setDraft({ ...draft, button_bg_color: v })}
+                        fallback="#111827"
+                      />
+                      <ColorField
+                        label="Cor do texto do botão"
+                        value={draft.button_text_color}
+                        onChange={(v) => setDraft({ ...draft, button_text_color: v })}
+                        fallback="#ffffff"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
