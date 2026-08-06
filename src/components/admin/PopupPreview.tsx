@@ -1,8 +1,12 @@
+import { PromoCodeBlock } from "@/components/PromoCodeBlock";
+
 type PreviewPopup = {
   title: string;
   body_html: string;
   image_url: string | null;
   link_url: string | null;
+  is_promo_code?: boolean;
+  promo_code?: string | null;
 };
 
 /**
@@ -15,6 +19,10 @@ export function PopupPreview({ popup }: { popup: PreviewPopup }) {
       <div className="max-h-[70vh] overflow-y-auto">
         {popup.image_url ? (
           <img src={popup.image_url} alt={popup.title} className="block h-auto w-full" />
+        ) : null}
+
+        {popup.is_promo_code && popup.promo_code?.trim() ? (
+          <PromoCodeBlock code={popup.promo_code.trim()} />
         ) : null}
 
         {popup.body_html?.trim() ? (
