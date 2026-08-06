@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import { PopupPreview, PopupPreviewModal } from "@/components/admin/PopupPreview";
 
 export const Route = createFileRoute("/admin/popups")({
   head: () => ({ meta: [{ title: "Admin · Pop-ups" }] }),
