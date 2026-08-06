@@ -364,7 +364,7 @@ function AdminCardsManagePage() {
     setQuickMsg(null);
     const newStock = Math.max(0, parseInt(quickForm.stock) || 0);
     const payload = {
-      condition: quickForm.condition,
+      condition: (quickForm.condition || "NM") as Condition,
       category: quickForm.category,
       trainer_subcategory: quickForm.category === "Treinador" && quickForm.trainer_subcategory ? quickForm.trainer_subcategory : null,
       liga_subcategory: quickForm.finish === "Liga" && quickForm.liga_subcategory ? quickForm.liga_subcategory : null,
