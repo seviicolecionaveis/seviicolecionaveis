@@ -165,6 +165,12 @@ function PopupsAdminPage() {
       return toast.error("Informe o código promocional.");
     if (draft.link_url.trim() && !/^(https?:\/\/|\/)/.test(draft.link_url.trim()))
       return toast.error("O link deve começar com http://, https:// ou /");
+    if (
+      draft.button_enabled &&
+      (draft.button_action === "url" || draft.button_action === "internal") &&
+      !draft.button_target.trim()
+    )
+      return toast.error("Informe o destino do botão de ação.");
     setSaving(true);
     const payload = {
       title: draft.title.trim(),
