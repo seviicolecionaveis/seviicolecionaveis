@@ -1,4 +1,4 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -134,6 +134,8 @@ if (typeof window !== "undefined") {
 }
 
 function RootComponent() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isHome = pathname === "/";
   const [queryClient] = useState(() => new QueryClient());
   return (
     <QueryClientProvider client={queryClient}>
@@ -158,7 +160,7 @@ function RootComponent() {
             <WhatsAppButton />
             <CompareBar />
             <PwaInstallBanner />
-            <SitePopups />
+            {isHome && <SitePopups />}
         </CartProvider>
       </WishlistProvider>
     </AuthProvider>
