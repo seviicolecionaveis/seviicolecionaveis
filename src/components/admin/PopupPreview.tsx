@@ -1,13 +1,6 @@
-import { PromoCodeBlock } from "@/components/PromoCodeBlock";
+import { PopupCard, type PopupCardData } from "@/components/PopupCard";
 
-type PreviewPopup = {
-  title: string;
-  body_html: string;
-  image_url: string | null;
-  link_url: string | null;
-  is_promo_code?: boolean;
-  promo_code?: string | null;
-};
+type PreviewPopup = PopupCardData;
 
 /**
  * Renders the popup exactly like visitors see it (same widths/styles as SitePopups),
@@ -17,27 +10,7 @@ export function PopupPreview({ popup }: { popup: PreviewPopup }) {
   return (
     <div className="mx-auto w-full max-w-[440px] overflow-hidden rounded-lg border border-border bg-background shadow-lg">
       <div className="max-h-[70vh] overflow-y-auto">
-        {popup.image_url ? (
-          <img src={popup.image_url} alt={popup.title} className="block h-auto w-full" />
-        ) : null}
-
-        {popup.is_promo_code && popup.promo_code?.trim() ? (
-          <PromoCodeBlock code={popup.promo_code.trim()} />
-        ) : null}
-
-        {popup.body_html?.trim() ? (
-          <div
-            className="prose prose-sm max-w-none px-5 pt-4 text-sm text-foreground [&_a]:underline [&_img]:max-w-full"
-            dangerouslySetInnerHTML={{ __html: popup.body_html }}
-          />
-        ) : null}
-
-        <div className="bg-background px-4 py-3">
-          <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <input type="checkbox" disabled />
-            Não mostrar novamente
-          </label>
-        </div>
+        <PopupCard popup={popup} disabled />
       </div>
     </div>
   );
