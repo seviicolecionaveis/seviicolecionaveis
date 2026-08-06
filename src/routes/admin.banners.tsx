@@ -202,66 +202,119 @@ function BannersAdmin() {
         ) : banners.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhum banner cadastrado.</p>
         ) : (
-          <ul className="space-y-3">
-            {banners.map((b, i) => (
-              <li key={b.id} className="rounded-xl border border-border bg-card p-4 flex flex-wrap items-center gap-4">
-                <img src={b.image_url} alt="" className="h-20 w-40 object-cover rounded-md bg-secondary" />
-                <div className="flex-1 min-w-[200px] space-y-2">
-                  <input
-                    type="text"
-                    defaultValue={b.link_url ?? ""}
-                    onBlur={(e) => {
-                      const v = e.target.value.trim();
-                      if (v !== (b.link_url ?? "")) updateField(b.id, { link_url: v || null });
-                    }}
-                    placeholder="Link"
-                    className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
-                  />
-                  <input
-                    type="text"
-                    defaultValue={b.alt ?? ""}
-                    onBlur={(e) => {
-                      const v = e.target.value.trim();
-                      if (v !== (b.alt ?? "")) updateField(b.id, { alt: v || null });
-                    }}
-                    placeholder="Texto alternativo"
-                    className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
-                  />
-                </div>
-                <label className="flex items-center gap-2 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={b.active}
-                    onChange={(e) => updateField(b.id, { active: e.target.checked })}
-                  />
-                  Ativo
-                </label>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => move(b.id, -1)}
-                    disabled={i === 0}
-                    className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-30"
-                  >
-                    ↑
-                  </button>
-                  <button
-                    onClick={() => move(b.id, 1)}
-                    disabled={i === banners.length - 1}
-                    className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-30"
-                  >
-                    ↓
-                  </button>
-                </div>
-                <button
-                  onClick={() => remove(b.id)}
-                  className="rounded-md border border-destructive/40 text-destructive px-3 py-1 text-xs font-semibold"
+          <>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Arraste pelo ⠿ para reordenar e clique em “Salvar ordem” no final.
+            </p>
+            <ul className="space-y-3">
+              {banners.map((b, i) => (
+                <li
+                  key={b.id}
+                  draggable
+                  onDragStart={() => (dragId.current = b.id)}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    if (dragOverId !== b.id) setDragOverId(b.id);
+                  }}
+                  onDragLeave={() => setDragOverId((v) => (v === b.id ? null : v))}
+                  onDrop={() => onDrop(b.id)}
+                  onDragEnd={() => {
+                    dragId.current = null;
+                    setDragOverId(null);
+                  }}
+                  className={`rounded-xl border bg-card p-4 flex flex-wrap items-center gap-4 ${
+                    dragOverId === b.id ? "border-primary" : "border-border"
+                  }`}
                 >
-                  Remover
+                  <span
+                    className="cursor-grab select-none px-1 text-muted-foreground active:cursor-grabbing"
+                    title="Arrastar para reordenar"
+                  >
+                    ⠿
+                  </span>
+                  <img src={b.image_url} alt="" className="h-20 w-40 object-cover rounded-md bg-secondary" />
+                  <div className="flex-1 min-w-[200px] space-y-2">
+                    <input
+                      type="text"
+                      defaultValue={b.link_url ?? ""}
+                      onBlur={(e) => {
+                        const v = e.target.value.trim();
+                        if (v !== (b.link_url ?? "")) updateField(b.id, { link_url: v || null });
+                      }}
+                      placeholder="Link"
+                      className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
+                    />
+                    <input
+                      type="text"
+                      defaultValue={b.alt ?? ""}
+                      onBlur={(e) => {
+                        const v = e.target.value.trim();
+                        if (v !== (b.alt ?? "")) updateField(b.id, { alt: v || null });
+                      }}
+                      placeholder="Texto alternativo"
+                      className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 text-xs">
+                    <input
+                      type="checkbox"
+                      checked={b.active}
+                      onChange={(e) => updateField(b.id, { active: e.target.checked })}
+                    />
+                    Ativo
+                  </label>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => move(b.id, -1)}
+                      disabled={i === 0}
+                      className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-30"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      onClick={() => move(b.id, 1)}
+                      disabled={i === banners.length - 1}
+                      className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-30"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => remove(b.id)}
+                    className="rounded-md border border-destructive/40 text-destructive px-3 py-1 text-xs font-semibold"
+                  >
+                    Remover
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
+              {orderDirty && (
+                <span className="text-xs text-muted-foreground">
+                  Você alterou a ordem — salve para aplicar no site.
+                </span>
+              )}
+              {orderDirty && (
+                <button
+                  onClick={() => void load()}
+                  disabled={savingOrder}
+                  className="rounded-md border border-border px-4 py-2 text-xs font-semibold hover:bg-secondary disabled:opacity-50"
+                >
+                  Desfazer
                 </button>
-              </li>
-            ))}
-          </ul>
+              )}
+              <button
+                onClick={() => void saveOrder()}
+                disabled={!orderDirty || savingOrder}
+                className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-40"
+              >
+                {savingOrder ? "Salvando..." : "Salvar ordem"}
+              </button>
+            </div>
+          </>
         )}
+
       </main>
     </div>
   );
