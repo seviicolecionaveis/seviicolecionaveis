@@ -74,6 +74,10 @@ const EMPTY: Draft = {
   button_label: "",
   button_action: "close",
   button_target: "",
+  icon_bg_color: "",
+  icon_color: "",
+  promo_bg_color: "",
+  promo_text_color: "",
   starts_at: "",
   ends_at: "",
 };
@@ -197,6 +201,10 @@ function PopupsAdminPage() {
         draft.button_enabled && (draft.button_action === "url" || draft.button_action === "internal")
           ? draft.button_target.trim() || null
           : null,
+      icon_bg_color: draft.icon_bg_color.trim() || null,
+      icon_color: draft.icon_color.trim() || null,
+      promo_bg_color: draft.promo_bg_color.trim() || null,
+      promo_text_color: draft.promo_text_color.trim() || null,
       starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null,
       ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null,
     };
@@ -317,6 +325,10 @@ function PopupsAdminPage() {
                       button_label: p.button_label ?? "",
                       button_action: p.button_action ?? "close",
                       button_target: p.button_target ?? "",
+                      icon_bg_color: p.icon_bg_color ?? "",
+                      icon_color: p.icon_color ?? "",
+                      promo_bg_color: p.promo_bg_color ?? "",
+                      promo_text_color: p.promo_text_color ?? "",
                       starts_at: toLocalInput(p.starts_at),
                       ends_at: toLocalInput(p.ends_at),
                     })
@@ -587,6 +599,10 @@ function PopupsAdminPage() {
                     button_label: draft.button_label,
                     button_action: draft.button_action,
                     button_target: draft.button_target,
+                    icon_bg_color: draft.icon_bg_color || null,
+                    icon_color: draft.icon_color || null,
+                    promo_bg_color: draft.promo_bg_color || null,
+                    promo_text_color: draft.promo_text_color || null,
                   }}
                 />
               </div>
