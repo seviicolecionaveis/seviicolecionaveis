@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { AlertTriangle, Gift, Sparkles, PartyPopper, Tag, Info } from "lucide-react";
 
 export type PopupIconKey = string;
@@ -6,7 +6,7 @@ export type PopupIconKey = string;
 type IconEntry = {
   key: string;
   label: string;
-  render: (className: string) => ReactNode;
+  render: (className: string, style?: CSSProperties) => ReactNode;
 };
 
 const SITE_LOGO = "/sevii-logo.png";
