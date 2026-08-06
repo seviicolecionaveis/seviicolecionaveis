@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import { PopupPreview, PopupPreviewModal } from "@/components/admin/PopupPreview";
+import { POPUP_ICONS, POPUP_BUTTON_ACTIONS } from "@/lib/popup-icons";
 
 export const Route = createFileRoute("/admin/popups")({
   head: () => ({ meta: [{ title: "Admin · Pop-ups" }] }),
@@ -21,6 +22,13 @@ type Popup = {
   show_on_notices: boolean;
   is_promo_code: boolean;
   promo_code: string | null;
+  icon_key: string | null;
+  button_enabled: boolean;
+  button_label: string | null;
+  button_action: string | null;
+  button_target: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
   sort_order: number;
   created_at: string;
 };
@@ -35,6 +43,13 @@ type Draft = {
   show_on_notices: boolean;
   is_promo_code: boolean;
   promo_code: string;
+  icon_key: string;
+  button_enabled: boolean;
+  button_label: string;
+  button_action: string;
+  button_target: string;
+  starts_at: string;
+  ends_at: string;
 };
 
 const EMPTY: Draft = {
@@ -46,7 +61,17 @@ const EMPTY: Draft = {
   show_on_notices: false,
   is_promo_code: false,
   promo_code: "",
+  icon_key: "none",
+  button_enabled: false,
+  button_label: "",
+  button_action: "close",
+  button_target: "",
+  starts_at: "",
+  ends_at: "",
 };
+
+const toLocalInput = (iso: string | null) =>
+  iso ? new Date(iso).toISOString().slice(0, 16) : "";
 
 function PopupsAdminPage() {
   const { isAdmin, loading: authLoading } = useAuth();
@@ -140,6 +165,12 @@ function PopupsAdminPage() {
       return toast.error("Informe o código promocional.");
     if (draft.link_url.trim() && !/^(https?:\/\/|\/)/.test(draft.link_url.trim()))
       return toast.error("O link deve começar com http://, https:// ou /");
+    if (
+      draft.button_enabled &&
+      (draft.button_action === "url" || draft.button_action === "internal") &&
+      !draft.button_target.trim()
+    )
+      return toast.error("Informe o destino do botão de ação.");
     setSaving(true);
     const payload = {
       title: draft.title.trim(),
@@ -150,6 +181,16 @@ function PopupsAdminPage() {
       show_on_notices: draft.show_on_notices,
       is_promo_code: draft.is_promo_code,
       promo_code: draft.is_promo_code ? draft.promo_code.trim().toUpperCase() || null : null,
+      icon_key: draft.icon_key || "none",
+      button_enabled: draft.button_enabled,
+      button_label: draft.button_enabled ? draft.button_label.trim() || null : null,
+      button_action: draft.button_enabled ? draft.button_action : "close",
+      button_target:
+        draft.button_enabled && (draft.button_action === "url" || draft.button_action === "internal")
+          ? draft.button_target.trim() || null
+          : null,
+      starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null,
+      ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null,
     };
     const res = draft.id
       ? await supabase.from("site_popups").update(payload).eq("id", draft.id)
@@ -263,6 +304,13 @@ function PopupsAdminPage() {
                       show_on_notices: p.show_on_notices,
                       is_promo_code: p.is_promo_code,
                       promo_code: p.promo_code ?? "",
+                      icon_key: p.icon_key ?? "none",
+                      button_enabled: !!p.button_enabled,
+                      button_label: p.button_label ?? "",
+                      button_action: p.button_action ?? "close",
+                      button_target: p.button_target ?? "",
+                      starts_at: toLocalInput(p.starts_at),
+                      ends_at: toLocalInput(p.ends_at),
                     })
                   }
                   className="rounded-md border border-border px-3 py-1.5 text-[11px] font-semibold hover:bg-secondary"
@@ -372,6 +420,99 @@ function PopupsAdminPage() {
                 />
               </label>
 
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block text-xs">
+                  <span className="mb-1 block font-semibold">Ícone no topo</span>
+                  <select
+                    value={draft.icon_key}
+                    onChange={(e) => setDraft({ ...draft, icon_key: e.target.value })}
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                  >
+                    {POPUP_ICONS.map((i) => (
+                      <option key={i.key} value={i.key}>
+                        {i.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="block text-xs">
+                    <span className="mb-1 block font-semibold">Início (opcional)</span>
+                    <input
+                      type="datetime-local"
+                      value={draft.starts_at}
+                      onChange={(e) => setDraft({ ...draft, starts_at: e.target.value })}
+                      className="w-full rounded-md border border-border bg-background px-2 py-2 text-xs"
+                    />
+                  </label>
+                  <label className="block text-xs">
+                    <span className="mb-1 block font-semibold">Término (opcional)</span>
+                    <input
+                      type="datetime-local"
+                      value={draft.ends_at}
+                      onChange={(e) => setDraft({ ...draft, ends_at: e.target.value })}
+                      className="w-full rounded-md border border-border bg-background px-2 py-2 text-xs"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-border p-3">
+                <label className="flex items-center gap-2 text-xs font-semibold">
+                  <input
+                    type="checkbox"
+                    checked={draft.button_enabled}
+                    onChange={(e) => setDraft({ ...draft, button_enabled: e.target.checked })}
+                  />
+                  Botão de ação
+                </label>
+                {draft.button_enabled && (
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="block text-xs">
+                      <span className="mb-1 block font-semibold">Texto do botão</span>
+                      <input
+                        value={draft.button_label}
+                        onChange={(e) => setDraft({ ...draft, button_label: e.target.value })}
+                        maxLength={60}
+                        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                        placeholder="Ver promoção"
+                      />
+                    </label>
+                    <label className="block text-xs">
+                      <span className="mb-1 block font-semibold">Ação</span>
+                      <select
+                        value={draft.button_action}
+                        onChange={(e) => setDraft({ ...draft, button_action: e.target.value })}
+                        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                      >
+                        {POPUP_BUTTON_ACTIONS.map((a) => (
+                          <option key={a.value} value={a.value}>
+                            {a.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    {(draft.button_action === "url" || draft.button_action === "internal") && (
+                      <label className="block text-xs sm:col-span-2">
+                        <span className="mb-1 block font-semibold">
+                          {draft.button_action === "url" ? "URL externa" : "Página interna"}
+                        </span>
+                        <input
+                          value={draft.button_target}
+                          onChange={(e) => setDraft({ ...draft, button_target: e.target.value })}
+                          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                          placeholder={
+                            draft.button_action === "url"
+                              ? "https://..."
+                              : "/pre-venda/pi-serie-3"
+                          }
+                        />
+                      </label>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className="flex flex-wrap gap-4 text-xs">
                 <label className="flex items-center gap-2">
                   <input
@@ -433,6 +574,11 @@ function PopupsAdminPage() {
                     link_url: draft.link_url.trim() || null,
                     is_promo_code: draft.is_promo_code,
                     promo_code: draft.promo_code.trim() || null,
+                    icon_key: draft.icon_key,
+                    button_enabled: draft.button_enabled,
+                    button_label: draft.button_label,
+                    button_action: draft.button_action,
+                    button_target: draft.button_target,
                   }}
                 />
               </div>
