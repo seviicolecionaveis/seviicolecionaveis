@@ -1693,12 +1693,16 @@ export type Database = {
           button_target: string | null
           created_at: string
           ends_at: string | null
+          icon_bg_color: string | null
+          icon_color: string | null
           icon_key: string
           id: string
           image_url: string | null
           is_promo_code: boolean
           link_url: string | null
+          promo_bg_color: string | null
           promo_code: string | null
+          promo_text_color: string | null
           show_on_notices: boolean
           sort_order: number
           starts_at: string | null
@@ -1714,12 +1718,16 @@ export type Database = {
           button_target?: string | null
           created_at?: string
           ends_at?: string | null
+          icon_bg_color?: string | null
+          icon_color?: string | null
           icon_key?: string
           id?: string
           image_url?: string | null
           is_promo_code?: boolean
           link_url?: string | null
+          promo_bg_color?: string | null
           promo_code?: string | null
+          promo_text_color?: string | null
           show_on_notices?: boolean
           sort_order?: number
           starts_at?: string | null
@@ -1735,12 +1743,16 @@ export type Database = {
           button_target?: string | null
           created_at?: string
           ends_at?: string | null
+          icon_bg_color?: string | null
+          icon_color?: string | null
           icon_key?: string
           id?: string
           image_url?: string | null
           is_promo_code?: boolean
           link_url?: string | null
+          promo_bg_color?: string | null
           promo_code?: string | null
+          promo_text_color?: string | null
           show_on_notices?: boolean
           sort_order?: number
           starts_at?: string | null
