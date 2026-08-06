@@ -26,6 +26,10 @@ function BannersAdmin() {
   const [uploading, setUploading] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [alt, setAlt] = useState("");
+  const [orderDirty, setOrderDirty] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
+  const dragId = useRef<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -41,8 +45,10 @@ function BannersAdmin() {
       .select("*")
       .order("sort_order", { ascending: true });
     setBanners(data ?? []);
+    setOrderDirty(false);
     setLoading(false);
   };
+
 
   useEffect(() => {
     if (isAdmin) load();
