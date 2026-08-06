@@ -19,6 +19,8 @@ type Popup = {
   link_url: string | null;
   active: boolean;
   show_on_notices: boolean;
+  is_promo_code: boolean;
+  promo_code: string | null;
   sort_order: number;
   created_at: string;
 };
@@ -31,6 +33,8 @@ type Draft = {
   link_url: string;
   active: boolean;
   show_on_notices: boolean;
+  is_promo_code: boolean;
+  promo_code: string;
 };
 
 const EMPTY: Draft = {
@@ -40,6 +44,8 @@ const EMPTY: Draft = {
   link_url: "",
   active: true,
   show_on_notices: false,
+  is_promo_code: false,
+  promo_code: "",
 };
 
 function PopupsAdminPage() {
@@ -130,6 +136,8 @@ function PopupsAdminPage() {
   const save = async () => {
     if (!draft) return;
     if (!draft.title.trim()) return toast.error("Informe um título.");
+    if (draft.is_promo_code && !draft.promo_code.trim())
+      return toast.error("Informe o código promocional.");
     if (draft.link_url.trim() && !/^(https?:\/\/|\/)/.test(draft.link_url.trim()))
       return toast.error("O link deve começar com http://, https:// ou /");
     setSaving(true);
@@ -140,6 +148,8 @@ function PopupsAdminPage() {
       link_url: draft.link_url.trim() || null,
       active: draft.active,
       show_on_notices: draft.show_on_notices,
+      is_promo_code: draft.is_promo_code,
+      promo_code: draft.is_promo_code ? draft.promo_code.trim().toUpperCase() || null : null,
     };
     const res = draft.id
       ? await supabase.from("site_popups").update(payload).eq("id", draft.id)
@@ -251,6 +261,8 @@ function PopupsAdminPage() {
                       link_url: p.link_url ?? "",
                       active: p.active,
                       show_on_notices: p.show_on_notices,
+                      is_promo_code: p.is_promo_code,
+                      promo_code: p.promo_code ?? "",
                     })
                   }
                   className="rounded-md border border-border px-3 py-1.5 text-[11px] font-semibold hover:bg-secondary"
@@ -377,7 +389,34 @@ function PopupsAdminPage() {
                   />
                   Publicar também na página de Avisos
                 </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={draft.is_promo_code}
+                    onChange={(e) => setDraft({ ...draft, is_promo_code: e.target.checked })}
+                  />
+                  É um código promocional
+                </label>
               </div>
+
+              {draft.is_promo_code && (
+                <label className="block text-xs">
+                  <span className="mb-1 block font-semibold">Código promocional *</span>
+                  <input
+                    value={draft.promo_code}
+                    onChange={(e) =>
+                      setDraft({ ...draft, promo_code: e.target.value.toUpperCase() })
+                    }
+                    maxLength={40}
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-mono uppercase tracking-widest"
+                    placeholder="BEMVINDO10"
+                  />
+                  <span className="mt-1 block text-[11px] text-muted-foreground">
+                    Aparece em destaque com "Toque para copiar". Depois que o cliente usar esse
+                    cupom em um pedido, o pop-up não é mais exibido para ele.
+                  </span>
+                </label>
+              )}
 
               <div className="rounded-lg border border-border bg-secondary/40 p-4">
                 <p className="mb-3 text-xs font-semibold">
@@ -392,6 +431,8 @@ function PopupsAdminPage() {
                     body_html: draft.body_html,
                     image_url: draft.image_url.trim() || null,
                     link_url: draft.link_url.trim() || null,
+                    is_promo_code: draft.is_promo_code,
+                    promo_code: draft.promo_code.trim() || null,
                   }}
                 />
               </div>
