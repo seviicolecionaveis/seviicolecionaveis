@@ -27,6 +27,8 @@ type Popup = {
   button_label: string | null;
   button_action: string | null;
   button_target: string | null;
+  button_bg_color: string | null;
+  button_text_color: string | null;
   icon_bg_color: string | null;
   icon_color: string | null;
   promo_bg_color: string | null;
@@ -52,6 +54,8 @@ type Draft = {
   button_label: string;
   button_action: string;
   button_target: string;
+  button_bg_color: string;
+  button_text_color: string;
   icon_bg_color: string;
   icon_color: string;
   promo_bg_color: string;
@@ -74,6 +78,8 @@ const EMPTY: Draft = {
   button_label: "",
   button_action: "close",
   button_target: "",
+  button_bg_color: "",
+  button_text_color: "",
   icon_bg_color: "",
   icon_color: "",
   promo_bg_color: "",
@@ -242,6 +248,8 @@ function PopupsAdminPage() {
         draft.button_enabled && (draft.button_action === "url" || draft.button_action === "internal")
           ? draft.button_target.trim() || null
           : null,
+      button_bg_color: draft.button_enabled ? draft.button_bg_color.trim() || null : null,
+      button_text_color: draft.button_enabled ? draft.button_text_color.trim() || null : null,
       icon_bg_color: draft.icon_bg_color.trim() || null,
       icon_color: draft.icon_color.trim() || null,
       promo_bg_color: draft.promo_bg_color.trim() || null,
@@ -366,6 +374,8 @@ function PopupsAdminPage() {
                       button_label: p.button_label ?? "",
                       button_action: p.button_action ?? "close",
                       button_target: p.button_target ?? "",
+                      button_bg_color: p.button_bg_color ?? "",
+                      button_text_color: p.button_text_color ?? "",
                       icon_bg_color: p.icon_bg_color ?? "",
                       icon_color: p.icon_color ?? "",
                       promo_bg_color: p.promo_bg_color ?? "",
@@ -673,6 +683,8 @@ function PopupsAdminPage() {
                     button_label: draft.button_label,
                     button_action: draft.button_action,
                     button_target: draft.button_target,
+                    button_bg_color: draft.button_bg_color || null,
+                    button_text_color: draft.button_text_color || null,
                     icon_bg_color: draft.icon_bg_color || null,
                     icon_color: draft.icon_color || null,
                     promo_bg_color: draft.promo_bg_color || null,
