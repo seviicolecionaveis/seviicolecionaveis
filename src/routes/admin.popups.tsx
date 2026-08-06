@@ -272,7 +272,7 @@ function PopupsAdminPage() {
 
       {draft && (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4">
-          <div className="my-8 w-full max-w-2xl rounded-xl bg-card p-5 shadow-xl">
+          <div className="my-8 w-full max-w-3xl rounded-xl bg-card p-5 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-sm font-semibold">
                 {draft.id ? "Editar pop-up" : "Novo pop-up"}
