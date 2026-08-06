@@ -72,7 +72,7 @@ interface FormState {
   collection: string;
   language: Language;
   finish: Finish;
-  condition: Condition;
+  condition: Condition | "";
   category: CardCategory;
   trainer_subcategory: TrainerSubcategory | "";
   liga_subcategory: LigaSubcategory | "";
@@ -89,7 +89,7 @@ const EMPTY_FORM: FormState = {
   collection: "",
   language: "Português",
   finish: "Normal",
-  condition: "NM",
+  condition: "",
   category: "Pokémon",
   trainer_subcategory: "",
   liga_subcategory: "",
@@ -205,7 +205,7 @@ function AdminCardsManagePage() {
     return Array.from(new Set([...rows.map((r) => r.collection), ...EXTRA_COLLECTIONS].filter(Boolean))).sort();
   }, [rows]);
 
-  const resetForm = () => { setForm(EMPTY_FORM); setEditingId(null); };
+  const resetForm = () => { setForm(EMPTY_FORM); setEditingId(null); setConditionError(false); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,6 +214,14 @@ function AdminCardsManagePage() {
       setMsg({ type: "err", text: "Preencha nome, número e coleção." });
       return;
     }
+    if (!form.condition) {
+      setConditionError(true);
+      setMsg({ type: "err", text: "Selecione a condição da carta antes de continuar." });
+      conditionRef.current?.focus();
+      conditionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    setConditionError(false);
     setSaving(true);
     let priceCents: number | null =
       form.price.trim() === "" ? null : Math.round(parseFloat(form.price.replace(",", ".")) * 100);
@@ -232,7 +240,7 @@ function AdminCardsManagePage() {
       collection: form.collection.trim(),
       language: form.language,
       finish: form.finish,
-      condition: form.condition,
+      condition: form.condition as Condition,
       category: form.category,
       trainer_subcategory: form.category === "Treinador" && form.trainer_subcategory ? form.trainer_subcategory : null,
       liga_subcategory: form.finish === "Liga" && form.liga_subcategory ? form.liga_subcategory : null,
@@ -510,12 +518,28 @@ function AdminCardsManagePage() {
             <label className="text-xs space-y-1">
               <span className="font-semibold">Condição *</span>
               <select
+                ref={conditionRef}
+                required
+                aria-invalid={conditionError}
                 value={form.condition}
-                onChange={(e) => setForm({ ...form, condition: e.target.value as Condition })}
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                onChange={(e) => {
+                  setForm({ ...form, condition: e.target.value as Condition | "" });
+                  if (e.target.value) setConditionError(false);
+                }}
+                className={`w-full rounded border bg-background px-3 py-2 text-sm ${
+                  conditionError
+                    ? "border-destructive ring-2 ring-destructive/40"
+                    : "border-border"
+                }`}
               >
+                <option value="">Selecione a condição…</option>
                 {CONDITIONS.map((c) => <option key={c} value={c}>{CONDITION_LABEL[c]}</option>)}
               </select>
+              {conditionError && (
+                <span className="block text-[11px] font-semibold text-destructive">
+                  Selecione a condição da carta antes de continuar.
+                </span>
+              )}
             </label>
 
             <label className="text-xs space-y-1">
