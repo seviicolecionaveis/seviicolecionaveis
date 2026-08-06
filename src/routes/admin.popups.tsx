@@ -49,6 +49,7 @@ function PopupsAdminPage() {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<Popup | null>(null);
   const dragId = useRef<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -235,6 +236,12 @@ function PopupsAdminPage() {
                   Em /avisos
                 </label>
                 <button
+                  onClick={() => setPreview(p)}
+                  className="rounded-md border border-border px-3 py-1.5 text-[11px] font-semibold hover:bg-secondary"
+                >
+                  Prévia
+                </button>
+                <button
                   onClick={() =>
                     setDraft({
                       id: p.id,
@@ -250,6 +257,7 @@ function PopupsAdminPage() {
                 >
                   Editar
                 </button>
+
                 <button
                   onClick={() => remove(p)}
                   className="rounded-md border border-border px-3 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-50"
