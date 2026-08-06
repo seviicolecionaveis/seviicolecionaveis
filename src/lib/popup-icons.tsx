@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { AlertTriangle, Gift, Sparkles, PartyPopper, Tag, Info } from "lucide-react";
 
 export type PopupIconKey = string;
@@ -6,7 +6,7 @@ export type PopupIconKey = string;
 type IconEntry = {
   key: string;
   label: string;
-  render: (className: string) => ReactNode;
+  render: (className: string, style?: CSSProperties) => ReactNode;
 };
 
 const SITE_LOGO = "/sevii-logo.png";
@@ -20,47 +20,67 @@ export const POPUP_ICONS: IconEntry[] = [
   {
     key: "logo",
     label: "Logo do site",
-    render: (c) => <img src={SITE_LOGO} alt="Sevii Colecionáveis" className={`${c} object-contain`} />,
+    render: (c, s) => (
+      <img src={SITE_LOGO} alt="Sevii Colecionáveis" className={`${c} object-contain`} style={s} />
+    ),
   },
   {
     key: "warning",
     label: "Aviso",
-    render: (c) => <AlertTriangle className={`${c} text-amber-500`} strokeWidth={1.8} />,
+    render: (c, s) => <AlertTriangle className={`${c} text-amber-500`} strokeWidth={1.8} style={s} />,
   },
   {
     key: "news",
     label: "Novidade",
-    render: (c) => <Sparkles className={`${c} text-primary`} strokeWidth={1.8} />,
+    render: (c, s) => <Sparkles className={`${c} text-primary`} strokeWidth={1.8} style={s} />,
   },
   {
     key: "promo",
     label: "Promoção",
-    render: (c) => <Tag className={`${c} text-primary`} strokeWidth={1.8} />,
+    render: (c, s) => <Tag className={`${c} text-primary`} strokeWidth={1.8} style={s} />,
   },
   {
     key: "gift",
     label: "Presente",
-    render: (c) => <Gift className={`${c} text-primary`} strokeWidth={1.8} />,
+    render: (c, s) => <Gift className={`${c} text-primary`} strokeWidth={1.8} style={s} />,
   },
   {
     key: "party",
     label: "Comemoração",
-    render: (c) => <PartyPopper className={`${c} text-primary`} strokeWidth={1.8} />,
+    render: (c, s) => <PartyPopper className={`${c} text-primary`} strokeWidth={1.8} style={s} />,
   },
   {
     key: "info",
     label: "Informação",
-    render: (c) => <Info className={`${c} text-primary`} strokeWidth={1.8} />,
+    render: (c, s) => <Info className={`${c} text-primary`} strokeWidth={1.8} style={s} />,
   },
 ];
 
-export function renderPopupIcon(key: string | null | undefined, className = "h-12 w-12") {
+export function renderPopupIcon(
+  key: string | null | undefined,
+  opts: { className?: string; color?: string | null; bgColor?: string | null } = {},
+) {
+  const { className = "h-12 w-12", color, bgColor } = opts;
   const entry = POPUP_ICONS.find((i) => i.key === (key ?? "none"));
   if (!entry || entry.key === "none") return null;
+  const iconStyle = color ? { color } : undefined;
+  const icon = entry.render(className, iconStyle);
   return (
-    <div className="flex justify-center pt-6 pb-1">{entry.render(className)}</div>
+    <div className="flex justify-center pt-6 pb-1">
+      {bgColor ? (
+        <span
+          className="grid h-20 w-20 place-items-center rounded-full"
+          style={{ backgroundColor: bgColor }}
+        >
+          {icon}
+        </span>
+      ) : (
+        icon
+      )}
+    </div>
   );
 }
+
 
 export const STORE_WHATSAPP_URL = "https://wa.me/5579981509552";
 

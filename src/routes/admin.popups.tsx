@@ -27,6 +27,10 @@ type Popup = {
   button_label: string | null;
   button_action: string | null;
   button_target: string | null;
+  icon_bg_color: string | null;
+  icon_color: string | null;
+  promo_bg_color: string | null;
+  promo_text_color: string | null;
   starts_at: string | null;
   ends_at: string | null;
   sort_order: number;
@@ -48,6 +52,10 @@ type Draft = {
   button_label: string;
   button_action: string;
   button_target: string;
+  icon_bg_color: string;
+  icon_color: string;
+  promo_bg_color: string;
+  promo_text_color: string;
   starts_at: string;
   ends_at: string;
 };
@@ -66,12 +74,57 @@ const EMPTY: Draft = {
   button_label: "",
   button_action: "close",
   button_target: "",
+  icon_bg_color: "",
+  icon_color: "",
+  promo_bg_color: "",
+  promo_text_color: "",
   starts_at: "",
   ends_at: "",
 };
 
 const toLocalInput = (iso: string | null) =>
   iso ? new Date(iso).toISOString().slice(0, 16) : "";
+
+function ColorField({
+  label,
+  value,
+  onChange,
+  fallback,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  fallback: string;
+}) {
+  return (
+    <label className="block text-xs">
+      <span className="mb-1 block font-semibold">{label}</span>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={value || fallback}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-9 w-10 cursor-pointer rounded-md border border-border bg-background p-1"
+        />
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="padrão"
+          className="w-full rounded-md border border-border bg-background px-2 py-2 text-xs font-mono"
+        />
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="rounded-md border border-border px-2 py-1 text-[10px] font-semibold hover:bg-secondary"
+          >
+            Limpar
+          </button>
+        )}
+      </div>
+    </label>
+  );
+}
 
 function PopupsAdminPage() {
   const { isAdmin, loading: authLoading } = useAuth();
@@ -189,6 +242,10 @@ function PopupsAdminPage() {
         draft.button_enabled && (draft.button_action === "url" || draft.button_action === "internal")
           ? draft.button_target.trim() || null
           : null,
+      icon_bg_color: draft.icon_bg_color.trim() || null,
+      icon_color: draft.icon_color.trim() || null,
+      promo_bg_color: draft.promo_bg_color.trim() || null,
+      promo_text_color: draft.promo_text_color.trim() || null,
       starts_at: draft.starts_at ? new Date(draft.starts_at).toISOString() : null,
       ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null,
     };
@@ -309,6 +366,10 @@ function PopupsAdminPage() {
                       button_label: p.button_label ?? "",
                       button_action: p.button_action ?? "close",
                       button_target: p.button_target ?? "",
+                      icon_bg_color: p.icon_bg_color ?? "",
+                      icon_color: p.icon_color ?? "",
+                      promo_bg_color: p.promo_bg_color ?? "",
+                      promo_text_color: p.promo_text_color ?? "",
                       starts_at: toLocalInput(p.starts_at),
                       ends_at: toLocalInput(p.ends_at),
                     })
@@ -435,6 +496,22 @@ function PopupsAdminPage() {
                     ))}
                   </select>
                 </label>
+                {draft.icon_key !== "none" && (
+                  <div className="grid grid-cols-2 gap-2 sm:col-span-2">
+                    <ColorField
+                      label="Cor de fundo do ícone"
+                      value={draft.icon_bg_color}
+                      onChange={(v) => setDraft({ ...draft, icon_bg_color: v })}
+                      fallback="#f1f5f9"
+                    />
+                    <ColorField
+                      label="Cor do ícone"
+                      value={draft.icon_color}
+                      onChange={(v) => setDraft({ ...draft, icon_color: v })}
+                      fallback="#111827"
+                    />
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-2">
                   <label className="block text-xs">
                     <span className="mb-1 block font-semibold">Início (opcional)</span>
@@ -559,6 +636,23 @@ function PopupsAdminPage() {
                 </label>
               )}
 
+              {draft.is_promo_code && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <ColorField
+                    label="Cor de fundo do cupom"
+                    value={draft.promo_bg_color}
+                    onChange={(v) => setDraft({ ...draft, promo_bg_color: v })}
+                    fallback="#fef9c3"
+                  />
+                  <ColorField
+                    label="Cor do texto/borda do cupom"
+                    value={draft.promo_text_color}
+                    onChange={(v) => setDraft({ ...draft, promo_text_color: v })}
+                    fallback="#b45309"
+                  />
+                </div>
+              )}
+
               <div className="rounded-lg border border-border bg-secondary/40 p-4">
                 <p className="mb-3 text-xs font-semibold">
                   Prévia ao vivo{" "}
@@ -579,6 +673,10 @@ function PopupsAdminPage() {
                     button_label: draft.button_label,
                     button_action: draft.button_action,
                     button_target: draft.button_target,
+                    icon_bg_color: draft.icon_bg_color || null,
+                    icon_color: draft.icon_color || null,
+                    promo_bg_color: draft.promo_bg_color || null,
+                    promo_text_color: draft.promo_text_color || null,
                   }}
                 />
               </div>

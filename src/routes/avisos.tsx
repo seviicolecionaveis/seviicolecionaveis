@@ -50,6 +50,8 @@ type PopupNotice = {
   link_url: string | null;
   is_promo_code: boolean;
   promo_code: string | null;
+  promo_bg_color: string | null;
+  promo_text_color: string | null;
   created_at: string;
 };
 
@@ -60,7 +62,9 @@ function PopupNotices() {
     void (async () => {
       const { data } = await supabase
         .from("site_popups")
-        .select("id, title, body_html, image_url, link_url, is_promo_code, promo_code, created_at")
+        .select(
+          "id, title, body_html, image_url, link_url, is_promo_code, promo_code, promo_bg_color, promo_text_color, created_at",
+        )
         .eq("active", true)
         .eq("show_on_notices", true)
         .order("sort_order", { ascending: true });
@@ -94,16 +98,20 @@ function PopupNotices() {
             ) : (
               <img src={n.image_url} alt={n.title} className="mt-3 w-full rounded-xl" />
             ))}
-          {n.is_promo_code && n.promo_code?.trim() && (
-            <div className="mt-3 -mx-5">
-              <PromoCodeBlock code={n.promo_code.trim()} />
-            </div>
-          )}
           {n.body_html?.trim() && (
             <div
               className="prose prose-sm mt-3 max-w-none text-sm leading-relaxed text-foreground [&_a]:underline [&_img]:max-w-full"
               dangerouslySetInnerHTML={{ __html: n.body_html }}
             />
+          )}
+          {n.is_promo_code && n.promo_code?.trim() && (
+            <div className="mt-3 -mx-5">
+              <PromoCodeBlock
+                code={n.promo_code.trim()}
+                bgColor={n.promo_bg_color}
+                textColor={n.promo_text_color}
+              />
+            </div>
           )}
         </article>
       ))}

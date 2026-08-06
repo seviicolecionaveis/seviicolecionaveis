@@ -15,6 +15,10 @@ export type PopupCardData = {
   button_label?: string | null;
   button_action?: string | null;
   button_target?: string | null;
+  icon_bg_color?: string | null;
+  icon_color?: string | null;
+  promo_bg_color?: string | null;
+  promo_text_color?: string | null;
 };
 
 type Props = {
@@ -49,7 +53,10 @@ export function PopupCard({
 
   return (
     <div>
-      {renderPopupIcon(popup.icon_key)}
+      {renderPopupIcon(popup.icon_key, {
+        color: popup.icon_color ?? undefined,
+        bgColor: popup.icon_bg_color ?? undefined,
+      })}
 
       {image &&
         (popup.link_url && !disabled ? (
@@ -72,16 +79,21 @@ export function PopupCard({
         </h2>
       )}
 
-      {popup.is_promo_code && popup.promo_code?.trim() && (
-        <PromoCodeBlock code={popup.promo_code.trim()} />
-      )}
-
       {popup.body_html?.trim() && (
         <div
           className="prose prose-sm max-w-none px-5 pt-3 text-sm text-foreground [&_a]:underline [&_img]:max-w-full"
           dangerouslySetInnerHTML={{ __html: popup.body_html }}
         />
       )}
+
+      {popup.is_promo_code && popup.promo_code?.trim() && (
+        <PromoCodeBlock
+          code={popup.promo_code.trim()}
+          bgColor={popup.promo_bg_color}
+          textColor={popup.promo_text_color}
+        />
+      )}
+
 
       {popup.button_enabled && (
         <div className="px-5 pt-4">
