@@ -117,6 +117,8 @@ function AdminCardsManagePage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [conditionError, setConditionError] = useState(false);
+  const conditionRef = useRef<HTMLSelectElement>(null);
   const [quickEditId, setQuickEditId] = useState<string | null>(null);
   const [quickForm, setQuickForm] = useState<FormState>(EMPTY_FORM);
   const [quickSaving, setQuickSaving] = useState(false);
