@@ -10,7 +10,6 @@ import { WishlistProvider } from "@/hooks/useWishlist";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
-import { WhatsAppGroupDialog } from "@/components/WhatsAppGroupDialog";
 import { GlobalHeaderActions } from "@/components/GlobalHeaderActions";
 import { CompareBar } from "@/components/CompareBar";
 import { PwaInstallBanner } from "@/components/PwaInstallBanner";
@@ -155,7 +154,7 @@ function RootComponent() {
           <AnalyticsTracker />
             <Outlet />
             <GlobalHeaderActions />
-            <WhatsAppGroupDialog />
+            {/* Pop-up da comunidade agora é gerenciado em Admin → Pop-ups */}
             <WhatsAppButton />
             <CompareBar />
             <PwaInstallBanner />
