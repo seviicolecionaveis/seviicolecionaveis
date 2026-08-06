@@ -1687,7 +1687,13 @@ export type Database = {
         Row: {
           active: boolean
           body_html: string
+          button_action: string
+          button_enabled: boolean
+          button_label: string | null
+          button_target: string | null
           created_at: string
+          ends_at: string | null
+          icon_key: string
           id: string
           image_url: string | null
           is_promo_code: boolean
@@ -1695,13 +1701,20 @@ export type Database = {
           promo_code: string | null
           show_on_notices: boolean
           sort_order: number
+          starts_at: string | null
           title: string
           updated_at: string
         }
         Insert: {
           active?: boolean
           body_html?: string
+          button_action?: string
+          button_enabled?: boolean
+          button_label?: string | null
+          button_target?: string | null
           created_at?: string
+          ends_at?: string | null
+          icon_key?: string
           id?: string
           image_url?: string | null
           is_promo_code?: boolean
@@ -1709,13 +1722,20 @@ export type Database = {
           promo_code?: string | null
           show_on_notices?: boolean
           sort_order?: number
+          starts_at?: string | null
           title: string
           updated_at?: string
         }
         Update: {
           active?: boolean
           body_html?: string
+          button_action?: string
+          button_enabled?: boolean
+          button_label?: string | null
+          button_target?: string | null
           created_at?: string
+          ends_at?: string | null
+          icon_key?: string
           id?: string
           image_url?: string | null
           is_promo_code?: boolean
@@ -1723,6 +1743,7 @@ export type Database = {
           promo_code?: string | null
           show_on_notices?: boolean
           sort_order?: number
+          starts_at?: string | null
           title?: string
           updated_at?: string
         }
