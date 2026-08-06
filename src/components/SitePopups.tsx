@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DontShowAgainCheckbox } from "@/components/DontShowAgainCheckbox";
-import { getPermanentlyDismissed, useDontShowAgain } from "@/hooks/usePopupPreference";
+import { PromoCodeBlock } from "@/components/PromoCodeBlock";
+import { getPermanentlyDismissed, setPermanentlyDismissed, useDontShowAgain } from "@/hooks/usePopupPreference";
 import { supabase } from "@/integrations/supabase/client";
 
 export type SitePopup = {
@@ -10,6 +11,8 @@ export type SitePopup = {
   body_html: string;
   image_url: string | null;
   link_url: string | null;
+  is_promo_code: boolean;
+  promo_code: string | null;
 };
 
 const SESSION_PREFIX = "site-popup-session:";
@@ -49,6 +52,10 @@ function PopupDialog({ popup, onClosed }: { popup: SitePopup; onClosed: () => vo
               image
             ))}
 
+          {popup.is_promo_code && popup.promo_code?.trim() && (
+            <PromoCodeBlock code={popup.promo_code.trim()} />
+          )}
+
           {popup.body_html?.trim() && (
             <div
               className="prose prose-sm max-w-none px-5 pt-4 text-sm text-foreground [&_a]:underline [&_img]:max-w-full"
@@ -79,16 +86,44 @@ export function SitePopups() {
     (async () => {
       const { data } = await supabase
         .from("site_popups")
-        .select("id, title, body_html, image_url, link_url")
+        .select("id, title, body_html, image_url, link_url, is_promo_code, promo_code")
         .eq("active", true)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
       if (cancelled) return;
-      const list = (data ?? []).filter(
+      let list = (data ?? []).filter(
         (p) =>
           !getPermanentlyDismissed(p.id) &&
           !sessionStorage.getItem(SESSION_PREFIX + p.id),
       ) as SitePopup[];
+
+      // Hide promo-code popups whose coupon the signed-in user has already used.
+      const codes = list
+        .filter((p) => p.is_promo_code && p.promo_code?.trim())
+        .map((p) => p.promo_code!.trim().toUpperCase());
+      if (codes.length > 0) {
+        const { data: userData } = await supabase.auth.getUser();
+        if (cancelled) return;
+        if (userData?.user) {
+          const { data: usedOrders } = await supabase
+            .from("orders")
+            .select("coupon_code")
+            .eq("user_id", userData.user.id)
+            .not("coupon_code", "is", null);
+          if (cancelled) return;
+          const used = new Set(
+            (usedOrders ?? []).map((o) => (o.coupon_code ?? "").trim().toUpperCase()),
+          );
+          list = list.filter((p) => {
+            const code = p.is_promo_code ? p.promo_code?.trim().toUpperCase() : null;
+            if (!code || !used.has(code)) return true;
+            // Never show this coupon popup to this user again.
+            setPermanentlyDismissed(p.id, true);
+            return false;
+          });
+        }
+      }
+
       list.forEach((p) => sessionStorage.setItem(SESSION_PREFIX + p.id, "1"));
       setQueue(list);
       setTimeout(() => !cancelled && setReady(true), 900);

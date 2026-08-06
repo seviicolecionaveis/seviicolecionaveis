@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { PromoCodeBlock } from "@/components/PromoCodeBlock";
 import { Bell, AlertTriangle, MessageCircle, Sparkles, Info } from "lucide-react";
 import { NOTICES, type Notice } from "@/data/notices";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -47,6 +48,8 @@ type PopupNotice = {
   body_html: string;
   image_url: string | null;
   link_url: string | null;
+  is_promo_code: boolean;
+  promo_code: string | null;
   created_at: string;
 };
 
@@ -57,7 +60,7 @@ function PopupNotices() {
     void (async () => {
       const { data } = await supabase
         .from("site_popups")
-        .select("id, title, body_html, image_url, link_url, created_at")
+        .select("id, title, body_html, image_url, link_url, is_promo_code, promo_code, created_at")
         .eq("active", true)
         .eq("show_on_notices", true)
         .order("sort_order", { ascending: true });
@@ -91,6 +94,11 @@ function PopupNotices() {
             ) : (
               <img src={n.image_url} alt={n.title} className="mt-3 w-full rounded-xl" />
             ))}
+          {n.is_promo_code && n.promo_code?.trim() && (
+            <div className="mt-3 -mx-5">
+              <PromoCodeBlock code={n.promo_code.trim()} />
+            </div>
+          )}
           {n.body_html?.trim() && (
             <div
               className="prose prose-sm mt-3 max-w-none text-sm leading-relaxed text-foreground [&_a]:underline [&_img]:max-w-full"
