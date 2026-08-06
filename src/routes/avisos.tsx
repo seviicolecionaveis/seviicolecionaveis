@@ -50,6 +50,8 @@ type PopupNotice = {
   link_url: string | null;
   is_promo_code: boolean;
   promo_code: string | null;
+  promo_bg_color: string | null;
+  promo_text_color: string | null;
   created_at: string;
 };
 
