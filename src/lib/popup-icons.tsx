@@ -66,12 +66,12 @@ export function renderPopupIcon(
   const iconStyle = color ? { color } : undefined;
   const icon = entry.render(className, iconStyle);
   return (
-    <div
-      className="flex justify-center pt-6 pb-1"
-      style={bgColor ? { backgroundColor: bgColor, paddingBottom: "1rem" } : undefined}
-    >
+    <div className="flex justify-center pt-6 pb-1">
       {bgColor ? (
-        <span className="grid h-20 w-20 place-items-center rounded-full bg-background/70">
+        <span
+          className="grid h-20 w-20 place-items-center rounded-full"
+          style={{ backgroundColor: bgColor }}
+        >
           {icon}
         </span>
       ) : (
