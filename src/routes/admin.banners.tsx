@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,6 +26,10 @@ function BannersAdmin() {
   const [uploading, setUploading] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [alt, setAlt] = useState("");
+  const [orderDirty, setOrderDirty] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
+  const dragId = useRef<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -40,8 +45,10 @@ function BannersAdmin() {
       .select("*")
       .order("sort_order", { ascending: true });
     setBanners(data ?? []);
+    setOrderDirty(false);
     setLoading(false);
   };
+
 
   useEffect(() => {
     if (isAdmin) load();
@@ -87,14 +94,49 @@ function BannersAdmin() {
     await load();
   };
 
-  const move = async (id: string, dir: -1 | 1) => {
+  const move = (id: string, dir: -1 | 1) => {
     const idx = banners.findIndex((b) => b.id === id);
-    const swap = banners[idx + dir];
-    if (!swap) return;
-    await supabase.from("banners").update({ sort_order: swap.sort_order }).eq("id", id);
-    await supabase.from("banners").update({ sort_order: banners[idx].sort_order }).eq("id", swap.id);
-    await load();
+    const to = idx + dir;
+    if (idx < 0 || to < 0 || to >= banners.length) return;
+    const next = [...banners];
+    const [moved] = next.splice(idx, 1);
+    next.splice(to, 0, moved!);
+    setBanners(next);
+    setOrderDirty(true);
   };
+
+  const onDrop = (targetId: string) => {
+    const from = banners.findIndex((b) => b.id === dragId.current);
+    const to = banners.findIndex((b) => b.id === targetId);
+    dragId.current = null;
+    setDragOverId(null);
+    if (from < 0 || to < 0 || from === to) return;
+    const next = [...banners];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved!);
+    setBanners(next);
+    setOrderDirty(true);
+  };
+
+  const saveOrder = async () => {
+    setSavingOrder(true);
+    try {
+      const results = await Promise.all(
+        banners.map((b, i) =>
+          supabase.from("banners").update({ sort_order: i }).eq("id", b.id),
+        ),
+      );
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+      toast.success("Ordem dos banners salva.");
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao salvar a ordem.");
+    } finally {
+      setSavingOrder(false);
+    }
+  };
+
 
   if (authLoading || !isAdmin) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
@@ -160,66 +202,119 @@ function BannersAdmin() {
         ) : banners.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhum banner cadastrado.</p>
         ) : (
-          <ul className="space-y-3">
-            {banners.map((b, i) => (
-              <li key={b.id} className="rounded-xl border border-border bg-card p-4 flex flex-wrap items-center gap-4">
-                <img src={b.image_url} alt="" className="h-20 w-40 object-cover rounded-md bg-secondary" />
-                <div className="flex-1 min-w-[200px] space-y-2">
-                  <input
-                    type="text"
-                    defaultValue={b.link_url ?? ""}
-                    onBlur={(e) => {
-                      const v = e.target.value.trim();
-                      if (v !== (b.link_url ?? "")) updateField(b.id, { link_url: v || null });
-                    }}
-                    placeholder="Link"
-                    className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
-                  />
-                  <input
-                    type="text"
-                    defaultValue={b.alt ?? ""}
-                    onBlur={(e) => {
-                      const v = e.target.value.trim();
-                      if (v !== (b.alt ?? "")) updateField(b.id, { alt: v || null });
-                    }}
-                    placeholder="Texto alternativo"
-                    className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
-                  />
-                </div>
-                <label className="flex items-center gap-2 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={b.active}
-                    onChange={(e) => updateField(b.id, { active: e.target.checked })}
-                  />
-                  Ativo
-                </label>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => move(b.id, -1)}
-                    disabled={i === 0}
-                    className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-30"
-                  >
-                    ↑
-                  </button>
-                  <button
-                    onClick={() => move(b.id, 1)}
-                    disabled={i === banners.length - 1}
-                    className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-30"
-                  >
-                    ↓
-                  </button>
-                </div>
-                <button
-                  onClick={() => remove(b.id)}
-                  className="rounded-md border border-destructive/40 text-destructive px-3 py-1 text-xs font-semibold"
+          <>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Arraste pelo ⠿ para reordenar e clique em “Salvar ordem” no final.
+            </p>
+            <ul className="space-y-3">
+              {banners.map((b, i) => (
+                <li
+                  key={b.id}
+                  draggable
+                  onDragStart={() => (dragId.current = b.id)}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    if (dragOverId !== b.id) setDragOverId(b.id);
+                  }}
+                  onDragLeave={() => setDragOverId((v) => (v === b.id ? null : v))}
+                  onDrop={() => onDrop(b.id)}
+                  onDragEnd={() => {
+                    dragId.current = null;
+                    setDragOverId(null);
+                  }}
+                  className={`rounded-xl border bg-card p-4 flex flex-wrap items-center gap-4 ${
+                    dragOverId === b.id ? "border-primary" : "border-border"
+                  }`}
                 >
-                  Remover
+                  <span
+                    className="cursor-grab select-none px-1 text-muted-foreground active:cursor-grabbing"
+                    title="Arrastar para reordenar"
+                  >
+                    ⠿
+                  </span>
+                  <img src={b.image_url} alt="" className="h-20 w-40 object-cover rounded-md bg-secondary" />
+                  <div className="flex-1 min-w-[200px] space-y-2">
+                    <input
+                      type="text"
+                      defaultValue={b.link_url ?? ""}
+                      onBlur={(e) => {
+                        const v = e.target.value.trim();
+                        if (v !== (b.link_url ?? "")) updateField(b.id, { link_url: v || null });
+                      }}
+                      placeholder="Link"
+                      className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
+                    />
+                    <input
+                      type="text"
+                      defaultValue={b.alt ?? ""}
+                      onBlur={(e) => {
+                        const v = e.target.value.trim();
+                        if (v !== (b.alt ?? "")) updateField(b.id, { alt: v || null });
+                      }}
+                      placeholder="Texto alternativo"
+                      className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 text-xs">
+                    <input
+                      type="checkbox"
+                      checked={b.active}
+                      onChange={(e) => updateField(b.id, { active: e.target.checked })}
+                    />
+                    Ativo
+                  </label>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => move(b.id, -1)}
+                      disabled={i === 0}
+                      className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-30"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      onClick={() => move(b.id, 1)}
+                      disabled={i === banners.length - 1}
+                      className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-30"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => remove(b.id)}
+                    className="rounded-md border border-destructive/40 text-destructive px-3 py-1 text-xs font-semibold"
+                  >
+                    Remover
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
+              {orderDirty && (
+                <span className="text-xs text-muted-foreground">
+                  Você alterou a ordem — salve para aplicar no site.
+                </span>
+              )}
+              {orderDirty && (
+                <button
+                  onClick={() => void load()}
+                  disabled={savingOrder}
+                  className="rounded-md border border-border px-4 py-2 text-xs font-semibold hover:bg-secondary disabled:opacity-50"
+                >
+                  Desfazer
                 </button>
-              </li>
-            ))}
-          </ul>
+              )}
+              <button
+                onClick={() => void saveOrder()}
+                disabled={!orderDirty || savingOrder}
+                className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-40"
+              >
+                {savingOrder ? "Salvando..." : "Salvar ordem"}
+              </button>
+            </div>
+          </>
         )}
+
       </main>
     </div>
   );
