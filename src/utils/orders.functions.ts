@@ -233,7 +233,7 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
         },
       });
     }
-    return { ok: true };
+    return { ok: true, refundCents: refund.refundCents, couponCode: refund.couponCode, refundDetails: refund.details };
   });
 
 export const adminPartialCancelItem = createServerFn({ method: "POST" })
