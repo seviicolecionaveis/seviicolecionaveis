@@ -133,10 +133,18 @@ export const requestOrderCancellation = createServerFn({ method: "POST" })
   });
 
 export const approveOrderCancellation = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        order_id: z.string().uuid(),
+        refund_method: z.enum(["mercadopago", "coupon", "manual", "none"]).default("none"),
+        restore_stock: z.boolean().default(true),
+      })
+      .parse(d),
+  )
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
-    const { isAdmin, getOrderById, updateOrder, deleteStockReservations } =
+    const { isAdmin, getOrderById, updateOrder, deleteStockReservations, refundEntireOrder, restoreStockIfPaid } =
       await import("@/lib/order-cancellation.server");
     const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
@@ -145,8 +153,9 @@ export const approveOrderCancellation = createServerFn({ method: "POST" })
       "id, status, pre_cancel_status, email, recipient_name",
     );
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
-    // Cancelamento manual pelo admin não devolve estoque.
+    await refundEntireOrder(order.id, data.refund_method);
     await deleteStockReservations(order.id);
+    if (data.restore_stock) await restoreStockIfPaid(order.id, order.pre_cancel_status ?? order.status);
     await updateOrder(order.id, { status: "cancelled" });
     if (order.email) {
       await sendTransactionalEmailSafe({
