@@ -71,6 +71,7 @@ function AdminOrderDetailPage() {
   const [coupon, setCoupon] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [cancelItem, setCancelItem] = useState<any | null>(null);
+  const [fullCancel, setFullCancel] = useState<"cancel" | "approve" | null>(null);
   const [stackedItemIds, setStackedItemIds] = useState<Set<string>>(new Set());
   const [selectedForStack, setSelectedForStack] = useState<Record<string, number>>({});
   const [sendingToStack, setSendingToStack] = useState(false);
@@ -147,16 +148,7 @@ function AdminOrderDetailPage() {
     }
   };
 
-  const handleApproveCancel = async () => {
-    if (!confirm("Aprovar o cancelamento deste pedido? O estoque será devolvido se o pedido já estava pago.")) return;
-    try {
-      await approveOrderCancellation({ data: { order_id: orderId } });
-      toast.success("Cancelamento aprovado.");
-      await load();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Erro ao aprovar cancelamento.");
-    }
-  };
+  const handleApproveCancel = () => setFullCancel("approve");
 
   const handleRejectCancel = async () => {
     if (!confirm("Recusar o cancelamento? O pedido voltará ao status anterior.")) return;
@@ -169,16 +161,7 @@ function AdminOrderDetailPage() {
     }
   };
 
-  const handleAdminCancel = async () => {
-    if (!confirm("Cancelar este pedido? Esta ação não pode ser desfeita.")) return;
-    try {
-      await adminCancelOrder({ data: { order_id: orderId } });
-      toast.success("Pedido cancelado.");
-      await load();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Erro ao cancelar pedido.");
-    }
-  };
+  const handleAdminCancel = () => setFullCancel("cancel");
 
   const toggleStackItem = (it: any, checked: boolean) => {
     setSelectedForStack((prev) => {
@@ -552,6 +535,18 @@ function AdminOrderDetailPage() {
         )}
       </main>
 
+      {fullCancel && (
+        <FullCancelDialog
+          order={order}
+          mode={fullCancel}
+          onClose={() => setFullCancel(null)}
+          onDone={async () => {
+            setFullCancel(null);
+            await load();
+          }}
+        />
+      )}
+
       {cancelItem && (
         <PartialCancelDialog
           item={cancelItem}
@@ -890,3 +885,114 @@ function PickingSummary({ items }: { items: any[] }) {
   );
 }
 
+
+function FullCancelDialog({
+  order,
+  mode,
+  onClose,
+  onDone,
+}: {
+  order: any;
+  mode: "cancel" | "approve";
+  onClose: () => void;
+  onDone: () => void | Promise<void>;
+}) {
+  const POST_PAID = ["paid", "preparing", "shipped", "awaiting_pickup", "delivered"];
+  const wasPaid = POST_PAID.includes(order.status) || POST_PAID.includes(order.pre_cancel_status ?? "");
+  const pending = Math.max(0, (order.total_cents ?? 0) - (order.refunded_cents ?? 0));
+  const [method, setMethod] = useState<"mercadopago" | "coupon" | "manual" | "none">(
+    !wasPaid || pending <= 0 ? "none" : order.mercadopago_payment_id ? "mercadopago" : "coupon",
+  );
+  const [restoreStock, setRestoreStock] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const submit = async () => {
+    setSubmitting(true);
+    try {
+      const fn = mode === "approve" ? approveOrderCancellation : adminCancelOrder;
+      const res: any = await fn({
+        data: { order_id: order.id, refund_method: method, restore_stock: restoreStock },
+      });
+      toast.success(
+        `Pedido cancelado.${res?.refundDetails ? ` ${res.refundDetails}` : ""}`,
+        { duration: 6000 },
+      );
+      await onDone();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao cancelar pedido.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const opts: { value: typeof method; label: string; hint?: string }[] = [
+    { value: "mercadopago", label: "Estornar no Mercado Pago", hint: order.mercadopago_payment_id ? undefined : "Pedido sem pagamento MP vinculado" },
+    { value: "coupon", label: "Gerar vale-presente (cupom)", hint: "Válido por 1 ano" },
+    { value: "manual", label: "Reembolso manual", hint: "Apenas registra; você paga fora do sistema" },
+    { value: "none", label: "Sem reembolso" },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-4" onClick={onClose}>
+      <div
+        className="w-full max-w-md rounded-xl bg-card border border-border p-5 space-y-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div>
+          <h3 className="text-base font-bold">
+            {mode === "approve" ? "Aprovar cancelamento" : "Cancelar pedido"}
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Pedido #{String(order.id).slice(0, 8).toUpperCase()} · Pendente de reembolso: {fmtBRL(pending)}
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
+            Forma de reembolso
+          </span>
+          {opts.map((o) => (
+            <label
+              key={o.value}
+              className="flex items-start gap-2 text-sm cursor-pointer rounded-lg border border-border p-2"
+            >
+              <input
+                type="radio"
+                className="mt-1"
+                checked={method === o.value}
+                disabled={o.value === "mercadopago" && !order.mercadopago_payment_id}
+                onChange={() => setMethod(o.value)}
+              />
+              <span>
+                {o.label}
+                {o.hint && <span className="block text-[11px] text-muted-foreground">{o.hint}</span>}
+              </span>
+            </label>
+          ))}
+        </div>
+
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={restoreStock}
+            onChange={(e) => setRestoreStock(e.target.checked)}
+          />
+          Devolver os itens ao estoque
+        </label>
+
+        <div className="flex justify-end gap-2 pt-1">
+          <button onClick={onClose} className="text-sm px-3 py-2 rounded-lg border border-border">
+            Voltar
+          </button>
+          <button
+            onClick={submit}
+            disabled={submitting}
+            className="text-sm px-3 py-2 rounded-lg bg-destructive text-destructive-foreground font-semibold disabled:opacity-60"
+          >
+            {submitting ? "Processando…" : "Confirmar cancelamento"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
