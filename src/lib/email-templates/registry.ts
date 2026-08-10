@@ -6,6 +6,15 @@ import { template as backInStockTemplate } from './back-in-stock'
 import { template as arteEmCardsDescontinuadaTemplate } from './arte-em-cards-descontinuada'
 import { template as adminBroadcastTemplate } from './admin-broadcast'
 import { template as comunidadeLaunchTemplate } from './comunidade-launch'
+import { template as orderReceivedTemplate } from './order-received'
+import { template as orderStatusUpdatedTemplate } from './order-status-updated'
+import { template as paymentConfirmedTemplate } from './payment-confirmed'
+import { template as priceDropTemplate } from './price-drop'
+import { template as adminCancellationRequestedTemplate } from './admin-cancellation-requested'
+import { template as arteEmCardsCodeTemplate } from './arte-em-cards-code'
+import { template as stackAuctionStoredTemplate } from './stack-auction-stored'
+import { template as stackOrderStoredTemplate } from './stack-order-stored'
+import { template as stackReminderTemplate } from './stack-reminder'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -28,4 +37,13 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'arte-em-cards-descontinuada': arteEmCardsDescontinuadaTemplate,
   'admin-broadcast': adminBroadcastTemplate,
   'comunidade-launch': comunidadeLaunchTemplate,
+  'order-received': orderReceivedTemplate,
+  'order-status-updated': orderStatusUpdatedTemplate,
+  'payment-confirmed': paymentConfirmedTemplate,
+  'price-drop': priceDropTemplate,
+  'admin-cancellation-requested': adminCancellationRequestedTemplate,
+  'arte-em-cards-code': arteEmCardsCodeTemplate,
+  'stack-auction-stored': stackAuctionStoredTemplate,
+  'stack-order-stored': stackOrderStoredTemplate,
+  'stack-reminder': stackReminderTemplate,
 }
