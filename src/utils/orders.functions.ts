@@ -231,8 +231,15 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
   )
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
-    const { isAdmin, getOrderById, updateOrder, deleteStockReservations, refundEntireOrder, restoreStockIfPaid } =
-      await import("@/lib/order-cancellation.server");
+    const {
+      isAdmin,
+      getOrderById,
+      updateOrder,
+      deleteStockReservations,
+      refundEntireOrder,
+      restoreStockIfPaid,
+      getActiveOrderItems,
+    } = await import("@/lib/order-cancellation.server");
     const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
     const order = await getOrderById(
@@ -241,6 +248,7 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
     );
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
     if (order.status === "cancelled") return { ok: true };
+    const cancelledItems = await getActiveOrderItems(order.id);
     const refund = await refundEntireOrder(order.id, data.refund_method);
     await deleteStockReservations(order.id);
     if (data.restore_stock) await restoreStockIfPaid(order.id, order.status);
@@ -254,9 +262,16 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
           recipientName: order.recipient_name?.split(/\s+/)[0],
           orderId: order.id,
           status: "cancelled",
+          cancellation: {
+            items: cancelledItems,
+            refundCents: refund.refundCents,
+            refundMethod: data.refund_method,
+            couponCode: refund.couponCode,
+          },
         },
       });
     }
+
     return { ok: true, refundCents: refund.refundCents, couponCode: refund.couponCode, refundDetails: refund.details };
   });
 
