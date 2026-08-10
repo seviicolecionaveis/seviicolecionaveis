@@ -77,6 +77,8 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
   carrier,
   trackingUrl,
   partialCancellation,
+  cancellation,
+
 }) => {
   const shortId = orderId ? `#${orderId.slice(0, 8).toUpperCase()}` : ''
   const label = (status && STATUS_LABEL[status]) || status || 'Atualizado'
