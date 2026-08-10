@@ -196,3 +196,17 @@ export async function refundEntireOrder(orderId: string, method: RefundMethod) {
 
   return { refundCents, couponCode, details };
 }
+
+/** Itens ainda ativos (não cancelados) de um pedido — usado no e-mail de cancelamento total. */
+export async function getActiveOrderItems(orderId: string) {
+  const { data } = await supabaseAdmin
+    .from("order_items")
+    .select("card_name, quantity, cancelled_quantity")
+    .eq("order_id", orderId);
+  return ((data ?? []) as any[])
+    .map((it) => ({
+      name: it.card_name as string,
+      quantity: Math.max(0, (it.quantity ?? 0) - (it.cancelled_quantity ?? 0)),
+    }))
+    .filter((it) => it.quantity > 0);
+}
