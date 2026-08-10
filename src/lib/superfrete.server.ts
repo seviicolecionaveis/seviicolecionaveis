@@ -40,6 +40,34 @@ function normalizeCep(cep: string) {
   return cep.replace(/\D/g, "");
 }
 
+// Converte o corpo de erro da Superfrete numa mensagem clara em português.
+function superfreteErrorMessage(status: number, text: string): string {
+  try {
+    const j = JSON.parse(text) as { errors?: Record<string, string[]>; message?: string };
+    const first = j.errors ? Object.entries(j.errors)[0] : undefined;
+    if (first) {
+      const [field, msgs] = first;
+      const detail = (msgs?.[0] ?? "").replace(/^\([^)]*\)\s*/, "").trim();
+      if (field.includes("postcode")) {
+        return `CEP de destino ${detail || "inválido"} — confira o CEP informado.`;
+      }
+      if (field.includes("weight")) {
+        return "O peso do pacote excede o limite dos Correios (30 kg).";
+      }
+      if (field.includes("dimension") || /height|width|length/.test(field)) {
+        return "As dimensões do pacote estão fora do limite dos Correios.";
+      }
+      return detail || j.message || `Falha ao consultar Superfrete (${status}).`;
+    }
+    if (j.message) return j.message;
+  } catch {
+    /* corpo não-JSON */
+  }
+  if (status === 401 || status === 403) return "Integração Superfrete não autorizada (token inválido).";
+  return `Falha ao consultar Superfrete (${status}).`;
+}
+
+
 function parseMoneyToCents(v: unknown): number {
   if (typeof v === "number") return Math.round(v * 100);
   if (typeof v === "string") {
