@@ -71,7 +71,11 @@ export async function getSuperfreteQuotes(params: {
     },
     package: {
       ...DEFAULT_PACKAGE,
-      weight: params.weightKg && params.weightKg > 0 ? params.weightKg : DEFAULT_PACKAGE.weight,
+      // Correios recusa acima de 30 kg — limita para não gerar erro 400.
+      weight: Math.min(
+        30,
+        params.weightKg && params.weightKg > 0 ? params.weightKg : DEFAULT_PACKAGE.weight,
+      ),
     },
   };
 
@@ -89,8 +93,9 @@ export async function getSuperfreteQuotes(params: {
   const text = await res.text();
   if (!res.ok) {
     console.error("[Superfrete] HTTP", res.status, text.slice(0, 500));
-    throw new Error(`Falha ao consultar Superfrete (${res.status}).`);
+    throw new Error(superfreteErrorMessage(res.status, text));
   }
+
 
   let raw: SuperfreteRaw[];
   try {
