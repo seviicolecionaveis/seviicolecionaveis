@@ -12,6 +12,17 @@ interface PartialCancellation {
   adminNote?: string | null
 }
 
+interface CancelledItem {
+  name?: string
+  quantity?: number
+}
+
+interface FullCancellation {
+  items?: CancelledItem[]
+  refundCents?: number
+  refundMethod?: 'mercadopago' | 'coupon' | 'manual' | 'none'
+  couponCode?: string | null
+}
 
 interface OrderStatusUpdatedProps {
   recipientName?: string
@@ -21,7 +32,9 @@ interface OrderStatusUpdatedProps {
   carrier?: 'correios' | 'latam' | 'pickup' | null
   trackingUrl?: string | null
   partialCancellation?: PartialCancellation | null
+  cancellation?: FullCancellation | null
 }
+
 
 const fmtBRL = (cents: number) =>
   `R$ ${(cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
