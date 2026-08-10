@@ -160,6 +160,33 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
         </Section>
       )}
 
+      {cancellation && (
+        <Section style={{ ...styles.card, borderColor: '#ef4444', background: '#fef2f2' }}>
+          <Text style={{ ...styles.muted, margin: '0 0 6px', color: '#991b1b' }}>Itens cancelados</Text>
+          {(cancellation.items ?? []).map((it, i) => (
+            <Text key={i} style={{ ...styles.text, margin: '0 0 4px' }}>
+              • <strong>{it.quantity}× {it.name}</strong>
+            </Text>
+          ))}
+          {typeof cancellation.refundCents === 'number' && cancellation.refundCents > 0 && (
+            <Text style={{ ...styles.text, margin: '10px 0 6px' }}>
+              Valor a reembolsar: <strong>{fmtBRL(cancellation.refundCents)}</strong>
+            </Text>
+          )}
+          {cancellation.refundMethod && cancellation.refundMethod !== 'none' && (
+            <Text style={{ ...styles.muted, margin: 0 }}>
+              Forma do reembolso: {REFUND_METHOD_LABEL[cancellation.refundMethod] ?? cancellation.refundMethod}
+            </Text>
+          )}
+          {cancellation.couponCode && (
+            <Text style={{ ...styles.text, margin: '8px 0 0', fontFamily: 'monospace', fontWeight: 600 }}>
+              Cupom: {cancellation.couponCode}
+            </Text>
+          )}
+        </Section>
+      )}
+
+
 
 
       <Text style={styles.muted}>
