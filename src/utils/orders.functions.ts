@@ -190,14 +190,14 @@ export const approveOrderCancellation = createServerFn({ method: "POST" })
           cancellation: {
             items: cancelledItems,
             refundCents: refund.refundCents,
-            refundMethod: data.refund_method,
+            refundMethod: refundError ? "none" : data.refund_method,
             couponCode: refund.couponCode,
           },
         },
       });
     }
 
-    return { ok: true };
+    return { ok: true, refundCents: refund.refundCents, couponCode: refund.couponCode, refundDetails: refund.details, refundError };
   });
 
 export const rejectOrderCancellation = createServerFn({ method: "POST" })
