@@ -913,10 +913,14 @@ function FullCancelDialog({
       const res: any = await fn({
         data: { order_id: order.id, refund_method: method, restore_stock: restoreStock },
       });
-      toast.success(
-        `Pedido cancelado.${res?.refundDetails ? ` ${res.refundDetails}` : ""}`,
-        { duration: 6000 },
-      );
+      if (res?.refundError) {
+        toast.warning(`Pedido cancelado, mas o reembolso falhou: ${res.refundError}`, { duration: 9000 });
+      } else {
+        toast.success(
+          `Pedido cancelado.${res?.refundDetails ? ` ${res.refundDetails}` : ""}`,
+          { duration: 6000 },
+        );
+      }
       await onDone();
     } catch (e: any) {
       toast.error(e?.message ?? "Erro ao cancelar pedido.");
