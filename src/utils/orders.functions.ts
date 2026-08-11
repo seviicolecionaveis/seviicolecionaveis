@@ -262,7 +262,19 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
     if (order.status === "cancelled") return { ok: true };
     const cancelledItems = await getActiveOrderItems(order.id);
-    const refund = await refundEntireOrder(order.id, data.refund_method);
+    let refund: { refundCents: number; couponCode: string | null; details: string } = {
+      refundCents: 0,
+      couponCode: null,
+      details: "Sem reembolso",
+    };
+    let refundError: string | null = null;
+    try {
+      refund = await refundEntireOrder(order.id, data.refund_method);
+    } catch (e: any) {
+      refundError =
+        e instanceof Response ? await e.text().catch(() => "Falha no reembolso") : (e?.message ?? "Falha no reembolso");
+      console.error("[adminCancelOrder] falha no reembolso", refundError);
+    }
     await deleteStockReservations(order.id);
     if (data.restore_stock) await restoreStockIfPaid(order.id, order.status);
     await updateOrder(order.id, { status: "cancelled" });
@@ -278,14 +290,14 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
           cancellation: {
             items: cancelledItems,
             refundCents: refund.refundCents,
-            refundMethod: data.refund_method,
+            refundMethod: refundError ? "none" : data.refund_method,
             couponCode: refund.couponCode,
           },
         },
       });
     }
 
-    return { ok: true, refundCents: refund.refundCents, couponCode: refund.couponCode, refundDetails: refund.details };
+    return { ok: true, refundCents: refund.refundCents, couponCode: refund.couponCode, refundDetails: refund.details, refundError };
   });
 
 export const adminPartialCancelItem = createServerFn({ method: "POST" })
