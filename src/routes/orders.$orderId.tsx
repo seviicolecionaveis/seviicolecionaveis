@@ -275,7 +275,7 @@ function OrderDetailPage() {
                     {it.card_number ? <span className="text-muted-foreground font-normal"> {it.card_number}</span> : null}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {it.finish} · {it.language}
+                    {it.finish === "Liga" && it.liga_subcategory ? `Liga · ${it.liga_subcategory}` : it.finish} · {it.language}
                     {it.condition ? ` · ${it.condition}` : ""}
                   </p>
                   {it.collection && (

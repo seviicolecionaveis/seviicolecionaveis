@@ -959,6 +959,7 @@ export type Database = {
           finish: string | null
           id: string
           language: string | null
+          liga_subcategory: string | null
           order_id: string
           picked_at: string | null
           picked_by: string | null
@@ -982,6 +983,7 @@ export type Database = {
           finish?: string | null
           id?: string
           language?: string | null
+          liga_subcategory?: string | null
           order_id: string
           picked_at?: string | null
           picked_by?: string | null
@@ -1005,6 +1007,7 @@ export type Database = {
           finish?: string | null
           id?: string
           language?: string | null
+          liga_subcategory?: string | null
           order_id?: string
           picked_at?: string | null
           picked_by?: string | null

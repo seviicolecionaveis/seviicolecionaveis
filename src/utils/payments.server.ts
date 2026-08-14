@@ -529,6 +529,24 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
   return resolved;
 }
 
+// Preenche o subtipo Liga (Normal / Foil / Double Rare) nos itens do pedido,
+// buscando direto na carta — assim o pedido identifica a variante exata.
+async function withLigaSubcategory<T extends { card_id: string; liga_subcategory?: string | null }>(
+  rows: T[],
+): Promise<T[]> {
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const ids = [...new Set(rows.map((r) => r.card_id).filter((id) => uuid.test(id)))];
+  if (ids.length === 0) return rows;
+  const { data } = await supabaseAdmin
+    .from("cards")
+    .select("id, liga_subcategory")
+    .in("id", ids);
+  const map = new Map((data ?? []).map((c: any) => [c.id, c.liga_subcategory ?? null]));
+  return rows.map((r) => ({ ...r, liga_subcategory: map.get(r.card_id) ?? null }));
+}
+
+
+
 async function getActiveReservationsByCard(
   cardIds: string[],
   excludeOrderId?: string,
@@ -769,7 +787,7 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
     quantity: i.quantity,
     unit_price_cents: Math.round(i.unitPrice * 100),
   }));
-  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
+  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(await withLigaSubcategory(orderItems));
   if (itemsErr) throw new Error(itemsErr.message);
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
   await sendOrderReceivedEmail(order.id);
@@ -932,7 +950,7 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     quantity: i.quantity,
     unit_price_cents: Math.round(i.unitPrice * 100),
   }));
-  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
+  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(await withLigaSubcategory(orderItems));
   if (itemsErr) throw new Error(itemsErr.message);
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
   await sendOrderReceivedEmail(order.id);
@@ -1118,7 +1136,7 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
     quantity: i.quantity,
     unit_price_cents: Math.round(i.unitPrice * 100),
   }));
-  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
+  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(await withLigaSubcategory(orderItems));
   if (itemsErr) throw new Error(itemsErr.message);
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
   await sendOrderReceivedEmail(order.id);
@@ -1469,7 +1487,7 @@ export async function createAdminTestOrderServer(data: AdminTestInput, userId: s
     quantity: i.quantity,
     unit_price_cents: Math.round(i.unitPrice * 100),
   }));
-  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
+  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(await withLigaSubcategory(orderItems));
   if (itemsErr) throw new Error(itemsErr.message);
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
 

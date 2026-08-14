@@ -402,7 +402,7 @@ function AdminOrderDetailPage() {
                           {it.card_number && <span className="text-muted-foreground font-normal"> · {it.card_number}</span>}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {[it.collection, it.finish, it.language, it.condition].filter(Boolean).join(" · ")}
+                          {[it.collection, it.finish === "Liga" && it.liga_subcategory ? `Liga · ${it.liga_subcategory}` : it.finish, it.language, it.condition].filter(Boolean).join(" · ")}
                         </p>
                         <p className="text-xs mt-2">
                           <span className="text-muted-foreground">Qtd:</span>{" "}
