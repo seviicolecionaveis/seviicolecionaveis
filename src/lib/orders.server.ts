@@ -120,15 +120,35 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
     .maybeSingle();
   if (!order) return;
   if (order.status === "paid") return;
+  // Pedidos que já passaram do pagamento (em preparo, enviado, entregue…) já
+  // tiveram o estoque baixado — nunca baixar de novo.
+  const POST_PAID = ["preparing", "shipped", "awaiting_pickup", "delivered"];
+  if (POST_PAID.includes(order.status)) return;
+
+  // Trava atômica: só um processamento consegue marcar stock_decremented de
+  // false -> true. Webhooks repetidos/concorrentes do Mercado Pago não baixam
+  // o estoque mais de uma vez.
+  const { data: claimed } = await supabaseAdmin
+    .from("orders")
+    .update({ stock_decremented: true })
+    .eq("id", orderId)
+    .eq("stock_decremented", false)
+    .select("id")
+    .maybeSingle();
+  const shouldDecrement = !!claimed;
+  if (!shouldDecrement) {
+    console.warn("[markOrderPaid] estoque já decrementado, pulando baixa", orderId);
+  }
 
   const { data: items } = await supabaseAdmin
     .from("order_items")
     .select("card_id, quantity, finish, card_name, collection, card_number")
     .eq("order_id", orderId);
 
-  if (items) {
+  if (items && shouldDecrement) {
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     for (const it of items) {
+
       // Panel (virtual product with its own stock in the panels table)
       if (typeof it.card_id === "string" && it.card_id.startsWith("panel:")) {
         const panelId = it.card_id.slice("panel:".length);
