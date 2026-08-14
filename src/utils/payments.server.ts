@@ -787,7 +787,7 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
     quantity: i.quantity,
     unit_price_cents: Math.round(i.unitPrice * 100),
   }));
-  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
+  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(await withLigaSubcategory(orderItems));
   if (itemsErr) throw new Error(itemsErr.message);
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
   await sendOrderReceivedEmail(order.id);
@@ -950,7 +950,7 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     quantity: i.quantity,
     unit_price_cents: Math.round(i.unitPrice * 100),
   }));
-  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
+  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(await withLigaSubcategory(orderItems));
   if (itemsErr) throw new Error(itemsErr.message);
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
   await sendOrderReceivedEmail(order.id);
@@ -1136,7 +1136,7 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
     quantity: i.quantity,
     unit_price_cents: Math.round(i.unitPrice * 100),
   }));
-  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
+  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(await withLigaSubcategory(orderItems));
   if (itemsErr) throw new Error(itemsErr.message);
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
   await sendOrderReceivedEmail(order.id);
@@ -1487,7 +1487,7 @@ export async function createAdminTestOrderServer(data: AdminTestInput, userId: s
     quantity: i.quantity,
     unit_price_cents: Math.round(i.unitPrice * 100),
   }));
-  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(orderItems);
+  const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(await withLigaSubcategory(orderItems));
   if (itemsErr) throw new Error(itemsErr.message);
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
 
