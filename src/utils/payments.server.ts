@@ -646,11 +646,13 @@ async function ensureAvailableStock(
     if (isVirtualItem(it)) continue;
     const { data, error } = await supabaseAdmin
       .from("cards")
-      .select("stock")
+      .select("stock, event_reserved")
       .eq("id", it.cardId)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    const rawStock = Number(data?.stock ?? 0);
+    // Unidades levadas a eventos presenciais não podem ser vendidas no site
+    const atEvent = Number((data as { event_reserved?: number } | null)?.event_reserved ?? 0);
+    const rawStock = Math.max(0, Number(data?.stock ?? 0) - atEvent);
     const reserved = reservations.get(it.cardId) ?? 0;
     const available = Math.max(0, rawStock - reserved);
     if (available < it.quantity) {

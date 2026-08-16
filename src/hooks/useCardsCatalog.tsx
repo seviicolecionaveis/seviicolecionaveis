@@ -93,7 +93,7 @@ async function loadCards(): Promise<Card[]> {
   while (true) {
     const { data, error } = await supabase
       .from("cards")
-      .select("name, card_number, collection, language, finish, condition, stock, base_price_cents, image, category, trainer_subcategory, pokemon_type, illustrator_id, created_at")
+      .select("name, card_number, collection, language, finish, condition, stock, event_reserved, base_price_cents, image, category, trainer_subcategory, pokemon_type, illustrator_id, created_at")
       .range(from, from + CHUNK - 1);
     if (error) { console.error("loadCards", error); break; }
     const batch = data ?? [];
@@ -119,7 +119,8 @@ async function loadCards(): Promise<Card[]> {
     finish: r.finish as Finish,
     language: r.language as Language,
     condition: ((r.condition as Condition) ?? "NM"),
-    stock: (r.stock as number) ?? 0,
+    // Estoque levado a eventos presenciais não fica disponível para venda no site
+    stock: Math.max(((r.stock as number) ?? 0) - ((r.event_reserved as number) ?? 0), 0),
     price: r.base_price_cents != null ? (r.base_price_cents as number) / 100 : null,
     category: (r.category as CardCategory) ?? "Pokémon",
     trainerSubcategory: (r.trainer_subcategory as TrainerSubcategory | null) ?? null,
