@@ -1,0 +1,1 @@
+UPDATE public.cards SET stock = 0, updated_at = now() WHERE collection = 'EVO - Evolutions' AND stock <> 0;
