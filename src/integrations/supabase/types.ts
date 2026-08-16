@@ -507,6 +507,7 @@ export type Database = {
           condition: Database["public"]["Enums"]["card_condition"]
           created_at: string
           created_by: string | null
+          event_reserved: number
           finish: Database["public"]["Enums"]["card_finish"]
           id: string
           illustrator_id: string | null
@@ -527,6 +528,7 @@ export type Database = {
           condition?: Database["public"]["Enums"]["card_condition"]
           created_at?: string
           created_by?: string | null
+          event_reserved?: number
           finish: Database["public"]["Enums"]["card_finish"]
           id?: string
           illustrator_id?: string | null
@@ -547,6 +549,7 @@ export type Database = {
           condition?: Database["public"]["Enums"]["card_condition"]
           created_at?: string
           created_by?: string | null
+          event_reserved?: number
           finish?: Database["public"]["Enums"]["card_finish"]
           id?: string
           illustrator_id?: string | null
@@ -1997,6 +2000,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_event_stock_sales: {
+        Args: { _items: Json; _reason?: string }
+        Returns: number
+      }
       available_stock: { Args: { _card_id: string }; Returns: number }
       award_birthday_points_today: { Args: never; Returns: number }
       backfill_loyalty_points_for_orders: {
@@ -2006,6 +2013,7 @@ export type Database = {
           points_credited: number
         }[]
       }
+      clear_event_reserved: { Args: never; Returns: number }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -2042,6 +2050,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      set_event_reserved: { Args: { _items: Json }; Returns: number }
       user_lifetime_earned: { Args: { _user_id: string }; Returns: number }
       user_points_balance: { Args: { _user_id: string }; Returns: number }
       user_tier: { Args: { _user_id: string }; Returns: string }
