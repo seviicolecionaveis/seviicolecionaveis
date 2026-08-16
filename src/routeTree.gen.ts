@@ -41,6 +41,7 @@ import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
+import { Route as AdminEventoRouteImport } from './routes/admin.evento'
 import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
 import { Route as AdminLeiloesRouteImport } from './routes/admin.leiloes'
 import { Route as AdminLoyaltyRouteImport } from './routes/admin.loyalty'
@@ -246,6 +247,11 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
 const AdminEmailsRoute = AdminEmailsRouteImport.update({
   id: '/emails',
   path: '/emails',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEventoRoute = AdminEventoRouteImport.update({
+  id: '/evento',
+  path: '/evento',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminIntegrationsRoute = AdminIntegrationsRouteImport.update({
@@ -524,6 +530,7 @@ export interface FileRoutesByFullPath {
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/evento': typeof AdminEventoRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/leiloes': typeof AdminLeiloesRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
@@ -601,6 +608,7 @@ export interface FileRoutesByTo {
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/evento': typeof AdminEventoRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/leiloes': typeof AdminLeiloesRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
@@ -682,6 +690,7 @@ export interface FileRoutesById {
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/evento': typeof AdminEventoRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/leiloes': typeof AdminLeiloesRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
@@ -764,6 +773,7 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/dashboard'
     | '/admin/emails'
+    | '/admin/evento'
     | '/admin/integrations'
     | '/admin/leiloes'
     | '/admin/loyalty'
@@ -841,6 +851,7 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/dashboard'
     | '/admin/emails'
+    | '/admin/evento'
     | '/admin/integrations'
     | '/admin/leiloes'
     | '/admin/loyalty'
@@ -921,6 +932,7 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/dashboard'
     | '/admin/emails'
+    | '/admin/evento'
     | '/admin/integrations'
     | '/admin/leiloes'
     | '/admin/loyalty'
@@ -1247,6 +1259,13 @@ declare module '@tanstack/react-router' {
       path: '/emails'
       fullPath: '/admin/emails'
       preLoaderRoute: typeof AdminEmailsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/evento': {
+      id: '/admin/evento'
+      path: '/evento'
+      fullPath: '/admin/evento'
+      preLoaderRoute: typeof AdminEventoRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/integrations': {
@@ -1580,6 +1599,7 @@ interface AdminRouteChildren {
   AdminCouponsRoute: typeof AdminCouponsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEmailsRoute: typeof AdminEmailsRoute
+  AdminEventoRoute: typeof AdminEventoRoute
   AdminIntegrationsRoute: typeof AdminIntegrationsRoute
   AdminLeiloesRoute: typeof AdminLeiloesRoute
   AdminLoyaltyRoute: typeof AdminLoyaltyRoute
@@ -1602,6 +1622,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCouponsRoute: AdminCouponsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEmailsRoute: AdminEmailsRoute,
+  AdminEventoRoute: AdminEventoRoute,
   AdminIntegrationsRoute: AdminIntegrationsRoute,
   AdminLeiloesRoute: AdminLeiloesRoute,
   AdminLoyaltyRoute: AdminLoyaltyRoute,

@@ -26,6 +26,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: "/admin/shipping", label: "Expedição" },
       { to: "/admin/pilha", label: "Pilha de Cartas" },
       { to: "/admin/leiloes", label: "Leilões" },
+      { to: "/admin/evento", label: "Modo Evento" },
     ],
   },
   {
