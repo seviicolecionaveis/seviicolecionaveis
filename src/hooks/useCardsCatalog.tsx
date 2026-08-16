@@ -119,7 +119,8 @@ async function loadCards(): Promise<Card[]> {
     finish: r.finish as Finish,
     language: r.language as Language,
     condition: ((r.condition as Condition) ?? "NM"),
-    stock: (r.stock as number) ?? 0,
+    // Estoque levado a eventos presenciais não fica disponível para venda no site
+    stock: Math.max(((r.stock as number) ?? 0) - ((r.event_reserved as number) ?? 0), 0),
     price: r.base_price_cents != null ? (r.base_price_cents as number) / 100 : null,
     category: (r.category as CardCategory) ?? "Pokémon",
     trainerSubcategory: (r.trainer_subcategory as TrainerSubcategory | null) ?? null,
