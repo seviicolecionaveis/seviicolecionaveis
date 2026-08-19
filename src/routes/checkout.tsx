@@ -424,7 +424,7 @@ function CheckoutPage() {
       shipping === "arrange" && pickupPoint
         ? pickupPoint === "app"
           ? `Entrega por aplicativo (somente Uber): cliente solicitará disponibilidade pelo WhatsApp. Envios realizados às terças e quintas, das 14h às 18h.`
-          : `Retirada em mãos: ${PICKUP_LABELS[pickupPoint]}. Horário: tarde das 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.`
+          : `Retirada em mãos: ${PICKUP_LABELS[pickupPoint]}. Horário: tarde das 14h às 18h em dias úteis, mediante contato com 24h de antecedência.`
         : "";
     const combined = [pickupLine, favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
     return combined ? combined.slice(0, 2000) : null;

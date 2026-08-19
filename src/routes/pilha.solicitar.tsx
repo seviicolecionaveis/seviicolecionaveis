@@ -504,7 +504,7 @@ function SolicitarPage() {
               <section className="rounded-xl border border-border bg-card p-5 mb-6 space-y-2">
                 <h2 className="text-sm font-semibold uppercase tracking-widest">Ponto de retirada</h2>
                 <p className="text-xs text-muted-foreground mb-2">
-                  Retirada gratuita. Horário: 14h às 18h em dias úteis, mediante contato pela manhã.
+                  Retirada gratuita. Horário: 14h às 18h em dias úteis, mediante contato com 24h de antecedência.
                 </p>
                 <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/30">
                   <input type="radio" name="pickup" checked={pickupPoint === "aruana"} onChange={() => setPickupPoint("aruana")} className="mt-1" />
