@@ -422,8 +422,8 @@ function OrderDetailPage() {
                 Entrega por aplicativo
               </h2>
               <p className="text-xs text-muted-foreground mt-1">
-                Solicite a disponibilidade da entrega por aplicativo (Uber / 99) direto pelo WhatsApp da loja.
-                O custo da corrida é por sua conta.
+                Solicite a disponibilidade da entrega por aplicativo (somente Uber) direto pelo WhatsApp da loja.
+                O custo da corrida é por sua conta. Envios realizados às terças e quintas, das 14h às 18h.
               </p>
             </div>
             <a
