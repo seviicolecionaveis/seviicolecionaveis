@@ -410,7 +410,7 @@ function OrderDetailPage() {
               em <Link to="/conta" className="underline font-semibold">Minha conta → Arte em Cards</Link>.
             </p>
             <p className="text-xs text-amber-900">
-              Retiradas: 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.
+              Retiradas: 14h às 18h em dias úteis, mediante contato com 24h de antecedência.
             </p>
           </section>
         )}
