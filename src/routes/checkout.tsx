@@ -412,7 +412,7 @@ function CheckoutPage() {
   const PICKUP_LABELS: Record<"aruana" | "aeroporto" | "app", string> = {
     aruana: "Aruana — Rua Josepha Andrade Irmã Fontes, 600, Residencial Vista Aruana",
     aeroporto: "Aeroporto — Av. Silvério Leite Fontes, 1128, Palm Ville Residence",
-    app: "Entrega por aplicativo (Uber/99)",
+    app: "Entrega por aplicativo (somente Uber)",
   };
 
   const buildNotes = () => {
@@ -423,7 +423,7 @@ function CheckoutPage() {
     const pickupLine =
       shipping === "arrange" && pickupPoint
         ? pickupPoint === "app"
-          ? `Entrega por aplicativo (Uber/99): cliente solicitará disponibilidade pelo WhatsApp.`
+          ? `Entrega por aplicativo (somente Uber): cliente solicitará disponibilidade pelo WhatsApp. Envios realizados às terças e quintas, das 14h às 18h.`
           : `Retirada em mãos: ${PICKUP_LABELS[pickupPoint]}. Horário: tarde das 14h às 18h em dias úteis, mediante contato pela manhã do mesmo dia.`
         : "";
     const combined = [pickupLine, favsLine, form.notes.trim()].filter(Boolean).join("\n\n");
@@ -742,14 +742,16 @@ function CheckoutPage() {
                   className="mt-1"
                 />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold">Entrega por aplicativo (Uber / 99)</p>
+                  <p className="text-sm font-semibold">Entrega por aplicativo (somente Uber)</p>
                   <p className="text-xs text-muted-foreground">
-                    Após a compra, solicite a disponibilidade pelo WhatsApp — o valor da corrida é por sua conta.
+                    Após a compra, solicite a disponibilidade pelo WhatsApp — o valor da corrida é por sua conta. Envios realizados às terças e quintas, das 14h às 18h.
                   </p>
                   {shipping === "arrange" && pickupPoint === "app" && (
                     <div className="mt-2 rounded-md bg-secondary/60 border border-border p-3 text-xs text-muted-foreground">
                       Assim que o pedido for confirmado, abra o pedido em <span className="font-semibold text-foreground">Meus pedidos</span> e
                       clique no botão <span className="font-semibold text-foreground">"Solicitar entrega por aplicativo"</span> para falar com a loja no WhatsApp.
+                      <br /><br />
+                      Envios por aplicativo são feitos apenas às <span className="font-semibold text-foreground">terças e quintas</span>, no período das <span className="font-semibold text-foreground">14h às 18h</span>.
                     </div>
                   )}
                 </div>
