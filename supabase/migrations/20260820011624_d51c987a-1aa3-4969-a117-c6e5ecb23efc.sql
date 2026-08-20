@@ -1,0 +1,2 @@
+update public.orders set refunded_cents = 6113, updated_at = now() where id = '68aa4e86-fa2b-4cf5-8626-c8ab977597cc';
+update public.order_items set refund_method = 'mercadopago', refund_cents = 6113, refund_notes = 'Reembolso MP #3192442423 (cancelamento total)' where order_id = '68aa4e86-fa2b-4cf5-8626-c8ab977597cc';
