@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
+import { parseVariants, parseAccessoryCartId } from "@/lib/accessory-variants";
 
 /**
  * Debita o saldo de vale-presente carteira reservado em wallet_deduction_cents.
@@ -183,16 +184,23 @@ export async function markOrderPaid(orderId: string, paymentRef?: { stripePaymen
       }
       // Accessory (own stock in the accessories table)
       if (typeof it.card_id === "string" && it.card_id.startsWith("accessory:")) {
-        const accessoryId = it.card_id.slice("accessory:".length);
+        const { accessoryId, variantId } = parseAccessoryCartId(it.card_id);
         if (UUID_RE.test(accessoryId)) {
           const { data: accessory } = await supabaseAdmin
             .from("accessories")
-            .select("stock")
+            .select("stock, variants")
             .eq("id", accessoryId)
             .maybeSingle();
           if (accessory) {
-            const newStock = Math.max(0, (accessory.stock ?? 0) - it.quantity);
-            await supabaseAdmin.from("accessories").update({ stock: newStock }).eq("id", accessoryId);
+            if (variantId) {
+              const variants = parseVariants((accessory as { variants?: unknown }).variants).map((v) =>
+                v.id === variantId ? { ...v, stock: Math.max(0, v.stock - it.quantity) } : v,
+              );
+              await supabaseAdmin.from("accessories").update({ variants } as never).eq("id", accessoryId);
+            } else {
+              const newStock = Math.max(0, (accessory.stock ?? 0) - it.quantity);
+              await supabaseAdmin.from("accessories").update({ stock: newStock }).eq("id", accessoryId);
+            }
           }
         }
         continue;

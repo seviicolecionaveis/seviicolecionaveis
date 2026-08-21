@@ -27,6 +27,7 @@ export type Database = {
           stock: number
           title: string
           updated_at: string
+          variants: Json
         }
         Insert: {
           active?: boolean
@@ -40,6 +41,7 @@ export type Database = {
           stock?: number
           title: string
           updated_at?: string
+          variants?: Json
         }
         Update: {
           active?: boolean
@@ -53,6 +55,7 @@ export type Database = {
           stock?: number
           title?: string
           updated_at?: string
+          variants?: Json
         }
         Relationships: []
       }

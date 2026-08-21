@@ -1,0 +1,1 @@
+ALTER TABLE public.accessories ADD COLUMN IF NOT EXISTS variants jsonb NOT NULL DEFAULT '[]'::jsonb;

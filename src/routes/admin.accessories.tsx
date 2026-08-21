@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Trash2, Plus, X, Upload, Link as LinkIcon, ArrowUp, ArrowDown } from "lucide-react";
+import { parseVariants, type AccessoryVariant } from "@/lib/accessory-variants";
 
 export const Route = createFileRoute("/admin/accessories")({
   head: () => ({ meta: [{ title: "Acessórios — Admin" }] }),
@@ -32,6 +33,7 @@ type Accessory = {
   images: string[];
   active: boolean;
   sort_order: number;
+  variants?: unknown;
 };
 
 function AccessoriesAdmin() {
@@ -130,6 +132,7 @@ function AccessoriesAdmin() {
                   <p className="font-semibold">{p.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {p.category} · R$ {(p.price_cents / 100).toFixed(2)} · Estoque: {p.stock} · {p.images.length} foto(s)
+                    {parseVariants(p.variants).length > 0 && ` · ${parseVariants(p.variants).length} variação(ões)`}
                     {!p.active && " · Inativo"}
                   </p>
                 </div>
@@ -172,6 +175,7 @@ function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; onClose:
   const [stock, setStock] = useState(String(item.stock));
   const [active, setActive] = useState(item.active);
   const [images, setImages] = useState<string[]>(item.images ?? []);
+  const [variants, setVariants] = useState<AccessoryVariant[]>(parseVariants(item.variants));
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -220,6 +224,7 @@ function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; onClose:
     if (!CATEGORIES.includes(category as any)) { toast.error("Categoria inválida"); return; }
     if (!Number.isFinite(priceCents) || priceCents < 0) { toast.error("Preço inválido"); return; }
     if (!Number.isInteger(stockN) || stockN < 0) { toast.error("Estoque inválido"); return; }
+    if (variants.some((v) => !v.name.trim())) { toast.error("Toda variação precisa de um nome"); return; }
     setSaving(true);
     const { error } = await supabase
       .from("accessories")
@@ -231,7 +236,8 @@ function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; onClose:
         stock: stockN,
         active,
         images,
-      })
+        variants: variants.map((v) => ({ ...v, name: v.name.trim() })),
+      } as never)
       .eq("id", item.id);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
@@ -275,6 +281,8 @@ function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; onClose:
               <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> Ativo
             </label>
           </div>
+
+          <VariantsEditor variants={variants} onChange={setVariants} />
 
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest mb-2">Imagens ({images.length})</p>
@@ -364,6 +372,202 @@ function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; onClose:
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+
+function uploadAccessoryImage(file: File) {
+  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const path = `accessories/${crypto.randomUUID()}.${ext}`;
+  return supabase.storage
+    .from("card-images")
+    .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type })
+    .then(({ error }) => {
+      if (error) throw error;
+      return supabase.storage.from("card-images").getPublicUrl(path).data.publicUrl;
+    });
+}
+
+function VariantsEditor({
+  variants,
+  onChange,
+}: {
+  variants: AccessoryVariant[];
+  onChange: (v: AccessoryVariant[]) => void;
+}) {
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const update = (id: string, patch: Partial<AccessoryVariant>) =>
+    onChange(variants.map((v) => (v.id === id ? { ...v, ...patch } : v)));
+
+  const addVariant = () =>
+    onChange([
+      ...variants,
+      { id: crypto.randomUUID(), name: "", color: "#000000", price_cents: null, stock: 0, images: [] },
+    ]);
+
+  const move = (idx: number, dir: -1 | 1) => {
+    const next = [...variants];
+    const j = idx + dir;
+    if (j < 0 || j >= next.length) return;
+    [next[idx], next[j]] = [next[j], next[idx]];
+    onChange(next);
+  };
+
+  const addImage = async (id: string, file: File) => {
+    setBusy(id);
+    try {
+      const url = await uploadAccessoryImage(file);
+      const v = variants.find((x) => x.id === id);
+      if (v) update(id, { images: [...v.images, url] });
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="rounded-lg border border-border p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest">Variações ({variants.length})</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Use para cores/modelos. Cada variação tem cor, fotos, preço e estoque próprios.
+            Deixe o preço vazio para usar o preço base.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={addVariant}
+          className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-semibold"
+        >
+          <Plus className="h-3 w-3" /> Nova variação
+        </button>
+      </div>
+
+      {variants.length === 0 ? (
+        <p className="text-xs text-muted-foreground">Nenhuma variação — o produto usa preço, estoque e fotos principais.</p>
+      ) : (
+        <ul className="space-y-3">
+          {variants.map((v, i) => (
+            <li key={v.id} className="rounded-md border border-border bg-card p-3">
+              <div className="flex flex-wrap items-end gap-3">
+                <div className="min-w-[140px] flex-1">
+                  <label className="text-[10px] font-semibold uppercase tracking-widest">Nome</label>
+                  <input
+                    value={v.name}
+                    onChange={(e) => update(v.id, { name: e.target.value })}
+                    placeholder="Ex.: Azul"
+                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold uppercase tracking-widest">Cor</label>
+                  <div className="mt-1 flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={v.color ?? "#000000"}
+                      onChange={(e) => update(v.id, { color: e.target.value })}
+                      className="h-9 w-12 cursor-pointer rounded-md border border-border bg-background"
+                    />
+                    <input
+                      value={v.color ?? ""}
+                      onChange={(e) => update(v.id, { color: e.target.value || null })}
+                      placeholder="#000000"
+                      className="w-24 rounded-md border border-border bg-background px-2 py-2 text-xs"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold uppercase tracking-widest">Preço (R$)</label>
+                  <input
+                    value={v.price_cents == null ? "" : (v.price_cents / 100).toFixed(2)}
+                    onChange={(e) => {
+                      const raw = e.target.value.trim().replace(",", ".");
+                      update(v.id, { price_cents: raw === "" ? null : Math.round(Number(raw) * 100) });
+                    }}
+                    inputMode="decimal"
+                    placeholder="Base"
+                    className="mt-1 w-24 rounded-md border border-border bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold uppercase tracking-widest">Estoque</label>
+                  <input
+                    value={String(v.stock)}
+                    onChange={(e) => update(v.id, { stock: Math.max(0, Number(e.target.value) || 0) })}
+                    inputMode="numeric"
+                    className="mt-1 w-20 rounded-md border border-border bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <div className="flex gap-1">
+                  <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-md border border-border px-2 py-2 disabled:opacity-30">
+                    <ArrowUp className="h-3 w-3" />
+                  </button>
+                  <button type="button" onClick={() => move(i, 1)} disabled={i === variants.length - 1} className="rounded-md border border-border px-2 py-2 disabled:opacity-30">
+                    <ArrowDown className="h-3 w-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onChange(variants.filter((x) => x.id !== v.id))}
+                    className="rounded-md border border-destructive/40 px-2 py-2 text-destructive"
+                    aria-label="Remover variação"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest">Fotos ({v.images.length})</p>
+                  <label className={`cursor-pointer rounded-md border border-border px-2 py-1 text-[11px] font-semibold inline-flex items-center gap-1 ${busy === v.id ? "opacity-50" : ""}`}>
+                    <Upload className="h-3 w-3" /> {busy === v.id ? "Enviando..." : "Upload"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={busy === v.id}
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) addImage(v.id, f); e.target.value = ""; }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = prompt("URL da imagem")?.trim();
+                      if (!url) return;
+                      if (!/^https?:\/\//i.test(url)) { toast.error("URL inválida"); return; }
+                      update(v.id, { images: [...v.images, url] });
+                    }}
+                    className="rounded-md border border-border px-2 py-1 text-[11px] font-semibold inline-flex items-center gap-1"
+                  >
+                    <LinkIcon className="h-3 w-3" /> URL
+                  </button>
+                </div>
+                {v.images.length > 0 && (
+                  <ul className="mt-2 flex flex-wrap gap-2">
+                    {v.images.map((url, ii) => (
+                      <li key={`${url}-${ii}`} className="relative h-16 w-16 overflow-hidden rounded-md border border-border bg-secondary">
+                        <img src={url} alt="" className="h-full w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => update(v.id, { images: v.images.filter((_, k) => k !== ii) })}
+                          className="absolute right-0.5 top-0.5 rounded-full bg-background/90 p-0.5 text-destructive"
+                          aria-label="Remover foto"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
