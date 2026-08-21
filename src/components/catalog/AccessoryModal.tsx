@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "sonner";
+import { parseVariants, type AccessoryVariant } from "@/lib/accessory-variants";
 
 export type Accessory = {
   id: string;
@@ -11,6 +12,7 @@ export type Accessory = {
   price_cents: number;
   stock: number;
   images: string[];
+  variants?: unknown;
 };
 
 interface Props {
@@ -22,22 +24,34 @@ export function AccessoryModal({ item, onClose }: Props) {
   const { add } = useCart();
   const [idx, setIdx] = useState(0);
   const [qty, setQty] = useState(1);
+  const [variantId, setVariantId] = useState<string | null>(null);
 
-  useEffect(() => { setIdx(0); setQty(1); }, [item?.id]);
+  const variants: AccessoryVariant[] = parseVariants(item?.variants);
+
+  useEffect(() => {
+    setIdx(0);
+    setQty(1);
+    const vs = parseVariants(item?.variants);
+    setVariantId(vs.find((v) => v.stock > 0)?.id ?? vs[0]?.id ?? null);
+  }, [item?.id]);
 
   if (!item) return null;
 
-  const imgs = item.images.length ? item.images : [""];
-  const inStock = item.stock > 0;
-  const price = item.price_cents / 100;
+  const variant = variants.find((v) => v.id === variantId) ?? null;
+  const baseImgs = variant && variant.images.length ? variant.images : item.images;
+  const imgs = baseImgs.length ? baseImgs : [""];
+  const stock = variant ? variant.stock : item.stock;
+  const inStock = stock > 0;
+  const priceCents = variant?.price_cents ?? item.price_cents;
+  const price = priceCents / 100;
 
   const handleAdd = () => {
     if (!inStock) return;
     add(
       {
-        id: `accessory:${item.id}`,
-        cardId: `accessory:${item.id}`,
-        name: item.title,
+        id: variant ? `accessory:${item.id}:${variant.id}` : `accessory:${item.id}`,
+        cardId: variant ? `accessory:${item.id}:${variant.id}` : `accessory:${item.id}`,
+        name: variant ? `${item.title} — ${variant.name}` : item.title,
         image: imgs[0],
         collection: "Acessório",
         number: "—",
@@ -45,7 +59,7 @@ export function AccessoryModal({ item, onClose }: Props) {
         language: "—",
         condition: "NM",
         unitPrice: price,
-        maxStock: item.stock,
+        maxStock: stock,
       },
       qty,
     );
@@ -105,11 +119,44 @@ export function AccessoryModal({ item, onClose }: Props) {
               <p className="mt-2 text-sm text-muted-foreground whitespace-pre-line">{item.description}</p>
             )}
 
+            {variants.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  Variação{variant ? `: ${variant.name}` : ""}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {variants.map((v) => {
+                    const sel = v.id === variantId;
+                    const out = v.stock <= 0;
+                    return (
+                      <button
+                        key={v.id}
+                        onClick={() => { setVariantId(v.id); setIdx(0); setQty(1); }}
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                          sel ? "border-primary bg-secondary" : "border-border hover:bg-secondary"
+                        } ${out ? "opacity-50" : ""}`}
+                        title={out ? "Esgotado" : v.name}
+                      >
+                        {v.color && (
+                          <span
+                            className="h-4 w-4 rounded-full border border-border"
+                            style={{ backgroundColor: v.color }}
+                          />
+                        )}
+                        {v.name}
+                        {out && <span className="text-[10px]">(esgotado)</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="mt-4 text-2xl font-bold">
               R$ {price.toFixed(2).replace(".", ",")}
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              {inStock ? `${item.stock} em estoque` : "Esgotado"}
+              {inStock ? `${stock} em estoque` : "Esgotado"}
             </p>
 
             {inStock && (
@@ -118,7 +165,7 @@ export function AccessoryModal({ item, onClose }: Props) {
                 <div className="inline-flex items-center rounded-md border border-border">
                   <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="px-2 py-1 text-sm">−</button>
                   <span className="px-3 text-sm font-semibold">{qty}</span>
-                  <button onClick={() => setQty((q) => Math.min(item.stock, q + 1))} className="px-2 py-1 text-sm">+</button>
+                  <button onClick={() => setQty((q) => Math.min(stock, q + 1))} className="px-2 py-1 text-sm">+</button>
                 </div>
               </div>
             )}
