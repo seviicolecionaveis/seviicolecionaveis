@@ -4,6 +4,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { AccessoryModal, type Accessory } from "@/components/catalog/AccessoryModal";
 import { supabase } from "@/integrations/supabase/client";
+import { parseVariants } from "@/lib/accessory-variants";
 import logoUrl from "@/assets/logo.webp";
 
 const CATEGORIES = [
@@ -57,7 +58,7 @@ function AcessoriosPage() {
     (async () => {
       const { data } = await supabase
         .from("accessories")
-        .select("id, title, description, category, price_cents, stock, images")
+        .select("id, title, description, category, price_cents, stock, images, variants")
         .eq("active", true)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
@@ -127,7 +128,13 @@ function AcessoriosPage() {
         ) : (
           <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 md:grid-cols-4">
             {filtered.map((p) => {
-              const cover = p.images[0];
+              const vs = parseVariants(p.variants);
+              const prices = vs.length
+                ? vs.map((v) => v.price_cents ?? p.price_cents)
+                : [p.price_cents];
+              const minPrice = Math.min(...prices);
+              const multiPrice = Math.max(...prices) !== minPrice;
+              const cover = vs.find((v) => v.images.length)?.images[0] ?? p.images[0];
               return (
                 <button
                   key={p.id}
@@ -144,8 +151,9 @@ function AcessoriosPage() {
                   <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{p.category}</p>
                   <p className="text-sm font-semibold line-clamp-2">{p.title}</p>
                   <p className="text-sm text-muted-foreground">
-                    R$ {(p.price_cents / 100).toFixed(2).replace(".", ",")}
-                    {p.images.length > 1 && <span className="ml-2 text-xs">· {p.images.length} fotos</span>}
+                    {multiPrice && <span className="text-xs">a partir de </span>}
+                    R$ {(minPrice / 100).toFixed(2).replace(".", ",")}
+                    {vs.length > 0 && <span className="ml-2 text-xs">· {vs.length} variações</span>}
                   </p>
                 </button>
               );

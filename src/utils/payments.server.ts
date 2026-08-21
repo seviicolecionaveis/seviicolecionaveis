@@ -6,6 +6,7 @@ import type { AdminTestInput, CardInput, PixInput, StripeInput } from "./payment
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
 import { computeBundleDiscount } from "@/lib/bundles";
 import { TEST_ADMIN_CARD_ID } from "@/lib/test-card";
+import { parseVariants, parseAccessoryCartId } from "@/lib/accessory-variants";
 
 async function sendOrderReceivedEmail(orderId: string) {
   const { data: order } = await supabaseAdmin
@@ -451,17 +452,26 @@ async function resolveCardIds<T extends ResolvableItem>(items: T[]): Promise<T[]
       continue;
     }
     if (isAccessoryItem(it)) {
-      const accessoryId = it.cardId.slice("accessory:".length);
+      const { accessoryId, variantId } = parseAccessoryCartId(it.cardId);
       const { data: accessory, error: aErr } = await supabaseAdmin
         .from("accessories")
-        .select("price_cents, active")
+        .select("price_cents, active, variants")
         .eq("id", accessoryId)
         .maybeSingle();
       if (aErr) throw new Error(aErr.message);
       if (!accessory || accessory.active === false) {
         throw new Error(`Acessório não encontrado ou indisponível: "${it.name}".`);
       }
-      const cents = Number(accessory.price_cents ?? 0);
+      let cents = Number(accessory.price_cents ?? 0);
+      if (variantId) {
+        const variant = parseVariants((accessory as { variants?: unknown }).variants).find(
+          (v) => v.id === variantId,
+        );
+        if (!variant) {
+          throw new Error(`Variação indisponível para o acessório "${it.name}".`);
+        }
+        cents = Number(variant.price_cents ?? accessory.price_cents ?? 0);
+      }
       if (cents <= 0) {
         throw new Error(`Preço indisponível para o acessório "${it.name}".`);
       }
@@ -614,13 +624,16 @@ async function ensureAvailableStock(
       continue;
     }
     if (isAccessoryItem(it)) {
-      const accessoryId = it.cardId.slice("accessory:".length);
+      const { accessoryId, variantId } = parseAccessoryCartId(it.cardId);
       const { data } = await supabaseAdmin
         .from("accessories")
-        .select("stock")
+        .select("stock, variants")
         .eq("id", accessoryId)
         .maybeSingle();
-      const available = Number(data?.stock ?? 0);
+      const variant = variantId
+        ? parseVariants((data as { variants?: unknown } | null)?.variants).find((v) => v.id === variantId)
+        : null;
+      const available = variantId ? Number(variant?.stock ?? 0) : Number(data?.stock ?? 0);
       if (available < it.quantity) {
         throw new Error(
           `Estoque insuficiente para "${it.name}". Disponível: ${available}, solicitado: ${it.quantity}.`,
