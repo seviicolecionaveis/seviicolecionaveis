@@ -1,0 +1,1 @@
+insert into app_settings (key, value) values ('event_mode', '{"enabled": false, "message": "Estamos em um evento presencial. As vendas online estão temporariamente pausadas e voltam em breve."}') on conflict (key) do update set value = excluded.value;
