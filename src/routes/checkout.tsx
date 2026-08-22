@@ -22,6 +22,7 @@ import { copyToClipboard } from "@/lib/clipboard";
 import { CardStackTermsDialog } from "@/components/CardStackTermsDialog";
 import { cartIsAllTestCard } from "@/lib/test-card";
 import { getMyLoyaltyStatus } from "@/lib/loyalty.functions";
+import { useEventMode } from "@/lib/event-mode";
 import {
   POINTS_PER_REDEEM_BLOCK,
   CENTS_PER_REDEEM_BLOCK,
@@ -1035,12 +1036,21 @@ function CheckoutPage() {
 
           {err && <p className="text-sm text-red-600">{err}</p>}
 
+          {eventMode.enabled && (
+            <div className="rounded-lg border border-amber-400 bg-amber-50 p-4 text-sm text-amber-900">
+              <p className="font-semibold">Vendas online pausadas</p>
+              <p className="mt-1 text-xs">{eventMode.message}</p>
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || eventMode.enabled}
             className="w-full rounded-full bg-foreground py-3 text-sm font-semibold uppercase tracking-wide text-background hover:bg-foreground/90 disabled:opacity-50"
           >
-            {loading
+            {eventMode.enabled
+              ? "Vendas temporariamente pausadas"
+              : loading
               ? "Carregando..."
               : paymentMethod === "admin_test"
                 ? `Aprovar pedido de teste — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
