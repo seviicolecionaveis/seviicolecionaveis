@@ -449,6 +449,10 @@ function CheckoutPage() {
 
   const handleAddressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (eventMode.enabled) {
+      setEventDialogOpen(true);
+      return;
+    }
     setErr(null);
     trackEvent("begin_checkout", {
       currency: "BRL",
