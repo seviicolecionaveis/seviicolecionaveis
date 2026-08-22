@@ -1,0 +1,1 @@
+insert into app_settings (key, value) values ('event_mode', '{"enabled": true, "message": "Estamos em evento presencial. Finalize seu pedido pelo WhatsApp."}') on conflict (key) do update set value = excluded.value;
