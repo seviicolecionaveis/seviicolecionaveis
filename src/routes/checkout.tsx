@@ -14,7 +14,7 @@ import {
 import { getMpCustomerForCheckout } from "@/lib/saved-cards.functions";
 import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
-import { Copy, Check, QrCode, CreditCard, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import { Copy, Check, QrCode, CreditCard, Loader2, ShieldCheck, Sparkles, MessageCircle, X } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 import { computeBundleDiscount } from "@/lib/bundles";
