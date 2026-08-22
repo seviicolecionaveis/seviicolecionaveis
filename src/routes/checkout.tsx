@@ -1090,17 +1090,14 @@ function CheckoutPage() {
           </Dialog>
 
           <button
-            type="button"
-            onClick={() => {
-              if (eventMode.enabled) {
-                setEventDialogOpen(true);
-                return;
-              }
-              // Força o submit do formulário de endereço quando não estiver em modo evento
-              const formEl = document.getElementById("checkout-address-form") as HTMLFormElement | null;
-              formEl?.requestSubmit();
-            }}
+            type="submit"
             disabled={loading}
+            onClick={(e) => {
+              if (eventMode.enabled) {
+                e.preventDefault();
+                setEventDialogOpen(true);
+              }
+            }}
             className="w-full rounded-full bg-foreground py-3 text-sm font-semibold uppercase tracking-wide text-background hover:bg-foreground/90 disabled:opacity-50"
           >
             {loading
