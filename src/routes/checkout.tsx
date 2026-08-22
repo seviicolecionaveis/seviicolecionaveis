@@ -165,6 +165,11 @@ function CheckoutPage() {
   const [card, setCard] = useState<CardState | null>(null);
   const [loading, setLoading] = useState(false);
   const { eventMode } = useEventMode();
+  const [eventDialogOpen, setEventDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (eventMode.enabled) setEventDialogOpen(true);
+  }, [eventMode.enabled]);
 
   const [err, setErr] = useState<string | null>(null);
   const [couponPreview, setCouponPreview] = useState<
