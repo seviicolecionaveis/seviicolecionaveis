@@ -669,7 +669,7 @@ function CheckoutPage() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-8 grid lg:grid-cols-[1fr_360px] gap-8">
-        <form onSubmit={handleAddressSubmit} className="space-y-6">
+        <form id="checkout-address-form" onSubmit={handleAddressSubmit} className="space-y-6">
           <h1 className="text-2xl font-bold">Endereço de entrega</h1>
 
           <div className="grid gap-4">
