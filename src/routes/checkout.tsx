@@ -1052,21 +1052,58 @@ function CheckoutPage() {
 
           {err && <p className="text-sm text-red-600">{err}</p>}
 
-          {eventMode.enabled && (
-            <div className="rounded-lg border border-amber-400 bg-amber-50 p-4 text-sm text-amber-900">
-              <p className="font-semibold">Vendas online pausadas</p>
-              <p className="mt-1 text-xs">{eventMode.message}</p>
-            </div>
-          )}
+          <Dialog open={eventDialogOpen} onOpenChange={setEventDialogOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-amber-900">Vendas online pausadas</DialogTitle>
+                <DialogDescription>{eventMode.message}</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <p className="text-sm text-muted-foreground">
+                  Estamos participando de um evento presencial. Para finalizar essa compra, fale com um admin no WhatsApp.
+                </p>
+                <Button
+                  asChild
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  <a
+                    href={`https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                      "Olá! Estou no checkout do site e vi que vocês estão em evento. Quero finalizar meu pedido."
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle className="h-4 w-4" /> Falar com admin no WhatsApp
+                  </a>
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setEventDialogOpen(false)}
+                >
+                  Fechar e continuar olhando
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           <button
-            type="submit"
-            disabled={loading || eventMode.enabled}
+            type="button"
+            onClick={() => {
+              if (eventMode.enabled) {
+                setEventDialogOpen(true);
+                return;
+              }
+              // Força o submit do formulário de endereço quando não estiver em modo evento
+              const formEl = document.getElementById("checkout-address-form") as HTMLFormElement | null;
+              formEl?.requestSubmit();
+            }}
+            disabled={loading}
             className="w-full rounded-full bg-foreground py-3 text-sm font-semibold uppercase tracking-wide text-background hover:bg-foreground/90 disabled:opacity-50"
           >
-            {eventMode.enabled
-              ? "Vendas temporariamente pausadas"
-              : loading
+            {loading
               ? "Carregando..."
               : paymentMethod === "admin_test"
                 ? `Aprovar pedido de teste — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
