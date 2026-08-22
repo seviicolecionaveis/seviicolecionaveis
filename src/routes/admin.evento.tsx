@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { invalidateCardsCache } from "@/hooks/useCardsCatalog";
 import { CONDITION_LABEL } from "@/data/cards";
 import type { Condition } from "@/data/cards";
-import { Minus, Plus, Search, Trash2, PackageCheck, Undo2 } from "lucide-react";
+import { Minus, Plus, Search, Trash2, PackageCheck, Undo2, Power } from "lucide-react";
+import { EVENT_MODE_KEY, useEventMode } from "@/lib/event-mode";
 
 export const Route = createFileRoute("/admin/evento")({
   head: () => ({
@@ -56,6 +57,23 @@ function EventoPage() {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [atEvent, setAtEvent] = useState<Row[]>([]);
+  const { eventMode, reload: reloadEventMode } = useEventMode();
+  const [eventMessage, setEventMessage] = useState("");
+  const [savingMode, setSavingMode] = useState(false);
+
+  useEffect(() => { setEventMessage(eventMode.message); }, [eventMode.message]);
+
+  const toggleEventMode = async (enabled: boolean) => {
+    setSavingMode(true);
+    setMsg(null);
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ key: EVENT_MODE_KEY, value: { enabled, message: eventMessage.trim() } }, { onConflict: "key" });
+    setSavingMode(false);
+    if (error) { setMsg({ type: "err", text: error.message }); return; }
+    await reloadEventMode();
+    setMsg({ type: "ok", text: enabled ? "Modo evento ativado — vendas online bloqueadas." : "Vendas online liberadas." });
+  };
 
   useEffect(() => {
     if (!authLoading) {
