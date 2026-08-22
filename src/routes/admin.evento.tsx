@@ -178,7 +178,48 @@ function EventoPage() {
         </p>
       </header>
 
+      <section className={`rounded-xl border p-4 space-y-3 ${eventMode.enabled ? "border-destructive/50 bg-destructive/10" : "border-border bg-card"}`}>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <Power className="h-4 w-4" /> Bloqueio de vendas online
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {eventMode.enabled
+                ? "Modo evento ATIVO: o site não aceita novos pedidos."
+                : "Modo evento desativado: as vendas online estão liberadas."}
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={savingMode}
+            onClick={() => toggleEventMode(!eventMode.enabled)}
+            className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white disabled:opacity-50 ${eventMode.enabled ? "bg-emerald-600 hover:bg-emerald-700" : "bg-destructive hover:bg-destructive/90"}`}
+          >
+            {savingMode ? "Salvando…" : eventMode.enabled ? "Liberar vendas" : "Ativar modo evento"}
+          </button>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-foreground">Mensagem exibida aos clientes</label>
+          <textarea
+            value={eventMessage}
+            onChange={(e) => setEventMessage(e.target.value)}
+            rows={2}
+            className="w-full rounded-md border border-border bg-background p-2 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+          <button
+            type="button"
+            disabled={savingMode}
+            onClick={() => toggleEventMode(eventMode.enabled)}
+            className="rounded-md bg-secondary px-3 py-1.5 text-xs font-semibold text-foreground disabled:opacity-50"
+          >
+            Salvar mensagem
+          </button>
+        </div>
+      </section>
+
       <div className="flex flex-wrap gap-2">
+
         <button
           type="button"
           onClick={() => setMode("sales")}
