@@ -1095,7 +1095,7 @@ function CheckoutPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || eventModeLoading}
             onClick={(e) => {
               if (eventMode.enabled) {
                 e.preventDefault();
