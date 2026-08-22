@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { cartIsAllTestCard } from "@/lib/test-card";
 import { getMyLoyaltyStatus } from "@/lib/loyalty.functions";
 import { useEventMode } from "@/lib/event-mode";
+const STORE_WHATSAPP_NUMBER = "5579981509552";
 import {
   POINTS_PER_REDEEM_BLOCK,
   CENTS_PER_REDEEM_BLOCK,
