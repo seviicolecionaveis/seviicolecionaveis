@@ -20,6 +20,14 @@ import { TrustBadges } from "@/components/TrustBadges";
 import { computeBundleDiscount } from "@/lib/bundles";
 import { copyToClipboard } from "@/lib/clipboard";
 import { CardStackTermsDialog } from "@/components/CardStackTermsDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { cartIsAllTestCard } from "@/lib/test-card";
 import { getMyLoyaltyStatus } from "@/lib/loyalty.functions";
 import { useEventMode } from "@/lib/event-mode";
