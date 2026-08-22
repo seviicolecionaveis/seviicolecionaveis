@@ -164,7 +164,7 @@ function CheckoutPage() {
   const [pix, setPix] = useState<PixState | null>(null);
   const [card, setCard] = useState<CardState | null>(null);
   const [loading, setLoading] = useState(false);
-  const { eventMode } = useEventMode();
+  const { eventMode, loading: eventModeLoading } = useEventMode();
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
 
   useEffect(() => {
