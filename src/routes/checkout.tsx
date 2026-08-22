@@ -155,6 +155,8 @@ function CheckoutPage() {
   const [pix, setPix] = useState<PixState | null>(null);
   const [card, setCard] = useState<CardState | null>(null);
   const [loading, setLoading] = useState(false);
+  const { eventMode } = useEventMode();
+
   const [err, setErr] = useState<string | null>(null);
   const [couponPreview, setCouponPreview] = useState<
     | { valid: true; discountCents: number; code: string; label: string; kind: "amount" | "percent"; percent: number | null; amountCents: number | null }
