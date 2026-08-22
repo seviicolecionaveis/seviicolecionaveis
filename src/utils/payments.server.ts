@@ -7,6 +7,7 @@ import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
 import { computeBundleDiscount } from "@/lib/bundles";
 import { TEST_ADMIN_CARD_ID } from "@/lib/test-card";
 import { parseVariants, parseAccessoryCartId } from "@/lib/accessory-variants";
+import { assertSalesOpen } from "@/lib/event-mode.server";
 
 async function sendOrderReceivedEmail(orderId: string) {
   const { data: order } = await supabaseAdmin
@@ -711,6 +712,7 @@ async function reserveStockForOrder(
 
 
 export async function createOrderCheckoutServer(data: StripeInput, userId: string) {
+  await assertSalesOpen();
   await cancelOtherPendingOrdersForUser(userId);
 
   const env = data.environment as StripeEnv;
@@ -869,6 +871,7 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
 }
 
 export async function createPixOrderServer(data: PixInput, userId: string) {
+  await assertSalesOpen();
   await cancelOtherPendingOrdersForUser(userId);
 
   const items = await resolveCardIds(data.items);
@@ -1064,6 +1067,7 @@ export async function checkPixOrderStatusServer(orderId: string, userId: string)
 }
 
 export async function createCardOrderServer(data: CardInput, userId: string) {
+  await assertSalesOpen();
   await cancelOtherPendingOrdersForUser(userId);
 
   const items = await resolveCardIds(data.items);
