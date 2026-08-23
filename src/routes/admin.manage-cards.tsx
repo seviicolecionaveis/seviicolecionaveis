@@ -9,6 +9,7 @@ import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS, LIGA_SUBCATEGORIES, POK
 import { notifyStockBack } from "@/lib/stock-alerts.functions";
 import { cardSlug } from "@/lib/slug";
 import { IllustratorCombobox } from "@/components/admin/IllustratorCombobox";
+import { useCustomCollections } from "@/lib/custom-collections";
 
 export const Route = createFileRoute("/admin/manage-cards")({
   head: () => ({ meta: [{ title: "Gerenciar cartas — Admin" }] }),
