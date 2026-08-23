@@ -117,6 +117,10 @@ function AdminCardsManagePage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const { customCollections, addCollection } = useCustomCollections();
+  const [showNewCollection, setShowNewCollection] = useState(false);
+  const [newCollection, setNewCollection] = useState("");
+  const [creatingCollection, setCreatingCollection] = useState(false);
   const [conditionError, setConditionError] = useState(false);
   const conditionRef = useRef<HTMLSelectElement>(null);
   const [quickEditId, setQuickEditId] = useState<string | null>(null);
