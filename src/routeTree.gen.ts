@@ -53,6 +53,7 @@ import { Route as AdminPopupsRouteImport } from './routes/admin.popups'
 import { Route as AdminPreVendaRouteImport } from './routes/admin.pre-venda'
 import { Route as AdminSealedRouteImport } from './routes/admin.sealed'
 import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
+import { Route as AdminSorteiosRouteImport } from './routes/admin.sorteios'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminVideogamesRouteImport } from './routes/admin.videogames'
 import { Route as BaralhoTokenRouteImport } from './routes/baralho.$token'
@@ -312,6 +313,11 @@ const AdminShippingRoute = AdminShippingRouteImport.update({
   path: '/shipping',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSorteiosRoute = AdminSorteiosRouteImport.update({
+  id: '/sorteios',
+  path: '/sorteios',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -561,6 +567,7 @@ export interface FileRoutesByFullPath {
   '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
+  '/admin/sorteios': typeof AdminSorteiosRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videogames': typeof AdminVideogamesRoute
   '/baralho/$token': typeof BaralhoTokenRoute
@@ -642,6 +649,7 @@ export interface FileRoutesByTo {
   '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
+  '/admin/sorteios': typeof AdminSorteiosRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videogames': typeof AdminVideogamesRoute
   '/baralho/$token': typeof BaralhoTokenRoute
@@ -727,6 +735,7 @@ export interface FileRoutesById {
   '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
+  '/admin/sorteios': typeof AdminSorteiosRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videogames': typeof AdminVideogamesRoute
   '/baralho/$token': typeof BaralhoTokenRoute
@@ -813,6 +822,7 @@ export interface FileRouteTypes {
     | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
+    | '/admin/sorteios'
     | '/admin/users'
     | '/admin/videogames'
     | '/baralho/$token'
@@ -894,6 +904,7 @@ export interface FileRouteTypes {
     | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
+    | '/admin/sorteios'
     | '/admin/users'
     | '/admin/videogames'
     | '/baralho/$token'
@@ -978,6 +989,7 @@ export interface FileRouteTypes {
     | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
+    | '/admin/sorteios'
     | '/admin/users'
     | '/admin/videogames'
     | '/baralho/$token'
@@ -1385,6 +1397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminShippingRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/sorteios': {
+      id: '/admin/sorteios'
+      path: '/sorteios'
+      fullPath: '/admin/sorteios'
+      preLoaderRoute: typeof AdminSorteiosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -1672,6 +1691,7 @@ interface AdminRouteChildren {
   AdminPreVendaRoute: typeof AdminPreVendaRoute
   AdminSealedRoute: typeof AdminSealedRoute
   AdminShippingRoute: typeof AdminShippingRoute
+  AdminSorteiosRoute: typeof AdminSorteiosRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminVideogamesRoute: typeof AdminVideogamesRoute
   AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
@@ -1695,6 +1715,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPreVendaRoute: AdminPreVendaRoute,
   AdminSealedRoute: AdminSealedRoute,
   AdminShippingRoute: AdminShippingRoute,
+  AdminSorteiosRoute: AdminSorteiosRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminVideogamesRoute: AdminVideogamesRoute,
   AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
