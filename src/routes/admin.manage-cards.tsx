@@ -488,7 +488,16 @@ function AdminCardsManagePage() {
             </label>
 
             <label className="text-xs space-y-1">
-              <span className="font-semibold">Coleção *</span>
+              <span className="flex items-center justify-between gap-2">
+                <span className="font-semibold">Coleção *</span>
+                <button
+                  type="button"
+                  onClick={() => setShowNewCollection((v) => !v)}
+                  className="text-[11px] font-medium underline underline-offset-2 text-muted-foreground hover:text-foreground"
+                >
+                  {showNewCollection ? "Cancelar" : "+ Nova coleção"}
+                </button>
+              </span>
               <input
                 value={form.collection}
                 onChange={(e) => setForm({ ...form, collection: e.target.value })}
@@ -500,6 +509,27 @@ function AdminCardsManagePage() {
               <datalist id="collections-list">
                 {collections.map((c) => <option key={c} value={c} />)}
               </datalist>
+              {showNewCollection && (
+                <span className="mt-1 flex gap-2">
+                  <input
+                    value={newCollection}
+                    onChange={(e) => setNewCollection(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { e.preventDefault(); handleCreateCollection(); }
+                    }}
+                    placeholder="Ex: DRI - Ritmo Destinado"
+                    className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateCollection}
+                    disabled={creatingCollection || !newCollection.trim()}
+                    className="shrink-0 rounded bg-foreground px-3 py-2 text-xs font-semibold text-background disabled:opacity-50"
+                  >
+                    {creatingCollection ? "Salvando..." : "Criar"}
+                  </button>
+                </span>
+              )}
             </label>
 
             <label className="text-xs space-y-1">
