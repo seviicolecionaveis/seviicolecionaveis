@@ -72,6 +72,7 @@ import { Route as PreVendaSlugRouteImport } from './routes/pre-venda.$slug'
 import { Route as ProdutosLacradosIndexRouteImport } from './routes/produtos-lacrados.index'
 import { Route as ProdutosLacradosSlugRouteImport } from './routes/produtos-lacrados.$slug'
 import { Route as SorteiosIndexRouteImport } from './routes/sorteios.index'
+import { Route as SorteiosRaffleIdRouteImport } from './routes/sorteios.$raffleId'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -406,6 +407,11 @@ const SorteiosIndexRoute = SorteiosIndexRouteImport.update({
   path: '/sorteios/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SorteiosRaffleIdRoute = SorteiosRaffleIdRouteImport.update({
+  id: '/sorteios/$raffleId',
+  path: '/sorteios/$raffleId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
   id: '/orders/$orderId',
   path: '/orders/$orderId',
@@ -569,6 +575,7 @@ export interface FileRoutesByFullPath {
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/pre-venda/$slug': typeof PreVendaSlugRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
+  '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
   '/pre-venda/': typeof PreVendaIndexRoute
@@ -649,6 +656,7 @@ export interface FileRoutesByTo {
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/pre-venda/$slug': typeof PreVendaSlugRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
+  '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
   '/orders': typeof OrdersIndexRoute
   '/pilha': typeof PilhaIndexRoute
   '/pre-venda': typeof PreVendaIndexRoute
@@ -733,6 +741,7 @@ export interface FileRoutesById {
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/pre-venda/$slug': typeof PreVendaSlugRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
+  '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
   '/pre-venda/': typeof PreVendaIndexRoute
@@ -818,6 +827,7 @@ export interface FileRouteTypes {
     | '/pilha/solicitar'
     | '/pre-venda/$slug'
     | '/produtos-lacrados/$slug'
+    | '/sorteios/$raffleId'
     | '/orders/'
     | '/pilha/'
     | '/pre-venda/'
@@ -898,6 +908,7 @@ export interface FileRouteTypes {
     | '/pilha/solicitar'
     | '/pre-venda/$slug'
     | '/produtos-lacrados/$slug'
+    | '/sorteios/$raffleId'
     | '/orders'
     | '/pilha'
     | '/pre-venda'
@@ -981,6 +992,7 @@ export interface FileRouteTypes {
     | '/pilha/solicitar'
     | '/pre-venda/$slug'
     | '/produtos-lacrados/$slug'
+    | '/sorteios/$raffleId'
     | '/orders/'
     | '/pilha/'
     | '/pre-venda/'
@@ -1041,6 +1053,7 @@ export interface RootRouteChildren {
   ListaDesejosTokenRoute: typeof ListaDesejosTokenRoute
   PayOrderIdRoute: typeof PayOrderIdRoute
   PreVendaSlugRoute: typeof PreVendaSlugRoute
+  SorteiosRaffleIdRoute: typeof SorteiosRaffleIdRoute
   PreVendaIndexRoute: typeof PreVendaIndexRoute
   SorteiosIndexRoute: typeof SorteiosIndexRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
@@ -1505,6 +1518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SorteiosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sorteios/$raffleId': {
+      id: '/sorteios/$raffleId'
+      path: '/sorteios/$raffleId'
+      fullPath: '/sorteios/$raffleId'
+      preLoaderRoute: typeof SorteiosRaffleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/orders/$orderId': {
       id: '/admin/orders/$orderId'
       path: '/orders/$orderId'
@@ -1779,6 +1799,7 @@ const rootRouteChildren: RootRouteChildren = {
   ListaDesejosTokenRoute: ListaDesejosTokenRoute,
   PayOrderIdRoute: PayOrderIdRoute,
   PreVendaSlugRoute: PreVendaSlugRoute,
+  SorteiosRaffleIdRoute: SorteiosRaffleIdRoute,
   PreVendaIndexRoute: PreVendaIndexRoute,
   SorteiosIndexRoute: SorteiosIndexRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
