@@ -124,6 +124,14 @@ export function SiteNav({ className = "" }: { className?: string }) {
       >
         Comunidade
       </Link>
+
+      <Link
+        to="/sorteios"
+        className="whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+        activeProps={{ className: "bg-foreground text-background hover:bg-foreground hover:text-background" }}
+      >
+        Sorteios
+      </Link>
     </nav>
   );
 }
