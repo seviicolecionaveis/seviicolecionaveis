@@ -1,11 +1,11 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateCardsCache } from "@/hooks/useCardsCatalog";
 import { CONDITION_LABEL } from "@/data/cards";
 import type { Condition } from "@/data/cards";
-import { Minus, Plus, Search, Trash2, PackageCheck, Undo2, Power } from "lucide-react";
+import { Minus, Plus, Search, Trash2, PackageCheck, Undo2, Power, Home, PackagePlus, ClipboardList } from "lucide-react";
 import { EVENT_MODE_KEY, useEventMode } from "@/lib/event-mode";
 
 export const Route = createFileRoute("/admin/evento")({
@@ -195,6 +195,27 @@ function EventoPage() {
           Marque o que foi levado ao evento (bloqueia a venda no site) e dê baixa em lote no que foi vendido lá.
         </p>
       </header>
+
+      <div className="flex flex-wrap gap-2">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-secondary"
+        >
+          <Home className="h-3.5 w-3.5" /> Página inicial
+        </Link>
+        <Link
+          to="/admin/manage-cards"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-secondary"
+        >
+          <PackagePlus className="h-3.5 w-3.5" /> Cadastrar carta
+        </Link>
+        <Link
+          to="/admin"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-secondary"
+        >
+          <ClipboardList className="h-3.5 w-3.5" /> Pedidos
+        </Link>
+      </div>
 
       <section className={`rounded-xl border p-4 space-y-3 ${eventMode.enabled ? "border-destructive/50 bg-destructive/10" : "border-border bg-card"}`}>
         <div className="flex flex-wrap items-start justify-between gap-3">
