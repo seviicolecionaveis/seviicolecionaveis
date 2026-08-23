@@ -71,6 +71,7 @@ import { Route as PreVendaIndexRouteImport } from './routes/pre-venda.index'
 import { Route as PreVendaSlugRouteImport } from './routes/pre-venda.$slug'
 import { Route as ProdutosLacradosIndexRouteImport } from './routes/produtos-lacrados.index'
 import { Route as ProdutosLacradosSlugRouteImport } from './routes/produtos-lacrados.$slug'
+import { Route as SorteiosIndexRouteImport } from './routes/sorteios.index'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -400,6 +401,11 @@ const ProdutosLacradosSlugRoute = ProdutosLacradosSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ProdutosLacradosRoute,
 } as any)
+const SorteiosIndexRoute = SorteiosIndexRouteImport.update({
+  id: '/sorteios/',
+  path: '/sorteios/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
   id: '/orders/$orderId',
   path: '/orders/$orderId',
@@ -567,6 +573,7 @@ export interface FileRoutesByFullPath {
   '/pilha/': typeof PilhaIndexRoute
   '/pre-venda/': typeof PreVendaIndexRoute
   '/produtos-lacrados/': typeof ProdutosLacradosIndexRoute
+  '/sorteios/': typeof SorteiosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -646,6 +653,7 @@ export interface FileRoutesByTo {
   '/pilha': typeof PilhaIndexRoute
   '/pre-venda': typeof PreVendaIndexRoute
   '/produtos-lacrados': typeof ProdutosLacradosIndexRoute
+  '/sorteios': typeof SorteiosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -729,6 +737,7 @@ export interface FileRoutesById {
   '/pilha/': typeof PilhaIndexRoute
   '/pre-venda/': typeof PreVendaIndexRoute
   '/produtos-lacrados/': typeof ProdutosLacradosIndexRoute
+  '/sorteios/': typeof SorteiosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -813,6 +822,7 @@ export interface FileRouteTypes {
     | '/pilha/'
     | '/pre-venda/'
     | '/produtos-lacrados/'
+    | '/sorteios/'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
@@ -892,6 +902,7 @@ export interface FileRouteTypes {
     | '/pilha'
     | '/pre-venda'
     | '/produtos-lacrados'
+    | '/sorteios'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
@@ -974,6 +985,7 @@ export interface FileRouteTypes {
     | '/pilha/'
     | '/pre-venda/'
     | '/produtos-lacrados/'
+    | '/sorteios/'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
@@ -1030,6 +1042,7 @@ export interface RootRouteChildren {
   PayOrderIdRoute: typeof PayOrderIdRoute
   PreVendaSlugRoute: typeof PreVendaSlugRoute
   PreVendaIndexRoute: typeof PreVendaIndexRoute
+  SorteiosIndexRoute: typeof SorteiosIndexRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksAutoCancelUnpaidRoute: typeof ApiPublicHooksAutoCancelUnpaidRoute
@@ -1485,6 +1498,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProdutosLacradosSlugRouteImport
       parentRoute: typeof ProdutosLacradosRoute
     }
+    '/sorteios/': {
+      id: '/sorteios/'
+      path: '/sorteios'
+      fullPath: '/sorteios/'
+      preLoaderRoute: typeof SorteiosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/orders/$orderId': {
       id: '/admin/orders/$orderId'
       path: '/orders/$orderId'
@@ -1760,6 +1780,7 @@ const rootRouteChildren: RootRouteChildren = {
   PayOrderIdRoute: PayOrderIdRoute,
   PreVendaSlugRoute: PreVendaSlugRoute,
   PreVendaIndexRoute: PreVendaIndexRoute,
+  SorteiosIndexRoute: SorteiosIndexRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksAutoCancelUnpaidRoute: ApiPublicHooksAutoCancelUnpaidRoute,
