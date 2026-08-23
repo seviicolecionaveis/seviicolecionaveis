@@ -9,6 +9,7 @@ import { CONDITIONS, CONDITION_LABEL, EXTRA_COLLECTIONS, LIGA_SUBCATEGORIES, POK
 import { notifyStockBack } from "@/lib/stock-alerts.functions";
 import { cardSlug } from "@/lib/slug";
 import { IllustratorCombobox } from "@/components/admin/IllustratorCombobox";
+import { useCustomCollections } from "@/lib/custom-collections";
 
 export const Route = createFileRoute("/admin/manage-cards")({
   head: () => ({ meta: [{ title: "Gerenciar cartas — Admin" }] }),
@@ -117,6 +118,10 @@ function AdminCardsManagePage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const { customCollections, addCollection } = useCustomCollections();
+  const [showNewCollection, setShowNewCollection] = useState(false);
+  const [newCollection, setNewCollection] = useState("");
+  const [creatingCollection, setCreatingCollection] = useState(false);
   const [conditionError, setConditionError] = useState(false);
   const conditionRef = useRef<HTMLSelectElement>(null);
   const [quickEditId, setQuickEditId] = useState<string | null>(null);
@@ -204,8 +209,27 @@ function AdminCardsManagePage() {
   );
 
   const collections = useMemo(() => {
-    return Array.from(new Set([...rows.map((r) => r.collection), ...EXTRA_COLLECTIONS].filter(Boolean))).sort();
-  }, [rows]);
+    return Array.from(
+      new Set([...rows.map((r) => r.collection), ...EXTRA_COLLECTIONS, ...customCollections].filter(Boolean)),
+    ).sort();
+  }, [rows, customCollections]);
+
+  const handleCreateCollection = async () => {
+    const name = newCollection.trim();
+    if (!name) return;
+    setCreatingCollection(true);
+    try {
+      await addCollection(name);
+      setForm((f) => ({ ...f, collection: name }));
+      setNewCollection("");
+      setShowNewCollection(false);
+      setMsg({ type: "ok", text: `Coleção "${name}" criada e selecionada.` });
+    } catch (e) {
+      setMsg({ type: "err", text: e instanceof Error ? e.message : "Falha ao criar coleção." });
+    } finally {
+      setCreatingCollection(false);
+    }
+  };
 
   const resetForm = () => { setForm(EMPTY_FORM); setEditingId(null); setConditionError(false); };
 
@@ -464,7 +488,16 @@ function AdminCardsManagePage() {
             </label>
 
             <label className="text-xs space-y-1">
-              <span className="font-semibold">Coleção *</span>
+              <span className="flex items-center justify-between gap-2">
+                <span className="font-semibold">Coleção *</span>
+                <button
+                  type="button"
+                  onClick={() => setShowNewCollection((v) => !v)}
+                  className="text-[11px] font-medium underline underline-offset-2 text-muted-foreground hover:text-foreground"
+                >
+                  {showNewCollection ? "Cancelar" : "+ Nova coleção"}
+                </button>
+              </span>
               <input
                 value={form.collection}
                 onChange={(e) => setForm({ ...form, collection: e.target.value })}
@@ -476,6 +509,27 @@ function AdminCardsManagePage() {
               <datalist id="collections-list">
                 {collections.map((c) => <option key={c} value={c} />)}
               </datalist>
+              {showNewCollection && (
+                <span className="mt-1 flex gap-2">
+                  <input
+                    value={newCollection}
+                    onChange={(e) => setNewCollection(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { e.preventDefault(); handleCreateCollection(); }
+                    }}
+                    placeholder="Ex: DRI - Ritmo Destinado"
+                    className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateCollection}
+                    disabled={creatingCollection || !newCollection.trim()}
+                    className="shrink-0 rounded bg-foreground px-3 py-2 text-xs font-semibold text-background disabled:opacity-50"
+                  >
+                    {creatingCollection ? "Salvando..." : "Criar"}
+                  </button>
+                </span>
+              )}
             </label>
 
             <label className="text-xs space-y-1">
