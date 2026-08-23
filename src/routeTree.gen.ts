@@ -53,6 +53,7 @@ import { Route as AdminPopupsRouteImport } from './routes/admin.popups'
 import { Route as AdminPreVendaRouteImport } from './routes/admin.pre-venda'
 import { Route as AdminSealedRouteImport } from './routes/admin.sealed'
 import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
+import { Route as AdminSorteiosRouteImport } from './routes/admin.sorteios'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminVideogamesRouteImport } from './routes/admin.videogames'
 import { Route as BaralhoTokenRouteImport } from './routes/baralho.$token'
@@ -71,12 +72,15 @@ import { Route as PreVendaIndexRouteImport } from './routes/pre-venda.index'
 import { Route as PreVendaSlugRouteImport } from './routes/pre-venda.$slug'
 import { Route as ProdutosLacradosIndexRouteImport } from './routes/produtos-lacrados.index'
 import { Route as ProdutosLacradosSlugRouteImport } from './routes/produtos-lacrados.$slug'
+import { Route as SorteiosIndexRouteImport } from './routes/sorteios.index'
+import { Route as SorteiosRaffleIdRouteImport } from './routes/sorteios.$raffleId'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api/public/hooks/auto-cancel-unpaid'
 import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
 import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/public/hooks/price-drop-check'
+import { Route as ApiPublicHooksRaffleExpireRouteImport } from './routes/api/public/hooks/raffle-expire'
 import { Route as ApiPublicHooksStackRemindersRouteImport } from './routes/api/public/hooks/stack-reminders'
 import { Route as ApiPublicHooksStockBackCheckRouteImport } from './routes/api/public/hooks/stock-back-check'
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
@@ -309,6 +313,11 @@ const AdminShippingRoute = AdminShippingRouteImport.update({
   path: '/shipping',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSorteiosRoute = AdminSorteiosRouteImport.update({
+  id: '/sorteios',
+  path: '/sorteios',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -399,6 +408,16 @@ const ProdutosLacradosSlugRoute = ProdutosLacradosSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ProdutosLacradosRoute,
 } as any)
+const SorteiosIndexRoute = SorteiosIndexRouteImport.update({
+  id: '/sorteios/',
+  path: '/sorteios/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SorteiosRaffleIdRoute = SorteiosRaffleIdRouteImport.update({
+  id: '/sorteios/$raffleId',
+  path: '/sorteios/$raffleId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
   id: '/orders/$orderId',
   path: '/orders/$orderId',
@@ -430,6 +449,12 @@ const ApiPublicHooksPriceDropCheckRoute =
   ApiPublicHooksPriceDropCheckRouteImport.update({
     id: '/api/public/hooks/price-drop-check',
     path: '/api/public/hooks/price-drop-check',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksRaffleExpireRoute =
+  ApiPublicHooksRaffleExpireRouteImport.update({
+    id: '/api/public/hooks/raffle-expire',
+    path: '/api/public/hooks/raffle-expire',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksStackRemindersRoute =
@@ -542,6 +567,7 @@ export interface FileRoutesByFullPath {
   '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
+  '/admin/sorteios': typeof AdminSorteiosRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videogames': typeof AdminVideogamesRoute
   '/baralho/$token': typeof BaralhoTokenRoute
@@ -556,16 +582,19 @@ export interface FileRoutesByFullPath {
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/pre-venda/$slug': typeof PreVendaSlugRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
+  '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
   '/pre-venda/': typeof PreVendaIndexRoute
   '/produtos-lacrados/': typeof ProdutosLacradosIndexRoute
+  '/sorteios/': typeof SorteiosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
+  '/api/public/hooks/raffle-expire': typeof ApiPublicHooksRaffleExpireRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
   '/api/public/hooks/stock-back-check': typeof ApiPublicHooksStockBackCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
@@ -620,6 +649,7 @@ export interface FileRoutesByTo {
   '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
+  '/admin/sorteios': typeof AdminSorteiosRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videogames': typeof AdminVideogamesRoute
   '/baralho/$token': typeof BaralhoTokenRoute
@@ -634,16 +664,19 @@ export interface FileRoutesByTo {
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/pre-venda/$slug': typeof PreVendaSlugRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
+  '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
   '/orders': typeof OrdersIndexRoute
   '/pilha': typeof PilhaIndexRoute
   '/pre-venda': typeof PreVendaIndexRoute
   '/produtos-lacrados': typeof ProdutosLacradosIndexRoute
+  '/sorteios': typeof SorteiosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
+  '/api/public/hooks/raffle-expire': typeof ApiPublicHooksRaffleExpireRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
   '/api/public/hooks/stock-back-check': typeof ApiPublicHooksStockBackCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
@@ -702,6 +735,7 @@ export interface FileRoutesById {
   '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
+  '/admin/sorteios': typeof AdminSorteiosRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videogames': typeof AdminVideogamesRoute
   '/baralho/$token': typeof BaralhoTokenRoute
@@ -716,16 +750,19 @@ export interface FileRoutesById {
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/pre-venda/$slug': typeof PreVendaSlugRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
+  '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
   '/pre-venda/': typeof PreVendaIndexRoute
   '/produtos-lacrados/': typeof ProdutosLacradosIndexRoute
+  '/sorteios/': typeof SorteiosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
+  '/api/public/hooks/raffle-expire': typeof ApiPublicHooksRaffleExpireRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
   '/api/public/hooks/stock-back-check': typeof ApiPublicHooksStockBackCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
@@ -785,6 +822,7 @@ export interface FileRouteTypes {
     | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
+    | '/admin/sorteios'
     | '/admin/users'
     | '/admin/videogames'
     | '/baralho/$token'
@@ -799,16 +837,19 @@ export interface FileRouteTypes {
     | '/pilha/solicitar'
     | '/pre-venda/$slug'
     | '/produtos-lacrados/$slug'
+    | '/sorteios/$raffleId'
     | '/orders/'
     | '/pilha/'
     | '/pre-venda/'
     | '/produtos-lacrados/'
+    | '/sorteios/'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
+    | '/api/public/hooks/raffle-expire'
     | '/api/public/hooks/stack-reminders'
     | '/api/public/hooks/stock-back-check'
     | '/api/public/hooks/update-prices'
@@ -863,6 +904,7 @@ export interface FileRouteTypes {
     | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
+    | '/admin/sorteios'
     | '/admin/users'
     | '/admin/videogames'
     | '/baralho/$token'
@@ -877,16 +919,19 @@ export interface FileRouteTypes {
     | '/pilha/solicitar'
     | '/pre-venda/$slug'
     | '/produtos-lacrados/$slug'
+    | '/sorteios/$raffleId'
     | '/orders'
     | '/pilha'
     | '/pre-venda'
     | '/produtos-lacrados'
+    | '/sorteios'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
+    | '/api/public/hooks/raffle-expire'
     | '/api/public/hooks/stack-reminders'
     | '/api/public/hooks/stock-back-check'
     | '/api/public/hooks/update-prices'
@@ -944,6 +989,7 @@ export interface FileRouteTypes {
     | '/admin/pre-venda'
     | '/admin/sealed'
     | '/admin/shipping'
+    | '/admin/sorteios'
     | '/admin/users'
     | '/admin/videogames'
     | '/baralho/$token'
@@ -958,16 +1004,19 @@ export interface FileRouteTypes {
     | '/pilha/solicitar'
     | '/pre-venda/$slug'
     | '/produtos-lacrados/$slug'
+    | '/sorteios/$raffleId'
     | '/orders/'
     | '/pilha/'
     | '/pre-venda/'
     | '/produtos-lacrados/'
+    | '/sorteios/'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
+    | '/api/public/hooks/raffle-expire'
     | '/api/public/hooks/stack-reminders'
     | '/api/public/hooks/stock-back-check'
     | '/api/public/hooks/update-prices'
@@ -1016,12 +1065,15 @@ export interface RootRouteChildren {
   ListaDesejosTokenRoute: typeof ListaDesejosTokenRoute
   PayOrderIdRoute: typeof PayOrderIdRoute
   PreVendaSlugRoute: typeof PreVendaSlugRoute
+  SorteiosRaffleIdRoute: typeof SorteiosRaffleIdRoute
   PreVendaIndexRoute: typeof PreVendaIndexRoute
+  SorteiosIndexRoute: typeof SorteiosIndexRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksAutoCancelUnpaidRoute: typeof ApiPublicHooksAutoCancelUnpaidRoute
   ApiPublicHooksExpireLoyaltyPointsRoute: typeof ApiPublicHooksExpireLoyaltyPointsRoute
   ApiPublicHooksPriceDropCheckRoute: typeof ApiPublicHooksPriceDropCheckRoute
+  ApiPublicHooksRaffleExpireRoute: typeof ApiPublicHooksRaffleExpireRoute
   ApiPublicHooksStackRemindersRoute: typeof ApiPublicHooksStackRemindersRoute
   ApiPublicHooksStockBackCheckRoute: typeof ApiPublicHooksStockBackCheckRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
@@ -1345,6 +1397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminShippingRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/sorteios': {
+      id: '/admin/sorteios'
+      path: '/sorteios'
+      fullPath: '/admin/sorteios'
+      preLoaderRoute: typeof AdminSorteiosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -1471,6 +1530,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProdutosLacradosSlugRouteImport
       parentRoute: typeof ProdutosLacradosRoute
     }
+    '/sorteios/': {
+      id: '/sorteios/'
+      path: '/sorteios'
+      fullPath: '/sorteios/'
+      preLoaderRoute: typeof SorteiosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sorteios/$raffleId': {
+      id: '/sorteios/$raffleId'
+      path: '/sorteios/$raffleId'
+      fullPath: '/sorteios/$raffleId'
+      preLoaderRoute: typeof SorteiosRaffleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/orders/$orderId': {
       id: '/admin/orders/$orderId'
       path: '/orders/$orderId'
@@ -1511,6 +1584,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/price-drop-check'
       fullPath: '/api/public/hooks/price-drop-check'
       preLoaderRoute: typeof ApiPublicHooksPriceDropCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/raffle-expire': {
+      id: '/api/public/hooks/raffle-expire'
+      path: '/api/public/hooks/raffle-expire'
+      fullPath: '/api/public/hooks/raffle-expire'
+      preLoaderRoute: typeof ApiPublicHooksRaffleExpireRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/stack-reminders': {
@@ -1611,6 +1691,7 @@ interface AdminRouteChildren {
   AdminPreVendaRoute: typeof AdminPreVendaRoute
   AdminSealedRoute: typeof AdminSealedRoute
   AdminShippingRoute: typeof AdminShippingRoute
+  AdminSorteiosRoute: typeof AdminSorteiosRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminVideogamesRoute: typeof AdminVideogamesRoute
   AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
@@ -1634,6 +1715,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPreVendaRoute: AdminPreVendaRoute,
   AdminSealedRoute: AdminSealedRoute,
   AdminShippingRoute: AdminShippingRoute,
+  AdminSorteiosRoute: AdminSorteiosRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminVideogamesRoute: AdminVideogamesRoute,
   AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
@@ -1738,13 +1820,16 @@ const rootRouteChildren: RootRouteChildren = {
   ListaDesejosTokenRoute: ListaDesejosTokenRoute,
   PayOrderIdRoute: PayOrderIdRoute,
   PreVendaSlugRoute: PreVendaSlugRoute,
+  SorteiosRaffleIdRoute: SorteiosRaffleIdRoute,
   PreVendaIndexRoute: PreVendaIndexRoute,
+  SorteiosIndexRoute: SorteiosIndexRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksAutoCancelUnpaidRoute: ApiPublicHooksAutoCancelUnpaidRoute,
   ApiPublicHooksExpireLoyaltyPointsRoute:
     ApiPublicHooksExpireLoyaltyPointsRoute,
   ApiPublicHooksPriceDropCheckRoute: ApiPublicHooksPriceDropCheckRoute,
+  ApiPublicHooksRaffleExpireRoute: ApiPublicHooksRaffleExpireRoute,
   ApiPublicHooksStackRemindersRoute: ApiPublicHooksStackRemindersRoute,
   ApiPublicHooksStockBackCheckRoute: ApiPublicHooksStockBackCheckRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,

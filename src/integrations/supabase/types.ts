@@ -1504,6 +1504,193 @@ export type Database = {
         }
         Relationships: []
       }
+      raffle_admin_logs: {
+        Row: {
+          action: string
+          admin_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          raffle_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          raffle_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          raffle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raffle_admin_logs_raffle_id_fkey"
+            columns: ["raffle_id"]
+            isOneToOne: false
+            referencedRelation: "raffles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      raffle_entries: {
+        Row: {
+          created_at: string
+          entry_code: string
+          id: string
+          raffle_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_code: string
+          id?: string
+          raffle_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_code?: string
+          id?: string
+          raffle_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raffle_entries_raffle_id_fkey"
+            columns: ["raffle_id"]
+            isOneToOne: false
+            referencedRelation: "raffles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      raffle_winners: {
+        Row: {
+          created_at: string
+          entry_id: string
+          id: string
+          notes: string | null
+          order_id: string | null
+          raffle_id: string
+          reserved_until: string | null
+          round: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_id: string
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          raffle_id: string
+          reserved_until?: string | null
+          round?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_id?: string
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          raffle_id?: string
+          reserved_until?: string | null
+          round?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raffle_winners_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "raffle_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raffle_winners_raffle_id_fkey"
+            columns: ["raffle_id"]
+            isOneToOne: false
+            referencedRelation: "raffles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      raffles: {
+        Row: {
+          closes_at: string
+          created_at: string
+          created_by: string | null
+          draw_at: string | null
+          entry_limit_per_user: number
+          id: string
+          opens_at: string
+          payment_deadline_hours: number
+          product_id: string | null
+          product_image: string | null
+          product_name: string
+          product_price_cents: number
+          product_type: string
+          rules: string | null
+          status: string
+          title: string
+          units: number
+          updated_at: string
+        }
+        Insert: {
+          closes_at: string
+          created_at?: string
+          created_by?: string | null
+          draw_at?: string | null
+          entry_limit_per_user?: number
+          id?: string
+          opens_at: string
+          payment_deadline_hours?: number
+          product_id?: string | null
+          product_image?: string | null
+          product_name: string
+          product_price_cents?: number
+          product_type?: string
+          rules?: string | null
+          status?: string
+          title: string
+          units?: number
+          updated_at?: string
+        }
+        Update: {
+          closes_at?: string
+          created_at?: string
+          created_by?: string | null
+          draw_at?: string | null
+          entry_limit_per_user?: number
+          id?: string
+          opens_at?: string
+          payment_deadline_hours?: number
+          product_id?: string | null
+          product_image?: string | null
+          product_name?: string
+          product_price_cents?: number
+          product_type?: string
+          rules?: string | null
+          status?: string
+          title?: string
+          units?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       saved_cards: {
         Row: {
           brand: string | null
@@ -2061,6 +2248,18 @@ export type Database = {
           payload: Json
           source_queue: string
         }
+        Returns: number
+      }
+      raffle_expire_reservations: { Args: never; Returns: number }
+      raffle_join: {
+        Args: { _raffle_id: string }
+        Returns: {
+          entry_code: string
+          entry_id: string
+        }[]
+      }
+      raffle_run_draw: {
+        Args: { _raffle_id: string; _units?: number }
         Returns: number
       }
       read_email_batch: {
