@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { invalidateCardsCache } from "@/hooks/useCardsCatalog";
 import { CONDITION_LABEL } from "@/data/cards";
 import type { Condition } from "@/data/cards";
-import { Minus, Plus, Search, Trash2, PackageCheck, Undo2, Power } from "lucide-react";
+import { Minus, Plus, Search, Trash2, PackageCheck, Undo2, Power, Home, PackagePlus, ClipboardList } from "lucide-react";
 import { EVENT_MODE_KEY, useEventMode } from "@/lib/event-mode";
 
 export const Route = createFileRoute("/admin/evento")({
