@@ -204,8 +204,27 @@ function AdminCardsManagePage() {
   );
 
   const collections = useMemo(() => {
-    return Array.from(new Set([...rows.map((r) => r.collection), ...EXTRA_COLLECTIONS].filter(Boolean))).sort();
-  }, [rows]);
+    return Array.from(
+      new Set([...rows.map((r) => r.collection), ...EXTRA_COLLECTIONS, ...customCollections].filter(Boolean)),
+    ).sort();
+  }, [rows, customCollections]);
+
+  const handleCreateCollection = async () => {
+    const name = newCollection.trim();
+    if (!name) return;
+    setCreatingCollection(true);
+    try {
+      await addCollection(name);
+      setForm((f) => ({ ...f, collection: name }));
+      setNewCollection("");
+      setShowNewCollection(false);
+      setMsg({ type: "ok", text: `Coleção "${name}" criada e selecionada.` });
+    } catch (e) {
+      setMsg({ type: "err", text: e instanceof Error ? e.message : "Falha ao criar coleção." });
+    } finally {
+      setCreatingCollection(false);
+    }
+  };
 
   const resetForm = () => { setForm(EMPTY_FORM); setEditingId(null); setConditionError(false); };
 
