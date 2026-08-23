@@ -77,6 +77,7 @@ import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/em
 import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api/public/hooks/auto-cancel-unpaid'
 import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
 import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/public/hooks/price-drop-check'
+import { Route as ApiPublicHooksRaffleExpireRouteImport } from './routes/api/public/hooks/raffle-expire'
 import { Route as ApiPublicHooksStackRemindersRouteImport } from './routes/api/public/hooks/stack-reminders'
 import { Route as ApiPublicHooksStockBackCheckRouteImport } from './routes/api/public/hooks/stock-back-check'
 import { Route as ApiPublicHooksUpdatePricesRouteImport } from './routes/api/public/hooks/update-prices'
@@ -432,6 +433,12 @@ const ApiPublicHooksPriceDropCheckRoute =
     path: '/api/public/hooks/price-drop-check',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRaffleExpireRoute =
+  ApiPublicHooksRaffleExpireRouteImport.update({
+    id: '/api/public/hooks/raffle-expire',
+    path: '/api/public/hooks/raffle-expire',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksStackRemindersRoute =
   ApiPublicHooksStackRemindersRouteImport.update({
     id: '/api/public/hooks/stack-reminders',
@@ -566,6 +573,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
+  '/api/public/hooks/raffle-expire': typeof ApiPublicHooksRaffleExpireRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
   '/api/public/hooks/stock-back-check': typeof ApiPublicHooksStockBackCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
@@ -644,6 +652,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
+  '/api/public/hooks/raffle-expire': typeof ApiPublicHooksRaffleExpireRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
   '/api/public/hooks/stock-back-check': typeof ApiPublicHooksStockBackCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
@@ -726,6 +735,7 @@ export interface FileRoutesById {
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
+  '/api/public/hooks/raffle-expire': typeof ApiPublicHooksRaffleExpireRoute
   '/api/public/hooks/stack-reminders': typeof ApiPublicHooksStackRemindersRoute
   '/api/public/hooks/stock-back-check': typeof ApiPublicHooksStockBackCheckRoute
   '/api/public/hooks/update-prices': typeof ApiPublicHooksUpdatePricesRoute
@@ -809,6 +819,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
+    | '/api/public/hooks/raffle-expire'
     | '/api/public/hooks/stack-reminders'
     | '/api/public/hooks/stock-back-check'
     | '/api/public/hooks/update-prices'
@@ -887,6 +898,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
+    | '/api/public/hooks/raffle-expire'
     | '/api/public/hooks/stack-reminders'
     | '/api/public/hooks/stock-back-check'
     | '/api/public/hooks/update-prices'
@@ -968,6 +980,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
+    | '/api/public/hooks/raffle-expire'
     | '/api/public/hooks/stack-reminders'
     | '/api/public/hooks/stock-back-check'
     | '/api/public/hooks/update-prices'
@@ -1022,6 +1035,7 @@ export interface RootRouteChildren {
   ApiPublicHooksAutoCancelUnpaidRoute: typeof ApiPublicHooksAutoCancelUnpaidRoute
   ApiPublicHooksExpireLoyaltyPointsRoute: typeof ApiPublicHooksExpireLoyaltyPointsRoute
   ApiPublicHooksPriceDropCheckRoute: typeof ApiPublicHooksPriceDropCheckRoute
+  ApiPublicHooksRaffleExpireRoute: typeof ApiPublicHooksRaffleExpireRoute
   ApiPublicHooksStackRemindersRoute: typeof ApiPublicHooksStackRemindersRoute
   ApiPublicHooksStockBackCheckRoute: typeof ApiPublicHooksStockBackCheckRoute
   ApiPublicHooksUpdatePricesRoute: typeof ApiPublicHooksUpdatePricesRoute
@@ -1513,6 +1527,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksPriceDropCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/raffle-expire': {
+      id: '/api/public/hooks/raffle-expire'
+      path: '/api/public/hooks/raffle-expire'
+      fullPath: '/api/public/hooks/raffle-expire'
+      preLoaderRoute: typeof ApiPublicHooksRaffleExpireRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/stack-reminders': {
       id: '/api/public/hooks/stack-reminders'
       path: '/api/public/hooks/stack-reminders'
@@ -1745,6 +1766,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksExpireLoyaltyPointsRoute:
     ApiPublicHooksExpireLoyaltyPointsRoute,
   ApiPublicHooksPriceDropCheckRoute: ApiPublicHooksPriceDropCheckRoute,
+  ApiPublicHooksRaffleExpireRoute: ApiPublicHooksRaffleExpireRoute,
   ApiPublicHooksStackRemindersRoute: ApiPublicHooksStackRemindersRoute,
   ApiPublicHooksStockBackCheckRoute: ApiPublicHooksStockBackCheckRoute,
   ApiPublicHooksUpdatePricesRoute: ApiPublicHooksUpdatePricesRoute,
