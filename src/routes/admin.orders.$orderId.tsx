@@ -211,6 +211,12 @@ function AdminOrderDetailPage() {
   const orderItemsRaw: any[] = order?.order_items ?? [];
   const itemMetaMap = useCardMetaMap(orderItemsRaw.map((it: any) => it.card_id));
 
+  // Filtros por características das cartas deste pedido (vazio = sem filtro)
+  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
+
+
   if (authLoading || !isAdmin || loading) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
   }
