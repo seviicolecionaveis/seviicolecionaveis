@@ -232,7 +232,7 @@ function AdminOrderDetailPage() {
     );
   }
 
-  const items: any[] = sortByCardGroup(orderItemsRaw, (it: any) => {
+  const allItems: any[] = sortByCardGroup(orderItemsRaw, (it: any) => {
     const m = itemMetaMap.get(it.card_id);
     return {
       category: m?.category ?? null,
@@ -241,6 +241,35 @@ function AdminOrderDetailPage() {
       name: it.card_name,
     };
   });
+
+  const itemFinish = (it: any) =>
+    it.finish === "Liga" && it.liga_subcategory ? `Liga · ${it.liga_subcategory}` : (it.finish ?? "");
+
+  const finishOptions: string[] = [];
+  const collectionOptions: string[] = [];
+  const conditionOptions: string[] = [];
+  for (const it of allItems) {
+    const f = itemFinish(it);
+    if (f && !finishOptions.includes(f)) finishOptions.push(f);
+    if (it.collection && !collectionOptions.includes(it.collection)) collectionOptions.push(it.collection);
+    if (it.condition && !conditionOptions.includes(it.condition)) conditionOptions.push(it.condition);
+  }
+  finishOptions.sort((a, b) => a.localeCompare(b));
+  collectionOptions.sort((a, b) => a.localeCompare(b));
+  conditionOptions.sort((a, b) => a.localeCompare(b));
+
+  const hasItemFilters =
+    selectedFinishes.length > 0 || selectedCollections.length > 0 || selectedConditions.length > 0;
+
+  const items: any[] = hasItemFilters
+    ? allItems.filter(
+        (it) =>
+          (selectedFinishes.length === 0 || selectedFinishes.includes(itemFinish(it))) &&
+          (selectedCollections.length === 0 || selectedCollections.includes(it.collection ?? "")) &&
+          (selectedConditions.length === 0 || selectedConditions.includes(it.condition ?? "")),
+      )
+    : allItems;
+
   const subtotalCents = order.subtotal_cents ?? 0;
   const shippingCents = order.shipping_cost_cents ?? 0;
   const totalCents = order.total_cents ?? 0;
