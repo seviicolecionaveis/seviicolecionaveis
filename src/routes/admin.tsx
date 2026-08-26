@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminCancellationBell } from "@/components/AdminCancellationBell";
 import { ChevronDown, ChevronRight, ImageOff, Search } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ItemFacetFilter } from "@/components/admin/ItemFacetFilter";
 
 type NavLink = { to: string; label: string };
 type NavGroup = { label: string; links: NavLink[] };
@@ -149,6 +150,11 @@ function AdminPage() {
     return [...SHIPPING_METHODS];
   });
 
+  // Filtros por características das cartas dentro dos pedidos (vazio = sem filtro)
+  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("admin-orders-filter-v2", JSON.stringify(selectedStatuses));
@@ -249,11 +255,42 @@ function AdminPage() {
   }
 
   const query = searchQuery.trim().toLowerCase();
+
+  const itemFinish = (it: any) =>
+    it.finish === "Liga" && it.liga_subcategory ? `Liga · ${it.liga_subcategory}` : (it.finish ?? "");
+
+  const finishOptions: string[] = [];
+  const collectionOptions: string[] = [];
+  const conditionOptions: string[] = [];
+  for (const o of orders) {
+    for (const it of (o.order_items ?? []) as any[]) {
+      const f = itemFinish(it);
+      if (f && !finishOptions.includes(f)) finishOptions.push(f);
+      if (it.collection && !collectionOptions.includes(it.collection)) collectionOptions.push(it.collection);
+      if (it.condition && !conditionOptions.includes(it.condition)) conditionOptions.push(it.condition);
+    }
+  }
+  finishOptions.sort((a, b) => a.localeCompare(b));
+  collectionOptions.sort((a, b) => a.localeCompare(b));
+  conditionOptions.sort((a, b) => a.localeCompare(b));
+
+  const hasItemFilters =
+    selectedFinishes.length > 0 || selectedCollections.length > 0 || selectedConditions.length > 0;
+
   const filtered = orders.filter((o) => {
     if (!selectedStatuses.includes(o.status)) return false;
     if (!selectedShippingMethods.includes(o.shipping_method ?? "")) return false;
-    if (!query) return true;
     const items: any[] = o.order_items ?? [];
+    if (hasItemFilters) {
+      const match = items.some(
+        (it) =>
+          (selectedFinishes.length === 0 || selectedFinishes.includes(itemFinish(it))) &&
+          (selectedCollections.length === 0 || selectedCollections.includes(it.collection ?? "")) &&
+          (selectedConditions.length === 0 || selectedConditions.includes(it.condition ?? "")),
+      );
+      if (!match) return false;
+    }
+    if (!query) return true;
     const matchId = o.id.toLowerCase().includes(query) || o.id.slice(0, 8).toLowerCase().includes(query);
     const matchName = (o.recipient_name ?? "").toLowerCase().includes(query);
     const matchEmail = (o.email ?? "").toLowerCase().includes(query);
@@ -356,6 +393,44 @@ function AdminPage() {
             </div>
           </div>
         </div>
+
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Filtrar por carta
+          </span>
+          <ItemFacetFilter
+            label="Acabamento"
+            options={finishOptions}
+            selected={selectedFinishes}
+            onChange={setSelectedFinishes}
+          />
+          <ItemFacetFilter
+            label="Coleção"
+            options={collectionOptions}
+            selected={selectedCollections}
+            onChange={setSelectedCollections}
+          />
+          <ItemFacetFilter
+            label="Condição"
+            options={conditionOptions}
+            selected={selectedConditions}
+            onChange={setSelectedConditions}
+          />
+          {hasItemFilters && (
+            <button
+              onClick={() => {
+                setSelectedFinishes([]);
+                setSelectedCollections([]);
+                setSelectedConditions([]);
+              }}
+              className="text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:underline"
+            >
+              Limpar filtros de carta
+            </button>
+          )}
+        </div>
+
+
 
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
