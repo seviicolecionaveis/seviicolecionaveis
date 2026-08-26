@@ -256,40 +256,11 @@ function AdminPage() {
 
   const query = searchQuery.trim().toLowerCase();
 
-  const itemFinish = (it: any) =>
-    it.finish === "Liga" && it.liga_subcategory ? `Liga · ${it.liga_subcategory}` : (it.finish ?? "");
-
-  const finishOptions: string[] = [];
-  const collectionOptions: string[] = [];
-  const conditionOptions: string[] = [];
-  for (const o of orders) {
-    for (const it of (o.order_items ?? []) as any[]) {
-      const f = itemFinish(it);
-      if (f && !finishOptions.includes(f)) finishOptions.push(f);
-      if (it.collection && !collectionOptions.includes(it.collection)) collectionOptions.push(it.collection);
-      if (it.condition && !conditionOptions.includes(it.condition)) conditionOptions.push(it.condition);
-    }
-  }
-  finishOptions.sort((a, b) => a.localeCompare(b));
-  collectionOptions.sort((a, b) => a.localeCompare(b));
-  conditionOptions.sort((a, b) => a.localeCompare(b));
-
-  const hasItemFilters =
-    selectedFinishes.length > 0 || selectedCollections.length > 0 || selectedConditions.length > 0;
-
   const filtered = orders.filter((o) => {
     if (!selectedStatuses.includes(o.status)) return false;
     if (!selectedShippingMethods.includes(o.shipping_method ?? "")) return false;
     const items: any[] = o.order_items ?? [];
-    if (hasItemFilters) {
-      const match = items.some(
-        (it) =>
-          (selectedFinishes.length === 0 || selectedFinishes.includes(itemFinish(it))) &&
-          (selectedCollections.length === 0 || selectedCollections.includes(it.collection ?? "")) &&
-          (selectedConditions.length === 0 || selectedConditions.includes(it.condition ?? "")),
-      );
-      if (!match) return false;
-    }
+
     if (!query) return true;
     const matchId = o.id.toLowerCase().includes(query) || o.id.slice(0, 8).toLowerCase().includes(query);
     const matchName = (o.recipient_name ?? "").toLowerCase().includes(query);
