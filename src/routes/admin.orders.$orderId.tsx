@@ -10,6 +10,7 @@ import {
   adminPartialCancelItem,
 } from "@/utils/orders.functions";
 import { adminAddOrderItemsToStack } from "@/lib/admin-pilha.functions";
+import { ItemFacetFilter } from "@/components/admin/ItemFacetFilter";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { ArrowLeft, ImageOff, Layers, X } from "lucide-react";
