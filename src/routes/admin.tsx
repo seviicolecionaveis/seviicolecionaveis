@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminCancellationBell } from "@/components/AdminCancellationBell";
 import { ChevronDown, ChevronRight, ImageOff, Search } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ItemFacetFilter } from "@/components/admin/ItemFacetFilter";
 
 type NavLink = { to: string; label: string };
 type NavGroup = { label: string; links: NavLink[] };
