@@ -382,7 +382,8 @@ function AdminOrderDetailPage() {
             <div className="rounded-xl border border-border bg-card overflow-hidden">
               <div className="px-5 py-3 border-b border-border flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-xs font-bold uppercase tracking-widest">
-                  Itens vendidos ({items.length})
+                  Itens vendidos ({items.length}
+                  {hasItemFilters ? ` de ${allItems.length}` : ""})
                 </h2>
                 <div className="flex items-center gap-3">
                   <PickingSummary items={items} />
@@ -398,6 +399,42 @@ function AdminOrderDetailPage() {
                   )}
                 </div>
               </div>
+              <div className="px-5 py-3 border-b border-border flex flex-wrap items-center gap-2 bg-secondary/30">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Filtrar itens
+                </span>
+                <ItemFacetFilter
+                  label="Acabamento"
+                  options={finishOptions}
+                  selected={selectedFinishes}
+                  onChange={setSelectedFinishes}
+                />
+                <ItemFacetFilter
+                  label="Coleção"
+                  options={collectionOptions}
+                  selected={selectedCollections}
+                  onChange={setSelectedCollections}
+                />
+                <ItemFacetFilter
+                  label="Condição"
+                  options={conditionOptions}
+                  selected={selectedConditions}
+                  onChange={setSelectedConditions}
+                />
+                {hasItemFilters && (
+                  <button
+                    onClick={() => {
+                      setSelectedFinishes([]);
+                      setSelectedCollections([]);
+                      setSelectedConditions([]);
+                    }}
+                    className="text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:underline"
+                  >
+                    Limpar filtros
+                  </button>
+                )}
+              </div>
+
               <ul className="divide-y divide-border">
                 {items.map((it) => {
                   const cancelledQty = it.cancelled_quantity ?? 0;
