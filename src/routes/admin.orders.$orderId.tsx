@@ -10,6 +10,7 @@ import {
   adminPartialCancelItem,
 } from "@/utils/orders.functions";
 import { adminAddOrderItemsToStack } from "@/lib/admin-pilha.functions";
+import { ItemFacetFilter } from "@/components/admin/ItemFacetFilter";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { ArrowLeft, ImageOff, Layers, X } from "lucide-react";
@@ -211,6 +212,12 @@ function AdminOrderDetailPage() {
   const orderItemsRaw: any[] = order?.order_items ?? [];
   const itemMetaMap = useCardMetaMap(orderItemsRaw.map((it: any) => it.card_id));
 
+  // Filtros por características das cartas deste pedido (vazio = sem filtro)
+  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
+
+
   if (authLoading || !isAdmin || loading) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
   }
@@ -226,7 +233,7 @@ function AdminOrderDetailPage() {
     );
   }
 
-  const items: any[] = sortByCardGroup(orderItemsRaw, (it: any) => {
+  const allItems: any[] = sortByCardGroup(orderItemsRaw, (it: any) => {
     const m = itemMetaMap.get(it.card_id);
     return {
       category: m?.category ?? null,
@@ -235,6 +242,35 @@ function AdminOrderDetailPage() {
       name: it.card_name,
     };
   });
+
+  const itemFinish = (it: any) =>
+    it.finish === "Liga" && it.liga_subcategory ? `Liga · ${it.liga_subcategory}` : (it.finish ?? "");
+
+  const finishOptions: string[] = [];
+  const collectionOptions: string[] = [];
+  const conditionOptions: string[] = [];
+  for (const it of allItems) {
+    const f = itemFinish(it);
+    if (f && !finishOptions.includes(f)) finishOptions.push(f);
+    if (it.collection && !collectionOptions.includes(it.collection)) collectionOptions.push(it.collection);
+    if (it.condition && !conditionOptions.includes(it.condition)) conditionOptions.push(it.condition);
+  }
+  finishOptions.sort((a, b) => a.localeCompare(b));
+  collectionOptions.sort((a, b) => a.localeCompare(b));
+  conditionOptions.sort((a, b) => a.localeCompare(b));
+
+  const hasItemFilters =
+    selectedFinishes.length > 0 || selectedCollections.length > 0 || selectedConditions.length > 0;
+
+  const items: any[] = hasItemFilters
+    ? allItems.filter(
+        (it) =>
+          (selectedFinishes.length === 0 || selectedFinishes.includes(itemFinish(it))) &&
+          (selectedCollections.length === 0 || selectedCollections.includes(it.collection ?? "")) &&
+          (selectedConditions.length === 0 || selectedConditions.includes(it.condition ?? "")),
+      )
+    : allItems;
+
   const subtotalCents = order.subtotal_cents ?? 0;
   const shippingCents = order.shipping_cost_cents ?? 0;
   const totalCents = order.total_cents ?? 0;
@@ -347,7 +383,8 @@ function AdminOrderDetailPage() {
             <div className="rounded-xl border border-border bg-card overflow-hidden">
               <div className="px-5 py-3 border-b border-border flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-xs font-bold uppercase tracking-widest">
-                  Itens vendidos ({items.length})
+                  Itens vendidos ({items.length}
+                  {hasItemFilters ? ` de ${allItems.length}` : ""})
                 </h2>
                 <div className="flex items-center gap-3">
                   <PickingSummary items={items} />
@@ -363,6 +400,42 @@ function AdminOrderDetailPage() {
                   )}
                 </div>
               </div>
+              <div className="px-5 py-3 border-b border-border flex flex-wrap items-center gap-2 bg-secondary/30">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Filtrar itens
+                </span>
+                <ItemFacetFilter
+                  label="Acabamento"
+                  options={finishOptions}
+                  selected={selectedFinishes}
+                  onChange={setSelectedFinishes}
+                />
+                <ItemFacetFilter
+                  label="Coleção"
+                  options={collectionOptions}
+                  selected={selectedCollections}
+                  onChange={setSelectedCollections}
+                />
+                <ItemFacetFilter
+                  label="Condição"
+                  options={conditionOptions}
+                  selected={selectedConditions}
+                  onChange={setSelectedConditions}
+                />
+                {hasItemFilters && (
+                  <button
+                    onClick={() => {
+                      setSelectedFinishes([]);
+                      setSelectedCollections([]);
+                      setSelectedConditions([]);
+                    }}
+                    className="text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:underline"
+                  >
+                    Limpar filtros
+                  </button>
+                )}
+              </div>
+
               <ul className="divide-y divide-border">
                 {items.map((it) => {
                   const cancelledQty = it.cancelled_quantity ?? 0;
