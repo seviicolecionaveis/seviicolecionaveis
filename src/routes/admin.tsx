@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminCancellationBell } from "@/components/AdminCancellationBell";
 import { ChevronDown, ChevronRight, ImageOff, Search } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ItemFacetFilter } from "@/components/admin/ItemFacetFilter";
 
 type NavLink = { to: string; label: string };
 type NavGroup = { label: string; links: NavLink[] };
@@ -150,10 +149,6 @@ function AdminPage() {
     return [...SHIPPING_METHODS];
   });
 
-  // Filtros por características das cartas dentro dos pedidos (vazio = sem filtro)
-  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
-  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
-  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
