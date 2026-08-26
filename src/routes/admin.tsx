@@ -150,6 +150,11 @@ function AdminPage() {
     return [...SHIPPING_METHODS];
   });
 
+  // Filtros por características das cartas dentro dos pedidos (vazio = sem filtro)
+  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("admin-orders-filter-v2", JSON.stringify(selectedStatuses));
