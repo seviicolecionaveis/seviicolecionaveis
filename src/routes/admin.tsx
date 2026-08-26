@@ -394,6 +394,44 @@ function AdminPage() {
           </div>
         </div>
 
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Filtrar por carta
+          </span>
+          <ItemFacetFilter
+            label="Acabamento"
+            options={finishOptions}
+            selected={selectedFinishes}
+            onChange={setSelectedFinishes}
+          />
+          <ItemFacetFilter
+            label="Coleção"
+            options={collectionOptions}
+            selected={selectedCollections}
+            onChange={setSelectedCollections}
+          />
+          <ItemFacetFilter
+            label="Condição"
+            options={conditionOptions}
+            selected={selectedConditions}
+            onChange={setSelectedConditions}
+          />
+          {hasItemFilters && (
+            <button
+              onClick={() => {
+                setSelectedFinishes([]);
+                setSelectedCollections([]);
+                setSelectedConditions([]);
+              }}
+              className="text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:underline"
+            >
+              Limpar filtros de carta
+            </button>
+          )}
+        </div>
+
+
+
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
