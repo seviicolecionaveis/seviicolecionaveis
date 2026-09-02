@@ -34,7 +34,6 @@ import { Route as SeladosRouteImport } from './routes/selados'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TiposDeCartaRouteImport } from './routes/tipos-de-carta'
-import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as VideogamesRouteImport } from './routes/videogames'
 import { Route as AdminAccessoriesRouteImport } from './routes/admin.accessories'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
@@ -61,7 +60,6 @@ import { Route as CartaSlugRouteImport } from './routes/carta.$slug'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ColecaoSlugRouteImport } from './routes/colecao.$slug'
 import { Route as DeckBuilderDeckIdRouteImport } from './routes/deck-builder.$deckId'
-import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ListaDesejosTokenRouteImport } from './routes/lista-desejos.$token'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
@@ -76,7 +74,7 @@ import { Route as SorteiosIndexRouteImport } from './routes/sorteios.index'
 import { Route as SorteiosRaffleIdRouteImport } from './routes/sorteios.$raffleId'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
-import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api/public/hooks/auto-cancel-unpaid'
 import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
 import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/public/hooks/price-drop-check'
@@ -89,9 +87,7 @@ import { Route as ApiPublicPaymentsMercadopagoWebhookRouteImport } from './route
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -216,11 +212,6 @@ const SobreRoute = SobreRouteImport.update({
 const TiposDeCartaRoute = TiposDeCartaRouteImport.update({
   id: '/tipos-de-carta',
   path: '/tipos-de-carta',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UnsubscribeRoute = UnsubscribeRouteImport.update({
-  id: '/unsubscribe',
-  path: '/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VideogamesRoute = VideogamesRouteImport.update({
@@ -353,11 +344,6 @@ const DeckBuilderDeckIdRoute = DeckBuilderDeckIdRouteImport.update({
   path: '/$deckId',
   getParentRoute: () => DeckBuilderRoute,
 } as any)
-const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: '/email/unsubscribe',
-  path: '/email/unsubscribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ListaDesejosTokenRoute = ListaDesejosTokenRouteImport.update({
   id: '/lista-desejos/$token',
   path: '/lista-desejos/$token',
@@ -428,9 +414,9 @@ const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
   path: '/api/public/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicHooksAutoCancelUnpaidRoute =
@@ -503,22 +489,10 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
   path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
     path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -548,7 +522,6 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/tipos-de-carta': typeof TiposDeCartaRoute
-  '/unsubscribe': typeof UnsubscribeRoute
   '/videogames': typeof VideogamesRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -575,7 +548,6 @@ export interface FileRoutesByFullPath {
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/deck-builder/$deckId': typeof DeckBuilderDeckIdRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/lista-desejos/$token': typeof ListaDesejosTokenRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
@@ -590,7 +562,7 @@ export interface FileRoutesByFullPath {
   '/sorteios/': typeof SorteiosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
@@ -603,9 +575,7 @@ export interface FileRoutesByFullPath {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -630,7 +600,6 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/tipos-de-carta': typeof TiposDeCartaRoute
-  '/unsubscribe': typeof UnsubscribeRoute
   '/videogames': typeof VideogamesRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -657,7 +626,6 @@ export interface FileRoutesByTo {
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/deck-builder/$deckId': typeof DeckBuilderDeckIdRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/lista-desejos/$token': typeof ListaDesejosTokenRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
@@ -672,7 +640,7 @@ export interface FileRoutesByTo {
   '/sorteios': typeof SorteiosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
@@ -685,9 +653,7 @@ export interface FileRoutesByTo {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -716,7 +682,6 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/tipos-de-carta': typeof TiposDeCartaRoute
-  '/unsubscribe': typeof UnsubscribeRoute
   '/videogames': typeof VideogamesRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -743,7 +708,6 @@ export interface FileRoutesById {
   '/checkout/return': typeof CheckoutReturnRoute
   '/colecao/$slug': typeof ColecaoSlugRoute
   '/deck-builder/$deckId': typeof DeckBuilderDeckIdRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/lista-desejos/$token': typeof ListaDesejosTokenRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/pay/$orderId': typeof PayOrderIdRoute
@@ -758,7 +722,7 @@ export interface FileRoutesById {
   '/sorteios/': typeof SorteiosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
@@ -771,9 +735,7 @@ export interface FileRoutesById {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -803,7 +765,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sobre'
     | '/tipos-de-carta'
-    | '/unsubscribe'
     | '/videogames'
     | '/admin/accessories'
     | '/admin/banners'
@@ -830,7 +791,6 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/colecao/$slug'
     | '/deck-builder/$deckId'
-    | '/email/unsubscribe'
     | '/lista-desejos/$token'
     | '/orders/$orderId'
     | '/pay/$orderId'
@@ -845,7 +805,7 @@ export interface FileRouteTypes {
     | '/sorteios/'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
-    | '/lovable/email/suppression'
+    | '/lovable/email/events'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
@@ -858,9 +818,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -885,7 +843,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sobre'
     | '/tipos-de-carta'
-    | '/unsubscribe'
     | '/videogames'
     | '/admin/accessories'
     | '/admin/banners'
@@ -912,7 +869,6 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/colecao/$slug'
     | '/deck-builder/$deckId'
-    | '/email/unsubscribe'
     | '/lista-desejos/$token'
     | '/orders/$orderId'
     | '/pay/$orderId'
@@ -927,7 +883,7 @@ export interface FileRouteTypes {
     | '/sorteios'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
-    | '/lovable/email/suppression'
+    | '/lovable/email/events'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
@@ -940,9 +896,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
   id:
     | '__root__'
     | '/'
@@ -970,7 +924,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sobre'
     | '/tipos-de-carta'
-    | '/unsubscribe'
     | '/videogames'
     | '/admin/accessories'
     | '/admin/banners'
@@ -997,7 +950,6 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/colecao/$slug'
     | '/deck-builder/$deckId'
-    | '/email/unsubscribe'
     | '/lista-desejos/$token'
     | '/orders/$orderId'
     | '/pay/$orderId'
@@ -1012,7 +964,7 @@ export interface FileRouteTypes {
     | '/sorteios/'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
-    | '/lovable/email/suppression'
+    | '/lovable/email/events'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
@@ -1025,9 +977,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1056,12 +1006,10 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
   TiposDeCartaRoute: typeof TiposDeCartaRoute
-  UnsubscribeRoute: typeof UnsubscribeRoute
   VideogamesRoute: typeof VideogamesRoute
   BaralhoTokenRoute: typeof BaralhoTokenRoute
   CartaSlugRoute: typeof CartaSlugRoute
   ColecaoSlugRoute: typeof ColecaoSlugRoute
-  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ListaDesejosTokenRoute: typeof ListaDesejosTokenRoute
   PayOrderIdRoute: typeof PayOrderIdRoute
   PreVendaSlugRoute: typeof PreVendaSlugRoute
@@ -1069,7 +1017,7 @@ export interface RootRouteChildren {
   PreVendaIndexRoute: typeof PreVendaIndexRoute
   SorteiosIndexRoute: typeof SorteiosIndexRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
-  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   ApiPublicHooksAutoCancelUnpaidRoute: typeof ApiPublicHooksAutoCancelUnpaidRoute
   ApiPublicHooksExpireLoyaltyPointsRoute: typeof ApiPublicHooksExpireLoyaltyPointsRoute
   ApiPublicHooksPriceDropCheckRoute: typeof ApiPublicHooksPriceDropCheckRoute
@@ -1082,9 +1030,7 @@ export interface RootRouteChildren {
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
-  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
-  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1262,13 +1208,6 @@ declare module '@tanstack/react-router' {
       path: '/tipos-de-carta'
       fullPath: '/tipos-de-carta'
       preLoaderRoute: typeof TiposDeCartaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/unsubscribe': {
-      id: '/unsubscribe'
-      path: '/unsubscribe'
-      fullPath: '/unsubscribe'
-      preLoaderRoute: typeof UnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/videogames': {
@@ -1453,13 +1392,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeckBuilderDeckIdRouteImport
       parentRoute: typeof DeckBuilderRoute
     }
-    '/email/unsubscribe': {
-      id: '/email/unsubscribe'
-      path: '/email/unsubscribe'
-      fullPath: '/email/unsubscribe'
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/lista-desejos/$token': {
       id: '/lista-desejos/$token'
       path: '/lista-desejos/$token'
@@ -1558,11 +1490,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/auto-cancel-unpaid': {
@@ -1649,25 +1581,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
       fullPath: '/lovable/email/transactional/preview'
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1811,12 +1729,10 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
   TiposDeCartaRoute: TiposDeCartaRoute,
-  UnsubscribeRoute: UnsubscribeRoute,
   VideogamesRoute: VideogamesRoute,
   BaralhoTokenRoute: BaralhoTokenRoute,
   CartaSlugRoute: CartaSlugRoute,
   ColecaoSlugRoute: ColecaoSlugRoute,
-  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ListaDesejosTokenRoute: ListaDesejosTokenRoute,
   PayOrderIdRoute: PayOrderIdRoute,
   PreVendaSlugRoute: PreVendaSlugRoute,
@@ -1824,7 +1740,7 @@ const rootRouteChildren: RootRouteChildren = {
   PreVendaIndexRoute: PreVendaIndexRoute,
   SorteiosIndexRoute: SorteiosIndexRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
-  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  LovableEmailEventsRoute: LovableEmailEventsRoute,
   ApiPublicHooksAutoCancelUnpaidRoute: ApiPublicHooksAutoCancelUnpaidRoute,
   ApiPublicHooksExpireLoyaltyPointsRoute:
     ApiPublicHooksExpireLoyaltyPointsRoute,
@@ -1839,9 +1755,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
-  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
-  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
