@@ -76,6 +76,7 @@ import { Route as SorteiosIndexRouteImport } from './routes/sorteios.index'
 import { Route as SorteiosRaffleIdRouteImport } from './routes/sorteios.$raffleId'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api/public/hooks/auto-cancel-unpaid'
 import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
@@ -428,6 +429,11 @@ const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
   path: '/api/public/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -590,6 +596,7 @@ export interface FileRoutesByFullPath {
   '/sorteios/': typeof SorteiosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
@@ -672,6 +679,7 @@ export interface FileRoutesByTo {
   '/sorteios': typeof SorteiosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
@@ -758,6 +766,7 @@ export interface FileRoutesById {
   '/sorteios/': typeof SorteiosIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
@@ -845,6 +854,7 @@ export interface FileRouteTypes {
     | '/sorteios/'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
@@ -927,6 +937,7 @@ export interface FileRouteTypes {
     | '/sorteios'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
@@ -1012,6 +1023,7 @@ export interface FileRouteTypes {
     | '/sorteios/'
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
@@ -1069,6 +1081,7 @@ export interface RootRouteChildren {
   PreVendaIndexRoute: typeof PreVendaIndexRoute
   SorteiosIndexRoute: typeof SorteiosIndexRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
+  LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksAutoCancelUnpaidRoute: typeof ApiPublicHooksAutoCancelUnpaidRoute
   ApiPublicHooksExpireLoyaltyPointsRoute: typeof ApiPublicHooksExpireLoyaltyPointsRoute
@@ -1558,6 +1571,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -1824,6 +1844,7 @@ const rootRouteChildren: RootRouteChildren = {
   PreVendaIndexRoute: PreVendaIndexRoute,
   SorteiosIndexRoute: SorteiosIndexRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
+  LovableEmailEventsRoute: LovableEmailEventsRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksAutoCancelUnpaidRoute: ApiPublicHooksAutoCancelUnpaidRoute,
   ApiPublicHooksExpireLoyaltyPointsRoute:
