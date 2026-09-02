@@ -75,10 +75,26 @@ export async function sendTransactionalEmailServer(
   })
 
   try {
-    const result = await sendTemplateEmail(templateName, effectiveRecipient, {
-      templateData,
-      idempotencyKey,
-    })
+    let result
+    try {
+      result = await sendTemplateEmail(templateName, effectiveRecipient, {
+        templateData,
+        idempotencyKey,
+      })
+    } catch (e: any) {
+      if (e?.status === 429) {
+        const waitSeconds =
+          typeof e.retryAfterSeconds === 'number' ? e.retryAfterSeconds : 60
+        await new Promise((r) => setTimeout(r, waitSeconds * 1000))
+        result = await sendTemplateEmail(templateName, effectiveRecipient, {
+          templateData,
+          idempotencyKey,
+        })
+      } else {
+        throw e
+      }
+    }
+
 
     if (!result.sent) {
       const { error } = await supabase
