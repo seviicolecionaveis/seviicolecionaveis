@@ -86,21 +86,34 @@ const listeners = new Set<(c: Card[]) => void>();
 
 export const cardCreatedAt = new Map<string, string>();
 
+const CARD_COLUMNS =
+  "name, card_number, collection, language, finish, condition, stock, event_reserved, base_price_cents, image, category, trainer_subcategory, pokemon_type, illustrator_id, created_at";
+
+async function fetchCardPage(from: number, to: number) {
+  const { data, error } = await supabase.from("cards").select(CARD_COLUMNS).range(from, to);
+  if (error) { console.error("loadCards", error); return []; }
+  return data ?? [];
+}
+
 async function loadCards(): Promise<Card[]> {
-  const all: any[] = [];
   const CHUNK = 1000;
-  let from = 0;
-  while (true) {
-    const { data, error } = await supabase
-      .from("cards")
-      .select("name, card_number, collection, language, finish, condition, stock, event_reserved, base_price_cents, image, category, trainer_subcategory, pokemon_type, illustrator_id, created_at")
-      .range(from, from + CHUNK - 1);
-    if (error) { console.error("loadCards", error); break; }
-    const batch = data ?? [];
-    all.push(...batch);
-    if (batch.length < CHUNK) break;
-    from += CHUNK;
+  // Primeira página já traz a contagem total para buscar o restante em paralelo
+  const { data, error, count } = await supabase
+    .from("cards")
+    .select(CARD_COLUMNS, { count: "exact" })
+    .range(0, CHUNK - 1);
+  if (error) console.error("loadCards", error);
+  const all: any[] = [...(data ?? [])];
+  const total = count ?? all.length;
+  if (total > CHUNK) {
+    const pages: Promise<any[]>[] = [];
+    for (let from = CHUNK; from < total; from += CHUNK) {
+      pages.push(fetchCardPage(from, from + CHUNK - 1));
+    }
+    const rest = await Promise.all(pages);
+    for (const batch of rest) all.push(...batch);
   }
+
   cardCreatedAt.clear();
   for (const r of all) {
     const key = `${r.name}__${r.collection}__${r.card_number}`;
