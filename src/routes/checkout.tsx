@@ -38,6 +38,7 @@ import {
   normalizeRedeemPoints,
   pointsToDiscountCents,
   formatPoints,
+  singlesSubtotalCents,
 } from "@/lib/loyalty";
 
 export const Route = createFileRoute("/checkout")({
@@ -348,10 +349,16 @@ function CheckoutPage() {
       ? Math.min(couponPreview.discountCents, nonBundleSubtotalCents)
       : 0;
 
-  // Pontos resgatados — base = subtotal − combo − cupom
-  const pointsMaxDiscountableCents = Math.max(
-    0,
-    subtotalCents - bundleDiscountCents - couponDiscountCents,
+  // Pontos resgatados — base = subtotal − combo − cupom, limitado ao
+  // valor das cartas avulsas (lacrados, acessórios, videogames e painéis
+  // acumulam pontos, mas não podem ser pagos com pontos).
+  const singlesCents = singlesSubtotalCents(items);
+  const pointsMaxDiscountableCents = Math.min(
+    singlesCents,
+    Math.max(
+      0,
+      subtotalCents - bundleDiscountCents - couponDiscountCents,
+    ),
   );
   const pointsRedeemed = normalizeRedeemPoints(pointsInput, pointsBalance, pointsMaxDiscountableCents);
   const pointsDiscountCents = pointsToDiscountCents(pointsRedeemed);
@@ -950,7 +957,14 @@ function CheckoutPage() {
             )}
           </div>
 
-          {user && pointsBalance >= POINTS_PER_REDEEM_BLOCK && (
+          {user && pointsBalance >= POINTS_PER_REDEEM_BLOCK && singlesCents <= 0 && (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 p-3">
+              <p className="flex items-center gap-2 text-xs font-semibold text-amber-800 dark:text-amber-200">
+                <Sparkles className="h-3.5 w-3.5" /> Você tem {formatPoints(pointsBalance)} pontos Sevii, mas o resgate vale apenas para cartas avulsas.
+              </p>
+            </div>
+          )}
+          {user && pointsBalance >= POINTS_PER_REDEEM_BLOCK && singlesCents > 0 && (
             <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 p-3">
               <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide mb-2 text-amber-800 dark:text-amber-200">
                 <Sparkles className="h-3.5 w-3.5" /> Usar pontos Sevii (saldo: {formatPoints(pointsBalance)})
@@ -980,7 +994,7 @@ function CheckoutPage() {
                 )}
               </div>
               <p className="mt-1 text-[11px] text-amber-700 dark:text-amber-300">
-                {POINTS_PER_REDEEM_BLOCK} pts = R$ {(CENTS_PER_REDEEM_BLOCK / 100).toFixed(2)} · use em múltiplos de {POINTS_PER_REDEEM_BLOCK}
+                {POINTS_PER_REDEEM_BLOCK} pts = R$ {(CENTS_PER_REDEEM_BLOCK / 100).toFixed(2)} · use em múltiplos de {POINTS_PER_REDEEM_BLOCK} · resgate válido apenas em cartas avulsas
               </p>
             </div>
           )}
