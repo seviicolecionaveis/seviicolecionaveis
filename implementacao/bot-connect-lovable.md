@@ -104,6 +104,31 @@ Chamado quando alguém digita `!ativar <codigo>` no grupo.
 
 O código é marcado como usado e o grupo entra em `bot_groups` com `status = active`.
 
+
+
+### 3.5b `POST /api/public/bot/groups/upsert` (aliases: `/groups/sync`, `POST /groups`)
+Sincroniza a lista de grupos que o bot enxerga no WhatsApp.
+
+```json
+{
+  "process_name": "bot_seviicolecionaveis",
+  "groups": [
+    { "jid": "120363XXXXXXXXXX@g.us", "name": "Sevii Leilões" }
+  ]
+}
+```
+Aceita também `group_jid`/`group_name`/`subject` e um array puro no corpo.
+JIDs sem sufixo `@g.us` são ignorados.
+
+- `200 { "success": true, "received": 12, "upserted": 10, "created": 3, "updated": 7, "active_jids": [...] }`
+- `400 { "error": "JSON inválido" | "process_name inválido..." }`
+- `401` sem header `x-bot-secret`
+
+Grupos novos entram como `status = "pending"`; a ativação continua exclusivamente
+por `!ativar <codigo>`. Grupos já ativos **não** são desativados por esta rota.
+
+
+
 ### 3.6 `GET /api/public/bot/commands/pending?process_name=bot_seviicolecionaveis&limit=20`
 Retorna comandos `pending` cujo `target_bot` é `bot_seviicolecionaveis` ou `NULL`.
 
