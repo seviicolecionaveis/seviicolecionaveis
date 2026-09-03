@@ -59,9 +59,9 @@ export const listActivePresalePages = createServerFn({ method: "GET" }).handler(
     .order("created_at", { ascending: false });
   if (error) {
     console.error("[presale] listActive failed", error);
-    return { pages: [] as Array<{ id: string; slug: string; title: string }> };
+    return { pages: [] as Array<{ id: string; slug: string; title: string }>, error: true as const };
   }
-  return { pages: (data ?? []).map((p) => ({ id: p.id, slug: p.slug, title: p.title })) };
+  return { pages: (data ?? []).map((p) => ({ id: p.id, slug: p.slug, title: p.title })), error: false as const };
 });
 
 // Public: get one page + products by slug (no quantity)
@@ -74,7 +74,11 @@ export const getActivePresalePageBySlug = createServerFn({ method: "POST" })
       .select("id, slug, title")
       .eq("slug", data.slug)
       .maybeSingle();
-    if (error || !page) return { page: null as PublicPresalePage | null };
+    if (error) {
+      console.error("[presale] page lookup failed", error);
+      return { page: null as PublicPresalePage | null, error: true as const };
+    }
+    if (!page) return { page: null as PublicPresalePage | null, error: false as const };
 
     const { data: products, error: pErr } = await supabase
       .from("presale_products")
@@ -85,7 +89,7 @@ export const getActivePresalePageBySlug = createServerFn({ method: "POST" })
       .order("sort_order", { ascending: true });
     if (pErr) {
       console.error("[presale] products failed", pErr);
-      return { page: { ...page, products: [] } };
+      return { page: { ...page, products: [] }, error: true as const };
     }
-    return { page: { ...page, products: (products ?? []) as unknown as PublicPresaleProduct[] } };
+    return { page: { ...page, products: (products ?? []) as unknown as PublicPresaleProduct[] }, error: false as const };
   });
