@@ -100,6 +100,7 @@ import { Route as ApiPublicBotBidsMarkRouteImport } from './routes/api/public/bo
 import { Route as ApiPublicBotCommandsPendingRouteImport } from './routes/api/public/bot/commands/pending'
 import { Route as ApiPublicBotGroupsActivateRouteImport } from './routes/api/public/bot/groups/activate'
 import { Route as ApiPublicBotGroupsActiveRouteImport } from './routes/api/public/bot/groups/active'
+import { Route as ApiPublicBotGroupsSyncRouteImport } from './routes/api/public/bot/groups/sync'
 import { Route as ApiPublicBotGroupsUpsertRouteImport } from './routes/api/public/bot/groups/upsert'
 import { Route as ApiPublicBotSchedulesPendingRouteImport } from './routes/api/public/bot/schedules/pending'
 import { Route as ApiPublicBotUsersSenhaRouteImport } from './routes/api/public/bot/users/senha'
@@ -576,6 +577,11 @@ const ApiPublicBotGroupsActiveRoute =
     path: '/api/public/bot/groups/active',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicBotGroupsSyncRoute = ApiPublicBotGroupsSyncRouteImport.update({
+  id: '/api/public/bot/groups/sync',
+  path: '/api/public/bot/groups/sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicBotGroupsUpsertRoute =
   ApiPublicBotGroupsUpsertRouteImport.update({
     id: '/api/public/bot/groups/upsert',
@@ -698,6 +704,7 @@ export interface FileRoutesByFullPath {
   '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
   '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
   '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
+  '/api/public/bot/groups/sync': typeof ApiPublicBotGroupsSyncRoute
   '/api/public/bot/groups/upsert': typeof ApiPublicBotGroupsUpsertRoute
   '/api/public/bot/schedules/pending': typeof ApiPublicBotSchedulesPendingRoute
   '/api/public/bot/users/senha': typeof ApiPublicBotUsersSenhaRoute
@@ -793,6 +800,7 @@ export interface FileRoutesByTo {
   '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
   '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
   '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
+  '/api/public/bot/groups/sync': typeof ApiPublicBotGroupsSyncRoute
   '/api/public/bot/groups/upsert': typeof ApiPublicBotGroupsUpsertRoute
   '/api/public/bot/schedules/pending': typeof ApiPublicBotSchedulesPendingRoute
   '/api/public/bot/users/senha': typeof ApiPublicBotUsersSenhaRoute
@@ -892,6 +900,7 @@ export interface FileRoutesById {
   '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
   '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
   '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
+  '/api/public/bot/groups/sync': typeof ApiPublicBotGroupsSyncRoute
   '/api/public/bot/groups/upsert': typeof ApiPublicBotGroupsUpsertRoute
   '/api/public/bot/schedules/pending': typeof ApiPublicBotSchedulesPendingRoute
   '/api/public/bot/users/senha': typeof ApiPublicBotUsersSenhaRoute
@@ -992,6 +1001,7 @@ export interface FileRouteTypes {
     | '/api/public/bot/commands/pending'
     | '/api/public/bot/groups/activate'
     | '/api/public/bot/groups/active'
+    | '/api/public/bot/groups/sync'
     | '/api/public/bot/groups/upsert'
     | '/api/public/bot/schedules/pending'
     | '/api/public/bot/users/senha'
@@ -1087,6 +1097,7 @@ export interface FileRouteTypes {
     | '/api/public/bot/commands/pending'
     | '/api/public/bot/groups/activate'
     | '/api/public/bot/groups/active'
+    | '/api/public/bot/groups/sync'
     | '/api/public/bot/groups/upsert'
     | '/api/public/bot/schedules/pending'
     | '/api/public/bot/users/senha'
@@ -1185,6 +1196,7 @@ export interface FileRouteTypes {
     | '/api/public/bot/commands/pending'
     | '/api/public/bot/groups/activate'
     | '/api/public/bot/groups/active'
+    | '/api/public/bot/groups/sync'
     | '/api/public/bot/groups/upsert'
     | '/api/public/bot/schedules/pending'
     | '/api/public/bot/users/senha'
@@ -1251,6 +1263,7 @@ export interface RootRouteChildren {
   ApiPublicBotCommandsPendingRoute: typeof ApiPublicBotCommandsPendingRoute
   ApiPublicBotGroupsActivateRoute: typeof ApiPublicBotGroupsActivateRoute
   ApiPublicBotGroupsActiveRoute: typeof ApiPublicBotGroupsActiveRoute
+  ApiPublicBotGroupsSyncRoute: typeof ApiPublicBotGroupsSyncRoute
   ApiPublicBotGroupsUpsertRoute: typeof ApiPublicBotGroupsUpsertRoute
   ApiPublicBotSchedulesPendingRoute: typeof ApiPublicBotSchedulesPendingRoute
   ApiPublicBotUsersSenhaRoute: typeof ApiPublicBotUsersSenhaRoute
@@ -1897,6 +1910,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBotGroupsActiveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/bot/groups/sync': {
+      id: '/api/public/bot/groups/sync'
+      path: '/api/public/bot/groups/sync'
+      fullPath: '/api/public/bot/groups/sync'
+      preLoaderRoute: typeof ApiPublicBotGroupsSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/bot/groups/upsert': {
       id: '/api/public/bot/groups/upsert'
       path: '/api/public/bot/groups/upsert'
@@ -2116,6 +2136,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBotCommandsPendingRoute: ApiPublicBotCommandsPendingRoute,
   ApiPublicBotGroupsActivateRoute: ApiPublicBotGroupsActivateRoute,
   ApiPublicBotGroupsActiveRoute: ApiPublicBotGroupsActiveRoute,
+  ApiPublicBotGroupsSyncRoute: ApiPublicBotGroupsSyncRoute,
   ApiPublicBotGroupsUpsertRoute: ApiPublicBotGroupsUpsertRoute,
   ApiPublicBotSchedulesPendingRoute: ApiPublicBotSchedulesPendingRoute,
   ApiPublicBotUsersSenhaRoute: ApiPublicBotUsersSenhaRoute,
