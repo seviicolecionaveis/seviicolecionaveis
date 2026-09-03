@@ -95,6 +95,12 @@ function CreateAuctionPage() {
             bid_increment: String(i.bid_increment ?? "1.00"),
             buyout_price: i.buyout_price != null ? String(i.buyout_price) : "",
             quantity: String(i.quantity ?? 1),
+            extra_prices: Array.isArray(i.extra_prices)
+              ? i.extra_prices.slice(0, MAX_EXTRA_PRICES).map((p: any) => ({
+                  label: String(p?.label ?? ""),
+                  value: p?.value != null ? String(p.value) : "",
+                }))
+              : [],
           })),
         );
       }
