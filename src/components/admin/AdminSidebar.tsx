@@ -3,7 +3,9 @@ import { useState } from "react";
 import {
   BadgePercent,
   Bell,
+  Bot,
   Boxes,
+
   CalendarClock,
   CreditCard,
   Gamepad2,
@@ -72,11 +74,13 @@ export const ADMIN_NAV: NavGroup[] = [
   {
     label: "Sistema",
     links: [
+      { to: "/admin/conectar-bot", label: "Conectar Bot", icon: Bot },
       { to: "/admin/integrations", label: "Integrações", icon: Plug },
       { to: "/admin/users", label: "Administradores", icon: Users },
     ],
   },
 ];
+
 
 function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   return (

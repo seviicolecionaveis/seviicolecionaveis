@@ -59,6 +59,39 @@ export type Database = {
         }
         Relationships: []
       }
+      activation_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string | null
+          group_name: string | null
+          group_type: string
+          id: string
+          is_used: boolean
+          used_by_jid: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          group_name?: string | null
+          group_type?: string
+          id?: string
+          is_used?: boolean
+          used_by_jid?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          group_name?: string | null
+          group_type?: string
+          id?: string
+          is_used?: boolean
+          used_by_jid?: string | null
+        }
+        Relationships: []
+      }
       addresses: {
         Row: {
           cep: string
@@ -184,6 +217,99 @@ export type Database = {
           image_url?: string
           link_url?: string | null
           sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bot_command_queue: {
+        Row: {
+          args: Json
+          command: string
+          created_at: string
+          id: string
+          status: string
+          target_bot: string | null
+          target_group: string | null
+          updated_at: string
+        }
+        Insert: {
+          args?: Json
+          command: string
+          created_at?: string
+          id?: string
+          status?: string
+          target_bot?: string | null
+          target_group?: string | null
+          updated_at?: string
+        }
+        Update: {
+          args?: Json
+          command?: string
+          created_at?: string
+          id?: string
+          status?: string
+          target_bot?: string | null
+          target_group?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bot_groups: {
+        Row: {
+          activated_at: string
+          group_jid: string
+          group_name: string | null
+          group_type: string
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string
+          group_jid: string
+          group_name?: string | null
+          group_type?: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string
+          group_jid?: string
+          group_name?: string | null
+          group_type?: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bot_instances: {
+        Row: {
+          bot_number: string | null
+          command: string | null
+          id: string
+          process_name: string
+          qr_code_base64: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          bot_number?: string | null
+          command?: string | null
+          id?: string
+          process_name: string
+          qr_code_base64?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          bot_number?: string | null
+          command?: string | null
+          id?: string
+          process_name?: string
+          qr_code_base64?: string | null
+          status?: string
           updated_at?: string
         }
         Relationships: []
