@@ -96,6 +96,7 @@ import { Route as ApiPublicBotGroupsActiveRouteImport } from './routes/api/publi
 import { Route as ApiPublicBotSchedulesPendingRouteImport } from './routes/api/public/bot/schedules/pending'
 import { Route as ApiPublicBotUsersSenhaRouteImport } from './routes/api/public/bot/users/senha'
 import { Route as ApiPublicBotCommandsIdMarkRouteImport } from './routes/api/public/bot/commands/$id.mark'
+import { Route as ApiPublicBotSchedulesIdMarkRouteImport } from './routes/api/public/bot/schedules/$id.mark'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -548,6 +549,12 @@ const ApiPublicBotCommandsIdMarkRoute =
     path: '/api/public/bot/commands/$id/mark',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicBotSchedulesIdMarkRoute =
+  ApiPublicBotSchedulesIdMarkRouteImport.update({
+    id: '/api/public/bot/schedules/$id/mark',
+    path: '/api/public/bot/schedules/$id/mark',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -637,6 +644,7 @@ export interface FileRoutesByFullPath {
   '/api/public/bot/schedules/pending': typeof ApiPublicBotSchedulesPendingRoute
   '/api/public/bot/users/senha': typeof ApiPublicBotUsersSenhaRoute
   '/api/public/bot/commands/$id/mark': typeof ApiPublicBotCommandsIdMarkRoute
+  '/api/public/bot/schedules/$id/mark': typeof ApiPublicBotSchedulesIdMarkRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -723,6 +731,7 @@ export interface FileRoutesByTo {
   '/api/public/bot/schedules/pending': typeof ApiPublicBotSchedulesPendingRoute
   '/api/public/bot/users/senha': typeof ApiPublicBotUsersSenhaRoute
   '/api/public/bot/commands/$id/mark': typeof ApiPublicBotCommandsIdMarkRoute
+  '/api/public/bot/schedules/$id/mark': typeof ApiPublicBotSchedulesIdMarkRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -813,6 +822,7 @@ export interface FileRoutesById {
   '/api/public/bot/schedules/pending': typeof ApiPublicBotSchedulesPendingRoute
   '/api/public/bot/users/senha': typeof ApiPublicBotUsersSenhaRoute
   '/api/public/bot/commands/$id/mark': typeof ApiPublicBotCommandsIdMarkRoute
+  '/api/public/bot/schedules/$id/mark': typeof ApiPublicBotSchedulesIdMarkRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -904,6 +914,7 @@ export interface FileRouteTypes {
     | '/api/public/bot/schedules/pending'
     | '/api/public/bot/users/senha'
     | '/api/public/bot/commands/$id/mark'
+    | '/api/public/bot/schedules/$id/mark'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -990,6 +1001,7 @@ export interface FileRouteTypes {
     | '/api/public/bot/schedules/pending'
     | '/api/public/bot/users/senha'
     | '/api/public/bot/commands/$id/mark'
+    | '/api/public/bot/schedules/$id/mark'
   id:
     | '__root__'
     | '/'
@@ -1079,6 +1091,7 @@ export interface FileRouteTypes {
     | '/api/public/bot/schedules/pending'
     | '/api/public/bot/users/senha'
     | '/api/public/bot/commands/$id/mark'
+    | '/api/public/bot/schedules/$id/mark'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1139,6 +1152,7 @@ export interface RootRouteChildren {
   ApiPublicBotSchedulesPendingRoute: typeof ApiPublicBotSchedulesPendingRoute
   ApiPublicBotUsersSenhaRoute: typeof ApiPublicBotUsersSenhaRoute
   ApiPublicBotCommandsIdMarkRoute: typeof ApiPublicBotCommandsIdMarkRoute
+  ApiPublicBotSchedulesIdMarkRoute: typeof ApiPublicBotSchedulesIdMarkRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1752,6 +1766,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBotCommandsIdMarkRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/bot/schedules/$id/mark': {
+      id: '/api/public/bot/schedules/$id/mark'
+      path: '/api/public/bot/schedules/$id/mark'
+      fullPath: '/api/public/bot/schedules/$id/mark'
+      preLoaderRoute: typeof ApiPublicBotSchedulesIdMarkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1929,6 +1950,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBotSchedulesPendingRoute: ApiPublicBotSchedulesPendingRoute,
   ApiPublicBotUsersSenhaRoute: ApiPublicBotUsersSenhaRoute,
   ApiPublicBotCommandsIdMarkRoute: ApiPublicBotCommandsIdMarkRoute,
+  ApiPublicBotSchedulesIdMarkRoute: ApiPublicBotSchedulesIdMarkRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
