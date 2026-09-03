@@ -900,7 +900,10 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     nonBundleSubtotalCents,
   );
 
-  const pointsBase = Math.max(0, subtotalCents - bundleDiscountCents - couponDiscountCents);
+  // Resgate de pontos limitado ao valor das cartas avulsas (lacrados,
+  // acessórios, videogames e painéis não podem ser pagos com pontos).
+  const singlesCents = (await import("@/lib/loyalty")).singlesSubtotalCents(items);
+  const pointsBase = Math.min(singlesCents, Math.max(0, subtotalCents - bundleDiscountCents - couponDiscountCents));
   const { points: pointsRedeemed, discountCents: pointsDiscountCents } =
     await resolvePointsRedemption(userId, data.pointsToRedeem, pointsBase);
 
@@ -1095,7 +1098,10 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
     data.couponCode,
     nonBundleSubtotalCents,
   );
-  const pointsBase = Math.max(0, subtotalCents - bundleDiscountCents - couponDiscountCents);
+  // Resgate de pontos limitado ao valor das cartas avulsas (lacrados,
+  // acessórios, videogames e painéis não podem ser pagos com pontos).
+  const singlesCents = (await import("@/lib/loyalty")).singlesSubtotalCents(items);
+  const pointsBase = Math.min(singlesCents, Math.max(0, subtotalCents - bundleDiscountCents - couponDiscountCents));
   const { points: pointsRedeemed, discountCents: pointsDiscountCents } =
     await resolvePointsRedemption(userId, data.pointsToRedeem, pointsBase);
   const discountCents = bundleDiscountCents + couponDiscountCents + pointsDiscountCents;
