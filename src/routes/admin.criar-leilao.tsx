@@ -185,6 +185,13 @@ function CreateAuctionPage() {
           bid_increment: Number(i.bid_increment.replace(",", ".")) || 1,
           buyout_price: i.buyout_price ? Number(i.buyout_price.replace(",", ".")) : null,
           quantity: Number(i.quantity) || 1,
+          extra_prices: i.extra_prices
+            .filter((p) => p.label.trim() || p.value.trim())
+            .slice(0, MAX_EXTRA_PRICES)
+            .map((p) => ({
+              label: p.label.trim() || "Valor",
+              value: Number(String(p.value).replace(",", ".")) || 0,
+            })),
         }));
         const { error } = await (supabase as any).from("auction_items").insert(rows);
         if (error) throw error;
