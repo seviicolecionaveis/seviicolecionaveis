@@ -75,6 +75,7 @@ import { Route as SorteiosRaffleIdRouteImport } from './routes/sorteios.$raffleI
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
+import { Route as ApiPublicBotStatusRouteImport } from './routes/api/public/bot/status'
 import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api/public/hooks/auto-cancel-unpaid'
 import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
 import { Route as ApiPublicHooksPriceDropCheckRouteImport } from './routes/api/public/hooks/price-drop-check'
@@ -88,6 +89,10 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as ApiPublicBotCommandsPendingRouteImport } from './routes/api/public/bot/commands/pending'
+import { Route as ApiPublicBotGroupsActivateRouteImport } from './routes/api/public/bot/groups/activate'
+import { Route as ApiPublicBotGroupsActiveRouteImport } from './routes/api/public/bot/groups/active'
+import { Route as ApiPublicBotCommandsIdMarkRouteImport } from './routes/api/public/bot/commands/$id.mark'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -419,6 +424,11 @@ const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
   path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicBotStatusRoute = ApiPublicBotStatusRouteImport.update({
+  id: '/api/public/bot/status',
+  path: '/api/public/bot/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksAutoCancelUnpaidRoute =
   ApiPublicHooksAutoCancelUnpaidRouteImport.update({
     id: '/api/public/hooks/auto-cancel-unpaid',
@@ -495,6 +505,30 @@ const LovableEmailTransactionalPreviewRoute =
     path: '/lovable/email/transactional/preview',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicBotCommandsPendingRoute =
+  ApiPublicBotCommandsPendingRouteImport.update({
+    id: '/api/public/bot/commands/pending',
+    path: '/api/public/bot/commands/pending',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicBotGroupsActivateRoute =
+  ApiPublicBotGroupsActivateRouteImport.update({
+    id: '/api/public/bot/groups/activate',
+    path: '/api/public/bot/groups/activate',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicBotGroupsActiveRoute =
+  ApiPublicBotGroupsActiveRouteImport.update({
+    id: '/api/public/bot/groups/active',
+    path: '/api/public/bot/groups/active',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicBotCommandsIdMarkRoute =
+  ApiPublicBotCommandsIdMarkRouteImport.update({
+    id: '/api/public/bot/commands/$id/mark',
+    path: '/api/public/bot/commands/$id/mark',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -563,6 +597,7 @@ export interface FileRoutesByFullPath {
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/api/public/bot/status': typeof ApiPublicBotStatusRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
@@ -576,6 +611,10 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
+  '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
+  '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
+  '/api/public/bot/commands/$id/mark': typeof ApiPublicBotCommandsIdMarkRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -641,6 +680,7 @@ export interface FileRoutesByTo {
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/api/public/bot/status': typeof ApiPublicBotStatusRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
@@ -654,6 +694,10 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
+  '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
+  '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
+  '/api/public/bot/commands/$id/mark': typeof ApiPublicBotCommandsIdMarkRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -723,6 +767,7 @@ export interface FileRoutesById {
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/api/public/bot/status': typeof ApiPublicBotStatusRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
   '/api/public/hooks/price-drop-check': typeof ApiPublicHooksPriceDropCheckRoute
@@ -736,6 +781,10 @@ export interface FileRoutesById {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
+  '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
+  '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
+  '/api/public/bot/commands/$id/mark': typeof ApiPublicBotCommandsIdMarkRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -806,6 +855,7 @@ export interface FileRouteTypes {
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/events'
+    | '/api/public/bot/status'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
@@ -819,6 +869,10 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/api/public/bot/commands/pending'
+    | '/api/public/bot/groups/activate'
+    | '/api/public/bot/groups/active'
+    | '/api/public/bot/commands/$id/mark'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -884,6 +938,7 @@ export interface FileRouteTypes {
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/events'
+    | '/api/public/bot/status'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
@@ -897,6 +952,10 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/api/public/bot/commands/pending'
+    | '/api/public/bot/groups/activate'
+    | '/api/public/bot/groups/active'
+    | '/api/public/bot/commands/$id/mark'
   id:
     | '__root__'
     | '/'
@@ -965,6 +1024,7 @@ export interface FileRouteTypes {
     | '/admin/orders/$orderId'
     | '/api/public/sitemap.xml'
     | '/lovable/email/events'
+    | '/api/public/bot/status'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
     | '/api/public/hooks/price-drop-check'
@@ -978,6 +1038,10 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/api/public/bot/commands/pending'
+    | '/api/public/bot/groups/activate'
+    | '/api/public/bot/groups/active'
+    | '/api/public/bot/commands/$id/mark'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1018,6 +1082,7 @@ export interface RootRouteChildren {
   SorteiosIndexRoute: typeof SorteiosIndexRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
+  ApiPublicBotStatusRoute: typeof ApiPublicBotStatusRoute
   ApiPublicHooksAutoCancelUnpaidRoute: typeof ApiPublicHooksAutoCancelUnpaidRoute
   ApiPublicHooksExpireLoyaltyPointsRoute: typeof ApiPublicHooksExpireLoyaltyPointsRoute
   ApiPublicHooksPriceDropCheckRoute: typeof ApiPublicHooksPriceDropCheckRoute
@@ -1031,6 +1096,10 @@ export interface RootRouteChildren {
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  ApiPublicBotCommandsPendingRoute: typeof ApiPublicBotCommandsPendingRoute
+  ApiPublicBotGroupsActivateRoute: typeof ApiPublicBotGroupsActivateRoute
+  ApiPublicBotGroupsActiveRoute: typeof ApiPublicBotGroupsActiveRoute
+  ApiPublicBotCommandsIdMarkRoute: typeof ApiPublicBotCommandsIdMarkRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1497,6 +1566,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/bot/status': {
+      id: '/api/public/bot/status'
+      path: '/api/public/bot/status'
+      fullPath: '/api/public/bot/status'
+      preLoaderRoute: typeof ApiPublicBotStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/auto-cancel-unpaid': {
       id: '/api/public/hooks/auto-cancel-unpaid'
       path: '/api/public/hooks/auto-cancel-unpaid'
@@ -1586,6 +1662,34 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/transactional/preview'
       fullPath: '/lovable/email/transactional/preview'
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/bot/commands/pending': {
+      id: '/api/public/bot/commands/pending'
+      path: '/api/public/bot/commands/pending'
+      fullPath: '/api/public/bot/commands/pending'
+      preLoaderRoute: typeof ApiPublicBotCommandsPendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/bot/groups/activate': {
+      id: '/api/public/bot/groups/activate'
+      path: '/api/public/bot/groups/activate'
+      fullPath: '/api/public/bot/groups/activate'
+      preLoaderRoute: typeof ApiPublicBotGroupsActivateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/bot/groups/active': {
+      id: '/api/public/bot/groups/active'
+      path: '/api/public/bot/groups/active'
+      fullPath: '/api/public/bot/groups/active'
+      preLoaderRoute: typeof ApiPublicBotGroupsActiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/bot/commands/$id/mark': {
+      id: '/api/public/bot/commands/$id/mark'
+      path: '/api/public/bot/commands/$id/mark'
+      fullPath: '/api/public/bot/commands/$id/mark'
+      preLoaderRoute: typeof ApiPublicBotCommandsIdMarkRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1741,6 +1845,7 @@ const rootRouteChildren: RootRouteChildren = {
   SorteiosIndexRoute: SorteiosIndexRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
+  ApiPublicBotStatusRoute: ApiPublicBotStatusRoute,
   ApiPublicHooksAutoCancelUnpaidRoute: ApiPublicHooksAutoCancelUnpaidRoute,
   ApiPublicHooksExpireLoyaltyPointsRoute:
     ApiPublicHooksExpireLoyaltyPointsRoute,
@@ -1756,6 +1861,10 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  ApiPublicBotCommandsPendingRoute: ApiPublicBotCommandsPendingRoute,
+  ApiPublicBotGroupsActivateRoute: ApiPublicBotGroupsActivateRoute,
+  ApiPublicBotGroupsActiveRoute: ApiPublicBotGroupsActiveRoute,
+  ApiPublicBotCommandsIdMarkRoute: ApiPublicBotCommandsIdMarkRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
