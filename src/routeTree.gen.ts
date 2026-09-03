@@ -93,6 +93,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as ApiPublicBotAuctionsIdRouteImport } from './routes/api/public/bot/auctions/$id'
 import { Route as ApiPublicBotBidsApprovedRouteImport } from './routes/api/public/bot/bids/approved'
 import { Route as ApiPublicBotBidsCreateRouteImport } from './routes/api/public/bot/bids/create'
+import { Route as ApiPublicBotBidsMarkRouteImport } from './routes/api/public/bot/bids/mark'
 import { Route as ApiPublicBotCommandsPendingRouteImport } from './routes/api/public/bot/commands/pending'
 import { Route as ApiPublicBotGroupsActivateRouteImport } from './routes/api/public/bot/groups/activate'
 import { Route as ApiPublicBotGroupsActiveRouteImport } from './routes/api/public/bot/groups/active'
@@ -533,6 +534,11 @@ const ApiPublicBotBidsCreateRoute = ApiPublicBotBidsCreateRouteImport.update({
   path: '/api/public/bot/bids/create',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicBotBidsMarkRoute = ApiPublicBotBidsMarkRouteImport.update({
+  id: '/api/public/bot/bids/mark',
+  path: '/api/public/bot/bids/mark',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicBotCommandsPendingRoute =
   ApiPublicBotCommandsPendingRouteImport.update({
     id: '/api/public/bot/commands/pending',
@@ -660,6 +666,7 @@ export interface FileRoutesByFullPath {
   '/api/public/bot/auctions/$id': typeof ApiPublicBotAuctionsIdRoute
   '/api/public/bot/bids/approved': typeof ApiPublicBotBidsApprovedRoute
   '/api/public/bot/bids/create': typeof ApiPublicBotBidsCreateRoute
+  '/api/public/bot/bids/mark': typeof ApiPublicBotBidsMarkRoute
   '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
   '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
   '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
@@ -750,6 +757,7 @@ export interface FileRoutesByTo {
   '/api/public/bot/auctions/$id': typeof ApiPublicBotAuctionsIdRoute
   '/api/public/bot/bids/approved': typeof ApiPublicBotBidsApprovedRoute
   '/api/public/bot/bids/create': typeof ApiPublicBotBidsCreateRoute
+  '/api/public/bot/bids/mark': typeof ApiPublicBotBidsMarkRoute
   '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
   '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
   '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
@@ -844,6 +852,7 @@ export interface FileRoutesById {
   '/api/public/bot/auctions/$id': typeof ApiPublicBotAuctionsIdRoute
   '/api/public/bot/bids/approved': typeof ApiPublicBotBidsApprovedRoute
   '/api/public/bot/bids/create': typeof ApiPublicBotBidsCreateRoute
+  '/api/public/bot/bids/mark': typeof ApiPublicBotBidsMarkRoute
   '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
   '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
   '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
@@ -939,6 +948,7 @@ export interface FileRouteTypes {
     | '/api/public/bot/auctions/$id'
     | '/api/public/bot/bids/approved'
     | '/api/public/bot/bids/create'
+    | '/api/public/bot/bids/mark'
     | '/api/public/bot/commands/pending'
     | '/api/public/bot/groups/activate'
     | '/api/public/bot/groups/active'
@@ -1029,6 +1039,7 @@ export interface FileRouteTypes {
     | '/api/public/bot/auctions/$id'
     | '/api/public/bot/bids/approved'
     | '/api/public/bot/bids/create'
+    | '/api/public/bot/bids/mark'
     | '/api/public/bot/commands/pending'
     | '/api/public/bot/groups/activate'
     | '/api/public/bot/groups/active'
@@ -1122,6 +1133,7 @@ export interface FileRouteTypes {
     | '/api/public/bot/auctions/$id'
     | '/api/public/bot/bids/approved'
     | '/api/public/bot/bids/create'
+    | '/api/public/bot/bids/mark'
     | '/api/public/bot/commands/pending'
     | '/api/public/bot/groups/activate'
     | '/api/public/bot/groups/active'
@@ -1186,6 +1198,7 @@ export interface RootRouteChildren {
   ApiPublicBotAuctionsIdRoute: typeof ApiPublicBotAuctionsIdRoute
   ApiPublicBotBidsApprovedRoute: typeof ApiPublicBotBidsApprovedRoute
   ApiPublicBotBidsCreateRoute: typeof ApiPublicBotBidsCreateRoute
+  ApiPublicBotBidsMarkRoute: typeof ApiPublicBotBidsMarkRoute
   ApiPublicBotCommandsPendingRoute: typeof ApiPublicBotCommandsPendingRoute
   ApiPublicBotGroupsActivateRoute: typeof ApiPublicBotGroupsActivateRoute
   ApiPublicBotGroupsActiveRoute: typeof ApiPublicBotGroupsActiveRoute
@@ -1785,6 +1798,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBotBidsCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/bot/bids/mark': {
+      id: '/api/public/bot/bids/mark'
+      path: '/api/public/bot/bids/mark'
+      fullPath: '/api/public/bot/bids/mark'
+      preLoaderRoute: typeof ApiPublicBotBidsMarkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/bot/commands/pending': {
       id: '/api/public/bot/commands/pending'
       path: '/api/public/bot/commands/pending'
@@ -2008,6 +2028,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBotAuctionsIdRoute: ApiPublicBotAuctionsIdRoute,
   ApiPublicBotBidsApprovedRoute: ApiPublicBotBidsApprovedRoute,
   ApiPublicBotBidsCreateRoute: ApiPublicBotBidsCreateRoute,
+  ApiPublicBotBidsMarkRoute: ApiPublicBotBidsMarkRoute,
   ApiPublicBotCommandsPendingRoute: ApiPublicBotCommandsPendingRoute,
   ApiPublicBotGroupsActivateRoute: ApiPublicBotGroupsActivateRoute,
   ApiPublicBotGroupsActiveRoute: ApiPublicBotGroupsActiveRoute,
