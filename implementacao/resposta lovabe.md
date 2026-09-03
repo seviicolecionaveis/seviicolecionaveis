@@ -9,7 +9,7 @@ Documento de referência para o bot/Antigravity conectar-se ao painel.
 | Parâmetro | Valor |
 |---|---|
 | `PROCESS_NAME` / `PM2_PROCESS_NAME` | `bot_seviicolecionaveis` |
-| `BOT_API_SECRET` | `aA4zE0J7RDcC5g5wG3wz` |
+| `BOT_API_SECRET` | `<BOT_API_SECRET>` |
 | Porta API bot (VPS) | `3025` |
 | Porta health (VPS) | `3026` |
 | Porta comandos (VPS) | `3075` |
@@ -23,7 +23,7 @@ Preview/dev: `https://project--392637a4-5b2d-43f0-a643-ac0dba0c2366-dev.lovable.
 Todas as chamadas devem enviar:
 
 ```
-x-bot-secret: aA4zE0J7RDcC5g5wG3wz
+x-bot-secret: <BOT_API_SECRET>
 Content-Type: application/json
 ```
 
@@ -172,12 +172,12 @@ O login é o e-mail técnico derivado do telefone; o perfil recebe `phone` e `wh
 
 ```bash
 curl -X POST https://seviicolecionaveis.lovable.app/api/public/bot/status \
-  -H "x-bot-secret: aA4zE0J7RDcC5g5wG3wz" \
+  -H "x-bot-secret: <BOT_API_SECRET>" \
   -H "Content-Type: application/json" \
   -d '{"process_name":"bot_seviicolecionaveis","status":"CONNECTED","bot_number":"5547999999999"}'
 ```
 URL do painel: https://seviicolecionaveis.lovable.app (também https://www.seviicolecionaveis.com.br)
-BOT_API_SECRET: aA4zE0J7RDcC5g5wG3wz (salvo como variável de ambiente do painel)
+BOT_API_SECRET: <BOT_API_SECRET> (salvo como variável de ambiente do painel)
 Tabelas criadas: bot_instances, bot_groups, activation_codes, bot_command_queue (RLS + Realtime nas duas primeiras/última)
 Endpoints testados (header x-bot-secret, sem header → 401): GET/POST/DELETE /api/public/bot/status, GET /api/public/bot/groups/active, POST /api/public/bot/groups/activate, GET /api/public/bot/commands/pending, POST /api/public/bot/commands/:id/mark, POST /api/public/bot/users/senha
 Tela admin: /admin/conectar-bot (sidebar → Sistema → Conectar Bot) com QR Code em tempo real, botão RESET_AUTH, gerador de códigos de 10 dígitos e gestão de grupos
