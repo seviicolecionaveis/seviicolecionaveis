@@ -147,36 +147,30 @@ function CreateAuctionPage() {
       "nome",
       "descricao",
       "lance_inicial",
-      "incremento",
+      "inc_1",
+      "inc_2",
+      "inc_3",
+      "inc_4",
+      "inc_5",
+      "inc_6",
       "arremate",
       "quantidade",
       "imagem_url",
-      "valor_extra_1_nome",
-      "valor_extra_1_valor",
-      "valor_extra_2_nome",
-      "valor_extra_2_valor",
-      "valor_extra_3_nome",
-      "valor_extra_3_valor",
-      "valor_extra_4_nome",
-      "valor_extra_4_valor",
     ];
     const example = [
       {
         nome: "Pikachu VMAX",
         descricao: "NM - Português",
         lance_inicial: 50,
-        incremento: 5,
+        inc_1: 55,
+        inc_2: 60,
+        inc_3: 70,
+        inc_4: "",
+        inc_5: "",
+        inc_6: "",
         arremate: 300,
         quantidade: 1,
         imagem_url: "",
-        valor_extra_1_nome: "Lance mínimo Pix",
-        valor_extra_1_valor: 55,
-        valor_extra_2_nome: "",
-        valor_extra_2_valor: "",
-        valor_extra_3_nome: "",
-        valor_extra_3_valor: "",
-        valor_extra_4_nome: "",
-        valor_extra_4_valor: "",
       },
     ];
     const ws = XLSX.utils.json_to_sheet(example, { header });
@@ -196,21 +190,16 @@ function CreateAuctionPage() {
       const norm = (v: any) => String(v ?? "").trim();
       const parsed: ItemForm[] = rows
         .map((r) => {
-          const extras: ExtraPrice[] = [];
-          for (let n = 1; n <= MAX_EXTRA_PRICES; n++) {
-            const label = norm(r[`valor_extra_${n}_nome`]);
-            const value = norm(r[`valor_extra_${n}_valor`]);
-            if (label || value) extras.push({ label, value });
-          }
+          const values = [norm(r["lance_inicial"])];
+          for (let n = 1; n < MAX_VALUES; n++) values.push(norm(r[`inc_${n}`]));
+          while (values.length > DEFAULT_VALUES && !values[values.length - 1]) values.pop();
           return {
             name: norm(r["nome"]),
             description: norm(r["descricao"]),
             image_url: norm(r["imagem_url"]),
-            starting_price: norm(r["lance_inicial"]) || "1.00",
-            bid_increment: norm(r["incremento"]) || "1.00",
+            values,
             buyout_price: norm(r["arremate"]),
             quantity: norm(r["quantidade"]) || "1",
-            extra_prices: extras,
           } as ItemForm;
         })
         .filter((i) => i.name);
