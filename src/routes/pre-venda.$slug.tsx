@@ -39,7 +39,31 @@ export const Route = createFileRoute("/pre-venda/$slug")({
   },
   component: PresalePage,
   notFoundComponent: PresaleNotFound,
+  errorComponent: PresaleLoadError,
 });
+
+function PresaleLoadError({ error }: { error: Error }) {
+  const router = useRouter();
+  return (
+    <Shell>
+      <main className="grid min-h-[50vh] place-items-center px-4">
+        <div className="text-center space-y-3">
+          <h1 className="text-2xl font-bold">Não foi possível carregar</h1>
+          <p role="alert" className="text-muted-foreground">
+            {error.message || "Tente novamente em instantes."}
+          </p>
+          <button
+            type="button"
+            onClick={() => router.invalidate()}
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:border-foreground/40 transition"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </main>
+    </Shell>
+  );
+}
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
