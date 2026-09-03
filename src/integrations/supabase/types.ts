@@ -188,6 +188,217 @@ export type Database = {
         }
         Relationships: []
       }
+      auction_bids: {
+        Row: {
+          amount: number
+          announced: boolean
+          auction_id: string
+          bidder_name: string | null
+          created_at: string
+          id: string
+          item_id: string | null
+          item_name: string
+          order_id: string | null
+          phone: string
+          sequence: number
+          status: string
+        }
+        Insert: {
+          amount: number
+          announced?: boolean
+          auction_id: string
+          bidder_name?: string | null
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          item_name: string
+          order_id?: string | null
+          phone: string
+          sequence?: number
+          status?: string
+        }
+        Update: {
+          amount?: number
+          announced?: boolean
+          auction_id?: string
+          bidder_name?: string | null
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          item_name?: string
+          order_id?: string | null
+          phone?: string
+          sequence?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_bids_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_bids_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "auction_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auction_items: {
+        Row: {
+          auction_id: string
+          bid_increment: number
+          buyout_price: number | null
+          created_at: string
+          description: string | null
+          final_bid: number | null
+          id: string
+          image_url: string | null
+          name: string
+          quantity: number
+          sequence: number
+          starting_price: number
+          status: string
+          winner_name: string | null
+          winner_phone: string | null
+        }
+        Insert: {
+          auction_id: string
+          bid_increment?: number
+          buyout_price?: number | null
+          created_at?: string
+          description?: string | null
+          final_bid?: number | null
+          id?: string
+          image_url?: string | null
+          name: string
+          quantity?: number
+          sequence?: number
+          starting_price?: number
+          status?: string
+          winner_name?: string | null
+          winner_phone?: string | null
+        }
+        Update: {
+          auction_id?: string
+          bid_increment?: number
+          buyout_price?: number | null
+          created_at?: string
+          description?: string | null
+          final_bid?: number | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          quantity?: number
+          sequence?: number
+          starting_price?: number
+          status?: string
+          winner_name?: string | null
+          winner_phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_items_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auction_schedules: {
+        Row: {
+          action: string
+          auction_id: string
+          created_at: string
+          error_message: string | null
+          group_jid: string
+          id: string
+          scheduled_time: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          auction_id: string
+          created_at?: string
+          error_message?: string | null
+          group_jid: string
+          id?: string
+          scheduled_time: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          auction_id?: string
+          created_at?: string
+          error_message?: string | null
+          group_jid?: string
+          id?: string
+          scheduled_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_schedules_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auctions: {
+        Row: {
+          auction_number: number
+          closed_at: string | null
+          closing_message: string | null
+          created_at: string
+          description: string | null
+          group_jid: string
+          id: string
+          scheduled_end: string
+          scheduled_start: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          auction_number?: number
+          closed_at?: string | null
+          closing_message?: string | null
+          created_at?: string
+          description?: string | null
+          group_jid: string
+          id?: string
+          scheduled_end: string
+          scheduled_start: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          auction_number?: number
+          closed_at?: string | null
+          closing_message?: string | null
+          created_at?: string
+          description?: string | null
+          group_jid?: string
+          id?: string
+          scheduled_end?: string
+          scheduled_start?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       banners: {
         Row: {
           active: boolean

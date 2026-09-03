@@ -9,6 +9,7 @@ import {
   CalendarClock,
   CreditCard,
   Gamepad2,
+  Gavel,
   Gauge,
   Gift,
   Image as ImageIcon,
@@ -54,7 +55,8 @@ export const ADMIN_NAV: NavGroup[] = [
     links: [
       { to: "/admin/shipping", label: "Expedição", icon: Truck },
       { to: "/admin/pilha", label: "Pilha de Cartas", icon: Layers },
-      { to: "/admin/leiloes", label: "Leilões", icon: Gift },
+      { to: "/admin/leiloes", label: "Leilões (Pilha)", icon: Gift },
+      { to: "/admin/leiloes-whatsapp", label: "Leilões WhatsApp", icon: Gavel },
       { to: "/admin/evento", label: "Modo Evento", icon: CalendarClock },
       { to: "/admin/sorteios", label: "Sorteios", icon: Ticket },
     ],
