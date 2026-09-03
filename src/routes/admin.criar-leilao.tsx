@@ -340,15 +340,40 @@ function CreateAuctionPage() {
       </section>
 
       <section className="space-y-3 rounded-lg border border-border p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-bold uppercase tracking-wide">Lotes / Itens</h2>
-          <button
-            onClick={() => setItems((p) => [...p, emptyItem()])}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold hover:bg-secondary"
-          >
-            <Plus className="h-3.5 w-3.5" /> Adicionar Lote
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={downloadTemplate}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold hover:bg-secondary"
+            >
+              <Download className="h-3.5 w-3.5" /> Baixar modelo
+            </button>
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold hover:bg-secondary">
+              <FileSpreadsheet className="h-3.5 w-3.5" /> Importar planilha
+              <input
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) importSpreadsheet(f);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+            <button
+              onClick={() => setItems((p) => [...p, emptyItem()])}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold hover:bg-secondary"
+            >
+              <Plus className="h-3.5 w-3.5" /> Adicionar Lote
+            </button>
+          </div>
         </div>
+        <p className="text-[11px] text-muted-foreground">
+          Cadastro em massa: baixe o modelo, preencha uma linha por lote (colunas de valores extras opcionais) e importe. Os lotes importados são adicionados à lista.
+        </p>
+
 
         {items.map((it, idx) => (
           <div key={idx} className="space-y-3 rounded-md border border-border p-3">
