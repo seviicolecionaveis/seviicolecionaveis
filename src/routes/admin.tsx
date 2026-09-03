@@ -3,88 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminCancellationBell } from "@/components/AdminCancellationBell";
-import { ChevronDown, ChevronRight, ImageOff, Search } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { ChevronRight, ImageOff, Search } from "lucide-react";
 
-type NavLink = { to: string; label: string };
-type NavGroup = { label: string; links: NavLink[] };
-
-const NAV_GROUPS: NavGroup[] = [
-  {
-    label: "Catálogo",
-    links: [
-      { to: "/admin/manage-cards", label: "Gerenciar cartas" },
-      { to: "/admin/panels", label: "Painéis" },
-      { to: "/admin/sealed", label: "Produtos Lacrados" },
-      { to: "/admin/accessories", label: "Acessórios" },
-      { to: "/admin/videogames", label: "Videogames" },
-    ],
-  },
-  {
-    label: "Operações",
-    links: [
-      { to: "/admin/shipping", label: "Expedição" },
-      { to: "/admin/pilha", label: "Pilha de Cartas" },
-      { to: "/admin/leiloes", label: "Leilões" },
-      { to: "/admin/evento", label: "Modo Evento" },
-      { to: "/admin/sorteios", label: "Sorteios" },
-    ],
-  },
-  {
-    label: "Marketing",
-    links: [
-      { to: "/admin/banners", label: "Banners" },
-      { to: "/admin/coupons", label: "Cupons" },
-      { to: "/admin/emails", label: "E-mails" },
-      { to: "/admin/loyalty", label: "Pontos / Fidelidade" },
-      { to: "/admin/ofertas-relampago", label: "Ofertas Relâmpago" },
-      { to: "/admin/popups", label: "Pop-ups" },
-      { to: "/admin/pre-venda", label: "Pré-Venda" },
-    ],
-  },
-  {
-    label: "Sistema",
-    links: [
-      { to: "/admin/integrations", label: "Integrações" },
-      { to: "/admin/users", label: "Administradores" },
-    ],
-  },
-];
-
-function AdminNavMenu({ group, currentPath }: { group: NavGroup; currentPath: string }) {
-  const [open, setOpen] = useState(false);
-  const active = group.links.some((l) => currentPath === l.to);
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className={`inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-semibold transition ${
-            active
-              ? "bg-foreground text-background"
-              : "text-foreground hover:bg-secondary"
-          }`}
-        >
-          {group.label}
-          <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="start" sideOffset={6} className="w-56 p-1">
-        {group.links.map((l) => (
-          <Link
-            key={l.to}
-            to={l.to}
-            onClick={() => setOpen(false)}
-            className="block rounded-md px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-secondary"
-            activeProps={{ className: "bg-secondary" }}
-          >
-            {l.label}
-          </Link>
-        ))}
-      </PopoverContent>
-    </Popover>
-  );
-}
 
 
 export const Route = createFileRoute("/admin")({
