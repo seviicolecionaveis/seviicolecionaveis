@@ -132,14 +132,17 @@ function CreateAuctionPage() {
     });
 
   const uploadImage = async (idx: number, file: File) => {
-    const ext = file.name.split(".").pop() || "jpg";
-    const path = `leiloes/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error } = await supabase.storage.from("card-images").upload(path, file, { upsert: true });
-    if (error) return toast.error(error.message);
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `leiloes/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("card-images")
+      .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+    if (error) return toast.error(`Erro ao enviar imagem: ${error.message}`);
     const { data } = supabase.storage.from("card-images").getPublicUrl(path);
     patchItem(idx, { image_url: data.publicUrl });
     toast.success("Imagem enviada.");
   };
+
 
   const downloadTemplate = async () => {
     const XLSX = await import("xlsx");
