@@ -39,6 +39,7 @@ import { Route as AdminAccessoriesRouteImport } from './routes/admin.accessories
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as AdminConectarBotRouteImport } from './routes/admin.conectar-bot'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
+import { Route as AdminCriarLeilaoRouteImport } from './routes/admin.criar-leilao'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
 import { Route as AdminEventoRouteImport } from './routes/admin.evento'
@@ -251,6 +252,11 @@ const AdminConectarBotRoute = AdminConectarBotRouteImport.update({
 const AdminCouponsRoute = AdminCouponsRouteImport.update({
   id: '/coupons',
   path: '/coupons',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCriarLeilaoRoute = AdminCriarLeilaoRouteImport.update({
+  id: '/criar-leilao',
+  path: '/criar-leilao',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
@@ -618,6 +624,7 @@ export interface FileRoutesByFullPath {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/conectar-bot': typeof AdminConectarBotRoute
   '/admin/coupons': typeof AdminCouponsRoute
+  '/admin/criar-leilao': typeof AdminCriarLeilaoRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/evento': typeof AdminEventoRoute
@@ -710,6 +717,7 @@ export interface FileRoutesByTo {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/conectar-bot': typeof AdminConectarBotRoute
   '/admin/coupons': typeof AdminCouponsRoute
+  '/admin/criar-leilao': typeof AdminCriarLeilaoRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/evento': typeof AdminEventoRoute
@@ -806,6 +814,7 @@ export interface FileRoutesById {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/conectar-bot': typeof AdminConectarBotRoute
   '/admin/coupons': typeof AdminCouponsRoute
+  '/admin/criar-leilao': typeof AdminCriarLeilaoRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/evento': typeof AdminEventoRoute
@@ -903,6 +912,7 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/conectar-bot'
     | '/admin/coupons'
+    | '/admin/criar-leilao'
     | '/admin/dashboard'
     | '/admin/emails'
     | '/admin/evento'
@@ -995,6 +1005,7 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/conectar-bot'
     | '/admin/coupons'
+    | '/admin/criar-leilao'
     | '/admin/dashboard'
     | '/admin/emails'
     | '/admin/evento'
@@ -1090,6 +1101,7 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/conectar-bot'
     | '/admin/coupons'
+    | '/admin/criar-leilao'
     | '/admin/dashboard'
     | '/admin/emails'
     | '/admin/evento'
@@ -1430,6 +1442,13 @@ declare module '@tanstack/react-router' {
       path: '/coupons'
       fullPath: '/admin/coupons'
       preLoaderRoute: typeof AdminCouponsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/criar-leilao': {
+      id: '/admin/criar-leilao'
+      path: '/criar-leilao'
+      fullPath: '/admin/criar-leilao'
+      preLoaderRoute: typeof AdminCriarLeilaoRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/dashboard': {
@@ -1881,6 +1900,7 @@ interface AdminRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
   AdminConectarBotRoute: typeof AdminConectarBotRoute
   AdminCouponsRoute: typeof AdminCouponsRoute
+  AdminCriarLeilaoRoute: typeof AdminCriarLeilaoRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEmailsRoute: typeof AdminEmailsRoute
   AdminEventoRoute: typeof AdminEventoRoute
@@ -1907,6 +1927,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
   AdminConectarBotRoute: AdminConectarBotRoute,
   AdminCouponsRoute: AdminCouponsRoute,
+  AdminCriarLeilaoRoute: AdminCriarLeilaoRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEmailsRoute: AdminEmailsRoute,
   AdminEventoRoute: AdminEventoRoute,
