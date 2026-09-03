@@ -13,6 +13,8 @@ export const Route = createFileRoute("/admin/criar-leilao")({
   component: CreateAuctionPage,
 });
 
+type ExtraPrice = { label: string; value: string };
+
 type ItemForm = {
   id?: string;
   name: string;
@@ -22,7 +24,11 @@ type ItemForm = {
   bid_increment: string;
   buyout_price: string;
   quantity: string;
+  extra_prices: ExtraPrice[];
 };
+
+/** 3 valores fixos (inicial, incremento, arremate) + até 4 extras = 7 valores por lote */
+const MAX_EXTRA_PRICES = 4;
 
 const emptyItem = (): ItemForm => ({
   name: "",
@@ -32,6 +38,7 @@ const emptyItem = (): ItemForm => ({
   bid_increment: "2.00",
   buyout_price: "",
   quantity: "1",
+  extra_prices: [],
 });
 
 const toLocalInput = (iso?: string | null) => {
