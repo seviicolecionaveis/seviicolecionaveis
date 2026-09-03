@@ -13,32 +13,29 @@ export const Route = createFileRoute("/admin/criar-leilao")({
   component: CreateAuctionPage,
 });
 
-type ExtraPrice = { label: string; value: string };
-
 type ItemForm = {
   id?: string;
   name: string;
   description: string;
   image_url: string;
-  starting_price: string;
-  bid_increment: string;
+  /** [0] = lance inicial, [1..] = incrementos (Inc. 1, Inc. 2, …) */
+  values: string[];
   buyout_price: string;
   quantity: string;
-  extra_prices: ExtraPrice[];
 };
 
-/** 3 valores fixos (inicial, incremento, arremate) + até 4 extras = 7 valores por lote */
-const MAX_EXTRA_PRICES = 4;
+const MAX_VALUES = 7;
+const DEFAULT_VALUES = 5;
+
+const labelForValue = (i: number) => (i === 0 ? "Inicial" : `Inc. ${i}`);
 
 const emptyItem = (): ItemForm => ({
   name: "",
   description: "",
   image_url: "",
-  starting_price: "1.00",
-  bid_increment: "2.00",
+  values: Array.from({ length: DEFAULT_VALUES }, () => ""),
   buyout_price: "",
   quantity: "1",
-  extra_prices: [],
 });
 
 const toLocalInput = (iso?: string | null) => {
@@ -91,16 +88,20 @@ function CreateAuctionPage() {
             name: i.name ?? "",
             description: i.description ?? "",
             image_url: i.image_url ?? "",
-            starting_price: String(i.starting_price ?? "1.00"),
-            bid_increment: String(i.bid_increment ?? "1.00"),
+            values: (() => {
+              const extras = Array.isArray(i.extra_prices)
+                ? i.extra_prices.map((p: any) => (p?.value != null ? String(p.value) : ""))
+                : [];
+              const vals = [
+                i.starting_price != null ? String(i.starting_price) : "",
+                i.bid_increment != null ? String(i.bid_increment) : "",
+                ...extras,
+              ].slice(0, MAX_VALUES);
+              while (vals.length < DEFAULT_VALUES) vals.push("");
+              return vals;
+            })(),
             buyout_price: i.buyout_price != null ? String(i.buyout_price) : "",
             quantity: String(i.quantity ?? 1),
-            extra_prices: Array.isArray(i.extra_prices)
-              ? i.extra_prices.slice(0, MAX_EXTRA_PRICES).map((p: any) => ({
-                  label: String(p?.label ?? ""),
-                  value: p?.value != null ? String(p.value) : "",
-                }))
-              : [],
           })),
         );
       }
@@ -146,36 +147,30 @@ function CreateAuctionPage() {
       "nome",
       "descricao",
       "lance_inicial",
-      "incremento",
+      "inc_1",
+      "inc_2",
+      "inc_3",
+      "inc_4",
+      "inc_5",
+      "inc_6",
       "arremate",
       "quantidade",
       "imagem_url",
-      "valor_extra_1_nome",
-      "valor_extra_1_valor",
-      "valor_extra_2_nome",
-      "valor_extra_2_valor",
-      "valor_extra_3_nome",
-      "valor_extra_3_valor",
-      "valor_extra_4_nome",
-      "valor_extra_4_valor",
     ];
     const example = [
       {
         nome: "Pikachu VMAX",
         descricao: "NM - Português",
         lance_inicial: 50,
-        incremento: 5,
+        inc_1: 55,
+        inc_2: 60,
+        inc_3: 70,
+        inc_4: "",
+        inc_5: "",
+        inc_6: "",
         arremate: 300,
         quantidade: 1,
         imagem_url: "",
-        valor_extra_1_nome: "Lance mínimo Pix",
-        valor_extra_1_valor: 55,
-        valor_extra_2_nome: "",
-        valor_extra_2_valor: "",
-        valor_extra_3_nome: "",
-        valor_extra_3_valor: "",
-        valor_extra_4_nome: "",
-        valor_extra_4_valor: "",
       },
     ];
     const ws = XLSX.utils.json_to_sheet(example, { header });
@@ -195,21 +190,16 @@ function CreateAuctionPage() {
       const norm = (v: any) => String(v ?? "").trim();
       const parsed: ItemForm[] = rows
         .map((r) => {
-          const extras: ExtraPrice[] = [];
-          for (let n = 1; n <= MAX_EXTRA_PRICES; n++) {
-            const label = norm(r[`valor_extra_${n}_nome`]);
-            const value = norm(r[`valor_extra_${n}_valor`]);
-            if (label || value) extras.push({ label, value });
-          }
+          const values = [norm(r["lance_inicial"])];
+          for (let n = 1; n < MAX_VALUES; n++) values.push(norm(r[`inc_${n}`]));
+          while (values.length > DEFAULT_VALUES && !values[values.length - 1]) values.pop();
           return {
             name: norm(r["nome"]),
             description: norm(r["descricao"]),
             image_url: norm(r["imagem_url"]),
-            starting_price: norm(r["lance_inicial"]) || "1.00",
-            bid_increment: norm(r["incremento"]) || "1.00",
+            values,
             buyout_price: norm(r["arremate"]),
             quantity: norm(r["quantidade"]) || "1",
-            extra_prices: extras,
           } as ItemForm;
         })
         .filter((i) => i.name);
@@ -259,24 +249,25 @@ function CreateAuctionPage() {
       }
 
       if (validItems.length > 0) {
-        const rows = validItems.map((i, idx) => ({
-          auction_id: auctionId,
-          sequence: idx + 1,
-          name: i.name.trim(),
-          description: i.description.trim() || null,
-          image_url: i.image_url || null,
-          starting_price: Number(i.starting_price.replace(",", ".")) || 1,
-          bid_increment: Number(i.bid_increment.replace(",", ".")) || 1,
-          buyout_price: i.buyout_price ? Number(i.buyout_price.replace(",", ".")) : null,
-          quantity: Number(i.quantity) || 1,
-          extra_prices: i.extra_prices
-            .filter((p) => p.label.trim() || p.value.trim())
-            .slice(0, MAX_EXTRA_PRICES)
-            .map((p) => ({
-              label: p.label.trim() || "Valor",
-              value: Number(String(p.value).replace(",", ".")) || 0,
-            })),
-        }));
+        const num = (v: string) => Number(String(v ?? "").replace(",", "."));
+        const rows = validItems.map((i, idx) => {
+          const vals = i.values.map(num).map((n) => (Number.isFinite(n) ? n : 0));
+          return {
+            auction_id: auctionId,
+            sequence: idx + 1,
+            name: i.name.trim(),
+            description: i.description.trim() || null,
+            image_url: i.image_url || null,
+            starting_price: vals[0] || 1,
+            bid_increment: vals[1] || 1,
+            buyout_price: i.buyout_price ? num(i.buyout_price) : null,
+            quantity: Number(i.quantity) || 1,
+            extra_prices: i.values
+              .slice(2, MAX_VALUES)
+              .map((v, k) => ({ label: labelForValue(k + 2), value: num(v) }))
+              .filter((p) => Number.isFinite(p.value) && p.value > 0),
+          };
+        });
         const { error } = await (supabase as any).from("auction_items").insert(rows);
         if (error) throw error;
       }
@@ -415,15 +406,44 @@ function CreateAuctionPage() {
 
             <input className={input} placeholder="Nome do item" value={it.name} onChange={(e) => patchItem(idx, { name: e.target.value })} />
             <input className={input} placeholder="Descrição / Condição" value={it.description} onChange={(e) => patchItem(idx, { description: e.target.value })} />
-            <div className="grid gap-3 sm:grid-cols-4">
-              <label className="space-y-1 text-[11px] font-semibold">
-                Lance inicial (R$)
-                <input className={input} value={it.starting_price} onChange={(e) => patchItem(idx, { starting_price: e.target.value })} />
-              </label>
-              <label className="space-y-1 text-[11px] font-semibold">
-                Incremento (R$)
-                <input className={input} value={it.bid_increment} onChange={(e) => patchItem(idx, { bid_increment: e.target.value })} />
-              </label>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Valores ({it.values.length}/{MAX_VALUES})
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => patchItem(idx, { values: it.values.slice(0, Math.max(2, it.values.length - 1)) })}
+                    disabled={it.values.length <= 2}
+                    className="rounded border border-border px-2 py-1 text-[11px] font-semibold hover:bg-secondary disabled:opacity-40"
+                  >
+                    − Remover
+                  </button>
+                  <button
+                    onClick={() => patchItem(idx, { values: [...it.values, ""] })}
+                    disabled={it.values.length >= MAX_VALUES}
+                    className="rounded border border-primary/50 px-2 py-1 text-[11px] font-semibold text-primary hover:bg-primary/10 disabled:opacity-40"
+                  >
+                    + Adicionar
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {it.values.map((v, vi) => (
+                  <input
+                    key={vi}
+                    className={input}
+                    placeholder={labelForValue(vi)}
+                    value={v}
+                    onChange={(e) =>
+                      patchItem(idx, { values: it.values.map((x, i2) => (i2 === vi ? e.target.value : x)) })
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
               <label className="space-y-1 text-[11px] font-semibold">
                 Arremate (R$)
                 <input className={input} placeholder="opcional" value={it.buyout_price} onChange={(e) => patchItem(idx, { buyout_price: e.target.value })} />
@@ -432,58 +452,6 @@ function CreateAuctionPage() {
                 Quantidade
                 <input className={input} value={it.quantity} onChange={(e) => patchItem(idx, { quantity: e.target.value })} />
               </label>
-            </div>
-
-            <div className="space-y-2 rounded-md border border-dashed border-border p-2.5">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-                  Valores adicionais ({3 + it.extra_prices.length}/7)
-                </p>
-                <button
-                  onClick={() =>
-                    patchItem(idx, {
-                      extra_prices:
-                        it.extra_prices.length >= MAX_EXTRA_PRICES
-                          ? it.extra_prices
-                          : [...it.extra_prices, { label: "", value: "" }],
-                    })
-                  }
-                  disabled={it.extra_prices.length >= MAX_EXTRA_PRICES}
-                  className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-[11px] font-semibold hover:bg-secondary disabled:opacity-40"
-                >
-                  <Plus className="h-3 w-3" /> Valor
-                </button>
-              </div>
-              {it.extra_prices.map((p, pi) => (
-                <div key={pi} className="grid gap-2 sm:grid-cols-[1fr_140px_auto]">
-                  <input
-                    className={input}
-                    placeholder="Nome do valor (ex.: Lance mínimo Pix)"
-                    value={p.label}
-                    onChange={(e) =>
-                      patchItem(idx, {
-                        extra_prices: it.extra_prices.map((x, i2) => (i2 === pi ? { ...x, label: e.target.value } : x)),
-                      })
-                    }
-                  />
-                  <input
-                    className={input}
-                    placeholder="R$"
-                    value={p.value}
-                    onChange={(e) =>
-                      patchItem(idx, {
-                        extra_prices: it.extra_prices.map((x, i2) => (i2 === pi ? { ...x, value: e.target.value } : x)),
-                      })
-                    }
-                  />
-                  <button
-                    onClick={() => patchItem(idx, { extra_prices: it.extra_prices.filter((_, i2) => i2 !== pi) })}
-                    className="rounded border border-destructive/40 px-2 text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ))}
             </div>
           </div>
         ))}
