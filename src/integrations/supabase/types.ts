@@ -255,6 +255,7 @@ export type Database = {
           buyout_price: number | null
           created_at: string
           description: string | null
+          extra_prices: Json
           final_bid: number | null
           id: string
           image_url: string | null
@@ -272,6 +273,7 @@ export type Database = {
           buyout_price?: number | null
           created_at?: string
           description?: string | null
+          extra_prices?: Json
           final_bid?: number | null
           id?: string
           image_url?: string | null
@@ -289,6 +291,7 @@ export type Database = {
           buyout_price?: number | null
           created_at?: string
           description?: string | null
+          extra_prices?: Json
           final_bid?: number | null
           id?: string
           image_url?: string | null
