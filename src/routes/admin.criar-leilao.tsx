@@ -406,15 +406,44 @@ function CreateAuctionPage() {
 
             <input className={input} placeholder="Nome do item" value={it.name} onChange={(e) => patchItem(idx, { name: e.target.value })} />
             <input className={input} placeholder="Descrição / Condição" value={it.description} onChange={(e) => patchItem(idx, { description: e.target.value })} />
-            <div className="grid gap-3 sm:grid-cols-4">
-              <label className="space-y-1 text-[11px] font-semibold">
-                Lance inicial (R$)
-                <input className={input} value={it.starting_price} onChange={(e) => patchItem(idx, { starting_price: e.target.value })} />
-              </label>
-              <label className="space-y-1 text-[11px] font-semibold">
-                Incremento (R$)
-                <input className={input} value={it.bid_increment} onChange={(e) => patchItem(idx, { bid_increment: e.target.value })} />
-              </label>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Valores ({it.values.length}/{MAX_VALUES})
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => patchItem(idx, { values: it.values.slice(0, Math.max(2, it.values.length - 1)) })}
+                    disabled={it.values.length <= 2}
+                    className="rounded border border-border px-2 py-1 text-[11px] font-semibold hover:bg-secondary disabled:opacity-40"
+                  >
+                    − Remover
+                  </button>
+                  <button
+                    onClick={() => patchItem(idx, { values: [...it.values, ""] })}
+                    disabled={it.values.length >= MAX_VALUES}
+                    className="rounded border border-primary/50 px-2 py-1 text-[11px] font-semibold text-primary hover:bg-primary/10 disabled:opacity-40"
+                  >
+                    + Adicionar
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {it.values.map((v, vi) => (
+                  <input
+                    key={vi}
+                    className={input}
+                    placeholder={labelForValue(vi)}
+                    value={v}
+                    onChange={(e) =>
+                      patchItem(idx, { values: it.values.map((x, i2) => (i2 === vi ? e.target.value : x)) })
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
               <label className="space-y-1 text-[11px] font-semibold">
                 Arremate (R$)
                 <input className={input} placeholder="opcional" value={it.buyout_price} onChange={(e) => patchItem(idx, { buyout_price: e.target.value })} />
@@ -423,58 +452,6 @@ function CreateAuctionPage() {
                 Quantidade
                 <input className={input} value={it.quantity} onChange={(e) => patchItem(idx, { quantity: e.target.value })} />
               </label>
-            </div>
-
-            <div className="space-y-2 rounded-md border border-dashed border-border p-2.5">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-                  Valores adicionais ({3 + it.extra_prices.length}/7)
-                </p>
-                <button
-                  onClick={() =>
-                    patchItem(idx, {
-                      extra_prices:
-                        it.extra_prices.length >= MAX_EXTRA_PRICES
-                          ? it.extra_prices
-                          : [...it.extra_prices, { label: "", value: "" }],
-                    })
-                  }
-                  disabled={it.extra_prices.length >= MAX_EXTRA_PRICES}
-                  className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-[11px] font-semibold hover:bg-secondary disabled:opacity-40"
-                >
-                  <Plus className="h-3 w-3" /> Valor
-                </button>
-              </div>
-              {it.extra_prices.map((p, pi) => (
-                <div key={pi} className="grid gap-2 sm:grid-cols-[1fr_140px_auto]">
-                  <input
-                    className={input}
-                    placeholder="Nome do valor (ex.: Lance mínimo Pix)"
-                    value={p.label}
-                    onChange={(e) =>
-                      patchItem(idx, {
-                        extra_prices: it.extra_prices.map((x, i2) => (i2 === pi ? { ...x, label: e.target.value } : x)),
-                      })
-                    }
-                  />
-                  <input
-                    className={input}
-                    placeholder="R$"
-                    value={p.value}
-                    onChange={(e) =>
-                      patchItem(idx, {
-                        extra_prices: it.extra_prices.map((x, i2) => (i2 === pi ? { ...x, value: e.target.value } : x)),
-                      })
-                    }
-                  />
-                  <button
-                    onClick={() => patchItem(idx, { extra_prices: it.extra_prices.filter((_, i2) => i2 !== pi) })}
-                    className="rounded border border-destructive/40 px-2 text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ))}
             </div>
           </div>
         ))}
