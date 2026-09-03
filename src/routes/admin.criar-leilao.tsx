@@ -140,6 +140,90 @@ function CreateAuctionPage() {
     toast.success("Imagem enviada.");
   };
 
+  const downloadTemplate = async () => {
+    const XLSX = await import("xlsx");
+    const header = [
+      "nome",
+      "descricao",
+      "lance_inicial",
+      "incremento",
+      "arremate",
+      "quantidade",
+      "imagem_url",
+      "valor_extra_1_nome",
+      "valor_extra_1_valor",
+      "valor_extra_2_nome",
+      "valor_extra_2_valor",
+      "valor_extra_3_nome",
+      "valor_extra_3_valor",
+      "valor_extra_4_nome",
+      "valor_extra_4_valor",
+    ];
+    const example = [
+      {
+        nome: "Pikachu VMAX",
+        descricao: "NM - Português",
+        lance_inicial: 50,
+        incremento: 5,
+        arremate: 300,
+        quantidade: 1,
+        imagem_url: "",
+        valor_extra_1_nome: "Lance mínimo Pix",
+        valor_extra_1_valor: 55,
+        valor_extra_2_nome: "",
+        valor_extra_2_valor: "",
+        valor_extra_3_nome: "",
+        valor_extra_3_valor: "",
+        valor_extra_4_nome: "",
+        valor_extra_4_valor: "",
+      },
+    ];
+    const ws = XLSX.utils.json_to_sheet(example, { header });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Lotes");
+    XLSX.writeFile(wb, "modelo-lotes-leilao.xlsx");
+  };
+
+  const importSpreadsheet = async (file: File) => {
+    try {
+      const XLSX = await import("xlsx");
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const sheetName = wb.SheetNames[0];
+      if (!sheetName) return toast.error("Planilha vazia.");
+      const rows: any[] = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]!, { defval: "" });
+      const norm = (v: any) => String(v ?? "").trim();
+      const parsed: ItemForm[] = rows
+        .map((r) => {
+          const extras: ExtraPrice[] = [];
+          for (let n = 1; n <= MAX_EXTRA_PRICES; n++) {
+            const label = norm(r[`valor_extra_${n}_nome`]);
+            const value = norm(r[`valor_extra_${n}_valor`]);
+            if (label || value) extras.push({ label, value });
+          }
+          return {
+            name: norm(r["nome"]),
+            description: norm(r["descricao"]),
+            image_url: norm(r["imagem_url"]),
+            starting_price: norm(r["lance_inicial"]) || "1.00",
+            bid_increment: norm(r["incremento"]) || "1.00",
+            buyout_price: norm(r["arremate"]),
+            quantity: norm(r["quantidade"]) || "1",
+            extra_prices: extras,
+          } as ItemForm;
+        })
+        .filter((i) => i.name);
+      if (parsed.length === 0) return toast.error("Nenhum lote válido encontrado (coluna 'nome' obrigatória).");
+      setItems((prev) => {
+        const base = prev.filter((p) => p.name.trim());
+        return [...base, ...parsed];
+      });
+      toast.success(`${parsed.length} lote(s) importado(s).`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao ler a planilha.");
+    }
+  };
+
   const save = async (mode: "draft" | "scheduled") => {
     if (!title.trim()) return toast.error("Informe o título do leilão.");
     if (!groupJid) return toast.error("Selecione o grupo de destino.");
