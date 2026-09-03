@@ -93,6 +93,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as ApiPublicBotCommandsPendingRouteImport } from './routes/api/public/bot/commands/pending'
 import { Route as ApiPublicBotGroupsActivateRouteImport } from './routes/api/public/bot/groups/activate'
 import { Route as ApiPublicBotGroupsActiveRouteImport } from './routes/api/public/bot/groups/active'
+import { Route as ApiPublicBotSchedulesPendingRouteImport } from './routes/api/public/bot/schedules/pending'
 import { Route as ApiPublicBotUsersSenhaRouteImport } from './routes/api/public/bot/users/senha'
 import { Route as ApiPublicBotCommandsIdMarkRouteImport } from './routes/api/public/bot/commands/$id.mark'
 
@@ -530,6 +531,12 @@ const ApiPublicBotGroupsActiveRoute =
     path: '/api/public/bot/groups/active',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicBotSchedulesPendingRoute =
+  ApiPublicBotSchedulesPendingRouteImport.update({
+    id: '/api/public/bot/schedules/pending',
+    path: '/api/public/bot/schedules/pending',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicBotUsersSenhaRoute = ApiPublicBotUsersSenhaRouteImport.update({
   id: '/api/public/bot/users/senha',
   path: '/api/public/bot/users/senha',
@@ -627,6 +634,7 @@ export interface FileRoutesByFullPath {
   '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
   '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
   '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
+  '/api/public/bot/schedules/pending': typeof ApiPublicBotSchedulesPendingRoute
   '/api/public/bot/users/senha': typeof ApiPublicBotUsersSenhaRoute
   '/api/public/bot/commands/$id/mark': typeof ApiPublicBotCommandsIdMarkRoute
 }
@@ -712,6 +720,7 @@ export interface FileRoutesByTo {
   '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
   '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
   '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
+  '/api/public/bot/schedules/pending': typeof ApiPublicBotSchedulesPendingRoute
   '/api/public/bot/users/senha': typeof ApiPublicBotUsersSenhaRoute
   '/api/public/bot/commands/$id/mark': typeof ApiPublicBotCommandsIdMarkRoute
 }
@@ -801,6 +810,7 @@ export interface FileRoutesById {
   '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
   '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
   '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
+  '/api/public/bot/schedules/pending': typeof ApiPublicBotSchedulesPendingRoute
   '/api/public/bot/users/senha': typeof ApiPublicBotUsersSenhaRoute
   '/api/public/bot/commands/$id/mark': typeof ApiPublicBotCommandsIdMarkRoute
 }
@@ -891,6 +901,7 @@ export interface FileRouteTypes {
     | '/api/public/bot/commands/pending'
     | '/api/public/bot/groups/activate'
     | '/api/public/bot/groups/active'
+    | '/api/public/bot/schedules/pending'
     | '/api/public/bot/users/senha'
     | '/api/public/bot/commands/$id/mark'
   fileRoutesByTo: FileRoutesByTo
@@ -976,6 +987,7 @@ export interface FileRouteTypes {
     | '/api/public/bot/commands/pending'
     | '/api/public/bot/groups/activate'
     | '/api/public/bot/groups/active'
+    | '/api/public/bot/schedules/pending'
     | '/api/public/bot/users/senha'
     | '/api/public/bot/commands/$id/mark'
   id:
@@ -1064,6 +1076,7 @@ export interface FileRouteTypes {
     | '/api/public/bot/commands/pending'
     | '/api/public/bot/groups/activate'
     | '/api/public/bot/groups/active'
+    | '/api/public/bot/schedules/pending'
     | '/api/public/bot/users/senha'
     | '/api/public/bot/commands/$id/mark'
   fileRoutesById: FileRoutesById
@@ -1123,6 +1136,7 @@ export interface RootRouteChildren {
   ApiPublicBotCommandsPendingRoute: typeof ApiPublicBotCommandsPendingRoute
   ApiPublicBotGroupsActivateRoute: typeof ApiPublicBotGroupsActivateRoute
   ApiPublicBotGroupsActiveRoute: typeof ApiPublicBotGroupsActiveRoute
+  ApiPublicBotSchedulesPendingRoute: typeof ApiPublicBotSchedulesPendingRoute
   ApiPublicBotUsersSenhaRoute: typeof ApiPublicBotUsersSenhaRoute
   ApiPublicBotCommandsIdMarkRoute: typeof ApiPublicBotCommandsIdMarkRoute
 }
@@ -1717,6 +1731,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBotGroupsActiveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/bot/schedules/pending': {
+      id: '/api/public/bot/schedules/pending'
+      path: '/api/public/bot/schedules/pending'
+      fullPath: '/api/public/bot/schedules/pending'
+      preLoaderRoute: typeof ApiPublicBotSchedulesPendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/bot/users/senha': {
       id: '/api/public/bot/users/senha'
       path: '/api/public/bot/users/senha'
@@ -1905,6 +1926,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBotCommandsPendingRoute: ApiPublicBotCommandsPendingRoute,
   ApiPublicBotGroupsActivateRoute: ApiPublicBotGroupsActivateRoute,
   ApiPublicBotGroupsActiveRoute: ApiPublicBotGroupsActiveRoute,
+  ApiPublicBotSchedulesPendingRoute: ApiPublicBotSchedulesPendingRoute,
   ApiPublicBotUsersSenhaRoute: ApiPublicBotUsersSenhaRoute,
   ApiPublicBotCommandsIdMarkRoute: ApiPublicBotCommandsIdMarkRoute,
 }
