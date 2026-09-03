@@ -102,6 +102,9 @@ Chamado quando alguém digita `!ativar <codigo>` no grupo.
 - `200 { "success": true, "message": "Grupo ativado com sucesso!" }`
 - `400 / 404 { "error": "Código inválido ou expirado" }`
 
+O código é marcado como usado e o grupo entra em `bot_groups` com `status = active`.
+
+
 
 ### 3.5b `POST /api/public/bot/groups/upsert` (aliases: `/groups/sync`, `POST /groups`)
 Sincroniza a lista de grupos que o bot enxerga no WhatsApp.
