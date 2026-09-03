@@ -408,6 +408,58 @@ function CreateAuctionPage() {
                 <input className={input} value={it.quantity} onChange={(e) => patchItem(idx, { quantity: e.target.value })} />
               </label>
             </div>
+
+            <div className="space-y-2 rounded-md border border-dashed border-border p-2.5">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Valores adicionais ({3 + it.extra_prices.length}/7)
+                </p>
+                <button
+                  onClick={() =>
+                    patchItem(idx, {
+                      extra_prices:
+                        it.extra_prices.length >= MAX_EXTRA_PRICES
+                          ? it.extra_prices
+                          : [...it.extra_prices, { label: "", value: "" }],
+                    })
+                  }
+                  disabled={it.extra_prices.length >= MAX_EXTRA_PRICES}
+                  className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-[11px] font-semibold hover:bg-secondary disabled:opacity-40"
+                >
+                  <Plus className="h-3 w-3" /> Valor
+                </button>
+              </div>
+              {it.extra_prices.map((p, pi) => (
+                <div key={pi} className="grid gap-2 sm:grid-cols-[1fr_140px_auto]">
+                  <input
+                    className={input}
+                    placeholder="Nome do valor (ex.: Lance mínimo Pix)"
+                    value={p.label}
+                    onChange={(e) =>
+                      patchItem(idx, {
+                        extra_prices: it.extra_prices.map((x, i2) => (i2 === pi ? { ...x, label: e.target.value } : x)),
+                      })
+                    }
+                  />
+                  <input
+                    className={input}
+                    placeholder="R$"
+                    value={p.value}
+                    onChange={(e) =>
+                      patchItem(idx, {
+                        extra_prices: it.extra_prices.map((x, i2) => (i2 === pi ? { ...x, value: e.target.value } : x)),
+                      })
+                    }
+                  />
+                  <button
+                    onClick={() => patchItem(idx, { extra_prices: it.extra_prices.filter((_, i2) => i2 !== pi) })}
+                    className="rounded border border-destructive/40 px-2 text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </section>
