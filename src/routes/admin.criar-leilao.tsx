@@ -88,16 +88,20 @@ function CreateAuctionPage() {
             name: i.name ?? "",
             description: i.description ?? "",
             image_url: i.image_url ?? "",
-            starting_price: String(i.starting_price ?? "1.00"),
-            bid_increment: String(i.bid_increment ?? "1.00"),
+            values: (() => {
+              const extras = Array.isArray(i.extra_prices)
+                ? i.extra_prices.map((p: any) => (p?.value != null ? String(p.value) : ""))
+                : [];
+              const vals = [
+                i.starting_price != null ? String(i.starting_price) : "",
+                i.bid_increment != null ? String(i.bid_increment) : "",
+                ...extras,
+              ].slice(0, MAX_VALUES);
+              while (vals.length < DEFAULT_VALUES) vals.push("");
+              return vals;
+            })(),
             buyout_price: i.buyout_price != null ? String(i.buyout_price) : "",
             quantity: String(i.quantity ?? 1),
-            extra_prices: Array.isArray(i.extra_prices)
-              ? i.extra_prices.slice(0, MAX_EXTRA_PRICES).map((p: any) => ({
-                  label: String(p?.label ?? ""),
-                  value: p?.value != null ? String(p.value) : "",
-                }))
-              : [],
           })),
         );
       }
