@@ -10,7 +10,8 @@ const WHATSAPP_NUMBER = "5579981509552";
 
 export const Route = createFileRoute("/pre-venda/$slug")({
   loader: async ({ params }) => {
-    const { page } = await getActivePresalePageBySlug({ data: { slug: params.slug } });
+    const { page, error } = await getActivePresalePageBySlug({ data: { slug: params.slug } });
+    if (error) throw new Error("Não foi possível carregar esta pré-venda agora. Tente novamente.");
     if (!page) throw notFound();
     return { page };
   },
