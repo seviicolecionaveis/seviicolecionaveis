@@ -37,6 +37,7 @@ import { Route as TiposDeCartaRouteImport } from './routes/tipos-de-carta'
 import { Route as VideogamesRouteImport } from './routes/videogames'
 import { Route as AdminAccessoriesRouteImport } from './routes/admin.accessories'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as AdminConectarBotRouteImport } from './routes/admin.conectar-bot'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
@@ -233,6 +234,11 @@ const AdminAccessoriesRoute = AdminAccessoriesRouteImport.update({
 const AdminBannersRoute = AdminBannersRouteImport.update({
   id: '/banners',
   path: '/banners',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConectarBotRoute = AdminConectarBotRouteImport.update({
+  id: '/conectar-bot',
+  path: '/conectar-bot',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCouponsRoute = AdminCouponsRouteImport.update({
@@ -565,6 +571,7 @@ export interface FileRoutesByFullPath {
   '/videogames': typeof VideogamesRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/conectar-bot': typeof AdminConectarBotRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
@@ -649,6 +656,7 @@ export interface FileRoutesByTo {
   '/videogames': typeof VideogamesRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/conectar-bot': typeof AdminConectarBotRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
@@ -737,6 +745,7 @@ export interface FileRoutesById {
   '/videogames': typeof VideogamesRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/conectar-bot': typeof AdminConectarBotRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
@@ -826,6 +835,7 @@ export interface FileRouteTypes {
     | '/videogames'
     | '/admin/accessories'
     | '/admin/banners'
+    | '/admin/conectar-bot'
     | '/admin/coupons'
     | '/admin/dashboard'
     | '/admin/emails'
@@ -910,6 +920,7 @@ export interface FileRouteTypes {
     | '/videogames'
     | '/admin/accessories'
     | '/admin/banners'
+    | '/admin/conectar-bot'
     | '/admin/coupons'
     | '/admin/dashboard'
     | '/admin/emails'
@@ -997,6 +1008,7 @@ export interface FileRouteTypes {
     | '/videogames'
     | '/admin/accessories'
     | '/admin/banners'
+    | '/admin/conectar-bot'
     | '/admin/coupons'
     | '/admin/dashboard'
     | '/admin/emails'
@@ -1311,6 +1323,13 @@ declare module '@tanstack/react-router' {
       path: '/banners'
       fullPath: '/admin/banners'
       preLoaderRoute: typeof AdminBannersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/conectar-bot': {
+      id: '/admin/conectar-bot'
+      path: '/conectar-bot'
+      fullPath: '/admin/conectar-bot'
+      preLoaderRoute: typeof AdminConectarBotRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/coupons': {
@@ -1718,6 +1737,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminAccessoriesRoute: typeof AdminAccessoriesRoute
   AdminBannersRoute: typeof AdminBannersRoute
+  AdminConectarBotRoute: typeof AdminConectarBotRoute
   AdminCouponsRoute: typeof AdminCouponsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEmailsRoute: typeof AdminEmailsRoute
@@ -1742,6 +1762,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAccessoriesRoute: AdminAccessoriesRoute,
   AdminBannersRoute: AdminBannersRoute,
+  AdminConectarBotRoute: AdminConectarBotRoute,
   AdminCouponsRoute: AdminCouponsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEmailsRoute: AdminEmailsRoute,
