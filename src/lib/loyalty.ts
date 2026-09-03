@@ -77,6 +77,29 @@ export function normalizeRedeemPoints(
   return blocks * POINTS_PER_REDEEM_BLOCK;
 }
 
+// ---------------- Resgate restrito a cartas avulsas ----------------
+const SINGLE_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Cartas avulsas têm cardId = UUID do registro em `cards`.
+ * Produtos não elegíveis a resgate de pontos usam prefixos:
+ * "sealed:", "accessory:", "videogame:", "panel:" (e outros virtuais).
+ * Esses produtos acumulam pontos, mas não podem ser pagos com pontos.
+ */
+export function isSingleCardId(cardId: string | null | undefined): boolean {
+  return typeof cardId === "string" && SINGLE_UUID_RE.test(cardId);
+}
+
+/** Subtotal (em centavos) apenas das cartas avulsas do carrinho. unitPrice em reais. */
+export function singlesSubtotalCents(
+  items: ReadonlyArray<{ cardId: string; unitPrice: number; quantity: number }>,
+): number {
+  return items.reduce(
+    (sum, i) => sum + (isSingleCardId(i.cardId) ? Math.round(i.unitPrice * 100) * i.quantity : 0),
+    0,
+  );
+}
+
 export function formatPoints(n: number): string {
   return n.toLocaleString("pt-BR");
 }
