@@ -167,7 +167,14 @@ function AdminPage() {
   }
 
   if (!isOrdersRoute) {
-    return <Outlet />;
+    return (
+      <div className="min-h-screen bg-background flex">
+        <AdminSidebar />
+        <div className="flex-1 min-w-0">
+          <Outlet />
+        </div>
+      </div>
+    );
   }
 
   const query = searchQuery.trim().toLowerCase();
@@ -186,29 +193,17 @@ function AdminPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex">
+      <AdminSidebar />
+      <div className="flex-1 min-w-0">
       <header className="border-b border-border px-4 py-4">
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
           <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis · Admin</Link>
-          <div className="flex items-center gap-3">
-            <AdminCancellationBell />
-          <div className="flex items-center gap-1 flex-wrap">
-            <Link
-              to="/admin/dashboard"
-              className="rounded-md px-2.5 py-1.5 text-xs font-semibold text-foreground transition hover:bg-secondary"
-              activeProps={{ className: "bg-foreground text-background hover:bg-foreground" }}
-            >
-              Dashboard
-            </Link>
-            {NAV_GROUPS.map((g) => (
-              <AdminNavMenu key={g.label} group={g} currentPath={location.pathname} />
-            ))}
-            <Link to="/" className="ml-2 text-xs text-muted-foreground hover:text-foreground">← Catálogo</Link>
-          </div>
-          </div>
+          <AdminCancellationBell />
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8">
+
         <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
           <h1 className="text-2xl font-bold">Pedidos ({filtered.length})</h1>
           <div className="flex flex-wrap gap-3">
