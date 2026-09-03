@@ -9,7 +9,7 @@ Documento de referência para o bot/Antigravity conectar-se ao painel.
 | Parâmetro | Valor |
 |---|---|
 | `PROCESS_NAME` / `PM2_PROCESS_NAME` | `bot_seviicolecionaveis` |
-| `BOT_API_SECRET` | `aA4zE0J7RDcC5g5wG3wz` |
+| `BOT_API_SECRET` | `<BOT_API_SECRET>` |
 | Porta API bot (VPS) | `3025` |
 | Porta health (VPS) | `3026` |
 | Porta comandos (VPS) | `3075` |
