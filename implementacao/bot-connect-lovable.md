@@ -23,12 +23,13 @@ Preview/dev: `https://project--392637a4-5b2d-43f0-a643-ac0dba0c2366-dev.lovable.
 Todas as chamadas devem enviar:
 
 ```
-x-bot-secret: aA4zE0J7RDcC5g5wG3wz
+x-bot-secret: <BOT_API_SECRET>
 Content-Type: application/json
 ```
 
 Respostas de erro de autenticação: `401` (sem header), `403` (segredo errado),
 `400` (`process_name` diferente de `bot_seviicolecionaveis`).
+Detalhamento completo na **seção 7 (Erros do bot)**.
 
 ---
 
