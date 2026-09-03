@@ -2222,15 +2222,6 @@ export type Database = {
         }[]
       }
       clear_event_reserved: { Args: never; Returns: number }
-      delete_email: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
-      email_queue_dispatch: { Args: never; Returns: undefined }
-      enqueue_email: {
-        Args: { payload: Json; queue_name: string }
-        Returns: number
-      }
       expire_old_loyalty_points: { Args: never; Returns: number }
       has_role: {
         Args: {
@@ -2241,15 +2232,6 @@ export type Database = {
       }
       has_user_purchased: { Args: { _user_id: string }; Returns: boolean }
       increment_card_view: { Args: { _card_key: string }; Returns: undefined }
-      move_to_dlq: {
-        Args: {
-          dlq_name: string
-          message_id: number
-          payload: Json
-          source_queue: string
-        }
-        Returns: number
-      }
       raffle_expire_reservations: { Args: never; Returns: number }
       raffle_join: {
         Args: { _raffle_id: string }
@@ -2261,14 +2243,6 @@ export type Database = {
       raffle_run_draw: {
         Args: { _raffle_id: string; _units?: number }
         Returns: number
-      }
-      read_email_batch: {
-        Args: { batch_size: number; queue_name: string; vt: number }
-        Returns: {
-          message: Json
-          msg_id: number
-          read_ct: number
-        }[]
       }
       set_event_reserved: { Args: { _items: Json }; Returns: number }
       user_lifetime_earned: { Args: { _user_id: string }; Returns: number }
