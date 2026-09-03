@@ -249,24 +249,25 @@ function CreateAuctionPage() {
       }
 
       if (validItems.length > 0) {
-        const rows = validItems.map((i, idx) => ({
-          auction_id: auctionId,
-          sequence: idx + 1,
-          name: i.name.trim(),
-          description: i.description.trim() || null,
-          image_url: i.image_url || null,
-          starting_price: Number(i.starting_price.replace(",", ".")) || 1,
-          bid_increment: Number(i.bid_increment.replace(",", ".")) || 1,
-          buyout_price: i.buyout_price ? Number(i.buyout_price.replace(",", ".")) : null,
-          quantity: Number(i.quantity) || 1,
-          extra_prices: i.extra_prices
-            .filter((p) => p.label.trim() || p.value.trim())
-            .slice(0, MAX_EXTRA_PRICES)
-            .map((p) => ({
-              label: p.label.trim() || "Valor",
-              value: Number(String(p.value).replace(",", ".")) || 0,
-            })),
-        }));
+        const num = (v: string) => Number(String(v ?? "").replace(",", "."));
+        const rows = validItems.map((i, idx) => {
+          const vals = i.values.map(num).map((n) => (Number.isFinite(n) ? n : 0));
+          return {
+            auction_id: auctionId,
+            sequence: idx + 1,
+            name: i.name.trim(),
+            description: i.description.trim() || null,
+            image_url: i.image_url || null,
+            starting_price: vals[0] || 1,
+            bid_increment: vals[1] || 1,
+            buyout_price: i.buyout_price ? num(i.buyout_price) : null,
+            quantity: Number(i.quantity) || 1,
+            extra_prices: i.values
+              .slice(2, MAX_VALUES)
+              .map((v, k) => ({ label: labelForValue(k + 2), value: num(v) }))
+              .filter((p) => Number.isFinite(p.value) && p.value > 0),
+          };
+        });
         const { error } = await (supabase as any).from("auction_items").insert(rows);
         if (error) throw error;
       }
