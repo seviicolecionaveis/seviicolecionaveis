@@ -90,6 +90,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as ApiPublicBotAuctionsIdRouteImport } from './routes/api/public/bot/auctions/$id'
 import { Route as ApiPublicBotCommandsPendingRouteImport } from './routes/api/public/bot/commands/pending'
 import { Route as ApiPublicBotGroupsActivateRouteImport } from './routes/api/public/bot/groups/activate'
 import { Route as ApiPublicBotGroupsActiveRouteImport } from './routes/api/public/bot/groups/active'
@@ -514,6 +515,11 @@ const LovableEmailTransactionalPreviewRoute =
     path: '/lovable/email/transactional/preview',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicBotAuctionsIdRoute = ApiPublicBotAuctionsIdRouteImport.update({
+  id: '/api/public/bot/auctions/$id',
+  path: '/api/public/bot/auctions/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicBotCommandsPendingRoute =
   ApiPublicBotCommandsPendingRouteImport.update({
     id: '/api/public/bot/commands/pending',
@@ -638,6 +644,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/api/public/bot/auctions/$id': typeof ApiPublicBotAuctionsIdRoute
   '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
   '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
   '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
@@ -725,6 +732,7 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/api/public/bot/auctions/$id': typeof ApiPublicBotAuctionsIdRoute
   '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
   '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
   '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
@@ -816,6 +824,7 @@ export interface FileRoutesById {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/api/public/bot/auctions/$id': typeof ApiPublicBotAuctionsIdRoute
   '/api/public/bot/commands/pending': typeof ApiPublicBotCommandsPendingRoute
   '/api/public/bot/groups/activate': typeof ApiPublicBotGroupsActivateRoute
   '/api/public/bot/groups/active': typeof ApiPublicBotGroupsActiveRoute
@@ -908,6 +917,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/api/public/bot/auctions/$id'
     | '/api/public/bot/commands/pending'
     | '/api/public/bot/groups/activate'
     | '/api/public/bot/groups/active'
@@ -995,6 +1005,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/api/public/bot/auctions/$id'
     | '/api/public/bot/commands/pending'
     | '/api/public/bot/groups/activate'
     | '/api/public/bot/groups/active'
@@ -1085,6 +1096,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/api/public/bot/auctions/$id'
     | '/api/public/bot/commands/pending'
     | '/api/public/bot/groups/activate'
     | '/api/public/bot/groups/active'
@@ -1146,6 +1158,7 @@ export interface RootRouteChildren {
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  ApiPublicBotAuctionsIdRoute: typeof ApiPublicBotAuctionsIdRoute
   ApiPublicBotCommandsPendingRoute: typeof ApiPublicBotCommandsPendingRoute
   ApiPublicBotGroupsActivateRoute: typeof ApiPublicBotGroupsActivateRoute
   ApiPublicBotGroupsActiveRoute: typeof ApiPublicBotGroupsActiveRoute
@@ -1724,6 +1737,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/bot/auctions/$id': {
+      id: '/api/public/bot/auctions/$id'
+      path: '/api/public/bot/auctions/$id'
+      fullPath: '/api/public/bot/auctions/$id'
+      preLoaderRoute: typeof ApiPublicBotAuctionsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/bot/commands/pending': {
       id: '/api/public/bot/commands/pending'
       path: '/api/public/bot/commands/pending'
@@ -1944,6 +1964,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  ApiPublicBotAuctionsIdRoute: ApiPublicBotAuctionsIdRoute,
   ApiPublicBotCommandsPendingRoute: ApiPublicBotCommandsPendingRoute,
   ApiPublicBotGroupsActivateRoute: ApiPublicBotGroupsActivateRoute,
   ApiPublicBotGroupsActiveRoute: ApiPublicBotGroupsActiveRoute,
