@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, ArrowUp, ArrowDown, Upload, ArrowLeft } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Upload, ArrowLeft, Download, FileSpreadsheet } from "lucide-react";
 
 export const Route = createFileRoute("/admin/criar-leilao")({
   head: () => ({ meta: [{ title: "Criar Leilão — Admin" }] }),
