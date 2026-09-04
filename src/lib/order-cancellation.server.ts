@@ -164,6 +164,22 @@ export async function refundEntireOrder(orderId: string, method: RefundMethod) {
       throw new Response("Erro ao gerar cupom de reembolso.", { status: 500 });
     }
     details = `Cupom ${couponCode} (válido 1 ano)`;
+
+    // Envia o e-mail do vale-presente assim que o cupom é gerado
+    if (order.email) {
+      const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
+      await sendTransactionalEmailSafe({
+        templateName: "gift-voucher",
+        recipientEmail: order.email,
+        idempotencyKey: `refund-voucher:${couponCode}`,
+        templateData: {
+          recipientName: null,
+          code: couponCode,
+          amountCents: refundCents,
+          expiresAt: expires,
+        },
+      });
+    }
   } else {
     details = "Reembolso manual (a processar fora do sistema)";
   }
