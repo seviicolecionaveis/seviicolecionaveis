@@ -123,7 +123,7 @@ export async function refundEntireOrder(orderId: string, method: RefundMethod) {
 
   const { data: order } = await supabaseAdmin
     .from("orders")
-    .select("id, user_id, total_cents, refunded_cents, mercadopago_payment_id")
+    .select("id, user_id, email, total_cents, refunded_cents, mercadopago_payment_id")
     .eq("id", orderId)
     .maybeSingle();
   if (!order) throw new Response("Pedido não encontrado", { status: 404 });
