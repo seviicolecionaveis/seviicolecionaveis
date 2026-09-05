@@ -38,6 +38,7 @@ import { Route as VideogamesRouteImport } from './routes/videogames'
 import { Route as AdminAccessoriesRouteImport } from './routes/admin.accessories'
 import { Route as AdminAcompanharLeilaoRouteImport } from './routes/admin.acompanhar-leilao'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as AdminComandosRouteImport } from './routes/admin.comandos'
 import { Route as AdminConectarBotRouteImport } from './routes/admin.conectar-bot'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminCriarLeilaoRouteImport } from './routes/admin.criar-leilao'
@@ -251,6 +252,11 @@ const AdminAcompanharLeilaoRoute = AdminAcompanharLeilaoRouteImport.update({
 const AdminBannersRoute = AdminBannersRouteImport.update({
   id: '/banners',
   path: '/banners',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminComandosRoute = AdminComandosRouteImport.update({
+  id: '/comandos',
+  path: '/comandos',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminConectarBotRoute = AdminConectarBotRouteImport.update({
@@ -648,6 +654,7 @@ export interface FileRoutesByFullPath {
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/acompanhar-leilao': typeof AdminAcompanharLeilaoRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/comandos': typeof AdminComandosRoute
   '/admin/conectar-bot': typeof AdminConectarBotRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/criar-leilao': typeof AdminCriarLeilaoRoute
@@ -745,6 +752,7 @@ export interface FileRoutesByTo {
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/acompanhar-leilao': typeof AdminAcompanharLeilaoRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/comandos': typeof AdminComandosRoute
   '/admin/conectar-bot': typeof AdminConectarBotRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/criar-leilao': typeof AdminCriarLeilaoRoute
@@ -846,6 +854,7 @@ export interface FileRoutesById {
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/acompanhar-leilao': typeof AdminAcompanharLeilaoRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/comandos': typeof AdminComandosRoute
   '/admin/conectar-bot': typeof AdminConectarBotRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/criar-leilao': typeof AdminCriarLeilaoRoute
@@ -948,6 +957,7 @@ export interface FileRouteTypes {
     | '/admin/accessories'
     | '/admin/acompanhar-leilao'
     | '/admin/banners'
+    | '/admin/comandos'
     | '/admin/conectar-bot'
     | '/admin/coupons'
     | '/admin/criar-leilao'
@@ -1045,6 +1055,7 @@ export interface FileRouteTypes {
     | '/admin/accessories'
     | '/admin/acompanhar-leilao'
     | '/admin/banners'
+    | '/admin/comandos'
     | '/admin/conectar-bot'
     | '/admin/coupons'
     | '/admin/criar-leilao'
@@ -1145,6 +1156,7 @@ export interface FileRouteTypes {
     | '/admin/accessories'
     | '/admin/acompanhar-leilao'
     | '/admin/banners'
+    | '/admin/comandos'
     | '/admin/conectar-bot'
     | '/admin/coupons'
     | '/admin/criar-leilao'
@@ -1487,6 +1499,13 @@ declare module '@tanstack/react-router' {
       path: '/banners'
       fullPath: '/admin/banners'
       preLoaderRoute: typeof AdminBannersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/comandos': {
+      id: '/admin/comandos'
+      path: '/comandos'
+      fullPath: '/admin/comandos'
+      preLoaderRoute: typeof AdminComandosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/conectar-bot': {
@@ -1979,6 +1998,7 @@ interface AdminRouteChildren {
   AdminAccessoriesRoute: typeof AdminAccessoriesRoute
   AdminAcompanharLeilaoRoute: typeof AdminAcompanharLeilaoRoute
   AdminBannersRoute: typeof AdminBannersRoute
+  AdminComandosRoute: typeof AdminComandosRoute
   AdminConectarBotRoute: typeof AdminConectarBotRoute
   AdminCouponsRoute: typeof AdminCouponsRoute
   AdminCriarLeilaoRoute: typeof AdminCriarLeilaoRoute
@@ -2007,6 +2027,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAccessoriesRoute: AdminAccessoriesRoute,
   AdminAcompanharLeilaoRoute: AdminAcompanharLeilaoRoute,
   AdminBannersRoute: AdminBannersRoute,
+  AdminComandosRoute: AdminComandosRoute,
   AdminConectarBotRoute: AdminConectarBotRoute,
   AdminCouponsRoute: AdminCouponsRoute,
   AdminCriarLeilaoRoute: AdminCriarLeilaoRoute,

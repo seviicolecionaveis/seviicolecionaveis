@@ -21,6 +21,7 @@ import {
   Plug,
   ShoppingBag,
   Sparkles,
+  Terminal,
   Ticket,
   Timer,
   Truck,
@@ -77,6 +78,7 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Sistema",
     links: [
       { to: "/admin/conectar-bot", label: "Conectar Bot", icon: Bot },
+      { to: "/admin/comandos", label: "Comandos & Enquetes", icon: Terminal },
       { to: "/admin/integrations", label: "Integrações", icon: Plug },
       { to: "/admin/users", label: "Administradores", icon: Users },
     ],

@@ -1,6 +1,6 @@
 # 📋 [BUG] #002: Integração Externa (Lovable / Supabase / WUZAPI)
 
-> **Status:** 🟡 AGUARDANDO_RETORNO_LOVABLE
+> **Status:** 🟢 CONCLUIDO
 > **Data:** 2026-09-04T15:14:52.319Z
 > **Bot de Origem:** bot_seviicolecionaveis (Sevii Colecionáveis WhatsApp Bot)
 > **Painel Lovable:** seviicolecionaveis
@@ -36,3 +36,16 @@ Erro HTTP, timeout ou rejeição de credenciais em endpoints de API externa.
 
 ---
 *Documento gerado automaticamente pelo Dev (FixerAgent) do Antigravity em doc-agentes/.*
+
+---
+
+## 4. Retorno Recebido e Conclusão:
+- **Data da Homologação:** 2026-09-05T22:58:00.000Z
+- **Status Final:** 🟢 CONCLUIDO COM SUCESSO
+- **Notas de Retorno do Lovable:**
+  > A rota `POST /api/public/bot/groups/upsert` está implementada e ativa, junto com os aliases `POST /api/public/bot/groups/sync` e `POST /api/public/bot/groups`.
+  > Autenticação obrigatória via header `x-bot-secret: <BOT_API_SECRET>` (401 sem header, 403 com segredo inválido).
+  > Payload aceito: `{ "groups": [...] }`, `{ "chats": [...] }` ou array cru; chaves aceitas por item: `jid`/`group_jid`/`id` e `name`/`group_name`/`subject`. JIDs que não terminam em `@g.us` são ignorados.
+  > Grupos novos entram como `pending` (precisam ser ativados em `/admin/conectar-bot` ou via `!ativar <codigo>`); grupos já `active` mantêm o status e apenas atualizam o nome.
+  > Resposta de sucesso: `200` com o resumo do upsert.
+- **Ação no Bot:** Integração liberada e operacional após deploy de produção do painel.
