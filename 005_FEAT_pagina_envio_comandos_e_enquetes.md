@@ -195,3 +195,22 @@ await supabase.from("bot_command_queue").insert({
 10. **Endpoints de polling do bot** continuam ativos e inalterados: `GET /api/public/bot/commands/pending?process_name=bot_seviicolecionaveis&limit=20` e `POST /api/public/bot/commands/:id/mark` (header `x-bot-secret`).
 
 > **Observação:** a página fica disponível no preview imediatamente; em `https://seviicolecionaveis.com.br` após a publicação do projeto.
+
+---
+
+## 7. Guia Final para o Bot Colocar pra Funcionar:
+
+1. **Deploy de produção:** a página `/admin/comandos` e todas as rotas já existem no código; em `https://seviicolecionaveis.com.br` ficam ativas após a publicação do projeto.
+2. **Polling da fila (a cada ~5s):**
+   - `GET https://seviicolecionaveis.com.br/api/public/bot/commands/pending?process_name=bot_seviicolecionaveis&limit=20`
+   - Para cada comando: `POST /api/public/bot/commands/:id/mark` com `{ "action": "sending" }` → executar no WhatsApp → `{ "action": "done" }` (ou `"error"`).
+3. **Filtro de grupo:** comandos com `target_group` preenchido só devem ser executados se o JID constar em `GET /api/public/bot/groups/active` (cache de ~60s).
+4. **Formatos de comando que a página envia** (o parser do bot deve aceitar):
+   - `!enquete Pergunta | Opção 1 | Opção 2` (2 a 12 opções)
+   - `!enquete-s Título`
+   - `!enquete-c Item | R$ 180,00`
+   - `!enquete-q Descrição | 3 | R$ 45 | R$ 50 | R$ 55`
+   - `!all` (mensagem em `args.mensagem`), `!ping`, `!abrir`, `!fechar`, `!sorteio-membros` (nº de ganhadores em `args`), `!quiz`, `!ranking`, `!parar-jogo`, `!criar-bv` (texto em `args`)
+   - `!iniciar-leilao`, `!status-leilao`, `!encerrar-leilao`, `!liberar-leilao`
+   - Qualquer comando/mensagem livre digitado pelo admin.
+5. **Consolidado de homologação:** ver `implementacao/resposta-antigravity-final.md`.
