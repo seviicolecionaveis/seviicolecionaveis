@@ -49,3 +49,33 @@ Erro HTTP, timeout ou rejeição de credenciais em endpoints de API externa.
   > Grupos novos entram como `pending` (precisam ser ativados em `/admin/conectar-bot` ou via `!ativar <codigo>`); grupos já `active` mantêm o status e apenas atualizam o nome.
   > Resposta de sucesso: `200` com o resumo do upsert.
 - **Ação no Bot:** Integração liberada e operacional após deploy de produção do painel.
+
+---
+
+## 5. Detalhamento Técnico Final para o Antigravity:
+
+**URL de produção:** `https://seviicolecionaveis.com.br/api/public/bot/groups/upsert`
+(aliases equivalentes: `POST /api/public/bot/groups/sync` e `POST /api/public/bot/groups`)
+
+**Exemplo de chamada:**
+```bash
+curl -X POST https://seviicolecionaveis.com.br/api/public/bot/groups/upsert \
+  -H "x-bot-secret: $BOT_API_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"process_name":"bot_seviicolecionaveis","groups":[{"jid":"120363XXXXXXXXXX@g.us","name":"Sevii Leilões"}]}'
+```
+
+**Resposta `200` (formato real):**
+```json
+{ "success": true, "process_name": "bot_seviicolecionaveis", "received": 12, "upserted": 10, "created": 3, "updated": 7, "active_jids": ["120363XXXXXXXXXX@g.us"] }
+```
+
+**Códigos de erro:** `401` sem header `x-bot-secret` · `403` segredo divergente · `400` JSON inválido ou `process_name` diferente de `bot_seviicolecionaveis` · `500` erro de banco (mensagem no corpo `error`).
+
+**Regras de negócio confirmadas:**
+- Grupos novos entram como `status = "pending"` — ativação exclusiva via `!ativar <codigo>` ou painel `/admin/conectar-bot`.
+- Grupos já `active` nunca são rebaixados por esta rota.
+- JIDs sem sufixo `@g.us` são ignorados silenciosamente.
+- Trava de segurança: `GET /api/public/bot/groups/active` a cada ~60s; responder apenas nos JIDs retornados.
+
+**Documentação completa:** `implementacao/bot-connect-lovable.md` (seção 3.5b) e `implementacao/resposta-antigravity-final.md`.
