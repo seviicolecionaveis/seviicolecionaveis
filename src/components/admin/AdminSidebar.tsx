@@ -21,6 +21,7 @@ import {
   Plug,
   ShoppingBag,
   Sparkles,
+  Terminal,
   Ticket,
   Timer,
   Truck,
