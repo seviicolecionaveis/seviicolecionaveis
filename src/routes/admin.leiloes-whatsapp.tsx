@@ -116,8 +116,8 @@ function AuctionsListPage() {
           description: a.description,
           group_jid: a.group_jid,
           status: "draft",
-          scheduled_start: null,
-          scheduled_end: null,
+          scheduled_start: a.scheduled_start,
+          scheduled_end: a.scheduled_end,
           closing_message: a.closing_message,
         })
         .select("id")
