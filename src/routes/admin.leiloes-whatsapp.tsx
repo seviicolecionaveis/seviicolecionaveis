@@ -84,13 +84,20 @@ function AuctionsListPage() {
 
   const filtered = rows.filter((r) => (tab === "all" ? true : r.status === tab));
 
-  const remove = async (id: string) => {
-    if (!confirm("Excluir este leilão e todos os seus lotes?")) return;
+  const remove = async (id: string, status: string, title: string) => {
+    const extra =
+      status === "live"
+        ? "\n\nATENÇÃO: este leilão está AO VIVO. Excluir vai apagar lotes e lances em andamento."
+        : "";
+    if (!confirm(`Excluir o leilão "${title}" e todos os seus lotes, lances e agendamentos?${extra}`))
+      return;
     const { error } = await (supabase as any).from("auctions").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(`Não foi possível excluir: ${error.message}`);
+    setRows((prev) => prev.filter((r) => r.id !== id));
     toast.success("Leilão excluído.");
     load();
   };
+
 
   const duplicate = async (id: string) => {
     if (!confirm("Copiar este leilão? Uma cópia em rascunho será criada.")) return;
