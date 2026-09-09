@@ -1395,6 +1395,7 @@ export type Database = {
       orders: {
         Row: {
           arte_em_cards_code: string | null
+          auction_id: string | null
           bundle_discount_cents: number
           carrier: string | null
           cep: string
@@ -1411,6 +1412,7 @@ export type Database = {
           neighborhood: string
           notes: string | null
           number: string
+          origin: string
           payment_method: string
           phone: string | null
           pix_discount_cents: number
@@ -1448,6 +1450,7 @@ export type Database = {
         }
         Insert: {
           arte_em_cards_code?: string | null
+          auction_id?: string | null
           bundle_discount_cents?: number
           carrier?: string | null
           cep: string
@@ -1464,6 +1467,7 @@ export type Database = {
           neighborhood: string
           notes?: string | null
           number: string
+          origin?: string
           payment_method?: string
           phone?: string | null
           pix_discount_cents?: number
@@ -1501,6 +1505,7 @@ export type Database = {
         }
         Update: {
           arte_em_cards_code?: string | null
+          auction_id?: string | null
           bundle_discount_cents?: number
           carrier?: string | null
           cep?: string
@@ -1517,6 +1522,7 @@ export type Database = {
           neighborhood?: string
           notes?: string | null
           number?: string
+          origin?: string
           payment_method?: string
           phone?: string | null
           pix_discount_cents?: number
@@ -1552,7 +1558,15 @@ export type Database = {
           user_id?: string
           wallet_deduction_cents?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       panels: {
         Row: {
