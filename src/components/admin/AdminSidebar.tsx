@@ -4,6 +4,7 @@ import {
   BadgePercent,
   Bell,
   Bot,
+  Camera,
   Boxes,
 
   CalendarClock,
