@@ -2566,6 +2566,10 @@ export type Database = {
         Args: { _items: Json; _reason?: string }
         Returns: number
       }
+      apply_recognized_stock: {
+        Args: { _items: Json; _reason?: string }
+        Returns: number
+      }
       available_stock: { Args: { _card_id: string }; Returns: number }
       award_birthday_points_today: { Args: never; Returns: number }
       backfill_loyalty_points_for_orders: {
