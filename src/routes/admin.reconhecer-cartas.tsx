@@ -7,7 +7,7 @@ import { invalidateCardsCache } from "@/hooks/useCardsCatalog";
 import { recognizeCardsFromPhotos, type CardCandidate, type DetectedCard } from "@/lib/card-recognition.functions";
 import { COLLECTIONS, CONDITIONS, CONDITION_LABEL, FINISHES, LANGUAGES } from "@/data/cards";
 import { useCustomCollections } from "@/lib/custom-collections";
-import { Camera, Check, ChevronDown, Loader2, Plus, RefreshCw, Trash2, X } from "lucide-react";
+import { Camera, Check, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/reconhecer-cartas")({
   head: () => ({ meta: [{ title: "Reconhecer cartas por foto — Admin" }] }),
