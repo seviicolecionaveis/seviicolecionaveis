@@ -136,8 +136,8 @@ function EnviosPage() {
             cta={{ label: "Falar pelo WhatsApp", href: WHATSAPP_URL }}
           >
             <p>
-              Trabalhamos com <span className="font-medium text-neutral-800">99 Entrega</span> e{" "}
-              <span className="font-medium text-neutral-800">Uber Entrega</span>. O valor do
+              Trabalhamos com <span className="font-medium text-neutral-800">Uber Entrega</span> e{" "}
+              <span className="font-medium text-neutral-800">Entregador parceiro da loja</span>. O valor do
               frete varia conforme a sua localização e é calculado no momento do envio.
             </p>
             <p className="mt-3">
