@@ -19,8 +19,8 @@ export const Route = createFileRoute("/envios")({
       { property: "og:title", content: "Política de Envios e Retirada — Sevii Colecionáveis" },
       {
         property: "og:description",
-        content:
-          "Retirada em Aruana e Aeroporto, envio por 99 Entrega/Uber Entrega e presença em eventos. Atendimento via WhatsApp.",
+          content:
+            "Retirada em Aruana e Aeroporto, envio por Uber Entrega e entregador parceiro da loja e presença em eventos. Atendimento via WhatsApp.",
       },
     ],
   }),
