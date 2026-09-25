@@ -147,7 +147,7 @@ function EnviosPage() {
 
           <PolicyCard
             icon={CalendarCheck}
-            title="Retirada em eventos e lojas parceiras"
+            title="Retirada em eventos"
             cta={{ label: "Verificar agenda", href: WHATSAPP_URL }}
           >
             <p>
