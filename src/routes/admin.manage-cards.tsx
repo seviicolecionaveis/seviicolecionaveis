@@ -113,6 +113,8 @@ function AdminCardsManagePage() {
   const [trainerSubFilter, setTrainerSubFilter] = useState<TrainerSubcategory[]>([]);
   const [noPriceOnly, setNoPriceOnly] = useState(false);
   const [collectionFilter, setCollectionFilter] = useState<string>("");
+  const [numberFilter, setNumberFilter] = useState("");
+  const [sortBy, setSortBy] = useState<"name-asc" | "name-desc" | "number-asc" | "number-desc">("name-asc");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
