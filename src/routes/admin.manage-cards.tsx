@@ -907,6 +907,7 @@ function AdminCardsManagePage() {
                 placeholder="Ex: 094"
                 value={numberFilter}
                 onChange={(e) => setNumberFilter(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
                 className="w-24 rounded border border-border bg-background px-2 py-1 text-xs"
               />
             </label>
