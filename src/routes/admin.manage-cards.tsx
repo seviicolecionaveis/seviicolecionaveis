@@ -113,6 +113,8 @@ function AdminCardsManagePage() {
   const [trainerSubFilter, setTrainerSubFilter] = useState<TrainerSubcategory[]>([]);
   const [noPriceOnly, setNoPriceOnly] = useState(false);
   const [collectionFilter, setCollectionFilter] = useState<string>("");
+  const [numberFilter, setNumberFilter] = useState("");
+  const [sortBy, setSortBy] = useState<"name-asc" | "name-desc" | "number-asc" | "number-desc">("name-asc");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -185,12 +187,14 @@ function AdminCardsManagePage() {
 
   const filteredAll = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return rows.filter((r) => {
+    const nq = numberFilter.trim().toLowerCase();
+    const out = rows.filter((r) => {
       if (categoryFilter.length > 0 && !categoryFilter.includes(r.category)) return false;
       if (pokemonTypeFilter.length > 0 && (!r.pokemon_type || !pokemonTypeFilter.includes(r.pokemon_type))) return false;
       if (trainerSubFilter.length > 0 && (r.category !== "Treinador" || !r.trainer_subcategory || !trainerSubFilter.includes(r.trainer_subcategory))) return false;
       if (noPriceOnly && r.base_price_cents != null) return false;
       if (collectionFilter && r.collection !== collectionFilter) return false;
+      if (nq && !r.card_number.toLowerCase().includes(nq)) return false;
       if (!q) return true;
       return (
         r.name.toLowerCase().includes(q) ||
@@ -198,9 +202,23 @@ function AdminCardsManagePage() {
         r.card_number.toLowerCase().includes(q)
       );
     });
-  }, [rows, search, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly, collectionFilter]);
+    const numKey = (cardNumber: string) => {
+      const m = cardNumber.match(/\d+/);
+      return m ? parseInt(m[0], 10) : Number.MAX_SAFE_INTEGER;
+    };
+    return out.sort((a, b) => {
+      if (sortBy === "name-desc") return b.name.localeCompare(a.name, "pt-BR") || a.collection.localeCompare(b.collection, "pt-BR");
+      if (sortBy === "number-asc" || sortBy === "number-desc") {
+        const cmp = a.collection.localeCompare(b.collection, "pt-BR");
+        if (cmp !== 0) return cmp;
+        const d = numKey(a.card_number) - numKey(b.card_number);
+        return sortBy === "number-asc" ? d : -d;
+      }
+      return a.name.localeCompare(b.name, "pt-BR") || a.collection.localeCompare(b.collection, "pt-BR");
+    });
+  }, [rows, search, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly, collectionFilter, numberFilter, sortBy]);
 
-  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly, collectionFilter]);
+  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly, collectionFilter, numberFilter, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(filteredAll.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -882,9 +900,33 @@ function AdminCardsManagePage() {
               <span className="font-semibold">Sem preço</span>
               <span className="text-muted-foreground">({rows.filter((r) => r.base_price_cents == null).length})</span>
             </label>
-            {(noPriceOnly || collectionFilter) && (
+            <label className="flex items-center gap-1.5 text-xs">
+              <span className="font-semibold">Numeração:</span>
+              <input
+                type="text"
+                placeholder="Ex: 094"
+                value={numberFilter}
+                onChange={(e) => setNumberFilter(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
+                className="w-24 rounded border border-border bg-background px-2 py-1 text-xs"
+              />
+            </label>
+            <label className="flex items-center gap-1.5 text-xs">
+              <span className="font-semibold">Ordem:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                className="rounded border border-border bg-background px-2 py-1 text-xs"
+              >
+                <option value="name-asc">Alfabética (A→Z)</option>
+                <option value="name-desc">Alfabética (Z→A)</option>
+                <option value="number-asc">Numeração (crescente)</option>
+                <option value="number-desc">Numeração (decrescente)</option>
+              </select>
+            </label>
+            {(noPriceOnly || collectionFilter || numberFilter) && (
               <button
-                onClick={() => { setNoPriceOnly(false); setCollectionFilter(""); }}
+                onClick={() => { setNoPriceOnly(false); setCollectionFilter(""); setNumberFilter(""); }}
                 className="ml-auto text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
               >
                 Limpar
