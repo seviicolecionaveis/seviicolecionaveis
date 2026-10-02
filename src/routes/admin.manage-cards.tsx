@@ -187,12 +187,14 @@ function AdminCardsManagePage() {
 
   const filteredAll = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return rows.filter((r) => {
+    const nq = numberFilter.trim().toLowerCase();
+    const out = rows.filter((r) => {
       if (categoryFilter.length > 0 && !categoryFilter.includes(r.category)) return false;
       if (pokemonTypeFilter.length > 0 && (!r.pokemon_type || !pokemonTypeFilter.includes(r.pokemon_type))) return false;
       if (trainerSubFilter.length > 0 && (r.category !== "Treinador" || !r.trainer_subcategory || !trainerSubFilter.includes(r.trainer_subcategory))) return false;
       if (noPriceOnly && r.base_price_cents != null) return false;
       if (collectionFilter && r.collection !== collectionFilter) return false;
+      if (nq && !r.card_number.toLowerCase().includes(nq)) return false;
       if (!q) return true;
       return (
         r.name.toLowerCase().includes(q) ||
@@ -200,9 +202,23 @@ function AdminCardsManagePage() {
         r.card_number.toLowerCase().includes(q)
       );
     });
-  }, [rows, search, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly, collectionFilter]);
+    const numKey = (cardNumber: string) => {
+      const m = cardNumber.match(/\d+/);
+      return m ? parseInt(m[0], 10) : Number.MAX_SAFE_INTEGER;
+    };
+    return out.sort((a, b) => {
+      if (sortBy === "name-desc") return b.name.localeCompare(a.name, "pt-BR") || a.collection.localeCompare(b.collection, "pt-BR");
+      if (sortBy === "number-asc" || sortBy === "number-desc") {
+        const cmp = a.collection.localeCompare(b.collection, "pt-BR");
+        if (cmp !== 0) return cmp;
+        const d = numKey(a.card_number) - numKey(b.card_number);
+        return sortBy === "number-asc" ? d : -d;
+      }
+      return a.name.localeCompare(b.name, "pt-BR") || a.collection.localeCompare(b.collection, "pt-BR");
+    });
+  }, [rows, search, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly, collectionFilter, numberFilter, sortBy]);
 
-  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly, collectionFilter]);
+  useEffect(() => { setPage(1); }, [search, pageSize, categoryFilter, pokemonTypeFilter, trainerSubFilter, noPriceOnly, collectionFilter, numberFilter, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(filteredAll.length / pageSize));
   const currentPage = Math.min(page, totalPages);
