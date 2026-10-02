@@ -900,9 +900,32 @@ function AdminCardsManagePage() {
               <span className="font-semibold">Sem preço</span>
               <span className="text-muted-foreground">({rows.filter((r) => r.base_price_cents == null).length})</span>
             </label>
-            {(noPriceOnly || collectionFilter) && (
+            <label className="flex items-center gap-1.5 text-xs">
+              <span className="font-semibold">Numeração:</span>
+              <input
+                type="text"
+                placeholder="Ex: 094"
+                value={numberFilter}
+                onChange={(e) => setNumberFilter(e.target.value)}
+                className="w-24 rounded border border-border bg-background px-2 py-1 text-xs"
+              />
+            </label>
+            <label className="flex items-center gap-1.5 text-xs">
+              <span className="font-semibold">Ordem:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                className="rounded border border-border bg-background px-2 py-1 text-xs"
+              >
+                <option value="name-asc">Alfabética (A→Z)</option>
+                <option value="name-desc">Alfabética (Z→A)</option>
+                <option value="number-asc">Numeração (crescente)</option>
+                <option value="number-desc">Numeração (decrescente)</option>
+              </select>
+            </label>
+            {(noPriceOnly || collectionFilter || numberFilter) && (
               <button
-                onClick={() => { setNoPriceOnly(false); setCollectionFilter(""); }}
+                onClick={() => { setNoPriceOnly(false); setCollectionFilter(""); setNumberFilter(""); }}
                 className="ml-auto text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
               >
                 Limpar
