@@ -10,6 +10,7 @@ import { notifyStockBack } from "@/lib/stock-alerts.functions";
 import { cardSlug } from "@/lib/slug";
 import { IllustratorCombobox } from "@/components/admin/IllustratorCombobox";
 import { useCustomCollections } from "@/lib/custom-collections";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin/manage-cards")({
   head: () => ({ meta: [{ title: "Gerenciar cartas — Admin" }] }),
@@ -235,6 +236,10 @@ function AdminCardsManagePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const submitter = (e.nativeEvent as SubmitEvent).submitter;
+    const saveAndGoNext = submitter instanceof HTMLButtonElement && submitter.value === "next";
+    const editingIndex = editingId ? filteredAll.findIndex((row) => row.id === editingId) : -1;
+    const nextCard = saveAndGoNext && editingIndex >= 0 ? filteredAll[editingIndex + 1] : undefined;
     setMsg(null);
     if (!form.name.trim() || !form.card_number.trim() || !form.collection.trim()) {
       setMsg({ type: "err", text: "Preencha nome, número e coleção." });
@@ -289,8 +294,20 @@ function AdminCardsManagePage() {
     }
     setMsg({ type: "ok", text: editingId ? "Carta atualizada!" : "Carta adicionada!" });
     invalidateCardsCache();
-    resetForm();
     await load();
+    if (saveAndGoNext && editingId) {
+      if (nextCard) {
+        const nextIndex = editingIndex + 1;
+        setPage(Math.floor(nextIndex / pageSize) + 1);
+        handleEdit(nextCard);
+        setMsg({ type: "ok", text: "Carta atualizada! Próxima carta aberta para edição." });
+      } else {
+        resetForm();
+        setMsg({ type: "ok", text: "Carta atualizada! Não há próxima carta na lista filtrada." });
+      }
+      return;
+    }
+    resetForm();
   };
 
   const handleEdit = (r: CardRow) => {
@@ -706,13 +723,27 @@ function AdminCardsManagePage() {
             </label>
 
             <div className="sm:col-span-2 flex flex-wrap items-center gap-3">
-              <button
+              <Button
                 type="submit"
                 disabled={saving}
-                className="rounded bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wide text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                size="sm"
+                className="text-xs font-bold uppercase tracking-wide"
               >
                 {saving ? "Salvando..." : editingId ? "💾 Atualizar carta" : "+ Adicionar carta"}
-              </button>
+              </Button>
+              {editingId && (
+                <Button
+                  type="submit"
+                  name="saveAction"
+                  value="next"
+                  variant="secondary"
+                  size="sm"
+                  disabled={saving}
+                  className="text-xs font-bold uppercase tracking-wide"
+                >
+                  {saving ? "Salvando..." : "💾 Salvar e ir p/ próxima →"}
+                </Button>
+              )}
               {editingId && (
                 <button
                   type="button"
