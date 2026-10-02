@@ -535,7 +535,11 @@ function AdminCardsManagePage() {
               </span>
               <input
                 value={form.collection}
-                onChange={(e) => setForm({ ...form, collection: e.target.value })}
+                onChange={(e) => {
+                  const collection = e.target.value;
+                  const is30C = collection.trim().toLowerCase() === "30c - celebração de 30 anos";
+                  setForm({ ...form, collection, ...(is30C ? { finish: "Foil" as Finish } : {}) });
+                }}
                 placeholder="Ex: SVI - Escarlate e Violeta"
                 list="collections-list"
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
