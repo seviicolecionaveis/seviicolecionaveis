@@ -419,7 +419,12 @@ export async function markOrderPaid(
   }
 }
 
+// Automatic cancellation (expired/rejected payment, cron, duplicate cleanup).
+// Auction orders are never auto-cancelled: the customer can generate a new Pix
+// from the same order; only an admin cancels them manually.
 export async function cancelOrder(orderId: string) {
+  const { data: o } = await supabaseAdmin.from("orders").select("origin").eq("id", orderId).maybeSingle();
+  if (o?.origin === "auction") return;
   await supabaseAdmin.from("stock_reservations").delete().eq("order_id", orderId);
   await supabaseAdmin
     .from("orders")
