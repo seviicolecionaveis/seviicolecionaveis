@@ -12,6 +12,9 @@ type IncomingLiveBid = {
   groupJid?: string;
   voterJid?: string;
   voterPhone?: string;
+  voterName?: string;
+  bidder_name?: string;
+  displayLabel?: string;
   phone?: string;
   optionText?: string;
   bidValue?: number | string;
