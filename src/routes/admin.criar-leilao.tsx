@@ -51,6 +51,7 @@ type BlockActionForm = {
 
 const MAX_VALUES = 7;
 const DEFAULT_VALUES = 5;
+const num = (value: string): number => Number(value.trim().replace(",", "."));
 
 const labelForValue = (i: number) => (i === 0 ? "Lance 1 (Inicial)" : `Lance ${i + 1}`);
 
@@ -287,9 +288,9 @@ function CreateAuctionPage() {
           const blockRaw = Number(r["bloco"] || r["Bloco"] || 1);
           return {
             name: norm(r["nome"]),
-            condicao: norm(r["condicao"] || r["condição"]) || "NM",
-            idioma: norm(r["idioma"]) || "Português",
-            acabamento: norm(r["acabamento"]) || "Normal",
+            condition: norm(r["condicao"] || r["condição"]) || "NM",
+            language: norm(r["idioma"]) || "Português",
+            finish: norm(r["acabamento"]) || "Normal",
             liga_price: norm(r["valor_liga"] || r["liga_price"]),
             description: norm(r["descricao"] || r["descrição"]),
             image_url: norm(r["imagem_url"]),
@@ -297,7 +298,7 @@ function CreateAuctionPage() {
             buyout_price: norm(r["arremate"]),
             quantity: norm(r["quantidade"]) || "1",
             block_number: Math.max(1, isNaN(blockRaw) ? 1 : blockRaw),
-          } as ItemForm;
+          } satisfies ItemForm;
         })
         .filter((i) => i.name);
 
