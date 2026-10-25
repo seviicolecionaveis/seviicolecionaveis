@@ -123,6 +123,7 @@ export async function prepareExistingCreditPayment(orderId: string, owner: strin
   if (error) throw new Error('Não foi possível conferir as tentativas anteriores.');
   const active = attempts?.find(t => ['reserved', 'pending', 'approved', 'review'].includes(t.status));
   if (active) {
+    if(['approved','review'].includes(active.status)) throw new Error('Conciliação do pagamento anterior necessária antes de tentar novamente.');
     if (!(await releaseStoreCreditIfTerminal(orderId))) throw new Error('Pagamento anterior ainda está em aberto. Aguarde a confirmação ou expiração.');
   }
   if (!requested && !attempts?.length) return null;
@@ -174,8 +175,10 @@ export async function settleStoreCredit(orderId: string, ref?: { mercadopagoPaym
   if (settleError) throw new Error('Pagamento precisa de conciliação; saldo não foi debitado novamente.');
 }
 export async function releaseStoreCreditIfTerminal(orderId: string) {
-  const { data: t } = await db.from('customer_payment_attempts').select('*').eq('order_id', orderId).in('status', ['reserved','pending']).maybeSingle();
+  const { data: t, error } = await db.from('customer_payment_attempts').select('*').eq('order_id', orderId).in('status', ['reserved','pending','approved','review']).maybeSingle();
+  if(error) throw new Error('Não foi possível conferir a reserva; nenhuma liberação foi autorizada.');
   if (!t) return true;
+  if(['approved','review'].includes(t.status)) return false;
   if (!t.provider_id) return false; // Unknown creation outcome must never free funds automatically.
   if (t.provider === 'mercadopago') {
     const { getPixPayment } = await import('./mercadopago.server');
@@ -186,7 +189,33 @@ export async function releaseStoreCreditIfTerminal(orderId: string) {
     const session = await createStripeClient(t.provider_environment === 'sandbox' ? 'sandbox' : 'live').checkout.sessions.retrieve(t.provider_id);
     if (session.status !== 'expired') return false;
   } else return false;
-  const { error } = await db.rpc('finance_release_payment', { p_attempt: t.id, p_provider_id: t.provider_id });
-  if (error) throw new Error('Não foi possível liberar a reserva.');
+  const { error:releaseError } = await db.rpc('finance_release_payment', { p_attempt: t.id, p_provider_id: t.provider_id });
+  if (releaseError) throw new Error('Não foi possível liberar a reserva.');
   return true;
+}
+export async function reconcileCreditPayments() {
+  const {data:attempts,error}=await db.from('customer_payment_attempts').select('*').in('status',['reserved','pending','approved']).order('created_at',{ascending:true}).limit(100);
+  if(error) throw new Error('Não foi possível consultar pagamentos para conciliação.');
+  const {markOrderPaid}=await import('./orders.server');
+  let recovered=0; let released=0; let unresolved=0;
+  for(const attempt of attempts??[]) {
+    try {
+      const {data:order,error:orderError}=await db.from('orders').select('status').eq('id',attempt.order_id).single();
+      if(orderError) throw new Error('Pedido indisponível');
+      if(order.status!=='pending') continue;
+      if(attempt.provider==='credit') {await markOrderPaid(attempt.order_id);recovered++;continue;}
+      if(!attempt.provider_id) {unresolved++;continue;}
+      if(attempt.provider==='mercadopago') {
+        const {getPixPayment}=await import('./mercadopago.server');
+        const remote=await getPixPayment(attempt.provider_id);
+        if(remote.status==='approved') {await markOrderPaid(attempt.order_id,{mercadopagoPaymentId:attempt.provider_id});recovered++;continue;}
+      } else if(attempt.provider==='stripe') {
+        const {createStripeClient}=await import('./stripe.server');
+        const session=await createStripeClient(attempt.provider_environment==='sandbox'?'sandbox':'live').checkout.sessions.retrieve(attempt.provider_id);
+        if(session.payment_status==='paid') {await markOrderPaid(attempt.order_id,{stripePaymentIntent:typeof session.payment_intent==='string'?session.payment_intent:undefined});recovered++;continue;}
+      }
+      if(await releaseStoreCreditIfTerminal(attempt.order_id)) released++;else unresolved++;
+    } catch {unresolved++;}
+  }
+  return {recovered,released,unresolved};
 }
