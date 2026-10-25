@@ -1100,6 +1100,281 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_credit_accounts: {
+        Row: {
+          balance_cents: number
+          reserved_cents: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance_cents?: number
+          reserved_cents?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance_cents?: number
+          reserved_cents?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      customer_credit_entries: {
+        Row: {
+          actor_id: string | null
+          amount_cents: number
+          balance_after_cents: number
+          created_at: string
+          description: string
+          id: string
+          operation_key: string
+          order_id: string | null
+          refund_id: string | null
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          amount_cents: number
+          balance_after_cents: number
+          created_at?: string
+          description: string
+          id?: string
+          operation_key: string
+          order_id?: string | null
+          refund_id?: string | null
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          amount_cents?: number
+          balance_after_cents?: number
+          created_at?: string
+          description?: string
+          id?: string
+          operation_key?: string
+          order_id?: string | null
+          refund_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_credit_entries_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_credit_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "customer_credit_accounts"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      customer_finance_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          amount_cents: number | null
+          created_at: string
+          id: string
+          order_id: string | null
+          reason: string | null
+          refund_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          amount_cents?: number | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          reason?: string | null
+          refund_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          amount_cents?: number | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          reason?: string | null
+          refund_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_finance_audit_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_finance_audit_refund_id_fkey"
+            columns: ["refund_id"]
+            isOneToOne: false
+            referencedRelation: "customer_refunds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_payment_attempts: {
+        Row: {
+          created_at: string
+          credit_cents: number
+          id: string
+          operation_key: string
+          order_id: string
+          provider: string
+          provider_cents: number
+          provider_id: string | null
+          settled_at: string | null
+          status: string
+          total_cents: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credit_cents: number
+          id?: string
+          operation_key: string
+          order_id: string
+          provider: string
+          provider_cents: number
+          provider_id?: string | null
+          settled_at?: string | null
+          status?: string
+          total_cents: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credit_cents?: number
+          id?: string
+          operation_key?: string
+          order_id?: string
+          provider?: string
+          provider_cents?: number
+          provider_id?: string | null
+          settled_at?: string | null
+          status?: string
+          total_cents?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_payment_attempts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_refunds: {
+        Row: {
+          amount_cents: number
+          approved_by: string | null
+          choice: string | null
+          chosen_at: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          credit_cents: number
+          decision_reason: string | null
+          email_status: string | null
+          external_confirmed_cents: number
+          id: string
+          item_id: string | null
+          operation_key: string
+          order_id: string
+          provider_cents: number
+          provider_id: string | null
+          provider_refund_id: string | null
+          reason: string
+          status: string
+          token_expires_at: string
+          token_hash: string
+          token_version: number
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          approved_by?: string | null
+          choice?: string | null
+          chosen_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          credit_cents?: number
+          decision_reason?: string | null
+          email_status?: string | null
+          external_confirmed_cents?: number
+          id?: string
+          item_id?: string | null
+          operation_key: string
+          order_id: string
+          provider_cents?: number
+          provider_id?: string | null
+          provider_refund_id?: string | null
+          reason: string
+          status?: string
+          token_expires_at: string
+          token_hash: string
+          token_version?: number
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          approved_by?: string | null
+          choice?: string | null
+          chosen_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          credit_cents?: number
+          decision_reason?: string | null
+          email_status?: string | null
+          external_confirmed_cents?: number
+          id?: string
+          item_id?: string | null
+          operation_key?: string
+          order_id?: string
+          provider_cents?: number
+          provider_id?: string | null
+          provider_refund_id?: string | null
+          reason?: string
+          status?: string
+          token_expires_at?: string
+          token_hash?: string
+          token_version?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_refunds_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_refunds_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deck_cards: {
         Row: {
           card_id: string
@@ -1663,6 +1938,7 @@ export type Database = {
           event_added_manually_at: string | null
           event_id: string | null
           event_previous: Json | null
+          finance_settled_at: string | null
           hand_delivery_fee_confirmed_at: string | null
           hand_delivery_fee_confirmed_by: string | null
           hand_delivery_fee_history: Json
@@ -1705,6 +1981,7 @@ export type Database = {
           status: string
           stock_decremented: boolean
           stock_reservation_expires_at: string | null
+          store_credit_cents: number
           street: string
           stripe_payment_intent: string | null
           stripe_session_id: string | null
@@ -1742,6 +2019,7 @@ export type Database = {
           event_added_manually_at?: string | null
           event_id?: string | null
           event_previous?: Json | null
+          finance_settled_at?: string | null
           hand_delivery_fee_confirmed_at?: string | null
           hand_delivery_fee_confirmed_by?: string | null
           hand_delivery_fee_history?: Json
@@ -1784,6 +2062,7 @@ export type Database = {
           status?: string
           stock_decremented?: boolean
           stock_reservation_expires_at?: string | null
+          store_credit_cents?: number
           street: string
           stripe_payment_intent?: string | null
           stripe_session_id?: string | null
@@ -1821,6 +2100,7 @@ export type Database = {
           event_added_manually_at?: string | null
           event_id?: string | null
           event_previous?: Json | null
+          finance_settled_at?: string | null
           hand_delivery_fee_confirmed_at?: string | null
           hand_delivery_fee_confirmed_by?: string | null
           hand_delivery_fee_history?: Json
@@ -1863,6 +2143,7 @@ export type Database = {
           status?: string
           stock_decremented?: boolean
           stock_reservation_expires_at?: string | null
+          store_credit_cents?: number
           street?: string
           stripe_payment_intent?: string | null
           stripe_session_id?: string | null
@@ -2937,6 +3218,68 @@ export type Database = {
       clear_event_reserved: { Args: never; Returns: number }
       confirm_order_receipt: { Args: { _order_id: string }; Returns: Json }
       expire_old_loyalty_points: { Args: never; Returns: number }
+      finance_adjust_credit: {
+        Args: {
+          p_actor: string
+          p_amount: number
+          p_key: string
+          p_reason: string
+          p_user: string
+        }
+        Returns: Json
+      }
+      finance_assert_admin: { Args: { p_actor: string }; Returns: undefined }
+      finance_choose_refund: {
+        Args: { p_choice: string; p_hash: string; p_id: string }
+        Returns: Json
+      }
+      finance_create_refund: {
+        Args: {
+          p_actor: string
+          p_amount: number
+          p_hash: string
+          p_item: string
+          p_key: string
+          p_order: string
+          p_reason: string
+        }
+        Returns: Json
+      }
+      finance_refund_action: {
+        Args: {
+          p_action: string
+          p_actor: string
+          p_external?: number
+          p_hash?: string
+          p_id: string
+          p_reason: string
+          p_reference?: string
+        }
+        Returns: Json
+      }
+      finance_release_payment: {
+        Args: { p_attempt: string; p_provider_id: string }
+        Returns: undefined
+      }
+      finance_reserve_payment: {
+        Args: {
+          p_credit: number
+          p_key: string
+          p_order: string
+          p_provider: string
+          p_user: string
+        }
+        Returns: Json
+      }
+      finance_settle_payment: {
+        Args: {
+          p_amount: number
+          p_attempt: string
+          p_currency: string
+          p_provider_id: string
+        }
+        Returns: boolean
+      }
       find_user_by_phone: { Args: { _digits: string }; Returns: string }
       has_role: {
         Args: {
