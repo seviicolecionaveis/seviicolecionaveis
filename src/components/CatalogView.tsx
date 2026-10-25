@@ -101,6 +101,10 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
         if (c.price < min || c.price > max) return false;
       }
       if (numQ && !c.number.toLowerCase().includes(numQ)) return false;
+      if (recentCutoff) {
+        const ts = cardLastActivity.get(`${c.name}__${c.collection}__${c.number}`) ?? "";
+        if (!ts || ts < recentCutoff) return false;
+      }
       if (q) {
         const hay = `${c.name} ${c.collection} ${c.number}`.toLowerCase();
         if (!hay.includes(q)) return false;
