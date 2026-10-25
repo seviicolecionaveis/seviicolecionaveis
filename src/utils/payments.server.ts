@@ -885,7 +885,7 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
   await sendOrderReceivedEmail(order.id);
 
-  const creditAttempt = await reserveStoreCredit(order.id, userId, data.storeCreditCents ?? 0, 'stripe');
+  const creditAttempt = await reserveStoreCredit(order.id, userId, data.storeCreditCents ?? 0, 'stripe', env);
   const providerDueCents = creditAttempt?.provider_cents ?? totalCents;
 
   // Vale-presente cobre o pedido inteiro: marca pago direto, sem gateway.
@@ -1364,13 +1364,14 @@ export async function regeneratePixForExistingOrderServer(orderId: string, userI
   else if (!userId || !(await canPayOrder(order.user_id, userId))) throw new Error("Pedido não encontrado");
   if (order.status !== "pending") throw new Error("Este pedido não está mais pendente.");
 
+  const payer = await resolveExistingOrderPayer(order);
+  if (!payer.cpf) throw new Error('Complete ou corrija o CPF em Minha conta antes de gerar o Pix.');
   const creditAttempt = await prepareExistingCreditPayment(order.id, order.user_id, userId, requestedCredit);
   const providerDueCents = creditAttempt?.provider_cents ?? order.total_cents;
   if (providerDueCents === 0) { await markOrderPaid(order.id); return { orderId: order.id, qrCode: '', qrCodeBase64: '', expiresAt: new Date().toISOString(), totalCents: 0, status: 'paid' as const }; }
   const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.com.br";
   const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
 
-  const payer = await resolveExistingOrderPayer(order);
   const [firstName, ...rest] = payer.name.trim().split(/\s+/);
   const lastName = rest.join(" ") || "Sevii";
 
