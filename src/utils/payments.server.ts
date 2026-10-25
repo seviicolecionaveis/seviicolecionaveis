@@ -1092,6 +1092,7 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     payerLastName: lastName,
     payerCpf: data.address.cpf,
     externalReference: order.id,
+    operationKey: creditAttempt ? `sevii-payment:${creditAttempt.id}` : undefined,
     notificationUrl,
     expiresInMinutes: PIX_EXPIRES_MINUTES,
   });
@@ -1307,6 +1308,7 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
       payerLastName: lastName,
       payerCpf: data.card.payerCpf ?? data.address.cpf ?? null,
       externalReference: order.id,
+    operationKey: creditAttempt ? `sevii-payment:${creditAttempt.id}` : undefined,
       notificationUrl,
       customerId,
     });
@@ -1385,6 +1387,7 @@ export async function regeneratePixForExistingOrderServer(orderId: string, userI
     payerLastName: lastName,
     payerCpf: payer.cpf,
     externalReference: order.id,
+    operationKey: creditAttempt ? `sevii-payment:${creditAttempt.id}` : undefined,
     notificationUrl,
     expiresInMinutes: PIX_EXPIRES_MINUTES,
   });
@@ -1465,6 +1468,7 @@ export async function payExistingOrderWithCardServer(
     payerLastName: lastName,
     payerCpf: card.payerCpf || payer.cpf,
     externalReference: order.id,
+    operationKey: creditAttempt ? `sevii-payment:${creditAttempt.id}` : undefined,
     notificationUrl,
     customerId,
   });
