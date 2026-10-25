@@ -1,0 +1,11 @@
+CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role BYPASSRLS;
+CREATE SCHEMA auth;
+CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+CREATE TABLE auth.users(id uuid PRIMARY KEY,deleted_at timestamptz,banned_until timestamptz);
+CREATE TYPE public.app_role AS ENUM('admin','user');
+CREATE TABLE public.user_roles(user_id uuid,role public.app_role);
+CREATE FUNCTION public.has_role(uuid,public.app_role) RETURNS boolean LANGUAGE sql SECURITY DEFINER AS $$ SELECT EXISTS(SELECT 1 FROM public.user_roles WHERE user_id=$1 AND role=$2) $$;
+CREATE TABLE public.profiles(user_id uuid PRIMARY KEY);
+CREATE TABLE public.orders(id uuid PRIMARY KEY,user_id uuid,status text,total_cents bigint,refunded_cents bigint DEFAULT 0,payment_paid_at timestamptz,mercadopago_payment_id text,discount_cents bigint DEFAULT 0,subtotal_cents bigint,wallet_deduction_cents bigint DEFAULT 0,coupon_code text);
+CREATE TABLE public.order_items(id uuid PRIMARY KEY,order_id uuid,quantity integer,unit_price_cents bigint,refund_cents bigint DEFAULT 0);
+GRANT USAGE ON SCHEMA auth,public TO anon,authenticated,service_role;
