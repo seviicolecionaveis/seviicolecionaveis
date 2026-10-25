@@ -141,6 +141,13 @@
       "when": 1792952209650,
       "tag": "0019_finance_safety_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792952262727,
+      "tag": "0020_finance_rpc_validation",
+      "breakpoints": true
     }
   ]
 }
