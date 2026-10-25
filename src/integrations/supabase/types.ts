@@ -1235,6 +1235,7 @@ export type Database = {
           order_id: string
           provider: string
           provider_cents: number
+          provider_environment: string
           provider_id: string | null
           settled_at: string | null
           status: string
@@ -1249,6 +1250,7 @@ export type Database = {
           order_id: string
           provider: string
           provider_cents: number
+          provider_environment?: string
           provider_id?: string | null
           settled_at?: string | null
           status?: string
@@ -1263,6 +1265,7 @@ export type Database = {
           order_id?: string
           provider?: string
           provider_cents?: number
+          provider_environment?: string
           provider_id?: string | null
           settled_at?: string | null
           status?: string

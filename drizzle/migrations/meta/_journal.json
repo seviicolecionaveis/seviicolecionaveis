@@ -134,6 +134,13 @@
       "when": 1792951466915,
       "tag": "0018_customer_credit_and_refund_accounting",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792952209650,
+      "tag": "0019_finance_safety_guards",
+      "breakpoints": true
     }
   ]
 }
