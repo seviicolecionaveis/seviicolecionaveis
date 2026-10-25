@@ -641,6 +641,15 @@ function CheckoutPage() {
       } catch (e) {
         console.warn("persistAddressAndProfile falhou (seguindo mesmo assim):", e);
       }
+      if (providerDueCents === 0 && storeCreditCents > 0) {
+        const result = await createCardOrder({ data: {
+          items: buildItemsPayload(), shippingMethod: shipping, shippingQuote: shippingQuoteForApi(),
+          address: buildAddressPayload(), notes: buildNotes(), couponCode: couponNormalized || null,
+          pointsToRedeem: pointsRedeemed, storeCreditCents, schedule: schedulePayload(),
+          card: { token: 'store-credit-only', paymentMethodId: 'credit', installments: 1 },
+        }});
+        clear(); nav({ to: '/orders/$orderId', params: { orderId: result.orderId } }); return;
+      }
       // O servidor recalcula tudo (combo + cupom + Pix) por segurança;
       // aqui só passamos o totalCents já calculado para exibir no CardBrick.
       setCard({
