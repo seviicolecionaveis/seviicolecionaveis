@@ -33,7 +33,7 @@ export async function sendFinanceNotice(r: Refund, event: string, link?: string)
   }) : { success: false, reason: 'missing_recipient' };
   await db.from('customer_refunds').update({ email_status: result.success ? 'sent' : 'failed' }).eq('id', r.id);
   if (event !== 'invite') {
-    const { data: setting } = await db.from('app_settings').select('value').eq('key', 'schedule_store_email').maybeSingle();
+    const { data: setting } = await db.from('app_settings').select('value').eq('key', 'schedule_confirmation_email').maybeSingle();
     const v = setting?.value;
     const recipient = v && typeof v === 'object' && !Array.isArray(v) && typeof v.email === 'string' ? v.email : 'seviicolecionaveis@gmail.com';
     await sendTransactionalEmailSafe({ templateName: 'customer-finance', recipientEmail: recipient,
@@ -44,7 +44,7 @@ export async function sendFinanceNotice(r: Refund, event: string, link?: string)
 export async function createFinanceRefund(actor: string, input: { orderId: string; itemId?: string; amountCents: number; reason: string; key: string }) {
   await assertFinanceAdmin(actor);
   const token = randomBytes(32).toString('hex');
-  const { data, error } = await db.rpc('finance_create_refund', { p_order: input.orderId, p_item: input.itemId, p_actor: actor, p_amount: input.amountCents, p_reason: input.reason, p_hash: hashRefundToken(token), p_key: input.key });
+  const { data, error } = await db.rpc('finance_create_refund', { p_order: input.orderId, p_item: input.itemId ?? null as unknown as string, p_actor: actor, p_amount: input.amountCents, p_reason: input.reason, p_hash: hashRefundToken(token), p_key: input.key });
   if (error) throw new Error('Não foi possível criar: confira pagamento confirmado, item e limite disponível.');
   const r = objectResult<Refund>(data);
   // A replay must never send a new token whose hash was not stored.
@@ -130,7 +130,7 @@ export async function settleStoreCredit(orderId: string, ref?: { mercadopagoPaym
     if (session.payment_status !== 'paid' || session.metadata?.orderId !== orderId) throw new Error('Pagamento ainda não confirmado.');
     amount = session.amount_total ?? -1; currency = (session.currency ?? '').toUpperCase();
   }
-  const { error: settleError } = await db.rpc('finance_settle_payment', { p_attempt: t.id, p_provider_id: providerId ?? undefined, p_amount: amount, p_currency: currency });
+  const { error: settleError } = await db.rpc('finance_settle_payment', { p_attempt: t.id, p_provider_id: providerId ?? null as unknown as string, p_amount: amount, p_currency: currency });
   if (settleError) throw new Error('Pagamento precisa de conciliação; saldo não foi debitado novamente.');
 }
 export async function releaseStoreCreditIfTerminal(orderId: string) {

@@ -60,6 +60,7 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Operações",
     links: [
       { to: "/admin/shipping", label: "Expedição", icon: Truck },
+      { to: '/admin/reembolsos', label: 'Reembolsos e saldo', icon: CreditCard },
       { to: "/admin/pilha", label: "Pilha de Cartas", icon: Layers },
       { to: "/admin/leiloes", label: "Leilões (Pilha)", icon: Gift },
       { to: "/admin/leiloes-whatsapp", label: "Leilões WhatsApp", icon: Gavel },

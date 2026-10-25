@@ -285,7 +285,7 @@ export async function createPixPayment(input: CreatePixInput): Promise<PixPaymen
   };
 }
 
-export async function getPixPayment(paymentId: string | number): Promise<{ status: string; external_reference?: string }> {
+export async function getPixPayment(paymentId: string | number): Promise<{ status: string; external_reference?: string; amount_cents?: number; currency_id?: string }> {
   const token = getAccessToken();
   const res = await fetchMpWithTimeout(`${MP_API}/v1/payments/${paymentId}`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -295,7 +295,7 @@ export async function getPixPayment(paymentId: string | number): Promise<{ statu
     throw new Error(`MP get payment ${res.status}: ${text.slice(0, 200)}`);
   }
   const json: any = await res.json();
-  return { status: json.status, external_reference: json.external_reference };
+  return { status: json.status, external_reference: json.external_reference, amount_cents: Math.round(Number(json.transaction_amount) * 100), currency_id: json.currency_id };
 }
 
 export async function findPaymentByExternalReference(
@@ -336,13 +336,12 @@ export interface RefundResult {
 export async function refundMercadoPagoPayment(
   paymentId: string | number,
   amountCents: number,
+  operationKey?: string,
 ): Promise<RefundResult> {
+  if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('Valor de estorno inválido.');
   const token = getAccessToken();
-  const body =
-    amountCents > 0
-      ? { amount: Number((amountCents / 100).toFixed(2)) }
-      : {};
-  const idempotencyKey = `refund-${paymentId}-${amountCents}-${Date.now()}`;
+  const body = { amount: Number((amountCents / 100).toFixed(2)) };
+  const idempotencyKey = operationKey ?? `legacy-refund-${paymentId}-${amountCents}`;
   const res = await fetchMpWithTimeout(`${MP_API}/v1/payments/${paymentId}/refunds`, {
     method: "POST",
     headers: {
@@ -358,5 +357,14 @@ export async function refundMercadoPagoPayment(
     const msg = json?.message || json?.error || `erro ${res.status}`;
     throw new Error(`Mercado Pago (reembolso): ${String(msg).slice(0, 300)}`);
   }
+  return { id: json.id, amount: json.amount, status: json.status };
+}
+
+export async function getMercadoPagoRefund(paymentId: string, refundId: string): Promise<RefundResult> {
+  if (!/^[0-9]+$/.test(paymentId) || !/^[0-9]+$/.test(refundId)) throw new Error('Identificador inválido.');
+  const token = getAccessToken();
+  const res = await fetchMpWithTimeout(`${MP_API}/v1/payments/${paymentId}/refunds/${refundId}`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error('Não foi possível conciliar o estorno.');
+  const json = await res.json() as RefundResult;
   return { id: json.id, amount: json.amount, status: json.status };
 }

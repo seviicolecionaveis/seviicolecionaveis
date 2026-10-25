@@ -1,6 +1,6 @@
 # Confirmações de agendamento
 ## Saldo de clientes e reembolsos
-- [ ] Analisar estrutura atual e apresentar plano de integração financeira segura.
+- [x] Analisar estrutura atual e apresentar plano de integração financeira segura.
 - [ ] Implementar saldo/extrato, reservas atômicas e reembolsos parciais com auditoria e permissões existentes.
 - [ ] Integrar escolha segura, painel administrativo, e-mails e Mercado Pago sem modificar regras atuais.
 - [ ] Integrar pagamento total/parcial e liberação de reservas no checkout e pedidos existentes.
