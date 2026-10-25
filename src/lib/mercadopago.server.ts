@@ -46,6 +46,7 @@ export interface CreateCardInput {
   externalReference: string;
   notificationUrl: string;
   customerId?: string | null; // MP customer id — quando presente, MP vincula o cartão ao cliente
+  operationKey?: string;
 }
 
 export interface CardPaymentResult {
@@ -94,7 +95,7 @@ export async function createCardPaymentMP(input: CreateCardInput): Promise<CardP
     payer,
   };
 
-  const idempotencyKey = `${input.externalReference}-card-${Date.now()}`;
+  const idempotencyKey = input.operationKey ?? `${input.externalReference}-card-${Date.now()}`;
 
   const res = await fetchMpWithTimeout(`${MP_API}/v1/payments`, {
     method: "POST",
@@ -211,6 +212,7 @@ export interface CreatePixInput {
   externalReference: string; // order id
   notificationUrl: string;
   expiresInMinutes?: number; // default 30
+  operationKey?: string;
 }
 
 export interface PixPayment {
@@ -251,7 +253,7 @@ export async function createPixPayment(input: CreatePixInput): Promise<PixPaymen
     },
   };
 
-  const idempotencyKey = `${input.externalReference}-${Date.now()}`;
+  const idempotencyKey = input.operationKey ?? `${input.externalReference}-${Date.now()}`;
 
   const res = await fetchMpWithTimeout(`${MP_API}/v1/payments`, {
     method: "POST",
