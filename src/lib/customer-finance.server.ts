@@ -7,6 +7,13 @@ import { sendTransactionalEmailSafe } from './email/send.server';
 type Refund = Database['public']['Tables']['customer_refunds']['Row'];
 type Attempt = Database['public']['Tables']['customer_payment_attempts']['Row'];
 function objectResult<T>(data: Json): T { return data as unknown as T; }
+export async function assertLegacyRefundSafe(orderId: string) {
+  const [attempts,refunds]=await Promise.all([
+    db.from('customer_payment_attempts').select('id',{head:true,count:'exact'}).eq('order_id',orderId),
+    db.from('customer_refunds').select('id',{head:true,count:'exact'}).eq('order_id',orderId).not('status','in','(revoked,declined)'),
+  ]);
+  if(attempts.error||refunds.error||attempts.count||refunds.count) throw new Error('Este pedido deve ser reembolsado em Reembolsos e saldo, preservando as parcelas e compromissos anteriores.');
+}
 export async function assertFinanceAdmin(actor: string) {
   const { error } = await db.rpc('finance_assert_admin', { p_actor: actor });
   if (error) throw new Error('Acesso permitido somente a administradores ativos.');
