@@ -4,7 +4,7 @@
 - [x] Implementar saldo/extrato, reservas atômicas e reembolsos parciais com auditoria e permissões existentes; cenários PostgreSQL isolados passaram.
 - [x] Integrar escolha segura, painel administrativo, templates de e-mail e processamento/conciliação Mercado Pago; nenhum estorno real executado.
 - [x] Integrar pagamento total/parcial no checkout e pedidos existentes, checagem de origem/valor e liberação após estado externo terminal confirmado.
-- [x] 42 testes automatizados passaram; banco descartável validou concorrência, uso único, limites, RLS, liberação, captura e reembolsos mistos; extrato/painel autenticados verificados; compilação OK.
+- [x] 47 testes automatizados passaram, incluindo recuperação de pagamentos; banco descartável validou concorrência, uso único, limites, RLS, liberação, captura e reembolsos mistos; extrato/painel autenticados verificados; compilação OK.
 - [ ] Homologação ponta a ponta de pagamento complementar/estorno e entrega de e-mails: aguarda ambiente Mercado Pago confirmado como teste e backend de aplicação isolado (o atual é compartilhado com a loja). Não publicar como financeiramente homologado antes disso.
 - [ ] Tentativas com criação externa de resultado desconhecido mantêm saldo reservado por segurança; dependem da conciliação do pagamento no provedor antes de liberar. Não liberar por prazo local.
 ## MCP administrativo pelo ChatGPT
