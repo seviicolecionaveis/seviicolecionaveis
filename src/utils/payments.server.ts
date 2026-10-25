@@ -1,4 +1,4 @@
-import { reserveStoreCredit, attachCreditProvider } from '@/lib/customer-finance.server';
+import { reserveStoreCredit, attachCreditProvider, prepareExistingCreditPayment } from '@/lib/customer-finance.server';
 import { resolvePaymentCpf } from "@/lib/customer-payment";
 import { assertAuctionPaymentLink } from "@/lib/auction-payment-links.server";
 import { isPaidOrderStatus } from "@/lib/order-status";
@@ -1350,7 +1350,7 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
 // Resume / change payment for an existing pending order
 // =========================================================================
 
-export async function regeneratePixForExistingOrderServer(orderId: string, userId: string | null, paymentToken?: string) {
+export async function regeneratePixForExistingOrderServer(orderId: string, userId: string | null, paymentToken?: string, requestedCredit = 0) {
   const { data: order, error } = await supabaseAdmin
     .from("orders")
     .select(
@@ -1364,6 +1364,9 @@ export async function regeneratePixForExistingOrderServer(orderId: string, userI
   else if (!userId || !(await canPayOrder(order.user_id, userId))) throw new Error("Pedido não encontrado");
   if (order.status !== "pending") throw new Error("Este pedido não está mais pendente.");
 
+  const creditAttempt = await prepareExistingCreditPayment(order.id, order.user_id, userId, requestedCredit);
+  const providerDueCents = creditAttempt?.provider_cents ?? order.total_cents;
+  if (providerDueCents === 0) { await markOrderPaid(order.id); return { orderId: order.id, qrCode: '', qrCodeBase64: '', expiresAt: new Date().toISOString(), totalCents: 0, status: 'paid' as const }; }
   const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.com.br";
   const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
 
@@ -1374,7 +1377,7 @@ export async function regeneratePixForExistingOrderServer(orderId: string, userI
   if (!payer.cpf) throw new Error("Complete ou corrija o CPF em Minha conta antes de gerar o Pix.");
 
   const pix = await createPixPayment({
-    amountCents: order.total_cents,
+    amountCents: providerDueCents,
     description: `Pedido Sevii Colecionáveis #${order.id.slice(0, 8)}`,
     payerEmail: payer.email,
     payerFirstName: firstName,
@@ -1385,6 +1388,7 @@ export async function regeneratePixForExistingOrderServer(orderId: string, userI
     expiresInMinutes: PIX_EXPIRES_MINUTES,
   });
 
+  await attachCreditProvider(creditAttempt, String(pix.id));
   await supabaseAdmin
     .from("orders")
     .update({
@@ -1401,7 +1405,7 @@ export async function regeneratePixForExistingOrderServer(orderId: string, userI
     qrCode: pix.qr_code,
     qrCodeBase64: pix.qr_code_base64,
     expiresAt: pix.date_of_expiration,
-    totalCents: order.total_cents,
+    totalCents: providerDueCents,
   };
 }
 
@@ -1416,7 +1420,7 @@ export async function payExistingOrderWithCardServer(
     payerEmail?: string | null;
     payerCpf?: string | null;
   },
-  options: { saveCard?: boolean } = {},
+  options: { saveCard?: boolean; storeCreditCents?: number } = {},
 ) {
   const { data: order, error } = await supabaseAdmin
     .from("orders")
@@ -1427,6 +1431,9 @@ export async function payExistingOrderWithCardServer(
   if (!order || !(await canPayOrder(order.user_id, userId))) throw new Error("Pedido não encontrado");
   if (order.status !== "pending") throw new Error("Este pedido não está mais pendente.");
 
+  const creditAttempt = await prepareExistingCreditPayment(order.id, order.user_id, userId, options.storeCreditCents ?? 0);
+  const providerDueCents = creditAttempt?.provider_cents ?? order.total_cents;
+  if (providerDueCents === 0) { await markOrderPaid(order.id); return { orderId: order.id, status: 'approved' as const }; }
   const baseUrl = process.env.PUBLIC_SITE_URL ?? "https://seviicolecionaveis.com.br";
   const notificationUrl = `${baseUrl}/api/public/payments/mercadopago-webhook`;
 
@@ -1446,7 +1453,7 @@ export async function payExistingOrderWithCardServer(
   }
 
   const result = await createCardPaymentMP({
-    amountCents: order.total_cents,
+    amountCents: providerDueCents,
     description: `Pedido Sevii Colecionáveis #${order.id.slice(0, 8)}`,
     token: card.token,
     paymentMethodId: card.paymentMethodId,
@@ -1461,6 +1468,7 @@ export async function payExistingOrderWithCardServer(
     customerId,
   });
 
+  await attachCreditProvider(creditAttempt, String(result.id));
   await supabaseAdmin
     .from("orders")
     .update({
