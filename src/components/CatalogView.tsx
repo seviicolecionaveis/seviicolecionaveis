@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { type Card } from "@/data/cards";
-import { useCardsCatalog, cardCreatedAt } from "@/hooks/useCardsCatalog";
+import { useCardsCatalog, cardLastActivity } from "@/hooks/useCardsCatalog";
 import { useCardStats } from "@/hooks/useCardStats";
 import { CardItem } from "@/components/catalog/CardItem";
 import { CardModal } from "@/components/catalog/CardModal";
@@ -138,9 +138,10 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
       case "number-desc":
         return [...list].sort((a, b) => cardNumValue(b.number) - cardNumValue(a.number) || b.number.localeCompare(a.number));
       case "newest":
+        // "Adicionadas Recentemente" inclui cadastros novos e reposições de estoque.
         return [...list].sort((a, b) => {
-          const ca = cardCreatedAt.get(`${a.name}__${a.collection}__${a.number}`) ?? "";
-          const cb = cardCreatedAt.get(`${b.name}__${b.collection}__${b.number}`) ?? "";
+          const ca = cardLastActivity.get(`${a.name}__${a.collection}__${a.number}`) ?? "";
+          const cb = cardLastActivity.get(`${b.name}__${b.collection}__${b.number}`) ?? "";
           return cb.localeCompare(ca);
         });
       case "oldest":
