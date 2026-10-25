@@ -1,3 +1,4 @@
+import { settleStoreCredit, releaseStoreCreditIfTerminal } from '@/lib/customer-finance.server';
 import { PAID_ORDER_STATUSES } from "@/lib/order-status";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
@@ -272,6 +273,7 @@ export async function markOrderPaid(
   const POST_PAID = PAID_ORDER_STATUSES;
   if (POST_PAID.includes(order.status)) return;
 
+  await settleStoreCredit(orderId, paymentRef);
   await decrementOrderStock(orderId);
 
   await supabaseAdmin.from("stock_reservations").delete().eq("order_id", orderId);
@@ -424,6 +426,7 @@ export async function markOrderPaid(
 // from the same order; only an admin cancels them manually.
 export async function cancelOrder(orderId: string) {
   const { data: o } = await supabaseAdmin.from("orders").select("origin").eq("id", orderId).maybeSingle();
+  if (!(await releaseStoreCreditIfTerminal(orderId))) return;
   if (o?.origin === "auction") return;
   await supabaseAdmin.from("stock_reservations").delete().eq("order_id", orderId);
   await supabaseAdmin

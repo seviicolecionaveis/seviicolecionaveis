@@ -1,3 +1,4 @@
+import { reserveStoreCredit, attachCreditProvider } from '@/lib/customer-finance.server';
 import { resolvePaymentCpf } from "@/lib/customer-payment";
 import { assertAuctionPaymentLink } from "@/lib/auction-payment-links.server";
 import { isPaidOrderStatus } from "@/lib/order-status";
@@ -884,8 +885,11 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
   await sendOrderReceivedEmail(order.id);
 
+  const creditAttempt = await reserveStoreCredit(order.id, userId, data.storeCreditCents ?? 0, 'stripe');
+  const providerDueCents = creditAttempt?.provider_cents ?? totalCents;
+
   // Vale-presente cobre o pedido inteiro: marca pago direto, sem gateway.
-  if (totalCents === 0) {
+  if (providerDueCents === 0) {
     await markOrderPaid(order.id);
     return { clientSecret: null, orderId: order.id, status: "paid" as const };
   }
@@ -929,7 +933,7 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
   }
 
   const session = await stripe.checkout.sessions.create({
-    line_items: lineItems,
+    line_items: creditAttempt ? [{ price_data: { currency: "brl", product_data: { name: `Pedido Sevii #${order.id.slice(0,8)} — diferença após saldo` }, unit_amount: providerDueCents }, quantity: 1 }] : lineItems,
     mode: "payment",
     ui_mode: "embedded_page",
     redirect_on_completion: "always",
@@ -940,6 +944,7 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
   });
 
+  await attachCreditProvider(creditAttempt, session.id);
   await supabaseAdmin.from("orders").update({ stripe_session_id: session.id }).eq("id", order.id);
 
   return { clientSecret: session.client_secret, orderId: order.id };
@@ -1056,8 +1061,11 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
 
 
+  const creditAttempt = await reserveStoreCredit(order.id, userId, data.storeCreditCents ?? 0, 'mercadopago');
+  const providerDueCents = creditAttempt?.provider_cents ?? totalCents;
+
   // Vale-presente cobre o pedido inteiro: marca pago direto, sem Pix.
-  if (totalCents === 0) {
+  if (providerDueCents === 0) {
     await sendOrderReceivedEmail(order.id);
     await markOrderPaid(order.id);
     return {
@@ -1077,7 +1085,7 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
   const lastName = rest.join(" ") || "Sevii";
 
   const pix = await createPixPayment({
-    amountCents: totalCents,
+    amountCents: providerDueCents,
     description: `Pedido Sevii Colecionáveis #${order.id.slice(0, 8)}`,
     payerEmail: email,
     payerFirstName: firstName,
@@ -1088,6 +1096,7 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     expiresInMinutes: PIX_EXPIRES_MINUTES,
   });
 
+  await attachCreditProvider(creditAttempt, String(pix.id));
   await supabaseAdmin
     .from("orders")
     .update({
@@ -1107,7 +1116,9 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
     qrCode: pix.qr_code,
     qrCodeBase64: pix.qr_code_base64,
     expiresAt: pix.date_of_expiration,
-    totalCents,
+    totalCents: providerDueCents,
+    orderTotalCents: totalCents,
+    storeCreditCents: creditAttempt?.credit_cents ?? 0,
   };
 }
 
@@ -1258,8 +1269,11 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
   await sendOrderReceivedEmail(order.id);
 
+  const creditAttempt = await reserveStoreCredit(order.id, userId, data.storeCreditCents ?? 0, 'mercadopago');
+  const providerDueCents = creditAttempt?.provider_cents ?? totalCents;
+
   // Vale-presente cobre o pedido inteiro: marca pago direto, sem cobrança no cartão.
-  if (totalCents === 0) {
+  if (providerDueCents === 0) {
     await markOrderPaid(order.id);
     return { orderId: order.id, status: "approved" as const };
   }
@@ -1282,7 +1296,7 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
 
   try {
     const result = await createCardPaymentMP({
-      amountCents: totalCents,
+      amountCents: providerDueCents,
       description: `Pedido Sevii Colecionáveis #${order.id.slice(0, 8)}`,
       token: data.card.token,
       paymentMethodId: data.card.paymentMethodId,
@@ -1297,6 +1311,7 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
       customerId,
     });
 
+    await attachCreditProvider(creditAttempt, String(result.id));
     await supabaseAdmin
       .from("orders")
       .update({ mercadopago_payment_id: String(result.id) })

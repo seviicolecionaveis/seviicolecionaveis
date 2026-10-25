@@ -64,6 +64,7 @@ import { Route as AdminPilhaRouteImport } from './routes/admin.pilha'
 import { Route as AdminPopupsRouteImport } from './routes/admin.popups'
 import { Route as AdminPreVendaRouteImport } from './routes/admin.pre-venda'
 import { Route as AdminReconhecerCartasRouteImport } from './routes/admin.reconhecer-cartas'
+import { Route as AdminReembolsosRouteImport } from './routes/admin.reembolsos'
 import { Route as AdminSealedRouteImport } from './routes/admin.sealed'
 import { Route as AdminShippingRouteImport } from './routes/admin.shipping'
 import { Route as AdminSorteiosRouteImport } from './routes/admin.sorteios'
@@ -84,6 +85,7 @@ import { Route as PreVendaIndexRouteImport } from './routes/pre-venda.index'
 import { Route as PreVendaSlugRouteImport } from './routes/pre-venda.$slug'
 import { Route as ProdutosLacradosIndexRouteImport } from './routes/produtos-lacrados.index'
 import { Route as ProdutosLacradosSlugRouteImport } from './routes/produtos-lacrados.$slug'
+import { Route as ReembolsoRefundIdRouteImport } from './routes/reembolso.$refundId'
 import { Route as SorteiosIndexRouteImport } from './routes/sorteios.index'
 import { Route as SorteiosRaffleIdRouteImport } from './routes/sorteios.$raffleId'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -407,6 +409,11 @@ const AdminReconhecerCartasRoute = AdminReconhecerCartasRouteImport.update({
   path: '/reconhecer-cartas',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminReembolsosRoute = AdminReembolsosRouteImport.update({
+  id: '/reembolsos',
+  path: '/reembolsos',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSealedRoute = AdminSealedRouteImport.update({
   id: '/sealed',
   path: '/sealed',
@@ -506,6 +513,11 @@ const ProdutosLacradosSlugRoute = ProdutosLacradosSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => ProdutosLacradosRoute,
+} as any)
+const ReembolsoRefundIdRoute = ReembolsoRefundIdRouteImport.update({
+  id: '/reembolso/$refundId',
+  path: '/reembolso/$refundId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SorteiosIndexRoute = SorteiosIndexRouteImport.update({
   id: '/sorteios/',
@@ -816,6 +828,7 @@ export interface FileRoutesByFullPath {
   '/admin/popups': typeof AdminPopupsRoute
   '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/reconhecer-cartas': typeof AdminReconhecerCartasRoute
+  '/admin/reembolsos': typeof AdminReembolsosRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/sorteios': typeof AdminSorteiosRoute
@@ -832,6 +845,7 @@ export interface FileRoutesByFullPath {
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/pre-venda/$slug': typeof PreVendaSlugRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
+  '/reembolso/$refundId': typeof ReembolsoRefundIdRoute
   '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
@@ -935,6 +949,7 @@ export interface FileRoutesByTo {
   '/admin/popups': typeof AdminPopupsRoute
   '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/reconhecer-cartas': typeof AdminReconhecerCartasRoute
+  '/admin/reembolsos': typeof AdminReembolsosRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/sorteios': typeof AdminSorteiosRoute
@@ -951,6 +966,7 @@ export interface FileRoutesByTo {
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/pre-venda/$slug': typeof PreVendaSlugRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
+  '/reembolso/$refundId': typeof ReembolsoRefundIdRoute
   '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
   '/orders': typeof OrdersIndexRoute
   '/pilha': typeof PilhaIndexRoute
@@ -1058,6 +1074,7 @@ export interface FileRoutesById {
   '/admin/popups': typeof AdminPopupsRoute
   '/admin/pre-venda': typeof AdminPreVendaRoute
   '/admin/reconhecer-cartas': typeof AdminReconhecerCartasRoute
+  '/admin/reembolsos': typeof AdminReembolsosRoute
   '/admin/sealed': typeof AdminSealedRoute
   '/admin/shipping': typeof AdminShippingRoute
   '/admin/sorteios': typeof AdminSorteiosRoute
@@ -1074,6 +1091,7 @@ export interface FileRoutesById {
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/pre-venda/$slug': typeof PreVendaSlugRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
+  '/reembolso/$refundId': typeof ReembolsoRefundIdRoute
   '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
@@ -1182,6 +1200,7 @@ export interface FileRouteTypes {
     | '/admin/popups'
     | '/admin/pre-venda'
     | '/admin/reconhecer-cartas'
+    | '/admin/reembolsos'
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/sorteios'
@@ -1198,6 +1217,7 @@ export interface FileRouteTypes {
     | '/pilha/solicitar'
     | '/pre-venda/$slug'
     | '/produtos-lacrados/$slug'
+    | '/reembolso/$refundId'
     | '/sorteios/$raffleId'
     | '/orders/'
     | '/pilha/'
@@ -1301,6 +1321,7 @@ export interface FileRouteTypes {
     | '/admin/popups'
     | '/admin/pre-venda'
     | '/admin/reconhecer-cartas'
+    | '/admin/reembolsos'
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/sorteios'
@@ -1317,6 +1338,7 @@ export interface FileRouteTypes {
     | '/pilha/solicitar'
     | '/pre-venda/$slug'
     | '/produtos-lacrados/$slug'
+    | '/reembolso/$refundId'
     | '/sorteios/$raffleId'
     | '/orders'
     | '/pilha'
@@ -1423,6 +1445,7 @@ export interface FileRouteTypes {
     | '/admin/popups'
     | '/admin/pre-venda'
     | '/admin/reconhecer-cartas'
+    | '/admin/reembolsos'
     | '/admin/sealed'
     | '/admin/shipping'
     | '/admin/sorteios'
@@ -1439,6 +1462,7 @@ export interface FileRouteTypes {
     | '/pilha/solicitar'
     | '/pre-venda/$slug'
     | '/produtos-lacrados/$slug'
+    | '/reembolso/$refundId'
     | '/sorteios/$raffleId'
     | '/orders/'
     | '/pilha/'
@@ -1527,6 +1551,7 @@ export interface RootRouteChildren {
   ListaDesejosTokenRoute: typeof ListaDesejosTokenRoute
   PayOrderIdRoute: typeof PayOrderIdRoute
   PreVendaSlugRoute: typeof PreVendaSlugRoute
+  ReembolsoRefundIdRoute: typeof ReembolsoRefundIdRoute
   SorteiosRaffleIdRoute: typeof SorteiosRaffleIdRoute
   PreVendaIndexRoute: typeof PreVendaIndexRoute
   SorteiosIndexRoute: typeof SorteiosIndexRoute
@@ -1958,6 +1983,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReconhecerCartasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/reembolsos': {
+      id: '/admin/reembolsos'
+      path: '/reembolsos'
+      fullPath: '/admin/reembolsos'
+      preLoaderRoute: typeof AdminReembolsosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/sealed': {
       id: '/admin/sealed'
       path: '/sealed'
@@ -2097,6 +2129,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/produtos-lacrados/$slug'
       preLoaderRoute: typeof ProdutosLacradosSlugRouteImport
       parentRoute: typeof ProdutosLacradosRoute
+    }
+    '/reembolso/$refundId': {
+      id: '/reembolso/$refundId'
+      path: '/reembolso/$refundId'
+      fullPath: '/reembolso/$refundId'
+      preLoaderRoute: typeof ReembolsoRefundIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/sorteios/': {
       id: '/sorteios/'
@@ -2442,6 +2481,7 @@ interface AdminRouteChildren {
   AdminPopupsRoute: typeof AdminPopupsRoute
   AdminPreVendaRoute: typeof AdminPreVendaRoute
   AdminReconhecerCartasRoute: typeof AdminReconhecerCartasRoute
+  AdminReembolsosRoute: typeof AdminReembolsosRoute
   AdminSealedRoute: typeof AdminSealedRoute
   AdminShippingRoute: typeof AdminShippingRoute
   AdminSorteiosRoute: typeof AdminSorteiosRoute
@@ -2476,6 +2516,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPopupsRoute: AdminPopupsRoute,
   AdminPreVendaRoute: AdminPreVendaRoute,
   AdminReconhecerCartasRoute: AdminReconhecerCartasRoute,
+  AdminReembolsosRoute: AdminReembolsosRoute,
   AdminSealedRoute: AdminSealedRoute,
   AdminShippingRoute: AdminShippingRoute,
   AdminSorteiosRoute: AdminSorteiosRoute,
@@ -2620,6 +2661,7 @@ const rootRouteChildren: RootRouteChildren = {
   ListaDesejosTokenRoute: ListaDesejosTokenRoute,
   PayOrderIdRoute: PayOrderIdRoute,
   PreVendaSlugRoute: PreVendaSlugRoute,
+  ReembolsoRefundIdRoute: ReembolsoRefundIdRoute,
   SorteiosRaffleIdRoute: SorteiosRaffleIdRoute,
   PreVendaIndexRoute: PreVendaIndexRoute,
   SorteiosIndexRoute: SorteiosIndexRoute,
