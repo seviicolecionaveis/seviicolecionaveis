@@ -107,6 +107,27 @@ export async function reserveStoreCredit(orderId: string, userId: string, credit
   if (error) throw new Error('Saldo indisponível ou outra tentativa de pagamento em aberto.');
   return objectResult<Attempt>(data);
 }
+export async function prepareExistingCreditPayment(orderId: string, owner: string, actor: string | null, requested: number) {
+  const { data: attempts, error } = await db.from('customer_payment_attempts').select('*').eq('order_id', orderId).order('created_at', { ascending: false });
+  if (error) throw new Error('Não foi possível conferir as tentativas anteriores.');
+  const active = attempts?.find(t => ['reserved', 'pending', 'approved', 'review'].includes(t.status));
+  if (active) {
+    if (!(await releaseStoreCreditIfTerminal(orderId))) throw new Error('Pagamento anterior ainda está em aberto. Aguarde a confirmação ou expiração.');
+  }
+  if (!requested) return null;
+  if (!actor || actor !== owner) throw new Error('Somente o titular autenticado pode autorizar uso do saldo.');
+  // Do not reserve against an older provider payment whose outcome is unknown.
+  const { data: order } = await db.from('orders').select('mercadopago_payment_id,stripe_session_id').eq('id',orderId).single();
+  if (order?.mercadopago_payment_id && !active) {
+    const { getPixPayment } = await import('./mercadopago.server');
+    const old = await getPixPayment(order.mercadopago_payment_id);
+    if (!['cancelled','rejected'].includes(old.status)) throw new Error('Concilie o pagamento anterior antes de usar saldo.');
+  }
+  if (order?.stripe_session_id) throw new Error('Concilie o pagamento anterior com cartão antes de usar saldo.');
+  const { data, error: reserveError } = await db.rpc('finance_reserve_payment', { p_order: orderId, p_user: owner, p_credit: requested, p_provider: 'mercadopago', p_key: `existing:${orderId}:${randomBytes(16).toString('hex')}` });
+  if (reserveError) throw new Error('Saldo indisponível ou tentativa em aberto.');
+  return objectResult<Attempt>(data);
+}
 export async function attachCreditProvider(attempt: Attempt | null, providerId: string) {
   if (!attempt) return;
   const { error } = await db.from('customer_payment_attempts').update({ provider_id: providerId, status: 'pending' }).eq('id', attempt.id).eq('status', 'reserved');
@@ -115,7 +136,12 @@ export async function attachCreditProvider(attempt: Attempt | null, providerId: 
 export async function settleStoreCredit(orderId: string, ref?: { mercadopagoPaymentId?: string; stripePaymentIntent?: string }) {
   const { data: t, error } = await db.from('customer_payment_attempts').select('*').eq('order_id', orderId).neq('status', 'released').maybeSingle();
   if (error) throw new Error('Não foi possível conferir pagamento com saldo.');
-  if (!t || t.status === 'approved') return;
+  if (!t) {
+    const { count } = await db.from('customer_payment_attempts').select('id', { count: 'exact', head: true }).eq('order_id',orderId);
+    if (count) throw new Error('Pagamento tardio após liberação de saldo: conciliação necessária.');
+    return;
+  }
+  if (t.status === 'approved') return;
   let providerId = t.provider_id; let amount = 0; let currency = 'BRL';
   if (t.provider === 'mercadopago') {
     if (!ref?.mercadopagoPaymentId || ref.mercadopagoPaymentId !== providerId) throw new Error('Tentativa de pagamento diferente: conciliação necessária.');
