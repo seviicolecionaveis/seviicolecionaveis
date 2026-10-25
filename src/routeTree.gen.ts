@@ -27,6 +27,7 @@ import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as ImasRouteImport } from './routes/imas'
 import { Route as MaisVendidasRouteImport } from './routes/mais-vendidas'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as NovidadesRouteImport } from './routes/novidades'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as PilhaRouteImport } from './routes/pilha'
 import { Route as ProdutosLacradosRouteImport } from './routes/produtos-lacrados'
@@ -217,6 +218,11 @@ const MaisVendidasRoute = MaisVendidasRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NovidadesRoute = NovidadesRouteImport.update({
+  id: '/novidades',
+  path: '/novidades',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrdersRoute = OrdersRouteImport.update({
@@ -773,6 +779,7 @@ export interface FileRoutesByFullPath {
   '/imas': typeof ImasRoute
   '/mais-vendidas': typeof MaisVendidasRoute
   '/mcp': typeof McpRoute
+  '/novidades': typeof NovidadesRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pilha': typeof PilhaRouteWithChildren
   '/produtos-lacrados': typeof ProdutosLacradosRouteWithChildren
@@ -894,6 +901,7 @@ export interface FileRoutesByTo {
   '/imas': typeof ImasRoute
   '/mais-vendidas': typeof MaisVendidasRoute
   '/mcp': typeof McpRoute
+  '/novidades': typeof NovidadesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -1013,6 +1021,7 @@ export interface FileRoutesById {
   '/imas': typeof ImasRoute
   '/mais-vendidas': typeof MaisVendidasRoute
   '/mcp': typeof McpRoute
+  '/novidades': typeof NovidadesRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pilha': typeof PilhaRouteWithChildren
   '/produtos-lacrados': typeof ProdutosLacradosRouteWithChildren
@@ -1136,6 +1145,7 @@ export interface FileRouteTypes {
     | '/imas'
     | '/mais-vendidas'
     | '/mcp'
+    | '/novidades'
     | '/orders'
     | '/pilha'
     | '/produtos-lacrados'
@@ -1257,6 +1267,7 @@ export interface FileRouteTypes {
     | '/imas'
     | '/mais-vendidas'
     | '/mcp'
+    | '/novidades'
     | '/reset-password'
     | '/selados'
     | '/sitemap.xml'
@@ -1375,6 +1386,7 @@ export interface FileRouteTypes {
     | '/imas'
     | '/mais-vendidas'
     | '/mcp'
+    | '/novidades'
     | '/orders'
     | '/pilha'
     | '/produtos-lacrados'
@@ -1497,6 +1509,7 @@ export interface RootRouteChildren {
   ImasRoute: typeof ImasRoute
   MaisVendidasRoute: typeof MaisVendidasRoute
   McpRoute: typeof McpRoute
+  NovidadesRoute: typeof NovidadesRoute
   OrdersRoute: typeof OrdersRouteWithChildren
   PilhaRoute: typeof PilhaRouteWithChildren
   ProdutosLacradosRoute: typeof ProdutosLacradosRouteWithChildren
@@ -1684,6 +1697,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/novidades': {
+      id: '/novidades'
+      path: '/novidades'
+      fullPath: '/novidades'
+      preLoaderRoute: typeof NovidadesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/orders': {
@@ -2580,6 +2600,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImasRoute: ImasRoute,
   MaisVendidasRoute: MaisVendidasRoute,
   McpRoute: McpRoute,
+  NovidadesRoute: NovidadesRoute,
   OrdersRoute: OrdersRouteWithChildren,
   PilhaRoute: PilhaRouteWithChildren,
   ProdutosLacradosRoute: ProdutosLacradosRouteWithChildren,

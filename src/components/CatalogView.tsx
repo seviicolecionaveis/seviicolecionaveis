@@ -45,13 +45,16 @@ const BATCH_SIZE = 50;
 interface Props {
   heading?: string;
   showBanners?: boolean;
+  initialSort?: Sort;
+  /** Quando definido, mostra apenas cartas adicionadas ou reabastecidas nos últimos N dias. */
+  recentOnlyDays?: number;
 }
 
-export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii Colecionáveis", showBanners = true }: Props) {
+export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii Colecionáveis", showBanners = true, initialSort, recentOnlyDays }: Props) {
   const { cards: CARDS, loading: cardsLoading } = useCardsCatalog();
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<Sort>("relevance");
+  const [sort, setSort] = useState<Sort>(initialSort ?? "relevance");
   const [active, setActive] = useState<Card | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
@@ -79,6 +82,9 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
     const priceFilterActive = hasMin || hasMax;
     const q = query.trim().toLowerCase();
     const numQ = filters.numberQuery.trim().toLowerCase();
+    const recentCutoff = recentOnlyDays
+      ? new Date(Date.now() - recentOnlyDays * 24 * 60 * 60 * 1000).toISOString()
+      : null;
 
     const list = CARDS.filter((c) => {
       if (filters.categories.length && !filters.categories.includes(c.category)) return false;
@@ -95,6 +101,10 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
         if (c.price < min || c.price > max) return false;
       }
       if (numQ && !c.number.toLowerCase().includes(numQ)) return false;
+      if (recentCutoff) {
+        const ts = cardLastActivity.get(`${c.name}__${c.collection}__${c.number}`) ?? "";
+        if (!ts || ts < recentCutoff) return false;
+      }
       if (q) {
         const hay = `${c.name} ${c.collection} ${c.number}`.toLowerCase();
         if (!hay.includes(q)) return false;
@@ -165,7 +175,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
         return scored.map((x) => x.c);
       }
     }
-  }, [filters, query, sort, CARDS, shuffleSeed, stats]);
+  }, [filters, query, sort, CARDS, shuffleSeed, stats, recentOnlyDays]);
 
   const reset = () => {
     setFilters(DEFAULT_FILTERS);
