@@ -72,7 +72,7 @@ export async function sendTransactionalEmailServer(
     status,
     metadata: { idempotency_key: idempotencyKey },
     subject: resolvedSubject,
-    body_html: html,
+    body_html: templateName === 'customer-finance' ? html.replace(/(reembolso\/[a-f0-9-]+)(?:#|%23)[a-f0-9]{64}/gi, '$1#redacted') : html,
     from_email: fromValue,
     batch_id: params.batchId ?? null,
     ...extra,

@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import { template as customerFinanceTemplate } from './customer-finance'
 import { template as loyaltyProgramLaunchTemplate } from './loyalty-program-launch'
 import { template as giftVoucherTemplate } from './gift-voucher'
 import { template as couponBroadcastTemplate } from './coupon-broadcast'
@@ -37,6 +38,7 @@ export interface TemplateEntry {
  * Import and register new templates here after creating them in this directory.
  */
 export const TEMPLATES: Record<string, TemplateEntry> = {
+  'customer-finance': customerFinanceTemplate,
   'loyalty-program-launch': loyaltyProgramLaunchTemplate,
   'gift-voucher': giftVoucherTemplate,
   'coupon-broadcast': couponBroadcastTemplate,
