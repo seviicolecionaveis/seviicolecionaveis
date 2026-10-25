@@ -462,6 +462,7 @@ function OrderDetailPage() {
             <span>Total</span>
             <span className="tabular-nums">R$ {(order.total_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
           </div>
+          {order.store_credit_cents > 0 && <><div className="flex justify-between"><span>Saldo Sevii {order.finance_settled_at ? 'utilizado' : 'reservado'}</span><span>R$ {(order.store_credit_cents/100).toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div><div className="flex justify-between"><span>{order.finance_settled_at ? 'Pago na forma complementar' : 'Restante a pagar'}</span><span>R$ {(Math.max(0,order.total_cents-order.store_credit_cents)/100).toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div></>}
           <div className="flex justify-between border-t border-border pt-2 text-xs text-muted-foreground">
             <span>Forma de pagamento</span>
             <span className="font-medium text-foreground">

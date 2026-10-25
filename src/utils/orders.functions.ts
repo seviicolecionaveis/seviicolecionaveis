@@ -290,6 +290,8 @@ export const adminPartialCancelItem = createServerFn({ method: "POST" })
     // Cancelamento manual pelo admin NÃO devolve estoque — decisão do negócio.
     // Estoque só é devolvido automaticamente quando o cliente não confirma pagamento (cron auto-cancel-unpaid).
 
+    const { assertLegacyRefundSafe } = await import('@/lib/customer-finance.server');
+    await assertLegacyRefundSafe(order.id);
     // Processa o reembolso conforme método escolhido.
     let couponCode: string | null = null;
     let refundDetails: string = "";

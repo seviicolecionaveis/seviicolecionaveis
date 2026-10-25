@@ -301,6 +301,7 @@ function AdminOrderDetailPage() {
             <ArrowLeft className="h-3.5 w-3.5" />
             {order?.origin === "auction" ? "Voltar para pedidos de leilão" : "Voltar para pedidos"}
           </Link>
+          <Link to="/admin/reembolsos" search={{orderId}} className="text-sm underline">Reembolso e saldo</Link>
           <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii · Admin</Link>
         </div>
       </header>
@@ -619,7 +620,8 @@ function AdminOrderDetailPage() {
               />
             )}
             <div className="border-t border-border pt-2 mt-2">
-              <Row label="Total pago" value={fmtBRL(totalCents)} tone="total" />
+              <Row label="Total do pedido" value={fmtBRL(totalCents)} tone="total" />
+              {order.store_credit_cents>0&&<><Row label="Saldo Sevii" value={fmtBRL(order.store_credit_cents)}/><Row label="Parcela complementar" value={fmtBRL(Math.max(0,totalCents-order.store_credit_cents))}/></>}
             </div>
             {(order.refunded_cents ?? 0) > 0 && (
               <Row

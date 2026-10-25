@@ -1,3 +1,7 @@
+import { useServerFn } from '@tanstack/react-start';
+import { useQuery } from '@tanstack/react-query';
+import { getCreditStatement } from '@/lib/customer-finance.functions';
+import { money } from '@/lib/customer-finance';
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -153,6 +157,7 @@ interface CardState {
   notes: string | null;
   couponCode: string | null;
   pointsToRedeem: number;
+  storeCreditCents: number;
   arteEmCardsCode: string | null;
   schedule: { kind: "delivery" | "pickup" | "event"; at: string; eventId?: string | null } | null;
 }
@@ -161,6 +166,9 @@ function CheckoutPage() {
   const { user, session, isAdmin, loading: authLoading } = useAuth();
   const { items, subtotal, clear } = useCart();
   const nav = useNavigate();
+  const readCredit=useServerFn(getCreditStatement);
+  const creditQuery=useQuery({queryKey:["checkout-credit",user?.id],queryFn:()=>readCredit({data:{page:0}}),enabled:!!user});
+  const [creditInput,setCreditInput]=useState(0);
   const [form, setForm] = useState<Form>(empty);
   const [shipping, setShipping] = useState<"fixed" | "arrange" | "card_stack">("fixed");
   const [stackTermsAccepted, setStackTermsAccepted] = useState(false);
@@ -411,6 +419,9 @@ function CheckoutPage() {
   const totalCents =
     subtotalCents - bundleDiscountCents - couponDiscountCents - pointsDiscountCents - pixDiscountCents + shippingCents;
 
+  const availableCredit=(creditQuery.data?.balanceCents??0)-(creditQuery.data?.reservedCents??0);
+  const storeCreditCents=Math.min(Math.max(0,creditInput),Math.max(0,totalCents),availableCredit);
+  const providerDueCents=Math.max(0,totalCents-storeCreditCents);
   const discount = couponDiscountCents / 100;
   const pixDiscount = pixDiscountCents / 100;
   const bundleDiscount = bundleDiscountCents / 100;
@@ -630,10 +641,19 @@ function CheckoutPage() {
       } catch (e) {
         console.warn("persistAddressAndProfile falhou (seguindo mesmo assim):", e);
       }
+      if (providerDueCents === 0 && storeCreditCents > 0) {
+        const result = await createCardOrder({ data: {
+          items: buildItemsPayload(), shippingMethod: shipping, shippingQuote: shippingQuoteForApi(),
+          address: buildAddressPayload(), notes: buildNotes(), couponCode: couponNormalized || null,
+          pointsToRedeem: pointsRedeemed, storeCreditCents, schedule: schedulePayload(),
+          card: { token: 'store-credit-only', paymentMethodId: 'credit', installments: 1 },
+        }});
+        clear(); nav({ to: '/orders/$orderId', params: { orderId: result.orderId } }); return;
+      }
       // O servidor recalcula tudo (combo + cupom + Pix) por segurança;
       // aqui só passamos o totalCents já calculado para exibir no CardBrick.
       setCard({
-        totalCents,
+        totalCents: providerDueCents,
         payerEmail: user.email ?? "",
         payerCpf: form.cpf || null,
         itemsPayload: buildItemsPayload(),
@@ -643,6 +663,7 @@ function CheckoutPage() {
         notes: buildNotes(),
         couponCode: couponNormalized || null,
         pointsToRedeem: pointsRedeemed,
+        storeCreditCents,
         arteEmCardsCode: null,
         schedule: schedulePayload(),
       });
@@ -679,6 +700,7 @@ function CheckoutPage() {
           notes: buildNotes(),
           couponCode: couponNormalized || null,
           pointsToRedeem: pointsRedeemed,
+          storeCreditCents,
           arteEmCardsCode: null,
           schedule: schedulePayload(),
         },
@@ -1126,6 +1148,13 @@ function CheckoutPage() {
 
           <div>
             <h2 className="text-lg font-bold mb-3">Forma de pagamento</h2>
+            <div className="border-y border-border py-4 mb-4 space-y-3">
+              <p className="font-semibold text-sm">Saldo Sevii · {money(availableCredit)} disponível</p>
+              {creditQuery.isError && <p role="alert" className="text-sm text-destructive">Não foi possível consultar seu saldo.</p>}
+              <label className="block text-sm">Usar saldo (R$)<input type="number" min="0" step="0.01" max={Math.min(availableCredit,Math.max(0,totalCents))/100} value={creditInput/100} onChange={e=>setCreditInput(Math.max(0,Math.round(Number(e.target.value)*100)))} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2"/></label>
+              <Button type="button" size="sm" variant="outline" disabled={!availableCredit} onClick={()=>setCreditInput(Math.min(availableCredit,Math.max(0,totalCents)))}>Usar saldo disponível</Button>
+              {storeCreditCents>0&&<p className="text-sm">Saldo: {money(storeCreditCents)} · Restante: {money(providerDueCents)}</p>}
+            </div>
             <div className="space-y-2">
               <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
                 <input type="radio" name="pm" checked={paymentMethod === "pix"} onChange={() => {
@@ -1237,8 +1266,8 @@ function CheckoutPage() {
               : paymentMethod === "admin_test"
                 ? `Aprovar pedido de teste — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
                 : paymentMethod === "pix"
-                  ? `Pagar com Pix — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
-                  : `Pagar com cartão — R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+                  ? `Pagar com Pix — R$ ${(providerDueCents/100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                  : `Pagar com cartão — R$ ${(providerDueCents/100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
           </button>
         </form>
 
@@ -1601,6 +1630,7 @@ function CardScreen({
                     notes: card.notes,
                     couponCode: card.couponCode,
                     pointsToRedeem: card.pointsToRedeem,
+                    storeCreditCents: card.storeCreditCents,
                     arteEmCardsCode: card.arteEmCardsCode,
                     schedule: card.schedule,
                     card: {

@@ -1,0 +1,26 @@
+DO $$ DECLARE d text; BEGIN
+SELECT pg_get_functiondef('public.finance_create_refund(uuid,uuid,uuid,bigint,text,text,text)'::regprocedure) INTO d;
+d:=replace(d,'IF p_amount<=0 OR','IF p_amount IS NULL OR p_reason IS NULL OR p_hash IS NULL OR p_key IS NULL OR length(p_key)<8 OR p_amount<=0 OR');
+d:=replace(d,'IF p_amount>ceiling THEN','IF ceiling IS NULL OR ceiling<=0 OR p_amount>ceiling THEN');
+d:=replace(d,'ceiling-committed-coalesce((SELECT refund_cents FROM public.order_items WHERE id=p_item),0)','ceiling-committed-greatest(0,coalesce((SELECT refund_cents FROM public.order_items WHERE id=p_item),0)-coalesce((SELECT sum(amount_cents) FROM public.customer_refunds WHERE item_id=p_item AND status IN (''refunded'',''credited'')),0))'); EXECUTE d;
+SELECT pg_get_functiondef('public.finance_adjust_credit(uuid,uuid,bigint,text,text)'::regprocedure) INTO d;
+d:=replace(d,'IF p_amount=0 OR abs(p_amount)>100000000 OR','IF p_amount IS NULL OR p_reason IS NULL OR p_key IS NULL OR p_amount=0 OR p_amount < -100000000 OR p_amount > 100000000 OR'); EXECUTE d;
+SELECT pg_get_functiondef('public.finance_choose_refund(uuid,text,text)'::regprocedure) INTO d;
+d:=replace(d,'IF r.token_hash<>p_hash','IF p_hash IS NULL OR p_choice IS NULL OR r.token_hash<>p_hash'); EXECUTE d;
+SELECT pg_get_functiondef('public.finance_refund_action(uuid,uuid,text,text,text,bigint,text)'::regprocedure) INTO d;
+d:=replace(d,'IF length(trim(p_reason))<5','IF p_reason IS NULL OR p_action IS NULL OR length(trim(p_reason))<5');
+d:=replace(d,'IF r.status<>''awaiting_choice'' OR p_hash','IF p_hash IS NULL OR r.status<>''awaiting_choice'' OR p_hash');
+d:=replace(d,'status IN (''processing'',''review'',''failed'',''refunded'')','status IN (''processing'',''review'',''failed'',''refunded'',''credited'')'); EXECUTE d;
+SELECT pg_get_functiondef('public.finance_reserve_payment(uuid,uuid,bigint,text,text)'::regprocedure) INTO d;
+d:=replace(d,'IF p_credit<0 OR','IF p_credit IS NULL OR p_user IS NULL OR p_provider IS NULL OR p_key IS NULL OR p_credit<0 OR'); EXECUTE d;
+SELECT pg_get_functiondef('public.finance_settle_payment(uuid,text,bigint,text)'::regprocedure) INTO d;
+d:=replace(d,'IF t.status NOT IN','IF p_amount IS NULL OR p_currency IS NULL OR t.status NOT IN'); EXECUTE d;
+END $$;
+CREATE OR REPLACE FUNCTION public.finance_validate_refund() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE o public.orders; committed bigint; t public.customer_payment_attempts; used_credit bigint; used_external bigint; remaining_credit bigint; remaining_external bigint; BEGIN
+SELECT * INTO o FROM public.orders WHERE id=NEW.order_id FOR UPDATE;
+IF TG_OP='INSERT' THEN IF o.total_cents IS NULL OR o.total_cents<=0 OR coalesce(o.refunded_cents,0)<0 OR coalesce(o.refunded_cents,0)>o.total_cents THEN RAISE EXCEPTION 'Invalid order accounting'; END IF; IF NEW.user_id IS DISTINCT FROM o.user_id THEN RAISE EXCEPTION 'Customer mismatch'; END IF; SELECT coalesce(sum(amount_cents),0) INTO committed FROM public.customer_refunds WHERE order_id=o.id AND status NOT IN ('revoked','declined','credited','refunded'); IF NEW.amount_cents>o.total_cents-coalesce(o.refunded_cents,0)-committed THEN RAISE EXCEPTION 'Refund exceeds available entitlement'; END IF; END IF;
+IF TG_OP='UPDATE' AND ((NEW.status='credited' AND OLD.status='awaiting_choice') OR (NEW.status='processing' AND OLD.status='approved')) THEN SELECT * INTO t FROM public.customer_payment_attempts WHERE order_id=NEW.order_id AND status='approved'; IF FOUND THEN SELECT coalesce(sum(credit_cents),0),coalesce(sum(provider_cents),0) INTO used_credit,used_external FROM public.customer_refunds WHERE order_id=NEW.order_id AND id<>NEW.id AND status IN ('processing','review','failed','refunded','credited'); remaining_credit:=greatest(0,t.credit_cents-used_credit); remaining_external:=greatest(0,t.provider_cents-used_external); IF NEW.status='credited' THEN NEW.credit_cents:=least(remaining_credit,round(NEW.amount_cents::numeric*t.credit_cents/nullif(t.total_cents,0))::bigint); NEW.provider_cents:=NEW.amount_cents-NEW.credit_cents; IF NEW.provider_cents>remaining_external THEN NEW.credit_cents:=NEW.credit_cents+NEW.provider_cents-remaining_external; NEW.provider_cents:=remaining_external; END IF; END IF; IF NEW.credit_cents>remaining_credit OR NEW.provider_cents>remaining_external OR NEW.credit_cents+NEW.provider_cents<>NEW.amount_cents THEN RAISE EXCEPTION 'Original tender ceiling exceeded'; END IF; END IF; END IF;
+IF TG_OP='UPDATE' AND NEW.status IN ('credited','refunded') AND OLD.status NOT IN ('credited','refunded') AND NEW.item_id IS NOT NULL THEN UPDATE public.order_items SET refund_cents=coalesce(refund_cents,0)+NEW.amount_cents WHERE id=NEW.item_id; END IF;
+RETURN NEW; END $$;
+CREATE FUNCTION public.finance_protect_settled_order() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN IF NEW.status='cancelled' AND OLD.status='pending' AND EXISTS(SELECT 1 FROM public.customer_payment_attempts WHERE order_id=NEW.id AND status IN ('reserved','pending','approved','review')) THEN RAISE EXCEPTION 'Financial attempt requires reconciliation before cancellation'; END IF; RETURN NEW; END $$;
+CREATE TRIGGER finance_pending_cancellation BEFORE UPDATE ON public.orders FOR EACH ROW EXECUTE FUNCTION public.finance_protect_settled_order();

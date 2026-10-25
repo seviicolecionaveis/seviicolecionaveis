@@ -1,0 +1,24 @@
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { useServerFn } from '@tanstack/react-start';
+import { useEffect, useState } from 'react';
+import { Wallet, CreditCard, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { getRefundChoice, confirmRefundChoice } from '@/lib/customer-finance.functions';
+import { money, REFUND_LABELS } from '@/lib/customer-finance';
+import logo from '@/assets/logo.webp';
+export const Route=createFileRoute('/reembolso/$refundId')({head:()=>({meta:[{title:'Escolha do reembolso — Sevii Colecionáveis'},{name:'description',content:'Consulte e confirme a modalidade do seu reembolso Sevii.'},{property:'og:title',content:'Reembolso — Sevii Colecionáveis'},{property:'og:description',content:'Atendimento financeiro Sevii Colecionáveis.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary'},{name:'robots',content:'noindex, nofollow'},{name:'referrer',content:'no-referrer'}]}),component:RefundChoicePage});
+function RefundChoicePage(){
+  const {refundId}=Route.useParams();const read=useServerFn(getRefundChoice);const confirm=useServerFn(confirmRefundChoice);
+  const [token,setToken]=useState('');const [data,setData]=useState<Awaited<ReturnType<typeof getRefundChoice>>|null>(null);const [error,setError]=useState('');const [loading,setLoading]=useState(true);const [busy,setBusy]=useState(false);const [choice,setChoice]=useState<'credit'|'original'|null>(null);const [checked,setChecked]=useState(false);
+  useEffect(()=>{let live=true;const t=window.location.hash.slice(1);setToken(t);read({data:{id:refundId,token:t}}).then(r=>{if(live)setData(r)}).catch(e=>{if(live)setError(e.message)}).finally(()=>{if(live)setLoading(false)});return()=>{live=false}},[refundId,read]);
+  async function submit(){if(!choice||!checked)return;setBusy(true);setError('');try{const r=await confirm({data:{id:refundId,token,choice,confirmed:true}});setData(d=>d?{...d,status:r.status}:d)}catch(e){setError(e instanceof Error?e.message:'Não foi possível confirmar.')}finally{setBusy(false)}}
+  return <div className="min-h-screen bg-background"><header className="border-b border-border px-5 py-4"><Link to="/"><img src={logo} alt="Sevii Colecionáveis" className="h-12 w-auto"/></Link></header><main className="mx-auto max-w-2xl px-5 py-10 space-y-6"><h1 className="text-2xl font-bold">Seu reembolso</h1>{loading&&<p role="status">Consultando…</p>}{error&&<p role="alert" className="text-destructive">{error}</p>}{data&&<>
+    <div className="border-y border-border py-5 space-y-2"><p>{data.name&&`${data.name}, `}pedido #{data.orderId.slice(0,8).toUpperCase()}</p><p className="text-3xl font-bold">{money(data.amountCents)}</p><p className="text-muted-foreground">{data.reason}</p></div>
+    {data.status!=='awaiting_choice'?<div className="space-y-3"><CheckCircle className="h-7 w-7"/><h2 className="text-lg font-semibold">{REFUND_LABELS[data.status]??data.status}</h2>{data.status==='credited'&&<Link to="/conta" className="underline">Consultar meu saldo</Link>}{data.status==='awaiting_approval'&&<p>A equipe recebeu sua solicitação para análise.</p>}</div>:<>
+      <fieldset className="space-y-3"><legend className="font-semibold mb-3">Como você deseja receber?</legend>
+      <label className="flex gap-3 rounded-md border border-border p-4 cursor-pointer"><input type="radio" name="refund-choice" checked={choice==='credit'} onChange={()=>{setChoice('credit');setChecked(false)}}/><span><span className="font-semibold flex gap-2 items-center"><Wallet className="h-4 w-4"/>Receber como saldo na Sevii</span><span className="block mt-2 text-sm text-muted-foreground">Receba o valor diretamente na sua conta da Sevii Colecionáveis e utilize-o para realizar novas compras em nossa loja.</span></span></label>
+      <label className="flex gap-3 rounded-md border border-border p-4 cursor-pointer"><input type="radio" name="refund-choice" checked={choice==='original'} onChange={()=>{setChoice('original');setChecked(false)}}/><span><span className="font-semibold flex gap-2 items-center"><CreditCard className="h-4 w-4"/>Forma de pagamento original</span><span className="block mt-2 text-sm text-muted-foreground">Solicite o reembolso pelo mesmo meio de pagamento utilizado na compra. A solicitação será encaminhada à equipe da Sevii Colecionáveis para análise e processamento.</span></span></label></fieldset>
+      <label className="flex gap-3 text-sm"><input type="checkbox" checked={checked} onChange={e=>setChecked(e.target.checked)} disabled={!choice}/><span>Confirmo a opção selecionada para {money(data.amountCents)}.</span></label><Button className="w-full" onClick={submit} disabled={!choice||!checked||busy}>{busy?'Confirmando…':'Confirmar escolha'}</Button>
+    </>}
+  </>}</main></div>
+}

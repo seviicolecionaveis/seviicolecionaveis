@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   order: { id: '11111111-1111-4111-8111-111111111111', user_id: 'owner', status: 'pending', total_cents: 4900, email: 'shadow@whatsapp.seviicolecionaveis.com.br', recipient_name: 'Bot name', cpf: null as string | null },
   profile: { cpf: '52998224725' as string | null, full_name: 'Account name' },
-  pix: vi.fn(), card: vi.fn(), paid: vi.fn(), update: vi.fn(),
+  pix: vi.fn(), card: vi.fn(), paid: vi.fn(), update: vi.fn(), prepare: vi.fn(), attach: vi.fn(),
 }));
 vi.mock('@/integrations/supabase/client.server', () => ({ supabaseAdmin: {
   from: (table: string) => ({
@@ -13,6 +13,7 @@ vi.mock('@/integrations/supabase/client.server', () => ({ supabaseAdmin: {
 } }));
 vi.mock('@/lib/mercadopago.server', () => ({ createPixPayment: mocks.pix, createCardPaymentMP: mocks.card, getPixPayment: vi.fn() }));
 vi.mock('@/lib/orders.server', () => ({ markOrderPaid: mocks.paid, cancelOrder: vi.fn() }));
+vi.mock('@/lib/customer-finance.server', () => ({ prepareExistingCreditPayment: mocks.prepare, attachCreditProvider: mocks.attach, reserveStoreCredit: vi.fn() }));
 vi.mock('@/lib/email/send.server', () => ({ sendTransactionalEmailSafe: vi.fn() }));
 vi.mock('@/lib/stripe.server', () => ({ createStripeClient: vi.fn() }));
 vi.mock('@/lib/event-mode.server', () => ({ assertSalesOpen: vi.fn() }));
@@ -20,6 +21,7 @@ import { regeneratePixForExistingOrderServer, payExistingOrderWithCardServer } f
 describe('existing auction payments', () => {
   beforeEach(() => {
     vi.clearAllMocks(); mocks.order.status = 'pending'; mocks.profile.cpf = '52998224725';
+    mocks.prepare.mockResolvedValue(null);
     mocks.pix.mockResolvedValue({ id: 10, qr_code: 'copy-code', qr_code_base64: 'qr', date_of_expiration: '2099-01-01T00:00:00Z' });
     mocks.card.mockResolvedValue({ id: 11, status: 'approved' });
   });
@@ -48,5 +50,18 @@ describe('existing auction payments', () => {
     expect(mocks.card).toHaveBeenCalledWith(expect.objectContaining({ payerCpf: '52998224725', amountCents: 4900 }));
     expect(result.status).toBe('approved');
     expect(mocks.paid).toHaveBeenCalledWith(mocks.order.id, { mercadopagoPaymentId: '11' });
+  });
+  it('sends only the difference to Pix with partial credit',async()=>{
+    mocks.prepare.mockResolvedValue({id:'attempt',provider_cents:2900,credit_cents:2000});
+    const result=await regeneratePixForExistingOrderServer(mocks.order.id,'owner',undefined,2000);
+    expect(mocks.prepare).toHaveBeenCalledWith(mocks.order.id,'owner','owner',2000);
+    expect(mocks.pix).toHaveBeenCalledWith(expect.objectContaining({amountCents:2900}));
+    expect(result.totalCents).toBe(2900);
+    expect(mocks.attach).toHaveBeenCalledWith(expect.objectContaining({id:'attempt'}),'10');
+  });
+  it('full credit finalizes without a provider charge',async()=>{
+    mocks.prepare.mockResolvedValue({id:'attempt',provider_cents:0,credit_cents:4900});
+    const result=await regeneratePixForExistingOrderServer(mocks.order.id,'owner',undefined,4900);
+    expect(result.totalCents).toBe(0);expect(mocks.pix).not.toHaveBeenCalled();expect(mocks.paid).toHaveBeenCalledWith(mocks.order.id);
   });
 });

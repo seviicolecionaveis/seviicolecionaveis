@@ -51,15 +51,16 @@ const CardForOrderSchema = z.object({
     payerEmail: z.string().email().max(200).optional().nullable(),
     payerCpf: z.string().max(20).optional().nullable(),
   }),
+  storeCreditCents: z.number().int().min(0).max(100000000).optional(),
   saveCard: z.boolean().optional().default(false),
 });
 
 export const regeneratePixForOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => z.object({ orderId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ orderId: z.string().uuid(), storeCreditCents: z.number().int().min(0).max(100000000).optional() }).parse(data))
   .handler(async ({ data, context }) => {
     const { regeneratePixForExistingOrderServer } = await import("./payments.server");
-    return regeneratePixForExistingOrderServer(data.orderId, context.userId);
+    return regeneratePixForExistingOrderServer(data.orderId, context.userId, undefined, data.storeCreditCents ?? 0);
   });
 
 export const getAuctionPaymentLink = createServerFn({ method: "POST" })
@@ -77,7 +78,7 @@ export const payExistingOrderWithCard = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => CardForOrderSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { payExistingOrderWithCardServer } = await import("./payments.server");
-    return payExistingOrderWithCardServer(data.orderId, context.userId, data.card, { saveCard: data.saveCard });
+    return payExistingOrderWithCardServer(data.orderId, context.userId, data.card, { saveCard: data.saveCard, storeCreditCents: data.storeCreditCents });
   });
 
 export const resendPendingOrderEmails = createServerFn({ method: "POST" })

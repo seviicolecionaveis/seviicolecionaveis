@@ -12,6 +12,8 @@ import {
   getMercadoPagoPublicKey,
 } from "@/utils/payments.functions";
 import { getMpCustomerForCheckout } from "@/lib/saved-cards.functions";
+import { useQuery } from "@tanstack/react-query";
+import { getCreditStatement } from "@/lib/customer-finance.functions";
 import { toast } from "sonner";
 import { copyToClipboard } from "@/lib/clipboard";
 import { Copy, Check, QrCode, CreditCard, ArrowLeft } from "lucide-react";
@@ -45,6 +47,9 @@ function PayOrderPage() {
   const { orderId } = Route.useParams();
   const { user, session, loading: authLoading } = useAuth();
   const nav = useNavigate();
+  const readCredit = useServerFn(getCreditStatement);
+  const credit = useQuery({queryKey:['credit-statement','pay',user?.id],queryFn:()=>readCredit({data:{page:0}}),enabled:!!user});
+  const [creditInput,setCreditInput]=useState(0);
   const readLinked = useServerFn(readLinkedAuctionPayment);
   const linkedPix = useServerFn(generateLinkedAuctionPix);
   const authenticatedPix = useServerFn(regeneratePixForOrder);
@@ -83,7 +88,7 @@ function PayOrderPage() {
             setOrder(data);
             const expiry = data.pix_expires_at;
             if (data.pix_qr_code && data.pix_qr_code_base64 && expiry && new Date(expiry).getTime() > Date.now()) {
-              setPix({ orderId: data.id, qrCode: data.pix_qr_code, qrCodeBase64: data.pix_qr_code_base64, expiresAt: expiry, totalCents: data.total_cents });
+              setPix({ orderId: data.id, qrCode: data.pix_qr_code, qrCodeBase64: data.pix_qr_code_base64, expiresAt: expiry, totalCents: data.total_cents-(data.store_credit_cents??0) });
             }
           }
         } catch {
@@ -97,7 +102,7 @@ function PayOrderPage() {
       try { await (supabase as any).rpc("claim_my_whatsapp_orders"); } catch {}
       const { data } = await supabase
         .from("orders")
-        .select("id, status, total_cents, payment_method, pix_qr_code, pix_qr_code_base64, pix_expires_at, mercadopago_payment_id, recipient_name")
+        .select("id, status, total_cents, store_credit_cents, payment_method, pix_qr_code, pix_qr_code_base64, pix_expires_at, mercadopago_payment_id, recipient_name")
         .eq("id", orderId)
         .maybeSingle();
       setOrder(data);
@@ -110,7 +115,7 @@ function PayOrderPage() {
             qrCode: data.pix_qr_code,
             qrCodeBase64: data.pix_qr_code_base64,
             expiresAt: data.pix_expires_at as string,
-            totalCents: data.total_cents,
+            totalCents: data.total_cents-(data.store_credit_cents??0),
           });
           setMethod("pix");
         }
@@ -127,7 +132,8 @@ function PayOrderPage() {
     try {
       const result = paymentToken
         ? await linkedPix({ data: { orderId, token: paymentToken } })
-        : await authenticatedPix({ data: { orderId } });
+        : await authenticatedPix({ data: { orderId,storeCreditCents:creditInput } });
+      if(result.totalCents===0){nav({to:"/orders/$orderId",params:{orderId}});return;}
       setPix(result);
       setShowCard(false);
     } catch (e: any) {
@@ -196,6 +202,7 @@ function PayOrderPage() {
           </p>
         </div>
 
+        {user && <div className="space-y-2 border-b border-border pb-4"><p className="text-sm">Saldo disponível: R$ {((credit.data?credit.data.balanceCents-credit.data.reservedCents:0)/100).toFixed(2).replace('.',',')}</p><label className="text-sm">Usar saldo (R$)<input aria-label="Usar saldo" type="number" min="0" step="0.01" max={Math.min(order.total_cents,credit.data?credit.data.balanceCents-credit.data.reservedCents:0)/100} value={creditInput/100} onChange={e=>{setCreditInput(Math.max(0,Math.round(Number(e.target.value)*100)));setShowCard(false)}} className="block mt-2 w-full rounded-md border border-border bg-background p-2"/></label><p className="text-sm font-semibold">Restante a pagar: R$ {(Math.max(0,order.total_cents-creditInput)/100).toFixed(2).replace('.',',')}</p></div>}
         <div>
           <p className="text-xs font-medium uppercase tracking-wide mb-2">Forma de pagamento</p>
           <div className="space-y-2">
@@ -226,7 +233,7 @@ function PayOrderPage() {
               </Button>
             ) : (
               <Button
-                onClick={startCard}
+                onClick={creditInput >= order.total_cents ? startPix : startCard}
                 disabled={!user}
                 className="rounded-md bg-foreground text-background px-5 py-2.5 text-sm font-bold uppercase tracking-wider hover:opacity-90"
               >
@@ -240,10 +247,11 @@ function PayOrderPage() {
 
         {method === "pix" && pix && <PixDisplay key={pix.expiresAt} pix={pix} session={session} paymentToken={paymentToken} onPaid={() => { if (user) nav({ to: "/orders/$orderId", params: { orderId } }); else setOrder((current: any) => ({ ...current, status: "paid" })); }} />}
 
-        {method === "card" && showCard && (
+        {method === "card" && showCard && order.total_cents>creditInput && (
           <CardBrick
             orderId={orderId}
-            totalCents={order.total_cents}
+            totalCents={order.total_cents-creditInput}
+            storeCreditCents={creditInput}
             onPaid={() => nav({ to: "/orders/$orderId", params: { orderId } })}
           />
         )}
@@ -348,7 +356,7 @@ function loadMpSdk(): Promise<void> {
   return mpSdkPromise;
 }
 
-function CardBrick({ orderId, totalCents, onPaid }: { orderId: string; totalCents: number; onPaid: () => void }) {
+function CardBrick({ orderId, totalCents, storeCreditCents, onPaid }: { orderId: string; totalCents: number; storeCreditCents: number; onPaid: () => void }) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -405,6 +413,7 @@ function CardBrick({ orderId, totalCents, onPaid }: { orderId: string; totalCent
                       payerEmail: formData.payer?.email ?? user?.email ?? null,
                       payerCpf: formData.payer?.identification?.number ?? null,
                     },
+                    storeCreditCents,
                     saveCard: saveCardRef.current,
                   },
                 });
@@ -439,7 +448,7 @@ function CardBrick({ orderId, totalCents, onPaid }: { orderId: string; totalCent
       controllerRef.current?.unmount?.();
       controllerRef.current = null;
     };
-  }, [orderId, totalCents, user]);
+  }, [orderId, totalCents, storeCreditCents, user]);
 
   return (
     <div className="space-y-3">

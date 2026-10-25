@@ -8,6 +8,7 @@ import { AddressesManager } from "@/components/account/AddressesManager";
 import { LoyaltyPointsCard } from "@/components/account/LoyaltyPointsCard";
 import { StockAlertsManager } from "@/components/account/StockAlertsManager";
 import { SavedCardsManager } from "@/components/account/SavedCardsManager";
+import { CreditStatement } from '@/components/account/CreditStatement';
 import { ShoppingBag, Heart, Layers, Sparkles, Bell, CreditCard } from "lucide-react";
 import logoUrl from "@/assets/logo.webp";
 
@@ -15,6 +16,11 @@ export const Route = createFileRoute("/conta")({
   head: () => ({
     meta: [
       { title: "Minha conta — Sevii Colecionáveis" },
+      { name: 'description', content: 'Dados, pedidos, saldo e preferências da sua conta Sevii Colecionáveis.' },
+      { property: 'og:title', content: 'Minha conta — Sevii Colecionáveis' },
+      { property: 'og:description', content: 'Sua conta e atendimento na Sevii Colecionáveis.' },
+      { property: 'og:type', content: 'website' },
+      { name: 'twitter:card', content: 'summary' },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -54,6 +60,7 @@ function AccountPage() {
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList className="flex w-full flex-wrap h-auto justify-start gap-1">
             <TabsTrigger value="dados">Dados</TabsTrigger>
+            <TabsTrigger value="saldo">Meu saldo</TabsTrigger>
             <TabsTrigger value="pontos"><Sparkles className="h-3.5 w-3.5 mr-1" />Pontos</TabsTrigger>
             <TabsTrigger value="preferencias">Preferências</TabsTrigger>
             <TabsTrigger value="enderecos">Endereços</TabsTrigger>
@@ -65,6 +72,7 @@ function AccountPage() {
           <TabsContent value="dados" className="mt-6">
             <PersonalDataForm />
           </TabsContent>
+          <TabsContent value="saldo" className="mt-6"><CreditStatement /></TabsContent>
 
           <TabsContent value="pontos" className="mt-6">
             <LoyaltyPointsCard onGoToProfile={() => setTab("dados")} />
