@@ -87,7 +87,8 @@ export async function processFinanceRefund(actor: string, id: string, reason: st
     const result = r.provider_refund_id
       ? await getMercadoPagoRefund(r.provider_id, r.provider_refund_id)
       : await refundMercadoPagoPayment(r.provider_id, r.provider_cents, `sevii-refund:${r.id}`);
-    await db.from('customer_refunds').update({ provider_refund_id: String(result.id) }).eq('id', r.id);
+    const saved = await db.from('customer_refunds').update({ provider_refund_id: String(result.id) }).eq('id', r.id).select('id').single();
+    if (saved.error || !saved.data) throw new Error('Refund evidence persistence failed');
     // Query the particular refund, never infer success from the payment's aggregate state.
     const remote = await getMercadoPagoRefund(r.provider_id, String(result.id));
     if (confirmedRefund(remote, r.provider_cents)) {
@@ -101,11 +102,14 @@ export async function processFinanceRefund(actor: string, id: string, reason: st
     await sendFinanceNotice(review, 'review'); return review;
   }
 }
-export async function reserveStoreCredit(orderId: string, userId: string, credit: number, provider: string) {
+export async function reserveStoreCredit(orderId: string, userId: string, credit: number, provider: string, environment: 'sandbox' | 'live' = 'live') {
   if (!credit) return null;
   const { data, error } = await db.rpc('finance_reserve_payment', { p_order: orderId, p_user: userId, p_credit: credit, p_provider: provider, p_key: `checkout:${orderId}` });
   if (error) throw new Error('Saldo indisponível ou outra tentativa de pagamento em aberto.');
-  return objectResult<Attempt>(data);
+  const attempt = objectResult<Attempt>(data);
+  const saved = await db.from('customer_payment_attempts').update({provider_environment:environment}).eq('id',attempt.id).select('id').single();
+  if (saved.error) throw new Error('Não foi possível registrar ambiente de pagamento.');
+  return {...attempt,provider_environment:environment};
 }
 export async function prepareExistingCreditPayment(orderId: string, owner: string, actor: string | null, requested: number) {
   const { data: attempts, error } = await db.from('customer_payment_attempts').select('*').eq('order_id', orderId).order('created_at', { ascending: false });
@@ -130,8 +134,8 @@ export async function prepareExistingCreditPayment(orderId: string, owner: strin
 }
 export async function attachCreditProvider(attempt: Attempt | null, providerId: string) {
   if (!attempt) return;
-  const { error } = await db.from('customer_payment_attempts').update({ provider_id: providerId, status: 'pending' }).eq('id', attempt.id).eq('status', 'reserved');
-  if (error) throw new Error('Pagamento criado; aguarde a conciliação antes de tentar novamente.');
+  const { data, error } = await db.from('customer_payment_attempts').update({ provider_id: providerId, status: 'pending' }).eq('id', attempt.id).eq('status', 'reserved').select('id').single();
+  if (error || !data) throw new Error('Pagamento criado; aguarde a conciliação antes de tentar novamente.');
 }
 export async function settleStoreCredit(orderId: string, ref?: { mercadopagoPaymentId?: string; stripePaymentIntent?: string }) {
   const { data: t, error } = await db.from('customer_payment_attempts').select('*').eq('order_id', orderId).neq('status', 'released').maybeSingle();
@@ -151,7 +155,7 @@ export async function settleStoreCredit(orderId: string, ref?: { mercadopagoPaym
     amount = remote.amount_cents ?? -1; currency = remote.currency_id ?? '';
   } else if (t.provider === 'stripe') {
     const { createStripeClient } = await import('./stripe.server');
-    const stripe = createStripeClient('live');
+    const stripe = createStripeClient(t.provider_environment === 'sandbox' ? 'sandbox' : 'live');
     const session = await stripe.checkout.sessions.retrieve(providerId ?? '');
     if (session.payment_status !== 'paid' || session.metadata?.orderId !== orderId) throw new Error('Pagamento ainda não confirmado.');
     amount = session.amount_total ?? -1; currency = (session.currency ?? '').toUpperCase();
@@ -169,7 +173,7 @@ export async function releaseStoreCreditIfTerminal(orderId: string) {
     if (!['cancelled','rejected'].includes(remote.status)) return false;
   } else if (t.provider === 'stripe') {
     const { createStripeClient } = await import('./stripe.server');
-    const session = await createStripeClient('live').checkout.sessions.retrieve(t.provider_id);
+    const session = await createStripeClient(t.provider_environment === 'sandbox' ? 'sandbox' : 'live').checkout.sessions.retrieve(t.provider_id);
     if (session.status !== 'expired') return false;
   } else return false;
   const { error } = await db.rpc('finance_release_payment', { p_attempt: t.id, p_provider_id: t.provider_id });
