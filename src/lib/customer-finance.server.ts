@@ -125,8 +125,8 @@ export async function prepareExistingCreditPayment(orderId: string, owner: strin
   if (active) {
     if (!(await releaseStoreCreditIfTerminal(orderId))) throw new Error('Pagamento anterior ainda está em aberto. Aguarde a confirmação ou expiração.');
   }
-  if (!requested) return null;
-  if (!actor || actor !== owner) throw new Error('Somente o titular autenticado pode autorizar uso do saldo.');
+  if (!requested && !attempts?.length) return null;
+  if (requested && (!actor || actor !== owner)) throw new Error('Somente o titular autenticado pode autorizar uso do saldo.');
   // Do not reserve against an older provider payment whose outcome is unknown.
   const { data: order } = await db.from('orders').select('mercadopago_payment_id,stripe_session_id').eq('id',orderId).single();
   if (order?.mercadopago_payment_id && !active) {
@@ -152,7 +152,10 @@ export async function settleStoreCredit(orderId: string, ref?: { mercadopagoPaym
     if (count) throw new Error('Pagamento tardio após liberação de saldo: conciliação necessária.');
     return;
   }
-  if (t.status === 'approved') return;
+  if (t.status === 'approved') {
+    if(t.provider==='mercadopago' && ref?.mercadopagoPaymentId!==t.provider_id) throw new Error('Confirmação de outra tentativa: conciliação necessária.');
+    return;
+  }
   let providerId = t.provider_id; let amount = 0; let currency = 'BRL';
   if (t.provider === 'mercadopago') {
     if (!ref?.mercadopagoPaymentId || ref.mercadopagoPaymentId !== providerId) throw new Error('Tentativa de pagamento diferente: conciliação necessária.');

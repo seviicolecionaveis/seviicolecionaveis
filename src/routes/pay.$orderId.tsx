@@ -233,7 +233,7 @@ function PayOrderPage() {
               </Button>
             ) : (
               <Button
-                onClick={startCard}
+                onClick={creditInput >= order.total_cents ? startPix : startCard}
                 disabled={!user}
                 className="rounded-md bg-foreground text-background px-5 py-2.5 text-sm font-bold uppercase tracking-wider hover:opacity-90"
               >
