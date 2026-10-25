@@ -19,6 +19,8 @@ export const Route = createFileRoute("/api/public/hooks/auto-cancel-unpaid")({
 async function handler({ request }: { request: Request }) {
   const unauthorized = verifyCronAuth(request);
   if (unauthorized) return unauthorized;
+  const {reconcileCreditPayments}=await import('@/lib/customer-finance.server');
+  const creditReconciliation=await reconcileCreditPayments();
   const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
   const { data: candidates, error } = await supabaseAdmin
     .from("orders")
@@ -31,7 +33,7 @@ async function handler({ request }: { request: Request }) {
     return Response.json({ ok: false, error: error.message }, { status: 500 });
   }
   if (!candidates || candidates.length === 0) {
-    return Response.json({ ok: true, checked: 0, paid: 0, cancelled: 0, skipped: 0 });
+    return Response.json({ ok: true, checked: 0, paid: 0, cancelled: 0, skipped: 0, creditReconciliation });
   }
 
   const { getPixPayment } = await import("@/lib/mercadopago.server");
@@ -93,5 +95,6 @@ async function handler({ request }: { request: Request }) {
     cancelled,
     skipped,
     errors,
+    creditReconciliation,
   });
 }
