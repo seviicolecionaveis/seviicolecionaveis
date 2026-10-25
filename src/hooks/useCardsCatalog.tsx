@@ -85,6 +85,8 @@ let inFlight: Promise<Card[]> | null = null;
 const listeners = new Set<(c: Card[]) => void>();
 
 export const cardCreatedAt = new Map<string, string>();
+// Data da atividade mais recente do cadastro: criação ou última reposição de estoque (delta > 0).
+export const cardLastActivity = new Map<string, string>();
 
 const CARD_COLUMNS =
   "name, card_number, collection, language, finish, condition, stock, event_reserved, base_price_cents, image, category, trainer_subcategory, pokemon_type, illustrator_id, created_at";
@@ -115,6 +117,7 @@ async function loadCards(): Promise<Card[]> {
   }
 
   cardCreatedAt.clear();
+  cardLastActivity.clear();
   for (const r of all) {
     const key = `${r.name}__${r.collection}__${r.card_number}`;
     const existing = cardCreatedAt.get(key);
@@ -122,6 +125,16 @@ async function loadCards(): Promise<Card[]> {
     if (created && (!existing || created > existing)) {
       cardCreatedAt.set(key, created);
     }
+  }
+  for (const [k, v] of cardCreatedAt) cardLastActivity.set(k, v);
+
+  // Reposições de estoque (delta > 0) também contam como "adicionadas recentemente".
+  const { data: additions } = await supabase.rpc("catalog_last_stock_additions");
+  for (const r of (additions ?? []) as { card_name: string; collection: string; card_number: string; last_added_at: string }[]) {
+    if (!r.last_added_at) continue;
+    const key = `${r.card_name}__${r.collection}__${r.card_number}`;
+    const cur = cardLastActivity.get(key);
+    if (!cur || r.last_added_at > cur) cardLastActivity.set(key, r.last_added_at);
   }
   const raw: RawCard[] = all.map((r, i) => ({
     id: i,
