@@ -1,4 +1,10 @@
 # Confirmações de agendamento
+## Saldo de clientes e reembolsos
+- [ ] Analisar estrutura atual e apresentar plano de integração financeira segura.
+- [ ] Implementar saldo/extrato, reservas atômicas e reembolsos parciais com auditoria e permissões existentes.
+- [ ] Integrar escolha segura, painel administrativo, e-mails e Mercado Pago sem modificar regras atuais.
+- [ ] Integrar pagamento total/parcial e liberação de reservas no checkout e pedidos existentes.
+- [ ] Executar testes automatizados e fluxos em ambiente isolado; relatar validações reais, simuladas e pendências externas, sem reembolsos reais não autorizados.
 ## MCP administrativo pelo ChatGPT
 - [x] 10 ferramentas de escrita (pedido, status, rastreio, produto, estoque, leilão, cliente) com admin revalidado, auditoria, idempotência e confirmação vinculada; 19 ferramentas no catálogo; 32 testes.
 - [ ] Escritas reais: aguardam ambiente de testes isolado (o backend atual é o mesmo da loja) e republicação.
