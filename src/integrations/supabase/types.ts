@@ -2924,6 +2924,15 @@ export type Database = {
           points_credited: number
         }[]
       }
+      catalog_last_stock_additions: {
+        Args: never
+        Returns: {
+          card_name: string
+          card_number: string
+          collection: string
+          last_added_at: string
+        }[]
+      }
       claim_my_whatsapp_orders: { Args: never; Returns: number }
       clear_event_reserved: { Args: never; Returns: number }
       confirm_order_receipt: { Args: { _order_id: string }; Returns: Json }
