@@ -175,7 +175,7 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
         return scored.map((x) => x.c);
       }
     }
-  }, [filters, query, sort, CARDS, shuffleSeed, stats]);
+  }, [filters, query, sort, CARDS, shuffleSeed, stats, recentOnlyDays]);
 
   const reset = () => {
     setFilters(DEFAULT_FILTERS);

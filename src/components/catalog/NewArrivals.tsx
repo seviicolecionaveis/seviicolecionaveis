@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { useCardsCatalog, cardCreatedAt } from "@/hooks/useCardsCatalog";
 import { CardItem } from "./CardItem";
 import { CardModal } from "./CardModal";
@@ -116,6 +117,18 @@ export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
               </button>
             )
           )}
+        </div>
+        <div className="mt-8 flex justify-center">
+          <Link
+            to="/novidades"
+            className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium text-white transition-colors"
+            style={{ backgroundColor: "#20a5c9" }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1b8eae")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#20a5c9")}
+          >
+            Ver todas as novidades
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </div>
       <CardModal card={activeCard} onClose={() => setActiveCard(null)} />
