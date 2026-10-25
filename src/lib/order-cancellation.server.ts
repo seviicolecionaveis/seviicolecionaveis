@@ -121,6 +121,8 @@ export type RefundMethod = "mercadopago" | "coupon" | "manual" | "none";
  */
 export async function refundEntireOrder(orderId: string, method: RefundMethod) {
   if (method === "none") return { refundCents: 0, couponCode: null as string | null, details: "Sem reembolso" };
+  const { assertLegacyRefundSafe } = await import('./customer-finance.server');
+  await assertLegacyRefundSafe(orderId);
 
   const { data: order } = await supabaseAdmin
     .from("orders")
