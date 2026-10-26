@@ -68,7 +68,7 @@ export interface CustomerDetail {
   }>;
   points_ledger: Array<{
     id: string;
-    points: number;
+    delta: number;
     reason: string;
     created_at: string;
     description: string | null;
@@ -108,7 +108,7 @@ export async function getCustomerDetailServer(userId: string): Promise<CustomerD
         .maybeSingle(),
       supabaseAdmin
         .from("loyalty_points_ledger")
-        .select("id,points,reason,created_at,description")
+        .select("id,delta,reason,created_at,description")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(15),
