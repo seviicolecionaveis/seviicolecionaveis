@@ -343,7 +343,9 @@ export async function refundMercadoPagoPayment(
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('Valor de estorno inválido.');
   const token = getAccessToken();
   const body = { amount: Number((amountCents / 100).toFixed(2)) };
-  const idempotencyKey = operationKey ?? `legacy-refund-${paymentId}-${amountCents}`;
+  // Without a caller-supplied operation key, each call is a distinct refund:
+  // a deterministic key would make Mercado Pago return the earlier refund.
+  const idempotencyKey = operationKey ?? `legacy-refund-${paymentId}-${amountCents}-${crypto.randomUUID()}`;
   const res = await fetchMpWithTimeout(`${MP_API}/v1/payments/${paymentId}/refunds`, {
     method: "POST",
     headers: {
