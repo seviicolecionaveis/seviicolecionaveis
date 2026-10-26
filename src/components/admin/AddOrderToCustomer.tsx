@@ -53,7 +53,7 @@ export function AddOrderToCustomer({ userId, customerName, onDone }: { userId: s
   }
 
   return (
-    <div className="mb-4 rounded-lg border border-border bg-secondary/30 p-3 space-y-3">
+    <div className="w-full rounded-lg border border-border bg-secondary/30 p-3 space-y-3">
       <form onSubmit={run} className="flex gap-2">
         <input
           value={q}

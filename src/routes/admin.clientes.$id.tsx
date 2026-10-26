@@ -358,7 +358,7 @@ function AdminClienteDetail() {
       </section>
 
       <section className="rounded-xl border border-border bg-card p-5">
-        <div className="flex items-center justify-between gap-2 mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <h2 className="text-sm font-bold uppercase tracking-wide">Pedidos</h2>
           <AddOrderToCustomer userId={id} customerName={detail.full_name ?? detail.email ?? "este cliente"} onDone={load} />
         </div>
