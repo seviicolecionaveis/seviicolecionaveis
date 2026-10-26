@@ -4,29 +4,16 @@
 
 BEGIN;
 
-CREATE TABLE public.profiles (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL UNIQUE,
-  full_name text,
-  cpf text,
-  phone text,
-  whatsapp text,
-  birth_date date,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-GRANT ALL ON public.profiles TO anon, authenticated, service_role;
+-- profiles/orders already exist from tests/finance/bootstrap.sql; extend with the columns this test needs.
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS full_name text, ADD COLUMN IF NOT EXISTS cpf text,
+  ADD COLUMN IF NOT EXISTS phone text, ADD COLUMN IF NOT EXISTS whatsapp text, ADD COLUMN IF NOT EXISTS birth_date date,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now(), ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS email text, ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
 
-CREATE TABLE public.orders (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL,
-  email text,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-GRANT ALL ON public.orders TO anon, authenticated, service_role;
-
-CREATE ROLE authenticated NOLOGIN;
-CREATE ROLE service_role NOLOGIN;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
+END $$;
 GRANT authenticated, service_role TO CURRENT_USER;
 
 -- fixture customers
