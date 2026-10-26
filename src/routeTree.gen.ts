@@ -92,6 +92,7 @@ import { Route as SorteiosRaffleIdRouteImport } from './routes/sorteios.$raffleI
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as DotwellKnownOauthProtectedResourceMcpRouteImport } from './routes/[.]well-known.oauth-protected-resource.mcp'
 import { Route as AdminClientesIndexRouteImport } from './routes/admin.clientes.index'
+import { Route as AdminClientesIdRouteImport } from './routes/admin.clientes.$id'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
@@ -552,6 +553,11 @@ const AdminClientesIndexRoute = AdminClientesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminClientesRoute,
 } as any)
+const AdminClientesIdRoute = AdminClientesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminClientesRoute,
+} as any)
 const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
   id: '/orders/$orderId',
   path: '/orders/$orderId',
@@ -867,6 +873,7 @@ export interface FileRoutesByFullPath {
   '/sorteios/': typeof SorteiosIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.well-known/oauth-protected-resource/mcp': typeof DotwellKnownOauthProtectedResourceMcpRoute
+  '/admin/clientes/$id': typeof AdminClientesIdRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -989,6 +996,7 @@ export interface FileRoutesByTo {
   '/sorteios': typeof SorteiosIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.well-known/oauth-protected-resource/mcp': typeof DotwellKnownOauthProtectedResourceMcpRoute
+  '/admin/clientes/$id': typeof AdminClientesIdRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -1116,6 +1124,7 @@ export interface FileRoutesById {
   '/sorteios/': typeof SorteiosIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.well-known/oauth-protected-resource/mcp': typeof DotwellKnownOauthProtectedResourceMcpRoute
+  '/admin/clientes/$id': typeof AdminClientesIdRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -1244,6 +1253,7 @@ export interface FileRouteTypes {
     | '/sorteios/'
     | '/.lovable/oauth/consent'
     | '/.well-known/oauth-protected-resource/mcp'
+    | '/admin/clientes/$id'
     | '/admin/orders/$orderId'
     | '/api/public/mcp'
     | '/api/public/sitemap.xml'
@@ -1366,6 +1376,7 @@ export interface FileRouteTypes {
     | '/sorteios'
     | '/.lovable/oauth/consent'
     | '/.well-known/oauth-protected-resource/mcp'
+    | '/admin/clientes/$id'
     | '/admin/orders/$orderId'
     | '/api/public/mcp'
     | '/api/public/sitemap.xml'
@@ -1492,6 +1503,7 @@ export interface FileRouteTypes {
     | '/sorteios/'
     | '/.lovable/oauth/consent'
     | '/.well-known/oauth-protected-resource/mcp'
+    | '/admin/clientes/$id'
     | '/admin/orders/$orderId'
     | '/api/public/mcp'
     | '/api/public/sitemap.xml'
@@ -2201,6 +2213,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClientesIndexRouteImport
       parentRoute: typeof AdminClientesRoute
     }
+    '/admin/clientes/$id': {
+      id: '/admin/clientes/$id'
+      path: '/$id'
+      fullPath: '/admin/clientes/$id'
+      preLoaderRoute: typeof AdminClientesIdRouteImport
+      parentRoute: typeof AdminClientesRoute
+    }
     '/admin/orders/$orderId': {
       id: '/admin/orders/$orderId'
       path: '/orders/$orderId'
@@ -2492,10 +2511,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminClientesRouteChildren {
+  AdminClientesIdRoute: typeof AdminClientesIdRoute
   AdminClientesIndexRoute: typeof AdminClientesIndexRoute
 }
 
 const AdminClientesRouteChildren: AdminClientesRouteChildren = {
+  AdminClientesIdRoute: AdminClientesIdRoute,
   AdminClientesIndexRoute: AdminClientesIndexRoute,
 }
 
