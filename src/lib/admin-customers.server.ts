@@ -15,11 +15,13 @@ export interface CustomerSearchRow {
 }
 
 export async function searchCustomersServer(
+  client: any,
   search: string,
   limit: number,
   offset: number
 ): Promise<{ rows: CustomerSearchRow[]; total: number }> {
-  const { data, error } = await supabaseAdmin.rpc("admin_search_customers", {
+  // Runs with the caller's JWT so the SECURITY DEFINER RPC rechecks the live admin role.
+  const { data, error } = await client.rpc("admin_search_customers", {
     _search: search.trim() || "",
     _limit: limit,
     _offset: offset,
@@ -68,7 +70,7 @@ export interface CustomerDetail {
   }>;
   points_ledger: Array<{
     id: string;
-    points: number;
+    delta: number;
     reason: string;
     created_at: string;
     description: string | null;
@@ -108,7 +110,7 @@ export async function getCustomerDetailServer(userId: string): Promise<CustomerD
         .maybeSingle(),
       supabaseAdmin
         .from("loyalty_points_ledger")
-        .select("id,points,reason,created_at,description")
+        .select("id,delta,reason,created_at,description")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(15),
@@ -210,7 +212,7 @@ export async function updateCustomerServer(actorId: string, input: UpdateCustome
 
   if (Object.keys(profilePatch).length > 0) {
     profilePatch.updated_at = new Date().toISOString();
-    const { error } = await supabaseAdmin.from("profiles").update(profilePatch).eq("user_id", input.userId);
+    const { error } = await supabaseAdmin.from("profiles").update(profilePatch as any).eq("user_id", input.userId);
     if (error) throw new Response(error.message, { status: 500 });
   }
 
@@ -274,13 +276,13 @@ export async function upsertAddressServer(actorId: string, input: AddressInput) 
   };
 
   if (input.addressId) {
-    const { error } = await supabaseAdmin.from("addresses").update(patch).eq("id", input.addressId);
+    const { error } = await supabaseAdmin.from("addresses").update(patch as any).eq("id", input.addressId);
     if (error) throw new Response(error.message, { status: 500 });
     return { ok: true, action: "updated" };
   }
 
   patch.is_default = input.isDefault ?? false;
-  const { data, error } = await supabaseAdmin.from("addresses").insert(patch).select("id").single();
+  const { data, error } = await supabaseAdmin.from("addresses").insert(patch as any).select("id").single();
   if (error) throw new Response(error.message, { status: 500 });
 
   if (input.isDefault) {

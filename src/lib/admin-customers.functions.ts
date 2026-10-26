@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { CustomerDetail } from "@/lib/admin-customers.server";
+export type { CustomerDetail };
 
 async function assertAdmin(context: any) {
   const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
@@ -19,7 +21,7 @@ export const searchCustomersFn = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { searchCustomersServer } = await import("@/lib/admin-customers.server");
-    return searchCustomersServer(data.q, data.limit, data.offset);
+    return searchCustomersServer(context.supabase, data.q, data.limit, data.offset);
   });
 
 const detailSchema = z.object({ userId: z.string().uuid() });

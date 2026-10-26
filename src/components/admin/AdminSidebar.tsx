@@ -9,6 +9,7 @@ import {
   Boxes,
 
   CalendarClock,
+  Contact,
   CreditCard,
   Gamepad2,
   Gavel,
@@ -40,6 +41,7 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Visão geral",
     links: [
       { to: "/admin", label: "Pedidos", icon: ShoppingBag, exact: true },
+      { to: "/admin/clientes", label: "Clientes", icon: Contact },
       { to: "/admin/pedidos-leilao", label: "Pedidos Leilão", icon: Gavel },
       { to: "/admin/dashboard", label: "Dashboard", icon: Gauge },
       { to: "/admin/notificacoes", label: "Notificações", icon: Bell },
