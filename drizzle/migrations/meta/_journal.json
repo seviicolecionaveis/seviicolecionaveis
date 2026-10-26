@@ -162,6 +162,13 @@
       "when": 1793021452644,
       "tag": "0022_admin_customer_search",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1793025091846,
+      "tag": "0023_event_attendances",
+      "breakpoints": true
     }
   ]
 }
