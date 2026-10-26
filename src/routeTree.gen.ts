@@ -84,6 +84,7 @@ import { Route as PilhaIndexRouteImport } from './routes/pilha.index'
 import { Route as PilhaSolicitarRouteImport } from './routes/pilha.solicitar'
 import { Route as PreVendaIndexRouteImport } from './routes/pre-venda.index'
 import { Route as PreVendaSlugRouteImport } from './routes/pre-venda.$slug'
+import { Route as PresencaEventIdRouteImport } from './routes/presenca.$eventId'
 import { Route as ProdutosLacradosIndexRouteImport } from './routes/produtos-lacrados.index'
 import { Route as ProdutosLacradosSlugRouteImport } from './routes/produtos-lacrados.$slug'
 import { Route as ReembolsoRefundIdRouteImport } from './routes/reembolso.$refundId'
@@ -512,6 +513,11 @@ const PreVendaSlugRoute = PreVendaSlugRouteImport.update({
   path: '/pre-venda/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PresencaEventIdRoute = PresencaEventIdRouteImport.update({
+  id: '/presenca/$eventId',
+  path: '/presenca/$eventId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProdutosLacradosIndexRoute = ProdutosLacradosIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -863,6 +869,7 @@ export interface FileRoutesByFullPath {
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/pre-venda/$slug': typeof PreVendaSlugRoute
+  '/presenca/$eventId': typeof PresencaEventIdRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/reembolso/$refundId': typeof ReembolsoRefundIdRoute
   '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
@@ -986,6 +993,7 @@ export interface FileRoutesByTo {
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/pre-venda/$slug': typeof PreVendaSlugRoute
+  '/presenca/$eventId': typeof PresencaEventIdRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/reembolso/$refundId': typeof ReembolsoRefundIdRoute
   '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
@@ -1114,6 +1122,7 @@ export interface FileRoutesById {
   '/pay/$orderId': typeof PayOrderIdRoute
   '/pilha/solicitar': typeof PilhaSolicitarRoute
   '/pre-venda/$slug': typeof PreVendaSlugRoute
+  '/presenca/$eventId': typeof PresencaEventIdRoute
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/reembolso/$refundId': typeof ReembolsoRefundIdRoute
   '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
@@ -1243,6 +1252,7 @@ export interface FileRouteTypes {
     | '/pay/$orderId'
     | '/pilha/solicitar'
     | '/pre-venda/$slug'
+    | '/presenca/$eventId'
     | '/produtos-lacrados/$slug'
     | '/reembolso/$refundId'
     | '/sorteios/$raffleId'
@@ -1366,6 +1376,7 @@ export interface FileRouteTypes {
     | '/pay/$orderId'
     | '/pilha/solicitar'
     | '/pre-venda/$slug'
+    | '/presenca/$eventId'
     | '/produtos-lacrados/$slug'
     | '/reembolso/$refundId'
     | '/sorteios/$raffleId'
@@ -1493,6 +1504,7 @@ export interface FileRouteTypes {
     | '/pay/$orderId'
     | '/pilha/solicitar'
     | '/pre-venda/$slug'
+    | '/presenca/$eventId'
     | '/produtos-lacrados/$slug'
     | '/reembolso/$refundId'
     | '/sorteios/$raffleId'
@@ -1585,6 +1597,7 @@ export interface RootRouteChildren {
   ListaDesejosTokenRoute: typeof ListaDesejosTokenRoute
   PayOrderIdRoute: typeof PayOrderIdRoute
   PreVendaSlugRoute: typeof PreVendaSlugRoute
+  PresencaEventIdRoute: typeof PresencaEventIdRoute
   ReembolsoRefundIdRoute: typeof ReembolsoRefundIdRoute
   SorteiosRaffleIdRoute: typeof SorteiosRaffleIdRoute
   PreVendaIndexRoute: typeof PreVendaIndexRoute
@@ -2155,6 +2168,13 @@ declare module '@tanstack/react-router' {
       path: '/pre-venda/$slug'
       fullPath: '/pre-venda/$slug'
       preLoaderRoute: typeof PreVendaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/presenca/$eventId': {
+      id: '/presenca/$eventId'
+      path: '/presenca/$eventId'
+      fullPath: '/presenca/$eventId'
+      preLoaderRoute: typeof PresencaEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/produtos-lacrados/': {
@@ -2732,6 +2752,7 @@ const rootRouteChildren: RootRouteChildren = {
   ListaDesejosTokenRoute: ListaDesejosTokenRoute,
   PayOrderIdRoute: PayOrderIdRoute,
   PreVendaSlugRoute: PreVendaSlugRoute,
+  PresencaEventIdRoute: PresencaEventIdRoute,
   ReembolsoRefundIdRoute: ReembolsoRefundIdRoute,
   SorteiosRaffleIdRoute: SorteiosRaffleIdRoute,
   PreVendaIndexRoute: PreVendaIndexRoute,

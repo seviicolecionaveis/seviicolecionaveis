@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ptBR } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   countEventOrders,
@@ -592,5 +593,44 @@ function EventosAdminPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function AttendeesButton({ eventId }: { eventId: string }) {
+  const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState<{ id: string; full_name: string | null; email: string | null; whatsapp: string | null; created_at: string }[] | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    supabase.from("event_attendances").select("id,full_name,email,whatsapp,created_at").eq("event_id", eventId).order("created_at")
+      .then(({ data }) => setRows(data ?? []));
+  }, [open, eventId]);
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} className="rounded-md border border-border px-2.5 py-1 text-xs font-semibold hover:bg-secondary">
+        Presenças
+      </button>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4" onClick={() => setOpen(false)}>
+          <div className="max-h-[80vh] w-full max-w-lg overflow-auto rounded-lg bg-card p-5" onClick={(ev) => ev.stopPropagation()}>
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="font-bold">Presenças confirmadas {rows ? `(${rows.length})` : ""}</h3>
+              <button type="button" onClick={() => setOpen(false)} className="text-sm text-muted-foreground">Fechar</button>
+            </div>
+            {!rows ? <p className="text-sm text-muted-foreground">Carregando…</p> : rows.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Ninguém confirmou ainda.</p>
+            ) : (
+              <ul className="divide-y divide-border text-sm">
+                {rows.map((r) => (
+                  <li key={r.id} className="py-2">
+                    <p className="font-semibold">{r.full_name || "Sem nome"}</p>
+                    <p className="text-xs text-muted-foreground">{[r.email, r.whatsapp].filter(Boolean).join(" · ")} · {new Date(r.created_at).toLocaleString("pt-BR")}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
