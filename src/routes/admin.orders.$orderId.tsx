@@ -799,7 +799,7 @@ function PartialCancelDialog({ item, order, onClose, onDone }: {
         order_id: order.id, order_item_id: item.id, quantity: qty, refund_method: method,
         notes: notes.trim() || null, operation_key: key, confirmed: true,
       } });
-      toast.success(`Item cancelado. ${res.refundDetails ?? `Reembolso: ${fmtBRL(res.refundCents ?? 0)}`}`, { duration: 6000 });
+      toast.success(`Item cancelado. ${res.refundDetails}`, { duration: 6000 });
       if (finance && res.refundSent === false) toast.warning("Cancelamento e solicitação registrados, mas o e-mail não foi enviado. Reenvie o convite em Reembolsos e saldo.", { duration: 9000 });
       await onDone();
     } catch (e: any) { toast.error(e?.message ?? "Erro ao cancelar item."); }
