@@ -169,6 +169,13 @@
       "when": 1793025091846,
       "tag": "0023_event_attendances",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1793034651803,
+      "tag": "0024_admin_merge_customer_accounts",
+      "breakpoints": true
     }
   ]
 }
