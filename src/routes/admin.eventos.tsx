@@ -306,6 +306,17 @@ function EventosAdminPage() {
           <button
             type="button"
             onClick={() => {
+              navigator.clipboard.writeText(`${window.location.origin}/presenca/${e.id}`);
+              toast.success("Link de presença copiado!");
+            }}
+            className="rounded-md border border-border px-2.5 py-1 text-xs font-semibold hover:bg-secondary"
+          >
+            Copiar link de presença
+          </button>
+          <AttendeesButton eventId={e.id} />
+          <button
+            type="button"
+            onClick={() => {
               setEditing(e);
               setForm(toForm(e));
             }}
