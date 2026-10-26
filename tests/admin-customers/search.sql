@@ -17,6 +17,7 @@ END $$;
 GRANT authenticated, service_role TO CURRENT_USER;
 
 -- stub of Supabase auth.users, which migration 0022 reads for the login e-mail
+DROP TABLE IF EXISTS auth.users CASCADE;
 CREATE TABLE auth.users (id uuid PRIMARY KEY, email text, email_confirmed_at timestamptz, last_sign_in_at timestamptz);
 GRANT SELECT ON auth.users TO authenticated, service_role;
 
