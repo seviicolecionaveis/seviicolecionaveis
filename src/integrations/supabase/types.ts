@@ -3232,6 +3232,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_merge_customer_accounts: {
+        Args: { _source: string; _target: string }
+        Returns: Json
+      }
       admin_search_customers: {
         Args: { _limit: number; _offset: number; _search: string }
         Returns: {
@@ -3245,6 +3249,19 @@ export type Database = {
           total: number
           user_id: string
           whatsapp: string
+        }[]
+      }
+      admin_search_orders_for_merge: {
+        Args: { _q: string; _target: string }
+        Returns: {
+          created_at: string
+          order_id: string
+          origin: string
+          owner_email: string
+          owner_name: string
+          status: string
+          total_cents: number
+          user_id: string
         }[]
       }
       apply_event_stock_sales: {
