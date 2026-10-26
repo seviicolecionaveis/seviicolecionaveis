@@ -20,8 +20,8 @@ GRANT authenticated, service_role TO CURRENT_USER;
 INSERT INTO public.profiles (user_id, full_name, cpf) VALUES
   ('11111111-1111-1111-1111-111111111111', 'Camilla Teste', '11122233344'),
   ('22222222-2222-2222-2222-222222222222', 'Outro Cliente', '55566677788');
-INSERT INTO public.orders (user_id, email) VALUES
-  ('22222222-2222-2222-2222-222222222222', 'outro@exemplo.com');
+INSERT INTO public.orders (id, user_id, email) VALUES
+  (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'outro@exemplo.com');
 
 -- admin customer
 INSERT INTO public.user_roles (user_id, role) VALUES ('11111111-1111-1111-1111-111111111111', 'admin');
