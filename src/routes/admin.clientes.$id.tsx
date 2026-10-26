@@ -12,6 +12,7 @@ import {
 } from "@/lib/admin-customers.functions";
 import { ORDER_STATUS_LABELS } from "@/lib/order-status";
 import { Loader2, Plus, Trash2, Star, Pencil } from "lucide-react";
+import { AddOrderToCustomer } from "@/components/admin/AddOrderToCustomer";
 
 export const Route = createFileRoute("/admin/clientes/$id")({
   head: () => ({ meta: [{ title: "Cliente — Admin" }] }),
@@ -357,7 +358,10 @@ function AdminClienteDetail() {
       </section>
 
       <section className="rounded-xl border border-border bg-card p-5">
-        <h2 className="text-sm font-bold uppercase tracking-wide mb-4">Pedidos</h2>
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <h2 className="text-sm font-bold uppercase tracking-wide">Pedidos</h2>
+          <AddOrderToCustomer userId={id} customerName={detail.full_name ?? detail.email ?? "este cliente"} onDone={load} />
+        </div>
         {detail.orders.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhum pedido.</p>
         ) : (
