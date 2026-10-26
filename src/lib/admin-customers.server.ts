@@ -15,11 +15,13 @@ export interface CustomerSearchRow {
 }
 
 export async function searchCustomersServer(
+  client: any,
   search: string,
   limit: number,
   offset: number
 ): Promise<{ rows: CustomerSearchRow[]; total: number }> {
-  const { data, error } = await supabaseAdmin.rpc("admin_search_customers", {
+  // Runs with the caller's JWT so the SECURITY DEFINER RPC rechecks the live admin role.
+  const { data, error } = await client.rpc("admin_search_customers", {
     _search: search.trim() || "",
     _limit: limit,
     _offset: offset,

@@ -21,7 +21,7 @@ export const searchCustomersFn = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { searchCustomersServer } = await import("@/lib/admin-customers.server");
-    return searchCustomersServer(data.q, data.limit, data.offset);
+    return searchCustomersServer(context.supabase, data.q, data.limit, data.offset);
   });
 
 const detailSchema = z.object({ userId: z.string().uuid() });
