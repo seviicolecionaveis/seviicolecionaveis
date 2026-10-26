@@ -1558,6 +1558,44 @@ export type Database = {
         }
         Relationships: []
       }
+      event_attendances: {
+        Row: {
+          created_at: string
+          email: string | null
+          event_id: string
+          full_name: string | null
+          id: string
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          event_id: string
+          full_name?: string | null
+          id?: string
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          event_id?: string
+          full_name?: string | null
+          id?: string
+          user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_attendances_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           active: boolean
@@ -3237,6 +3275,7 @@ export type Database = {
       }
       claim_my_whatsapp_orders: { Args: never; Returns: number }
       clear_event_reserved: { Args: never; Returns: number }
+      confirm_event_presence: { Args: { _event_id: string }; Returns: Json }
       confirm_order_receipt: { Args: { _order_id: string }; Returns: Json }
       expire_old_loyalty_points: { Args: never; Returns: number }
       finance_adjust_credit: {
