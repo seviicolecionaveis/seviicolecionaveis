@@ -393,8 +393,8 @@ function AdminClienteDetail() {
                   <p className="truncate">{l.description ?? l.reason}</p>
                   <p className="text-xs text-muted-foreground">{new Date(l.created_at).toLocaleDateString("pt-BR")}</p>
                 </div>
-                <p className={`font-semibold tabular-nums shrink-0 ${l.points >= 0 ? "text-green-600" : "text-destructive"}`}>
-                  {l.points >= 0 ? "+" : ""}{l.points}
+                <p className={`font-semibold tabular-nums shrink-0 ${l.delta >= 0 ? "text-green-600" : "text-destructive"}`}>
+                  {l.delta >= 0 ? "+" : ""}{l.delta}
                 </p>
               </div>
             ))}
