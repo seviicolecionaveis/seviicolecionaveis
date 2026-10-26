@@ -141,6 +141,7 @@ function AdminCardsManagePage() {
   const conditionRef = useRef<HTMLSelectElement>(null);
   const [quickEditId, setQuickEditId] = useState<string | null>(null);
   const [quickForm, setQuickForm] = useState<FormState>(EMPTY_FORM);
+  const [quickMore, setQuickMore] = useState(false);
   const [quickSaving, setQuickSaving] = useState(false);
   const [quickMsg, setQuickMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [uploadingMain, setUploadingMain] = useState(false);
@@ -417,6 +418,7 @@ function AdminCardsManagePage() {
   const openQuickEdit = (r: CardRow) => {
     if (quickEditId === r.id) { setQuickEditId(null); return; }
     setQuickEditId(r.id);
+    setQuickMore(false);
     setQuickMsg(null);
     setQuickForm({
       name: r.name,
@@ -475,11 +477,20 @@ function AdminCardsManagePage() {
     }
   }, [quickEditId]);
 
-  const handleQuickSave = async (id: string, opts?: { goNext?: boolean }) => {
+  const handleQuickSave = async (id: string, opts?: { goNext?: boolean; asNew?: boolean }) => {
+    if (!quickForm.name.trim() || !quickForm.card_number.trim() || !quickForm.collection.trim()) {
+      setQuickMsg({ type: "err", text: "Preencha nome, número e coleção." });
+      return;
+    }
     setQuickSaving(true);
     setQuickMsg(null);
     const newStock = Math.max(0, parseInt(quickForm.stock) || 0);
     const payload = {
+      name: quickForm.name.trim(),
+      card_number: quickForm.card_number.trim(),
+      collection: quickForm.collection.trim(),
+      language: quickForm.language,
+      finish: quickForm.finish,
       condition: (quickForm.condition || "NM") as Condition,
       category: quickForm.category,
       trainer_subcategory: quickForm.category === "Treinador" && quickForm.trainer_subcategory ? quickForm.trainer_subcategory : null,
@@ -490,9 +501,21 @@ function AdminCardsManagePage() {
       base_price_cents: quickForm.price.trim() === "" ? null : Math.round(parseFloat(quickForm.price.replace(",", ".")) * 100),
       image: quickForm.image.trim(),
     };
+    if (opts?.asNew) {
+      const { error: insErr } = await supabase.from("cards").insert({ ...payload, created_by: user?.id ?? null } as any);
+      setQuickSaving(false);
+      if (insErr) {
+        setQuickMsg({ type: "err", text: insErr.message.includes("duplicate") ? "Essa variante já existe (mude acabamento, idioma ou condição)." : insErr.message });
+        return;
+      }
+      setQuickMsg({ type: "ok", text: "Nova variante criada!" });
+      invalidateCardsCache();
+      await load();
+      return;
+    }
     const { error } = await supabase.from("cards").update(payload).eq("id", id);
     setQuickSaving(false);
-    if (error) { setQuickMsg({ type: "err", text: error.message }); return; }
+    if (error) { setQuickMsg({ type: "err", text: error.message.includes("duplicate") ? "Já existe outra carta com essa combinação." : error.message }); return; }
     const row = rows.find((r) => r.id === id);
     if (row) void maybeNotifyStockBack(row, newStock);
     setQuickMsg({ type: "ok", text: "Salvo!" });
@@ -1177,7 +1200,45 @@ function AdminCardsManagePage() {
                   </div>
                   {quickEditId === r.id && (
                     <div className="min-w-0 flex-1 rounded-lg border border-primary/40 bg-card p-4 shadow-lg">
-                      <p className="text-xs font-bold uppercase tracking-wide mb-3">Edição rápida</p>
+                      <div className="mb-3 flex items-center justify-between gap-2">
+                        <p className="text-xs font-bold uppercase tracking-wide">Edição rápida</p>
+                        <button
+                          type="button"
+                          onClick={() => setQuickMore((v) => !v)}
+                          className="rounded border border-border px-2 py-1 text-[11px] font-medium hover:bg-secondary"
+                          title="Mostra nome, número, coleção, idioma e acabamento"
+                        >
+                          {quickMore ? "▲ Menos campos" : "✎ Editar tudo aqui"}
+                        </button>
+                      </div>
+                      {quickMore && (
+                        <div className="mb-3 grid gap-3 rounded border border-dashed border-border p-3 sm:grid-cols-2 lg:grid-cols-5">
+                          <label className="text-xs space-y-1 lg:col-span-2">
+                            <span className="font-semibold">Nome</span>
+                            <input value={quickForm.name} onChange={(e) => setQuickForm({ ...quickForm, name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                          </label>
+                          <label className="text-xs space-y-1">
+                            <span className="font-semibold">Número</span>
+                            <input value={quickForm.card_number} onChange={(e) => setQuickForm({ ...quickForm, card_number: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                          </label>
+                          <label className="text-xs space-y-1 lg:col-span-2">
+                            <span className="font-semibold">Coleção</span>
+                            <input value={quickForm.collection} onChange={(e) => setQuickForm({ ...quickForm, collection: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                          </label>
+                          <label className="text-xs space-y-1">
+                            <span className="font-semibold">Idioma</span>
+                            <select value={quickForm.language} onChange={(e) => setQuickForm({ ...quickForm, language: e.target.value as Language })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
+                              {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+                            </select>
+                          </label>
+                          <label className="text-xs space-y-1">
+                            <span className="font-semibold">Acabamento</span>
+                            <select value={quickForm.finish} onChange={(e) => setQuickForm({ ...quickForm, finish: e.target.value as Finish, liga_subcategory: e.target.value === "Liga" ? quickForm.liga_subcategory : "" })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
+                              {FINISHES.map((f) => <option key={f} value={f}>{f}</option>)}
+                            </select>
+                          </label>
+                        </div>
+                      )}
                       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         <label className="text-xs space-y-1">
                           <span className="font-semibold">Condição</span>
@@ -1322,38 +1383,12 @@ function AdminCardsManagePage() {
                           Cancelar
                         </button>
                         <button
-                          onClick={() => handleEdit(r)}
-                          className="rounded border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary"
+                          onClick={() => handleQuickSave(r.id, { asNew: true })}
+                          disabled={quickSaving}
+                          className="rounded border border-primary/60 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 disabled:opacity-50"
+                          title="Cria uma carta nova com os dados acima, sem alterar esta. Mude acabamento, idioma ou condição antes."
                         >
-                          Editar tudo no topo →
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingId(null);
-                            setForm({
-                              name: r.name,
-                              card_number: r.card_number,
-                              collection: r.collection,
-                              language: r.language,
-                              finish: r.finish,
-                              condition: r.condition ?? "NM",
-                              category: r.category ?? "Pokémon",
-                              trainer_subcategory: r.trainer_subcategory ?? "",
-                              liga_subcategory: (r as any).liga_subcategory ?? "",
-                              pokemon_type: r.pokemon_type ?? "",
-                              illustrator_id: r.illustrator_id ?? null,
-                              stock: "1",
-                              price: r.base_price_cents != null ? (r.base_price_cents / 100).toFixed(2) : "",
-                              image: r.image,
-                            });
-                            setMsg({ type: "ok", text: "Informações copiadas! Ajuste o que mudar (ex: finish ou idioma) e adicione." });
-                            setQuickEditId(null);
-                            window.scrollTo({ top: 0, behavior: "smooth" });
-                          }}
-                          className="rounded border border-primary/60 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10"
-                          title="Copia todas as informações para o formulário acima como uma nova carta variante"
-                        >
-                          📋 Copiar p/ nova variante
+                          📋 Salvar como nova variante
                         </button>
                         {quickMsg && (
                           <span className={`text-xs ${quickMsg.type === "ok" ? "text-condition-mint" : "text-destructive"}`}>
