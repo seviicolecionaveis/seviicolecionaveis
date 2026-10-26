@@ -3194,6 +3194,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_search_customers: {
+        Args: { _limit: number; _offset: number; _search: string }
+        Returns: {
+          birth_date: string
+          cpf: string
+          created_at: string
+          email: string
+          full_name: string
+          orders_count: number
+          phone: string
+          total: number
+          user_id: string
+          whatsapp: string
+        }[]
+      }
       apply_event_stock_sales: {
         Args: { _items: Json; _reason?: string }
         Returns: number

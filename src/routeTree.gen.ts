@@ -42,6 +42,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as AdminAccessoriesRouteImport } from './routes/admin.accessories'
 import { Route as AdminAcompanharLeilaoRouteImport } from './routes/admin.acompanhar-leilao'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminComandosRouteImport } from './routes/admin.comandos'
 import { Route as AdminConectarBotRouteImport } from './routes/admin.conectar-bot'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
@@ -90,6 +91,8 @@ import { Route as SorteiosIndexRouteImport } from './routes/sorteios.index'
 import { Route as SorteiosRaffleIdRouteImport } from './routes/sorteios.$raffleId'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as DotwellKnownOauthProtectedResourceMcpRouteImport } from './routes/[.]well-known.oauth-protected-resource.mcp'
+import { Route as AdminClientesIndexRouteImport } from './routes/admin.clientes.index'
+import { Route as AdminClientesIdRouteImport } from './routes/admin.clientes.$id'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
@@ -297,6 +300,11 @@ const AdminAcompanharLeilaoRoute = AdminAcompanharLeilaoRouteImport.update({
 const AdminBannersRoute = AdminBannersRouteImport.update({
   id: '/banners',
   path: '/banners',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminClientesRoute = AdminClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminComandosRoute = AdminComandosRouteImport.update({
@@ -540,6 +548,16 @@ const DotwellKnownOauthProtectedResourceMcpRoute =
     path: '/mcp',
     getParentRoute: () => Char91DotwellKnownChar93OauthProtectedResourceRoute,
   } as any)
+const AdminClientesIndexRoute = AdminClientesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminClientesRoute,
+} as any)
+const AdminClientesIdRoute = AdminClientesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminClientesRoute,
+} as any)
 const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
   id: '/orders/$orderId',
   path: '/orders/$orderId',
@@ -806,6 +824,7 @@ export interface FileRoutesByFullPath {
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/acompanhar-leilao': typeof AdminAcompanharLeilaoRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/clientes': typeof AdminClientesRouteWithChildren
   '/admin/comandos': typeof AdminComandosRoute
   '/admin/conectar-bot': typeof AdminConectarBotRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -854,10 +873,12 @@ export interface FileRoutesByFullPath {
   '/sorteios/': typeof SorteiosIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.well-known/oauth-protected-resource/mcp': typeof DotwellKnownOauthProtectedResourceMcpRoute
+  '/admin/clientes/$id': typeof AdminClientesIdRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/admin/clientes/': typeof AdminClientesIndexRoute
   '/.well-known/oauth-protected-resource/api/mcp': typeof DotwellKnownOauthProtectedResourceApiMcpRoute
   '/api/public/bot/status': typeof ApiPublicBotStatusRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
@@ -975,10 +996,12 @@ export interface FileRoutesByTo {
   '/sorteios': typeof SorteiosIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.well-known/oauth-protected-resource/mcp': typeof DotwellKnownOauthProtectedResourceMcpRoute
+  '/admin/clientes/$id': typeof AdminClientesIdRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/admin/clientes': typeof AdminClientesIndexRoute
   '/.well-known/oauth-protected-resource/api/mcp': typeof DotwellKnownOauthProtectedResourceApiMcpRoute
   '/api/public/bot/status': typeof ApiPublicBotStatusRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
@@ -1052,6 +1075,7 @@ export interface FileRoutesById {
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/acompanhar-leilao': typeof AdminAcompanharLeilaoRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/clientes': typeof AdminClientesRouteWithChildren
   '/admin/comandos': typeof AdminComandosRoute
   '/admin/conectar-bot': typeof AdminConectarBotRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -1100,10 +1124,12 @@ export interface FileRoutesById {
   '/sorteios/': typeof SorteiosIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.well-known/oauth-protected-resource/mcp': typeof DotwellKnownOauthProtectedResourceMcpRoute
+  '/admin/clientes/$id': typeof AdminClientesIdRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/admin/clientes/': typeof AdminClientesIndexRoute
   '/.well-known/oauth-protected-resource/api/mcp': typeof DotwellKnownOauthProtectedResourceApiMcpRoute
   '/api/public/bot/status': typeof ApiPublicBotStatusRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
@@ -1178,6 +1204,7 @@ export interface FileRouteTypes {
     | '/admin/accessories'
     | '/admin/acompanhar-leilao'
     | '/admin/banners'
+    | '/admin/clientes'
     | '/admin/comandos'
     | '/admin/conectar-bot'
     | '/admin/coupons'
@@ -1226,10 +1253,12 @@ export interface FileRouteTypes {
     | '/sorteios/'
     | '/.lovable/oauth/consent'
     | '/.well-known/oauth-protected-resource/mcp'
+    | '/admin/clientes/$id'
     | '/admin/orders/$orderId'
     | '/api/public/mcp'
     | '/api/public/sitemap.xml'
     | '/lovable/email/events'
+    | '/admin/clientes/'
     | '/.well-known/oauth-protected-resource/api/mcp'
     | '/api/public/bot/status'
     | '/api/public/hooks/auto-cancel-unpaid'
@@ -1347,10 +1376,12 @@ export interface FileRouteTypes {
     | '/sorteios'
     | '/.lovable/oauth/consent'
     | '/.well-known/oauth-protected-resource/mcp'
+    | '/admin/clientes/$id'
     | '/admin/orders/$orderId'
     | '/api/public/mcp'
     | '/api/public/sitemap.xml'
     | '/lovable/email/events'
+    | '/admin/clientes'
     | '/.well-known/oauth-protected-resource/api/mcp'
     | '/api/public/bot/status'
     | '/api/public/hooks/auto-cancel-unpaid'
@@ -1423,6 +1454,7 @@ export interface FileRouteTypes {
     | '/admin/accessories'
     | '/admin/acompanhar-leilao'
     | '/admin/banners'
+    | '/admin/clientes'
     | '/admin/comandos'
     | '/admin/conectar-bot'
     | '/admin/coupons'
@@ -1471,10 +1503,12 @@ export interface FileRouteTypes {
     | '/sorteios/'
     | '/.lovable/oauth/consent'
     | '/.well-known/oauth-protected-resource/mcp'
+    | '/admin/clientes/$id'
     | '/admin/orders/$orderId'
     | '/api/public/mcp'
     | '/api/public/sitemap.xml'
     | '/lovable/email/events'
+    | '/admin/clientes/'
     | '/.well-known/oauth-protected-resource/api/mcp'
     | '/api/public/bot/status'
     | '/api/public/hooks/auto-cancel-unpaid'
@@ -1829,6 +1863,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBannersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/clientes': {
+      id: '/admin/clientes'
+      path: '/clientes'
+      fullPath: '/admin/clientes'
+      preLoaderRoute: typeof AdminClientesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/comandos': {
       id: '/admin/comandos'
       path: '/comandos'
@@ -2165,6 +2206,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotwellKnownOauthProtectedResourceMcpRouteImport
       parentRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
     }
+    '/admin/clientes/': {
+      id: '/admin/clientes/'
+      path: '/'
+      fullPath: '/admin/clientes/'
+      preLoaderRoute: typeof AdminClientesIndexRouteImport
+      parentRoute: typeof AdminClientesRoute
+    }
+    '/admin/clientes/$id': {
+      id: '/admin/clientes/$id'
+      path: '/$id'
+      fullPath: '/admin/clientes/$id'
+      preLoaderRoute: typeof AdminClientesIdRouteImport
+      parentRoute: typeof AdminClientesRoute
+    }
     '/admin/orders/$orderId': {
       id: '/admin/orders/$orderId'
       path: '/orders/$orderId'
@@ -2455,10 +2510,25 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminClientesRouteChildren {
+  AdminClientesIdRoute: typeof AdminClientesIdRoute
+  AdminClientesIndexRoute: typeof AdminClientesIndexRoute
+}
+
+const AdminClientesRouteChildren: AdminClientesRouteChildren = {
+  AdminClientesIdRoute: AdminClientesIdRoute,
+  AdminClientesIndexRoute: AdminClientesIndexRoute,
+}
+
+const AdminClientesRouteWithChildren = AdminClientesRoute._addFileChildren(
+  AdminClientesRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminAccessoriesRoute: typeof AdminAccessoriesRoute
   AdminAcompanharLeilaoRoute: typeof AdminAcompanharLeilaoRoute
   AdminBannersRoute: typeof AdminBannersRoute
+  AdminClientesRoute: typeof AdminClientesRouteWithChildren
   AdminComandosRoute: typeof AdminComandosRoute
   AdminConectarBotRoute: typeof AdminConectarBotRoute
   AdminCouponsRoute: typeof AdminCouponsRoute
@@ -2494,6 +2564,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAccessoriesRoute: AdminAccessoriesRoute,
   AdminAcompanharLeilaoRoute: AdminAcompanharLeilaoRoute,
   AdminBannersRoute: AdminBannersRoute,
+  AdminClientesRoute: AdminClientesRouteWithChildren,
   AdminComandosRoute: AdminComandosRoute,
   AdminConectarBotRoute: AdminConectarBotRoute,
   AdminCouponsRoute: AdminCouponsRoute,

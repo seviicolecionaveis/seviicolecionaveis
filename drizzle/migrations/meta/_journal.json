@@ -155,6 +155,13 @@
       "when": 1792981087819,
       "tag": "0021_item_cancellation_finance_integration",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1793021452644,
+      "tag": "0022_admin_customer_search",
+      "breakpoints": true
     }
   ]
 }
