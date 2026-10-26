@@ -97,3 +97,37 @@ export const setDefaultAddressFn = createServerFn({ method: "POST" })
     const { setDefaultAddressServer } = await import("@/lib/admin-customers.server");
     return setDefaultAddressServer(context.userId, data.userId, data.addressId);
   });
+
+const orderSearchSchema = z.object({ userId: z.string().uuid(), q: z.string().max(120) });
+
+export const searchOrdersForMergeFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => orderSearchSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    // Caller JWT: the SECURITY DEFINER RPC rechecks the live admin role.
+    const { data: rows, error } = await context.supabase.rpc("admin_search_orders_for_merge", {
+      _target: data.userId,
+      _q: data.q,
+    });
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as Array<{
+      order_id: string; user_id: string; owner_name: string | null; owner_email: string | null;
+      status: string; total_cents: number; origin: string | null; created_at: string;
+    }>;
+  });
+
+const mergeSchema = z.object({ userId: z.string().uuid(), sourceUserId: z.string().uuid() });
+
+export const mergeCustomerAccountsFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => mergeSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { data: res, error } = await context.supabase.rpc("admin_merge_customer_accounts", {
+      _target: data.userId,
+      _source: data.sourceUserId,
+    });
+    if (error) throw new Error(error.message);
+    return res as { orders_moved: number };
+  });
