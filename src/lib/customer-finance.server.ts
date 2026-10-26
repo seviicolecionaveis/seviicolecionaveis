@@ -53,12 +53,27 @@ export async function createFinanceRefund(actor: string, input: { orderId: strin
   const token = randomBytes(32).toString('hex');
   const { data, error } = await db.rpc('finance_create_refund', { p_order: input.orderId, p_item: input.itemId ?? null as unknown as string, p_actor: actor, p_amount: input.amountCents, p_reason: input.reason, p_hash: hashRefundToken(token), p_key: input.key });
   if (error) throw new Error('Não foi possível criar: confira pagamento confirmado, item e limite disponível.');
+  return notifyCreatedFinanceRefund(data, token);
+}
+async function notifyCreatedFinanceRefund(data: Json, token: string) {
   const r = objectResult<Refund>(data);
   // A replay must never send a new token whose hash was not stored.
   const { data: stored } = await db.from('customer_refunds').select('token_hash').eq('id', r.id).single();
   if (stored?.token_hash !== hashRefundToken(token)) return { refund: r, sent: r.email_status === 'sent' };
   const sent = await sendFinanceNotice(r, 'invite', `https://seviicolecionaveis.com.br/reembolso/${r.id}#${token}`);
   return { refund: r, sent };
+}
+export async function cancelItemWithFinanceRefund(client: import('@supabase/supabase-js').SupabaseClient<Database>, input: { orderId: string; itemId: string; quantity: number; reason: string; key: string }) {
+  const token = randomBytes(32).toString('hex');
+  // The RPC derives the administrator from the verified JWT, never from a supplied actor UUID.
+  const { data, error } = await client.rpc('finance_cancel_item_refund', {
+    p_order: input.orderId, p_item: input.itemId, p_quantity: input.quantity,
+    p_reason: input.reason, p_hash: hashRefundToken(token), p_key: input.key,
+  });
+  if (error) throw new Error('Cancelamento não realizado: confira permissão, quantidade, pagamento e limite de reembolso disponível.');
+  const r = objectResult<Refund>(data);
+  try { return await notifyCreatedFinanceRefund(data, token); }
+  catch { return { refund: r, sent: false }; } // Cancellation is committed; email failure must not look like a failed write.
 }
 export async function renewFinanceRefund(actor: string, id: string, reason: string) {
   const token = randomBytes(32).toString('hex');

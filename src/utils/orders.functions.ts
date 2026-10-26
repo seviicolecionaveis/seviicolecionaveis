@@ -234,12 +234,28 @@ export const adminPartialCancelItem = createServerFn({ method: "POST" })
       order_id: z.string().uuid(),
       order_item_id: z.string().uuid(),
       quantity: z.number().int().min(1).max(999),
-      refund_method: z.enum(["mercadopago", "coupon", "manual"]),
+      refund_method: z.enum(["mercadopago", "coupon", "manual", "customer_choice"]),
       notes: z.string().trim().max(500).optional().nullable(),
+      operation_key: z.string().uuid().optional(),
+      confirmed: z.boolean().optional(),
+    }).superRefine((value, ctx) => {
+      if (value.refund_method === "customer_choice" && (!value.operation_key || !value.confirmed || (value.notes?.length ?? 0) < 5)) {
+        ctx.addIssue({ code: 'custom', message: 'Informe a justificativa e confirme o cancelamento e a solicitação de reembolso.' });
+      }
     }).parse(d),
   )
   .middleware([requireSupabaseAuth])
   .handler(async ({ context, data }) => {
+    if (data.refund_method === "customer_choice") {
+      if (!data.operation_key || !data.notes || !data.confirmed) throw new Error('Confirme a operação e informe a justificativa.');
+      const { cancelItemWithFinanceRefund } = await import('@/lib/customer-finance.server');
+      const result = await cancelItemWithFinanceRefund(context.supabase, {
+        orderId: data.order_id, itemId: data.order_item_id, quantity: data.quantity,
+        reason: data.notes, key: data.operation_key,
+      });
+      return { ok: true, refundCents: result.refund.amount_cents, couponCode: null,
+        refundDetails: 'Solicitação registrada; aguardando escolha do cliente entre saldo Sevii e forma original.', refundSent: result.sent };
+    }
     const { isAdmin } = await import("@/lib/order-cancellation.server");
     if (!(await isAdmin(context.userId))) {
       throw new Response("Acesso negado", { status: 403 });
@@ -392,5 +408,5 @@ export const adminPartialCancelItem = createServerFn({ method: "POST" })
     }
 
 
-    return { ok: true, refundCents, couponCode, refundDetails };
+    return { ok: true, refundCents, couponCode, refundDetails, refundSent: undefined };
   });
