@@ -52,17 +52,4 @@ export const NOTICES: Notice[] = [
     ],
     active: true,
   },
-  {
-    id: "whatsapp-group",
-    title: "Entre no nosso grupo do WhatsApp",
-    date: "Permanente",
-    category: "Comunidade",
-    summary:
-      "Participe do nosso grupo exclusivo e fique por dentro de lançamentos, promoções e novidades.",
-    body: [
-      "Entre no nosso grupo exclusivo do WhatsApp e fique por dentro de lançamentos, promoções e novidades do mundo Pokémon.",
-      "Link do grupo: https://chat.whatsapp.com/LfG18YtcQMJ8PBjNz5IogS",
-    ],
-    active: true,
-  },
 ];
