@@ -210,7 +210,7 @@ export async function updateCustomerServer(actorId: string, input: UpdateCustome
 
   if (Object.keys(profilePatch).length > 0) {
     profilePatch.updated_at = new Date().toISOString();
-    const { error } = await supabaseAdmin.from("profiles").update(profilePatch).eq("user_id", input.userId);
+    const { error } = await supabaseAdmin.from("profiles").update(profilePatch as any).eq("user_id", input.userId);
     if (error) throw new Response(error.message, { status: 500 });
   }
 
@@ -274,13 +274,13 @@ export async function upsertAddressServer(actorId: string, input: AddressInput) 
   };
 
   if (input.addressId) {
-    const { error } = await supabaseAdmin.from("addresses").update(patch).eq("id", input.addressId);
+    const { error } = await supabaseAdmin.from("addresses").update(patch as any).eq("id", input.addressId);
     if (error) throw new Response(error.message, { status: 500 });
     return { ok: true, action: "updated" };
   }
 
   patch.is_default = input.isDefault ?? false;
-  const { data, error } = await supabaseAdmin.from("addresses").insert(patch).select("id").single();
+  const { data, error } = await supabaseAdmin.from("addresses").insert(patch as any).select("id").single();
   if (error) throw new Response(error.message, { status: 500 });
 
   if (input.isDefault) {
