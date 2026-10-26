@@ -16,6 +16,10 @@ DO $$ BEGIN
 END $$;
 GRANT authenticated, service_role TO CURRENT_USER;
 
+-- stub of Supabase auth.users, which migration 0022 reads for the login e-mail
+CREATE TABLE auth.users (id uuid PRIMARY KEY, email text, email_confirmed_at timestamptz, last_sign_in_at timestamptz);
+GRANT SELECT ON auth.users TO authenticated, service_role;
+
 -- fixture customers
 INSERT INTO public.profiles (user_id, full_name, cpf) VALUES
   ('11111111-1111-1111-1111-111111111111', 'Camilla Teste', '11122233344'),
