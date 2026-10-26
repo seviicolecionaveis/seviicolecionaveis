@@ -1,8 +1,8 @@
 # Confirmações de agendamento
 ## Reembolso no cancelamento de cartas
-- [ ] Integrar escolha de saldo/forma original ao cancelamento de item na página administrativa do pedido, com quantidade e justificativa.
-- [ ] Validar cancelamento e obrigação financeira atômicos com dados fictícios, sem estoque, saldo, pedidos ou e-mails reais.
-- [ ] Ativar a nova operação: aguarda autorização para aplicar somente a estrutura no banco compartilhado; nenhum valor será aplicado.
+- [x] Integrar escolha de saldo/forma original ao cancelamento de item na página administrativa do pedido, com quantidade, justificativa e confirmação; formas anteriores preservadas.
+- [x] Validar cancelamento e obrigação financeira atômicos em PostgreSQL descartável e fluxo administrativo com fixtures interceptadas; 28 testes existentes passaram, sem estoque, saldo, pedidos ou e-mails reais.
+- [x] Aplicar somente estrutura da operação autenticada (migration 0021), sem executar cancelamentos ou valores no banco compartilhado; não publicado.
 ## Saldo de clientes e reembolsos
 - [x] Analisar estrutura atual e apresentar plano de integração financeira segura.
 - [x] Implementar saldo/extrato, reservas atômicas e reembolsos parciais com auditoria e permissões existentes; cenários PostgreSQL isolados passaram.
