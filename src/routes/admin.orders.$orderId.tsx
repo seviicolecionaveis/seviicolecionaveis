@@ -23,6 +23,8 @@ import { canAdminEditShipping } from "@/lib/admin-shipping-edit";
 import { AdminTrackingEditor, type TrackingInfo } from "@/components/admin/AdminTrackingEditor";
 import { useCardMetaMap } from "@/hooks/useCardMetaMap";
 import { sortByCardGroup } from "@/lib/sortCards";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/orders/$orderId")({
   head: () => ({ meta: [
@@ -532,8 +534,9 @@ function AdminOrderDetailPage() {
                         {cancelledQty > 0 && (
                           <p className="text-xs mt-1 text-orange-700 font-semibold">
                             {cancelledQty}× cancelado{refundCents > 0 ? ` · reembolso ${fmtBRL(refundCents)}` : ""}
-                            {it.refund_method ? ` (${it.refund_method === "mercadopago" ? "estorno MP" : it.refund_method === "coupon" ? "cupom" : "manual"})` : ""}
+                            {it.refund_method ? ` (${it.refund_method === "mercadopago" ? "estorno MP" : it.refund_method === "coupon" ? "cupom" : it.refund_method === "customer_choice" ? "saldo / forma original" : "manual"})` : ""}
                             {it.refund_coupon_code ? ` · ${it.refund_coupon_code}` : ""}
+                            {it.refund_method === "customer_choice" && <Link to="/admin/reembolsos" search={{ orderId }} className="ml-2 underline text-foreground">Acompanhar reembolso</Link>}
                           </p>
                         )}
                         {inStack && (
@@ -769,194 +772,64 @@ function Row({ label, value, tone }: { label: string; value: string; tone?: "dis
   );
 }
 
-function PartialCancelDialog({
-  item,
-  order,
-  onClose,
-  onDone,
-}: {
-  item: any;
-  order: any;
-  onClose: () => void;
-  onDone: () => void | Promise<void>;
+function PartialCancelDialog({ item, order, onClose, onDone }: {
+  item: any; order: any; onClose: () => void; onDone: () => void | Promise<void>;
 }) {
-  const cancelledQty = item.cancelled_quantity ?? 0;
-  const remaining = (item.quantity ?? 0) - cancelledQty;
+  const remaining = (item.quantity ?? 0) - (item.cancelled_quantity ?? 0);
   const [qty, setQty] = useState(1);
-  const [method, setMethod] = useState<"mercadopago" | "coupon" | "manual">(
-    order.mercadopago_payment_id ? "mercadopago" : "coupon",
-  );
+  const [method, setMethod] = useState<"mercadopago" | "coupon" | "manual" | "customer_choice">("customer_choice");
   const [notes, setNotes] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
+  const [operationKey, setOperationKey] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  // Preview do valor de reembolso (proporcional ao desconto do pedido)
-  const baseCents = (item.unit_price_cents ?? 0) * qty;
-  const subtotal = order.subtotal_cents || 1;
+  const [attempted, setAttempted] = useState(false);
+  const cancelFn = useServerFn(adminPartialCancelItem);
   const discount = order.discount_cents ?? 0;
-  const ratio = Math.max(0, Math.min(1, 1 - discount / subtotal));
-  const refundPreview = Math.round(baseCents * ratio);
-
+  const ratio = Math.max(0, Math.min(1, 1 - discount / (order.subtotal_cents || 1)));
+  const refundPreview = Math.round((item.unit_price_cents ?? 0) * qty * ratio);
+  const finance = method === "customer_choice";
   const submit = async () => {
-    if (qty < 1 || qty > remaining) {
-      toast.error("Quantidade inválida.");
-      return;
-    }
+    if (qty < 1 || qty > remaining || !confirmed || (finance && (notes.trim().length < 5 || refundPreview <= 0))) return;
+    const key = operationKey || crypto.randomUUID();
+    setOperationKey(key);
+    setAttempted(true);
     setSubmitting(true);
     try {
-      const res = await adminPartialCancelItem({
-        data: {
-          order_id: order.id,
-          order_item_id: item.id,
-          quantity: qty,
-          refund_method: method,
-          notes: notes.trim() || null,
-        },
-      });
-      toast.success(
-        `Item cancelado. ${res.refundDetails ?? `Reembolso: ${fmtBRL(res.refundCents ?? 0)}`}`,
-        { duration: 6000 },
-      );
+      const res = await cancelFn({ data: {
+        order_id: order.id, order_item_id: item.id, quantity: qty, refund_method: method,
+        notes: notes.trim() || null, operation_key: key, confirmed: true,
+      } });
+      toast.success(`Item cancelado. ${res.refundDetails}`, { duration: 6000 });
+      if (finance && res.refundSent === false) toast.warning("Cancelamento e solicitação registrados, mas o e-mail não foi enviado. Reenvie o convite em Reembolsos e saldo.", { duration: 9000 });
       await onDone();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Erro ao cancelar item.");
-    } finally {
-      setSubmitting(false);
-    }
+    } catch (e: any) { toast.error(e?.message ?? "Erro ao cancelar item."); }
+    finally { setSubmitting(false); }
   };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-4"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md rounded-xl bg-card border border-border p-5 space-y-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div>
-          <h3 className="text-base font-bold">Cancelar item parcialmente</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {item.card_name}
-            {item.card_number ? ` · ${item.card_number}` : ""}
-          </p>
-        </div>
-
-        <div>
-          <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
-            Quantidade a cancelar
-          </label>
-          <div className="flex items-center gap-3 mt-1">
-            <input
-              type="number"
-              min={1}
-              max={remaining}
-              value={qty}
-              onChange={(e) => setQty(Math.max(1, Math.min(remaining, parseInt(e.target.value) || 1)))}
-              className="w-20 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-semibold"
-            />
-            <span className="text-xs text-muted-foreground">de {remaining} disponíveis</span>
-          </div>
-        </div>
-
-        <div>
-          <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
-            Forma de reembolso
-          </label>
-          <div className="mt-1 space-y-2">
-            <label className="flex items-start gap-2 text-sm">
-              <input
-                type="radio"
-                name="refund"
-                checked={method === "mercadopago"}
-                disabled={!order.mercadopago_payment_id}
-                onChange={() => setMethod("mercadopago")}
-                className="mt-0.5"
-              />
-              <span>
-                <strong>Estorno automático no Mercado Pago</strong>
-                {!order.mercadopago_payment_id && (
-                  <span className="text-xs text-muted-foreground"> — indisponível (pagamento não foi via MP)</span>
-                )}
-                <span className="block text-xs text-muted-foreground">Cai na conta/cartão do cliente em até 7 dias úteis.</span>
-              </span>
-            </label>
-            <label className="flex items-start gap-2 text-sm">
-              <input
-                type="radio"
-                name="refund"
-                checked={method === "coupon"}
-                onChange={() => setMethod("coupon")}
-                className="mt-0.5"
-              />
-              <span>
-                <strong>Cupom de desconto</strong>
-                <span className="block text-xs text-muted-foreground">Gera cupom único no valor do reembolso (válido 1 ano).</span>
-              </span>
-            </label>
-            <label className="flex items-start gap-2 text-sm">
-              <input
-                type="radio"
-                name="refund"
-                checked={method === "manual"}
-                onChange={() => setMethod("manual")}
-                className="mt-0.5"
-              />
-              <span>
-                <strong>Manual (Pix por fora)</strong>
-                <span className="block text-xs text-muted-foreground">Apenas registra; você devolve por fora.</span>
-              </span>
-            </label>
-          </div>
-        </div>
-
-        <div>
-          <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
-            Observação para o cliente (opcional)
-          </label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Ex.: Infelizmente esta carta saiu do estoque antes da separação. Pedimos desculpas pelo transtorno."
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-            rows={3}
-          />
-          <p className="text-[11px] text-muted-foreground mt-1">
-            Esta mensagem será enviada junto ao e-mail de cancelamento parcial.
-          </p>
-        </div>
-
-
-        <div className="rounded-md bg-secondary/50 p-3 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Valor a reembolsar:</span>
-            <span className="font-bold tabular-nums">{fmtBRL(refundPreview)}</span>
-          </div>
-          {discount > 0 && (
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Já desconta proporcionalmente {discount > 0 ? "o desconto/Pix" : ""} aplicado no pedido.
-            </p>
-          )}
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            disabled={submitting}
-            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm font-semibold hover:bg-secondary"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={submit}
-            disabled={submitting}
-            className="rounded-md bg-destructive text-destructive-foreground px-3 py-1.5 text-sm font-semibold hover:opacity-90 disabled:opacity-50"
-          >
-            {submitting ? "Processando..." : "Confirmar cancelamento"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  const options: { value: typeof method; label: string; disabled?: boolean }[] = [
+    { value: "customer_choice", label: "Saldo Sevii ou forma original — escolha do cliente" },
+    { value: "mercadopago", label: "Estorno automático no Mercado Pago", disabled: !order.mercadopago_payment_id },
+    { value: "coupon", label: "Cupom de desconto (forma anterior)" },
+    { value: "manual", label: "Manual (Pix por fora)" },
+  ];
+  return <Dialog open onOpenChange={open => { if (!open && !submitting) onClose(); }}>
+    <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" onEscapeKeyDown={e => { if (submitting) e.preventDefault(); }} onPointerDownOutside={e => { if (submitting) e.preventDefault(); }}>
+      <DialogHeader><DialogTitle>Cancelar item parcialmente</DialogTitle><DialogDescription>{item.card_name}{item.card_number ? ` · ${item.card_number}` : ""}</DialogDescription></DialogHeader>
+      <label className="text-sm font-semibold">Quantidade a cancelar
+        <div className="flex items-center gap-3 mt-1"><input aria-label="Quantidade a cancelar" type="number" min={1} max={remaining} value={qty} disabled={attempted} onChange={e => setQty(Math.max(1, Math.min(remaining, parseInt(e.target.value) || 1)))} className="w-20 rounded-md border border-border bg-background px-3 py-1.5 text-sm"/><span className="text-xs text-muted-foreground">de {remaining} disponíveis</span></div>
+      </label>
+      <fieldset className="space-y-2"><legend className="text-sm font-semibold mb-2">Forma de reembolso</legend>
+        {options.map(o => <label key={o.value} className="flex items-start gap-2 text-sm"><input type="radio" name="refund" checked={method === o.value} disabled={attempted || o.disabled} onChange={() => setMethod(o.value)} className="mt-1"/><span>{o.label}</span></label>)}
+      </fieldset>
+      {finance && <p className="text-xs text-muted-foreground">Aguardando escolha do cliente. O saldo só será aplicado após sua escolha; devolução na forma original depende de aprovação da loja.</p>}
+      <label className="text-sm font-semibold">{finance ? "Motivo do cancelamento" : "Observação para o cliente (opcional)"}
+        <textarea aria-label="Motivo do cancelamento" value={notes} disabled={attempted} onChange={e => setNotes(e.target.value)} maxLength={500} rows={3} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"/>
+      </label>
+      <div className="border-t border-border pt-3 text-sm flex justify-between"><span>Valor a reembolsar</span><strong className="tabular-nums">{fmtBRL(refundPreview)}</strong></div>
+      {discount > 0 && <p className="text-xs text-muted-foreground">Desconto do pedido já considerado proporcionalmente.</p>}
+      <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={confirmed} disabled={submitting} onChange={e => setConfirmed(e.target.checked)} className="mt-1"/><span>Confirmo o cancelamento de {qty} unidade(s){finance ? " e a solicitação de reembolso" : ""}, sem devolver ao estoque.</span></label>
+      <div className="flex justify-end gap-2"><Button variant="outline" disabled={submitting} onClick={onClose}>Voltar</Button><Button variant="destructive" disabled={submitting || !confirmed || (finance && (notes.trim().length < 5 || refundPreview <= 0))} onClick={submit}>{submitting ? "Processando…" : "Confirmar cancelamento"}</Button></div>
+    </DialogContent>
+  </Dialog>;
 }
 
 const PICKERS = ["Luca", "Julia"] as const;

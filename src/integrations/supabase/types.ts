@@ -1286,6 +1286,7 @@ export type Database = {
         Row: {
           amount_cents: number
           approved_by: string | null
+          cancellation_quantity: number | null
           choice: string | null
           chosen_at: string | null
           completed_at: string | null
@@ -1312,6 +1313,7 @@ export type Database = {
         Insert: {
           amount_cents: number
           approved_by?: string | null
+          cancellation_quantity?: number | null
           choice?: string | null
           chosen_at?: string | null
           completed_at?: string | null
@@ -1338,6 +1340,7 @@ export type Database = {
         Update: {
           amount_cents?: number
           approved_by?: string | null
+          cancellation_quantity?: number | null
           choice?: string | null
           chosen_at?: string | null
           completed_at?: string | null
@@ -3232,6 +3235,17 @@ export type Database = {
         Returns: Json
       }
       finance_assert_admin: { Args: { p_actor: string }; Returns: undefined }
+      finance_cancel_item_refund: {
+        Args: {
+          p_hash: string
+          p_item: string
+          p_key: string
+          p_order: string
+          p_quantity: number
+          p_reason: string
+        }
+        Returns: Json
+      }
       finance_choose_refund: {
         Args: { p_choice: string; p_hash: string; p_id: string }
         Returns: Json
