@@ -75,7 +75,6 @@ function AdminOrderDetailPage() {
   const [coupon, setCoupon] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [cancelItem, setCancelItem] = useState<any[] | null>(null);
-  const [selectedForCancel, setSelectedForCancel] = useState<Set<string>>(new Set());
   const [fullCancel, setFullCancel] = useState<"cancel" | "approve" | null>(null);
   const [stackedItemIds, setStackedItemIds] = useState<Set<string>>(new Set());
   const [selectedForStack, setSelectedForStack] = useState<Record<string, number>>({});
@@ -438,15 +437,32 @@ function AdminOrderDetailPage() {
                 </h2>
                 <div className="flex items-center gap-3">
                   <PickingSummary items={items} />
-                  {stackEligible && selectedCount > 0 && (
-                    <button
-                      onClick={sendSelectedToStack}
-                      disabled={sendingToStack}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50"
-                    >
-                      <Layers className="h-3.5 w-3.5" />
-                      {sendingToStack ? "Enviando..." : `Enviar ${selectedCount} para Pilha`}
-                    </button>
+                  {selectedCount > 0 && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setSelectedForStack({})}
+                        className="text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:underline"
+                      >
+                        Limpar
+                      </button>
+                      {stackEligible && (
+                        <button
+                          onClick={sendSelectedToStack}
+                          disabled={sendingToStack}
+                          className="inline-flex items-center gap-1.5 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50"
+                        >
+                          <Layers className="h-3.5 w-3.5" />
+                          {sendingToStack ? "Enviando..." : `Enviar ${selectedCount} para Pilha`}
+                        </button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => setCancelItem(items.filter((x: any) => selectedForStack[x.id] != null))}
+                      >
+                        <X className="h-3 w-3" /> Cancelar selecionados
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -486,17 +502,6 @@ function AdminOrderDetailPage() {
                 )}
               </div>
 
-              {selectedForCancel.size > 0 && (
-                <div className="flex items-center justify-between gap-3 border-b border-border bg-destructive/5 px-4 py-2">
-                  <span className="text-xs font-semibold">{selectedForCancel.size} item(ns) selecionado(s) para cancelar</span>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="ghost" onClick={() => setSelectedForCancel(new Set())}>Limpar</Button>
-                    <Button size="sm" variant="destructive" onClick={() => setCancelItem(items.filter((x: any) => selectedForCancel.has(x.id)))}>
-                      <X className="h-3 w-3" /> Cancelar selecionados
-                    </Button>
-                  </div>
-                </div>
-              )}
               <ul className="divide-y divide-border">
                 {items.map((it) => {
                   const cancelledQty = it.cancelled_quantity ?? 0;
@@ -512,25 +517,14 @@ function AdminOrderDetailPage() {
                   const isSelected = selectedQty != null;
                   return (
                     <li key={it.id} className="flex items-start gap-4 p-4">
-                      {canStack ? (
+                      {canStack || canCancel ? (
                         <input
                           type="checkbox"
+                          aria-label={`Selecionar ${it.card_name}`}
                           checked={isSelected}
                           onChange={(e) => toggleStackItem(it, e.target.checked)}
                           className="mt-2 h-4 w-4 shrink-0 cursor-pointer accent-primary"
-                          title="Selecionar para enviar à Pilha"
-                        />
-                      ) : (
-                        <div className="w-4 shrink-0" />
-                      )}
-                      {canCancel ? (
-                        <input
-                          type="checkbox"
-                          aria-label={`Selecionar ${it.card_name} para cancelamento`}
-                          checked={selectedForCancel.has(it.id)}
-                          onChange={(e) => setSelectedForCancel((prev) => { const n = new Set(prev); if (e.target.checked) n.add(it.id); else n.delete(it.id); return n; })}
-                          className="mt-2 h-4 w-4 shrink-0 cursor-pointer accent-destructive"
-                          title="Selecionar para cancelar"
+                          title="Selecionar item"
                         />
                       ) : (
                         <div className="w-4 shrink-0" />
@@ -569,7 +563,7 @@ function AdminOrderDetailPage() {
                             <Layers className="h-3 w-3" /> Já está na Pilha do cliente
                           </p>
                         )}
-                        {isSelected && (
+                        {isSelected && canStack && (
                           <div className="mt-2 flex items-center gap-2">
                             <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
                               Qtd p/ Pilha
@@ -751,7 +745,7 @@ function AdminOrderDetailPage() {
           onClose={() => setCancelItem(null)}
           onDone={async () => {
             setCancelItem(null);
-            setSelectedForCancel(new Set());
+            setSelectedForStack({});
             await load();
           }}
         />
