@@ -517,25 +517,14 @@ function AdminOrderDetailPage() {
                   const isSelected = selectedQty != null;
                   return (
                     <li key={it.id} className="flex items-start gap-4 p-4">
-                      {canStack ? (
+                      {canStack || canCancel ? (
                         <input
                           type="checkbox"
+                          aria-label={`Selecionar ${it.card_name}`}
                           checked={isSelected}
                           onChange={(e) => toggleStackItem(it, e.target.checked)}
                           className="mt-2 h-4 w-4 shrink-0 cursor-pointer accent-primary"
-                          title="Selecionar para enviar à Pilha"
-                        />
-                      ) : (
-                        <div className="w-4 shrink-0" />
-                      )}
-                      {canCancel ? (
-                        <input
-                          type="checkbox"
-                          aria-label={`Selecionar ${it.card_name} para cancelamento`}
-                          checked={selectedForCancel.has(it.id)}
-                          onChange={(e) => setSelectedForCancel((prev) => { const n = new Set(prev); if (e.target.checked) n.add(it.id); else n.delete(it.id); return n; })}
-                          className="mt-2 h-4 w-4 shrink-0 cursor-pointer accent-destructive"
-                          title="Selecionar para cancelar"
+                          title="Selecionar item"
                         />
                       ) : (
                         <div className="w-4 shrink-0" />
