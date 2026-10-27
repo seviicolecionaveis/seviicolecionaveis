@@ -75,7 +75,6 @@ function AdminOrderDetailPage() {
   const [coupon, setCoupon] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [cancelItem, setCancelItem] = useState<any[] | null>(null);
-  const [selectedForCancel, setSelectedForCancel] = useState<Set<string>>(new Set());
   const [fullCancel, setFullCancel] = useState<"cancel" | "approve" | null>(null);
   const [stackedItemIds, setStackedItemIds] = useState<Set<string>>(new Set());
   const [selectedForStack, setSelectedForStack] = useState<Record<string, number>>({});
