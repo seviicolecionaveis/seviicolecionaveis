@@ -745,7 +745,7 @@ function AdminOrderDetailPage() {
           onClose={() => setCancelItem(null)}
           onDone={async () => {
             setCancelItem(null);
-            setSelectedForCancel(new Set());
+            setSelectedForStack({});
             await load();
           }}
         />
