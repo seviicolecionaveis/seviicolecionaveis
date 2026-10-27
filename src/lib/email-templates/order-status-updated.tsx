@@ -45,6 +45,7 @@ const REFUND_METHOD_LABEL: Record<string, string> = {
   mercadopago: 'estorno automático no Mercado Pago (cai em até 7 dias úteis)',
   coupon: 'cupom de desconto para uso futuro',
   manual: 'estorno manual (entraremos em contato)',
+  customer_choice: 'saldo Sevii ou forma original — você receberá um e-mail para escolher',
 }
 
 const STATUS_LABEL = ORDER_STATUS_LABELS;
