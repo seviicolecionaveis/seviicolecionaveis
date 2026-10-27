@@ -11,6 +11,7 @@ import {
   adminCancelOrder,
   adminUpdateOrderStatus,
   adminPartialCancelItem,
+  adminNotifyItemsCancelled,
 } from "@/utils/orders.functions";
 import { adminAddOrderItemsToStack } from "@/lib/admin-pilha.functions";
 import { ItemFacetFilter } from "@/components/admin/ItemFacetFilter";
@@ -73,7 +74,8 @@ function AdminOrderDetailPage() {
   const [order, setOrder] = useState<any>(null);
   const [coupon, setCoupon] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [cancelItem, setCancelItem] = useState<any | null>(null);
+  const [cancelItem, setCancelItem] = useState<any[] | null>(null);
+  const [selectedForCancel, setSelectedForCancel] = useState<Set<string>>(new Set());
   const [fullCancel, setFullCancel] = useState<"cancel" | "approve" | null>(null);
   const [stackedItemIds, setStackedItemIds] = useState<Set<string>>(new Set());
   const [selectedForStack, setSelectedForStack] = useState<Record<string, number>>({});
@@ -484,6 +486,17 @@ function AdminOrderDetailPage() {
                 )}
               </div>
 
+              {selectedForCancel.size > 0 && (
+                <div className="flex items-center justify-between gap-3 border-b border-border bg-destructive/5 px-4 py-2">
+                  <span className="text-xs font-semibold">{selectedForCancel.size} item(ns) selecionado(s) para cancelar</span>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="ghost" onClick={() => setSelectedForCancel(new Set())}>Limpar</Button>
+                    <Button size="sm" variant="destructive" onClick={() => setCancelItem(items.filter((x: any) => selectedForCancel.has(x.id)))}>
+                      <X className="h-3 w-3" /> Cancelar selecionados
+                    </Button>
+                  </div>
+                </div>
+              )}
               <ul className="divide-y divide-border">
                 {items.map((it) => {
                   const cancelledQty = it.cancelled_quantity ?? 0;
@@ -506,6 +519,18 @@ function AdminOrderDetailPage() {
                           onChange={(e) => toggleStackItem(it, e.target.checked)}
                           className="mt-2 h-4 w-4 shrink-0 cursor-pointer accent-primary"
                           title="Selecionar para enviar à Pilha"
+                        />
+                      ) : (
+                        <div className="w-4 shrink-0" />
+                      )}
+                      {canCancel ? (
+                        <input
+                          type="checkbox"
+                          aria-label={`Selecionar ${it.card_name} para cancelamento`}
+                          checked={selectedForCancel.has(it.id)}
+                          onChange={(e) => setSelectedForCancel((prev) => { const n = new Set(prev); if (e.target.checked) n.add(it.id); else n.delete(it.id); return n; })}
+                          className="mt-2 h-4 w-4 shrink-0 cursor-pointer accent-destructive"
+                          title="Selecionar para cancelar"
                         />
                       ) : (
                         <div className="w-4 shrink-0" />
@@ -570,7 +595,7 @@ function AdminOrderDetailPage() {
                         </div>
                         {canCancel && (
                           <button
-                            onClick={() => setCancelItem(it)}
+                            onClick={() => setCancelItem([it])}
                             className="text-[11px] text-destructive hover:underline font-semibold inline-flex items-center gap-1"
                             title="Cancelar este item (sem estoque, etc.)"
                           >
@@ -721,11 +746,12 @@ function AdminOrderDetailPage() {
 
       {cancelItem && (
         <PartialCancelDialog
-          item={cancelItem}
+          items={cancelItem}
           order={order}
           onClose={() => setCancelItem(null)}
           onDone={async () => {
             setCancelItem(null);
+            setSelectedForCancel(new Set());
             await load();
           }}
         />
@@ -772,38 +798,62 @@ function Row({ label, value, tone }: { label: string; value: string; tone?: "dis
   );
 }
 
-function PartialCancelDialog({ item, order, onClose, onDone }: {
-  item: any; order: any; onClose: () => void; onDone: () => void | Promise<void>;
+function PartialCancelDialog({ items, order, onClose, onDone }: {
+  items: any[]; order: any; onClose: () => void; onDone: () => void | Promise<void>;
 }) {
-  const remaining = (item.quantity ?? 0) - (item.cancelled_quantity ?? 0);
-  const [qty, setQty] = useState(1);
+  const remainingOf = (it: any) => (it.quantity ?? 0) - (it.cancelled_quantity ?? 0);
+  const [qtys, setQtys] = useState<Record<string, number>>(() => Object.fromEntries(items.map((it) => [it.id, items.length > 1 ? remainingOf(it) : 1])));
   const [method, setMethod] = useState<"mercadopago" | "coupon" | "manual" | "customer_choice">("customer_choice");
   const [notes, setNotes] = useState("");
   const [confirmed, setConfirmed] = useState(false);
-  const [operationKey, setOperationKey] = useState("");
+  const [keys] = useState<Record<string, string>>(() => Object.fromEntries(items.map((it) => [it.id, crypto.randomUUID()])));
+  const [batchKey] = useState(() => crypto.randomUUID());
+  const [done, setDone] = useState<Record<string, { refundCents: number; coupon: string | null }>>({});
   const [submitting, setSubmitting] = useState(false);
   const [attempted, setAttempted] = useState(false);
   const cancelFn = useServerFn(adminPartialCancelItem);
+  const notifyFn = useServerFn(adminNotifyItemsCancelled);
   const discount = order.discount_cents ?? 0;
   const ratio = Math.max(0, Math.min(1, 1 - discount / (order.subtotal_cents || 1)));
-  const refundPreview = Math.round((item.unit_price_cents ?? 0) * qty * ratio);
+  const previewOf = (it: any) => Math.round((it.unit_price_cents ?? 0) * (qtys[it.id] ?? 1) * ratio);
+  const refundPreview = items.reduce((s, it) => s + previewOf(it), 0);
+  const totalUnits = items.reduce((s, it) => s + (qtys[it.id] ?? 1), 0);
   const finance = method === "customer_choice";
+  const invalid = !confirmed || (finance && (notes.trim().length < 5 || items.some((it) => previewOf(it) <= 0)));
   const submit = async () => {
-    if (qty < 1 || qty > remaining || !confirmed || (finance && (notes.trim().length < 5 || refundPreview <= 0))) return;
-    const key = operationKey || crypto.randomUUID();
-    setOperationKey(key);
+    if (invalid) return;
     setAttempted(true);
     setSubmitting(true);
-    try {
-      const res = await cancelFn({ data: {
-        order_id: order.id, order_item_id: item.id, quantity: qty, refund_method: method,
-        notes: notes.trim() || null, operation_key: key, confirmed: true,
-      } });
-      toast.success(`Item cancelado. ${res.refundDetails}`, { duration: 6000 });
-      if (finance && res.refundSent === false) toast.warning("Cancelamento e solicitação registrados, mas o e-mail não foi enviado. Reenvie o convite em Reembolsos e saldo.", { duration: 9000 });
-      await onDone();
-    } catch (e: any) { toast.error(e?.message ?? "Erro ao cancelar item."); }
-    finally { setSubmitting(false); }
+    const results = { ...done };
+    let failed: string | null = null;
+    let emailWarn = false;
+    for (const it of items) {
+      if (results[it.id]) continue;
+      try {
+        const res = await cancelFn({ data: {
+          order_id: order.id, order_item_id: it.id, quantity: qtys[it.id] ?? 1, refund_method: method,
+          notes: notes.trim() || null, operation_key: keys[it.id], confirmed: true, skip_email: true,
+        } });
+        results[it.id] = { refundCents: res.refundCents ?? previewOf(it), coupon: res.couponCode ?? null };
+        if (finance && res.refundSent === false) emailWarn = true;
+      } catch (e: any) { failed = `${it.card_name}: ${e?.message ?? "erro ao cancelar"}`; break; }
+    }
+    setDone(results);
+    const ok = items.filter((it) => results[it.id]);
+    if (ok.length) {
+      try {
+        await notifyFn({ data: {
+          order_id: order.id, batch_key: batchKey, refund_method: method, notes: notes.trim() || null,
+          items: ok.map((it) => ({ order_item_id: it.id, quantity: qtys[it.id] ?? 1, refund_cents: results[it.id].refundCents })),
+          coupon_codes: ok.map((it) => results[it.id].coupon).filter(Boolean) as string[],
+        } });
+      } catch { toast.warning("Itens cancelados, mas o e-mail ao cliente não foi enviado."); }
+    }
+    setSubmitting(false);
+    if (emailWarn) toast.warning("Solicitação de reembolso registrada, mas o convite de escolha não foi enviado. Reenvie em Reembolsos e saldo.", { duration: 9000 });
+    if (failed) { toast.error(`${ok.length} de ${items.length} cancelado(s). Falhou em ${failed}. Tente de novo para concluir.`, { duration: 9000 }); return; }
+    toast.success(`${ok.length} item(ns) cancelado(s). Cliente avisado por e-mail.`, { duration: 6000 });
+    await onDone();
   };
   const options: { value: typeof method; label: string; disabled?: boolean }[] = [
     { value: "customer_choice", label: "Saldo Sevii ou forma original — escolha do cliente" },
@@ -813,10 +863,15 @@ function PartialCancelDialog({ item, order, onClose, onDone }: {
   ];
   return <Dialog open onOpenChange={open => { if (!open && !submitting) onClose(); }}>
     <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" onEscapeKeyDown={e => { if (submitting) e.preventDefault(); }} onPointerDownOutside={e => { if (submitting) e.preventDefault(); }}>
-      <DialogHeader><DialogTitle>Cancelar item parcialmente</DialogTitle><DialogDescription>{item.card_name}{item.card_number ? ` · ${item.card_number}` : ""}</DialogDescription></DialogHeader>
-      <label className="text-sm font-semibold">Quantidade a cancelar
-        <div className="flex items-center gap-3 mt-1"><input aria-label="Quantidade a cancelar" type="number" min={1} max={remaining} value={qty} disabled={attempted} onChange={e => setQty(Math.max(1, Math.min(remaining, parseInt(e.target.value) || 1)))} className="w-20 rounded-md border border-border bg-background px-3 py-1.5 text-sm"/><span className="text-xs text-muted-foreground">de {remaining} disponíveis</span></div>
-      </label>
+      <DialogHeader><DialogTitle>{items.length > 1 ? `Cancelar ${items.length} itens` : "Cancelar item parcialmente"}</DialogTitle><DialogDescription>{items.length === 1 ? `${items[0].card_name}${items[0].card_number ? ` · ${items[0].card_number}` : ""}` : "Ajuste a quantidade de cada item."}</DialogDescription></DialogHeader>
+      <ul className="space-y-2">
+        {items.map((it) => { const rem = remainingOf(it); return (
+          <li key={it.id} className="flex items-center gap-2 text-sm">
+            <span className="flex-1 min-w-0 truncate">{done[it.id] ? "✓ " : ""}{it.card_name}{it.card_number ? ` · ${it.card_number}` : ""}</span>
+            <input aria-label={`Quantidade a cancelar de ${it.card_name}`} type="number" min={1} max={rem} value={qtys[it.id] ?? 1} disabled={attempted} onChange={e => setQtys((p) => ({ ...p, [it.id]: Math.max(1, Math.min(rem, parseInt(e.target.value) || 1)) }))} className="w-16 rounded-md border border-border bg-background px-2 py-1 text-sm"/>
+            <span className="text-xs text-muted-foreground w-10">de {rem}</span>
+          </li>); })}
+      </ul>
       <fieldset className="space-y-2"><legend className="text-sm font-semibold mb-2">Forma de reembolso</legend>
         {options.map(o => <label key={o.value} className="flex items-start gap-2 text-sm"><input type="radio" name="refund" checked={method === o.value} disabled={attempted || o.disabled} onChange={() => setMethod(o.value)} className="mt-1"/><span>{o.label}</span></label>)}
       </fieldset>
@@ -826,8 +881,8 @@ function PartialCancelDialog({ item, order, onClose, onDone }: {
       </label>
       <div className="border-t border-border pt-3 text-sm flex justify-between"><span>Valor a reembolsar</span><strong className="tabular-nums">{fmtBRL(refundPreview)}</strong></div>
       {discount > 0 && <p className="text-xs text-muted-foreground">Desconto do pedido já considerado proporcionalmente.</p>}
-      <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={confirmed} disabled={submitting} onChange={e => setConfirmed(e.target.checked)} className="mt-1"/><span>Confirmo o cancelamento de {qty} unidade(s){finance ? " e a solicitação de reembolso" : ""}, sem devolver ao estoque.</span></label>
-      <div className="flex justify-end gap-2"><Button variant="outline" disabled={submitting} onClick={onClose}>Voltar</Button><Button variant="destructive" disabled={submitting || !confirmed || (finance && (notes.trim().length < 5 || refundPreview <= 0))} onClick={submit}>{submitting ? "Processando…" : "Confirmar cancelamento"}</Button></div>
+      <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={confirmed} disabled={submitting} onChange={e => setConfirmed(e.target.checked)} className="mt-1"/><span>Confirmo o cancelamento de {totalUnits} unidade(s){finance ? " e a solicitação de reembolso" : ""}, sem devolver ao estoque.</span></label>
+      <div className="flex justify-end gap-2"><Button variant="outline" disabled={submitting} onClick={onClose}>Voltar</Button><Button variant="destructive" disabled={submitting || invalid} onClick={submit}>{submitting ? "Processando…" : "Confirmar cancelamento"}</Button></div>
     </DialogContent>
   </Dialog>;
 }
