@@ -342,8 +342,8 @@ function OrderDetailPage() {
             Itens do pedido
           </h2>
           <ul className="space-y-4">
-            {order.order_items?.map((it: any) => (
-              <li key={it.id} className="flex gap-4">
+            {order.order_items?.map((it: any) => { const cq = it.cancelled_quantity ?? 0; const fully = cq > 0 && cq >= (it.quantity ?? 0); return (
+              <li key={it.id} className={`flex gap-4 ${fully ? "opacity-60" : ""}`}>
                 <div className="h-24 w-20 shrink-0 rounded-md overflow-hidden bg-secondary border border-border">
                   {it.card_image ? (
                     <img
@@ -379,12 +379,18 @@ function OrderDetailPage() {
                   <p className="text-sm mt-1">
                     {it.quantity}× <span className="tabular-nums">R$ {(it.unit_price_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
                   </p>
+                  {cq > 0 && (
+                    <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive">
+                      {fully ? "Item cancelado" : `${cq} de ${it.quantity} cancelado(s)`}
+                      {(it.refund_cents ?? 0) > 0 ? ` · reembolso R$ ${(it.refund_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : ""}
+                    </p>
+                  )}
                 </div>
                 <div className="text-sm font-semibold tabular-nums shrink-0">
-                  R$ {(it.unit_price_cents * it.quantity / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  <span className={fully ? "line-through" : ""}>R$ {(it.unit_price_cents * it.quantity / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
                 </div>
               </li>
-            ))}
+            ); })}
           </ul>
         </section>
 

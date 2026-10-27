@@ -5,10 +5,11 @@ import type { TemplateEntry } from './registry'
 import { EmailLayout, styles, SITE_URL } from './_shared'
 
 interface PartialCancellation {
+  items?: { name?: string; quantity?: number; refundCents?: number }[]
   itemName?: string
   quantity?: number
   refundCents?: number
-  refundMethod?: 'mercadopago' | 'coupon' | 'manual'
+  refundMethod?: 'mercadopago' | 'coupon' | 'manual' | 'customer_choice'
   couponCode?: string | null
   adminNote?: string | null
 }
@@ -44,6 +45,7 @@ const REFUND_METHOD_LABEL: Record<string, string> = {
   mercadopago: 'estorno automático no Mercado Pago (cai em até 7 dias úteis)',
   coupon: 'cupom de desconto para uso futuro',
   manual: 'estorno manual (entraremos em contato)',
+  customer_choice: 'saldo Sevii ou forma original — você receberá um e-mail para escolher',
 }
 
 const STATUS_LABEL = ORDER_STATUS_LABELS;
@@ -127,9 +129,15 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
           <Text style={{ ...styles.muted, margin: '0 0 6px', color: '#9a3412' }}>Cancelamento parcial</Text>
           <Text style={{ ...styles.text, margin: '0 0 8px' }}>
             Tivemos uma divergência de estoque e precisamos cancelar{' '}
-            <strong>{partialCancellation.quantity}× {partialCancellation.itemName}</strong>{' '}
+            {partialCancellation.items?.length ? 'os itens abaixo' : <strong>{partialCancellation.quantity}× {partialCancellation.itemName}</strong>}{' '}
             do seu pedido. O restante segue normalmente.
           </Text>
+          {(partialCancellation.items ?? []).map((it, i) => (
+            <Text key={i} style={{ ...styles.text, margin: '0 0 4px' }}>
+              • <strong>{it.quantity}× {it.name}</strong>
+              {typeof it.refundCents === 'number' && it.refundCents > 0 ? ` — ${fmtBRL(it.refundCents)}` : ''}
+            </Text>
+          ))}
           {typeof partialCancellation.refundCents === 'number' && (
             <Text style={{ ...styles.text, margin: '0 0 6px' }}>
               Valor a reembolsar: <strong>{fmtBRL(partialCancellation.refundCents)}</strong>

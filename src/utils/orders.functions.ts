@@ -228,6 +228,62 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
     return { ok: true, refundCents: refund.refundCents, couponCode: refund.couponCode, refundDetails: refund.details, refundError };
   });
 
+/** Envia ao cliente UM e-mail com a lista de itens cancelados (cancelamento único ou em lote). */
+export const adminNotifyItemsCancelled = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z.object({
+      order_id: z.string().uuid(),
+      batch_key: z.string().uuid(),
+      refund_method: z.enum(["mercadopago", "coupon", "manual", "customer_choice"]),
+      notes: z.string().trim().max(500).optional().nullable(),
+      items: z.array(z.object({
+        order_item_id: z.string().uuid(),
+        quantity: z.number().int().min(1).max(999),
+        refund_cents: z.number().int().min(0),
+      })).min(1).max(200),
+      coupon_codes: z.array(z.string().max(64)).max(200).optional(),
+    }).parse(d),
+  )
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context, data }) => {
+    const { isAdmin } = await import("@/lib/order-cancellation.server");
+    if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
+    const { data: order } = await supabaseAdmin.from("orders")
+      .select("id, status, email, recipient_name").eq("id", data.order_id).maybeSingle();
+    if (!order) throw new Response("Pedido não encontrado", { status: 404 });
+    if (!order.email) return { sent: false };
+    const { data: rows } = await supabaseAdmin.from("order_items")
+      .select("id, card_name, card_number, order_id").eq("order_id", order.id)
+      .in("id", data.items.map((i) => i.order_item_id));
+    const byId = new Map((rows ?? []).map((r) => [r.id, r]));
+    const items = data.items.filter((i) => byId.has(i.order_item_id)).map((i) => {
+      const r = byId.get(i.order_item_id)!;
+      return { name: r.card_number ? `${r.card_name} ${r.card_number}` : r.card_name, quantity: i.quantity, refundCents: i.refund_cents };
+    });
+    if (!items.length) return { sent: false };
+    const coupons = (data.coupon_codes ?? []).filter(Boolean);
+    await sendTransactionalEmailSafe({
+      templateName: "order-status-updated",
+      recipientEmail: order.email,
+      idempotencyKey: `order-items-cancel-${data.batch_key}`,
+      templateData: {
+        recipientName: order.recipient_name?.split(/\s+/)[0],
+        orderId: order.id,
+        status: order.status,
+        partialCancellation: {
+          items,
+          refundCents: items.reduce((s, i) => s + i.refundCents, 0),
+          refundMethod: data.refund_method,
+          couponCode: coupons.length ? coupons.join(", ") : null,
+          adminNote: data.notes ?? null,
+        },
+      },
+    });
+    return { sent: true };
+  });
+
 export const adminPartialCancelItem = createServerFn({ method: "POST" })
   .inputValidator((d) =>
     z.object({
@@ -238,6 +294,7 @@ export const adminPartialCancelItem = createServerFn({ method: "POST" })
       notes: z.string().trim().max(500).optional().nullable(),
       operation_key: z.string().uuid().optional(),
       confirmed: z.boolean().optional(),
+      skip_email: z.boolean().optional(),
     }).superRefine((value, ctx) => {
       if (value.refund_method === "customer_choice" && (!value.operation_key || !value.confirmed || (value.notes?.length ?? 0) < 5)) {
         ctx.addIssue({ code: 'custom', message: 'Informe a justificativa e confirme o cancelamento e a solicitação de reembolso.' });
@@ -386,7 +443,7 @@ export const adminPartialCancelItem = createServerFn({ method: "POST" })
       .eq("id", order.id);
 
     // Notifica o cliente
-    if (order.email) {
+    if (order.email && !data.skip_email) {
       await sendTransactionalEmailSafe({
         templateName: "order-status-updated",
         recipientEmail: order.email,
