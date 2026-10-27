@@ -437,15 +437,32 @@ function AdminOrderDetailPage() {
                 </h2>
                 <div className="flex items-center gap-3">
                   <PickingSummary items={items} />
-                  {stackEligible && selectedCount > 0 && (
-                    <button
-                      onClick={sendSelectedToStack}
-                      disabled={sendingToStack}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50"
-                    >
-                      <Layers className="h-3.5 w-3.5" />
-                      {sendingToStack ? "Enviando..." : `Enviar ${selectedCount} para Pilha`}
-                    </button>
+                  {selectedCount > 0 && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setSelectedForStack({})}
+                        className="text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:underline"
+                      >
+                        Limpar
+                      </button>
+                      {stackEligible && (
+                        <button
+                          onClick={sendSelectedToStack}
+                          disabled={sendingToStack}
+                          className="inline-flex items-center gap-1.5 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50"
+                        >
+                          <Layers className="h-3.5 w-3.5" />
+                          {sendingToStack ? "Enviando..." : `Enviar ${selectedCount} para Pilha`}
+                        </button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => setCancelItem(items.filter((x: any) => selectedForStack[x.id] != null))}
+                      >
+                        <X className="h-3 w-3" /> Cancelar selecionados
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
