@@ -563,7 +563,7 @@ function AdminOrderDetailPage() {
                             <Layers className="h-3 w-3" /> Já está na Pilha do cliente
                           </p>
                         )}
-                        {isSelected && (
+                        {isSelected && canStack && (
                           <div className="mt-2 flex items-center gap-2">
                             <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
                               Qtd p/ Pilha
