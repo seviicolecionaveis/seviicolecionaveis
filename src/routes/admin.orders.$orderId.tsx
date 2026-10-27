@@ -502,17 +502,6 @@ function AdminOrderDetailPage() {
                 )}
               </div>
 
-              {selectedForCancel.size > 0 && (
-                <div className="flex items-center justify-between gap-3 border-b border-border bg-destructive/5 px-4 py-2">
-                  <span className="text-xs font-semibold">{selectedForCancel.size} item(ns) selecionado(s) para cancelar</span>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="ghost" onClick={() => setSelectedForCancel(new Set())}>Limpar</Button>
-                    <Button size="sm" variant="destructive" onClick={() => setCancelItem(items.filter((x: any) => selectedForCancel.has(x.id)))}>
-                      <X className="h-3 w-3" /> Cancelar selecionados
-                    </Button>
-                  </div>
-                </div>
-              )}
               <ul className="divide-y divide-border">
                 {items.map((it) => {
                   const cancelledQty = it.cancelled_quantity ?? 0;
