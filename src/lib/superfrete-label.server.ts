@@ -2,6 +2,7 @@
 // Fluxo: POST /api/v0/cart (adiciona ao carrinho) -> POST /api/v0/checkout (compra)
 // Docs: https://docs.superfrete.com
 
+import { superfreteInsuranceValue } from "@/lib/superfrete-label";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const BASE = "https://api.superfrete.com";
@@ -122,6 +123,9 @@ export async function purchaseShippingLabel(orderId: string): Promise<void> {
   const totalQty = products.reduce((s, p) => s + p.quantity, 0);
   const weightKg = Math.max(0.3, 0.05 + totalQty * 0.005);
 
+  // Valor segurado: total do pedido, no mínimo R$ 25,63 (limite do provedor).
+  const insuranceValue = superfreteInsuranceValue(totalValue);
+
   const cartBody = {
     from: SENDER,
     to: {
@@ -147,7 +151,7 @@ export async function purchaseShippingLabel(orderId: string): Promise<void> {
       },
     ],
     options: {
-      insurance_value: totalValue,
+      insurance_value: insuranceValue,
       receipt: false,
       own_hand: false,
       reverse: false,
