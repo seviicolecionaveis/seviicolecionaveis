@@ -152,7 +152,7 @@ export async function purchaseShippingLabel(orderId: string): Promise<void> {
       },
     ],
     options: {
-      insurance_value: totalValue,
+      insurance_value: insuranceValue,
       receipt: false,
       own_hand: false,
       reverse: false,
