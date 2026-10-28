@@ -122,6 +122,11 @@ export async function purchaseShippingLabel(orderId: string): Promise<void> {
   const totalQty = products.reduce((s, p) => s + p.quantity, 0);
   const weightKg = Math.max(0.3, 0.05 + totalQty * 0.005);
 
+  // A Superfrete exige valor segurado mínimo de R$ 25,63; pedidos mais
+  // baratos (ex.: 1-2 cartas baratas) seriam rejeitados com 500.
+  const MIN_INSURANCE_VALUE = 25.63;
+  const insuranceValue = Math.max(totalValue, MIN_INSURANCE_VALUE);
+
   const cartBody = {
     from: SENDER,
     to: {
