@@ -183,6 +183,13 @@
       "when": 1793034687127,
       "tag": "0025_admin_merge_customer_accounts_fix_profile_copy",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793296265284,
+      "tag": "0026_auction_order_account_sync",
+      "breakpoints": true
     }
   ]
 }
