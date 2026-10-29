@@ -1606,7 +1606,8 @@ function CardScreen({
               if (!cancelled) setErr(error?.message ?? "Erro no formulário de cartão");
             },
             onSubmit: async (cardFormData: any) => {
-              if (!session?.access_token) {
+              const { data: { session: liveSession } } = await supabase.auth.getSession();
+              if (!liveSession?.access_token) {
                 setErr("Sessão expirada. Faça login novamente.");
                 return;
               }
@@ -1614,7 +1615,7 @@ function CardScreen({
               setErr(null);
               try {
                 const result = await createCardOrder({
-                  headers: { Authorization: `Bearer ${session.access_token}` },
+                  headers: { Authorization: `Bearer ${liveSession.access_token}` },
                   data: {
                     items: card.itemsPayload,
                     shippingMethod: card.shipping,
@@ -1688,7 +1689,9 @@ function CardScreen({
         brickControllerRef.current?.unmount?.();
       } catch {}
     };
-  }, [card, session, onSuccess]);
+    // Recria o formulário só quando o carrinho muda — não a cada renovação de sessão
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [card, session?.user?.id]);
 
   const total = (card.totalCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 

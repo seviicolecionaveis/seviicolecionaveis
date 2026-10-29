@@ -448,7 +448,9 @@ function CardBrick({ orderId, totalCents, storeCreditCents, onPaid }: { orderId:
       controllerRef.current?.unmount?.();
       controllerRef.current = null;
     };
-  }, [orderId, totalCents, storeCreditCents, user]);
+    // Recria o formulário só quando o pedido/valor/conta mudam — não a cada renovação de sessão
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId, totalCents, storeCreditCents, user?.id]);
 
   return (
     <div className="space-y-3">
