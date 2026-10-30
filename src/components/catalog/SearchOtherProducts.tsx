@@ -185,7 +185,7 @@ export function SearchOtherProducts({ query }: Props) {
                     ? vs.map((v) => v.price_cents ?? a.price_cents)
                     : [a.price_cents];
                   const minPrice = Math.min(...prices);
-                  const out = !a.is_preorder_or_variant && vs.every((v) => v.stock <= 0) && (a.stock ?? 0) <= 0;
+                  const out = vs.every((v) => (v.stock ?? 0) <= 0) && (a.stock ?? 0) <= 0;
                   return (
                     <button key={a.id} onClick={() => setActiveAccessory(a)} className="group text-left">
                       <div className="relative aspect-square overflow-hidden rounded-lg bg-secondary">
