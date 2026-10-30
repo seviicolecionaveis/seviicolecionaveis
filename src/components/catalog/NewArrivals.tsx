@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useCardsCatalog, cardCreatedAt } from "@/hooks/useCardsCatalog";
+import { useRecentProducts } from "@/hooks/useRecentProducts";
 import { CardItem } from "./CardItem";
 import { CardModal } from "./CardModal";
+import { OtherProductTile } from "./OtherProductTile";
 import { SealedModal, type Sealed } from "./SealedModal";
-import { supabase } from "@/integrations/supabase/client";
+import { PanelModal, type Panel } from "./PanelModal";
+import { AccessoryModal, type Accessory } from "./AccessoryModal";
 import type { Card } from "@/data/cards";
 
 interface Props {
@@ -17,32 +20,21 @@ interface Props {
 
 type Entry =
   | { kind: "card"; t: number; card: Card }
-  | { kind: "sealed"; t: number; sealed: Sealed };
+  | { kind: "panel"; t: number; panel: Panel }
+  | { kind: "sealed"; t: number; sealed: Sealed }
+  | { kind: "accessory"; t: number; accessory: Accessory };
 
 export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
   const { cards } = useCardsCatalog();
+  const { entries: productEntries } = useRecentProducts(windowDays);
   const [activeCard, setActiveCard] = useState<Card | null>(null);
+  const [activePanel, setActivePanel] = useState<Panel | null>(null);
   const [activeSealed, setActiveSealed] = useState<Sealed | null>(null);
-  const [sealed, setSealed] = useState<Array<Sealed & { created_at: string }>>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const cutoff = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
-      const { data } = await supabase
-        .from("sealed_products")
-        .select("id, title, description, price_cents, stock, images, is_preorder, release_date, product_type, collection, language, distribution, condition, age_rating, sku, created_at")
-        .eq("active", true)
-        .gte("created_at", cutoff)
-        .order("created_at", { ascending: false });
-      if (!cancelled) setSealed((data ?? []) as Array<Sealed & { created_at: string }>);
-    })();
-    return () => { cancelled = true; };
-  }, [windowDays]);
+  const [activeAccessory, setActiveAccessory] = useState<Accessory | null>(null);
 
   const items = useMemo<Entry[]>(() => {
     const cutoff = Date.now() - windowDays * 24 * 60 * 60 * 1000;
-    const cardEntries = cards
+    const cardEntries: Entry[] = cards
       .map((c): Entry | null => {
         const ts = cardCreatedAt.get(c.id);
         if (!ts) return null;
@@ -51,13 +43,10 @@ export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
         return { kind: "card", t, card: c };
       })
       .filter((x): x is Entry => x !== null);
-    const sealedEntries: Entry[] = sealed
-      .filter((s) => (s.stock > 0 || s.is_preorder))
-      .map((s) => ({ kind: "sealed", t: new Date(s.created_at).getTime(), sealed: s }));
-    const all = [...cardEntries, ...sealedEntries];
+    const all = [...cardEntries, ...productEntries];
     all.sort((a, b) => b.t - a.t);
     return all.slice(0, limit);
-  }, [cards, sealed, windowDays, limit]);
+  }, [cards, productEntries, windowDays, limit]);
 
   if (items.length < 4) return null;
 
@@ -84,37 +73,15 @@ export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
                 onClick={() => setActiveCard(entry.card)}
               />
             ) : (
-              <button
-                key={`s-${entry.sealed.id}`}
-                onClick={() => setActiveSealed(entry.sealed)}
-                className="group text-left"
-              >
-                <div className="relative aspect-square overflow-hidden rounded-lg bg-secondary">
-                  {entry.sealed.images[0] ? (
-                    <img
-                      src={entry.sealed.images[0]}
-                      alt={entry.sealed.title}
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">
-                      Sem imagem
-                    </div>
-                  )}
-                  <span className="absolute left-2 top-2 rounded bg-brand-gold px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-background shadow">
-                    Lacrado
-                  </span>
-                  {entry.sealed.is_preorder && (
-                    <span className="absolute right-2 top-2 rounded bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow">
-                      Pré-venda
-                    </span>
-                  )}
-                </div>
-                <p className="mt-2 text-sm font-semibold line-clamp-2">{entry.sealed.title}</p>
-                <p className="text-sm text-muted-foreground">
-                  R$ {(entry.sealed.price_cents / 100).toFixed(2).replace(".", ",")}
-                </p>
-              </button>
+              <OtherProductTile
+                key={`${entry.kind}-${entry.kind === "panel" ? entry.panel.id : entry.kind === "sealed" ? entry.sealed.id : entry.accessory.id}`}
+                entry={entry}
+                onClick={() => {
+                  if (entry.kind === "panel") setActivePanel(entry.panel);
+                  else if (entry.kind === "sealed") setActiveSealed(entry.sealed);
+                  else setActiveAccessory(entry.accessory);
+                }}
+              />
             )
           )}
         </div>
@@ -132,7 +99,9 @@ export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
         </div>
       </div>
       <CardModal card={activeCard} onClose={() => setActiveCard(null)} />
+      <PanelModal panel={activePanel} onClose={() => setActivePanel(null)} />
       <SealedModal item={activeSealed} onClose={() => setActiveSealed(null)} />
+      <AccessoryModal item={activeAccessory} onClose={() => setActiveAccessory(null)} />
     </section>
   );
 }

@@ -2434,6 +2434,42 @@ export type Database = {
         }
         Relationships: []
       }
+      product_stock_changes: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          delta: number
+          id: number
+          new_stock: number
+          previous_stock: number
+          product_id: string
+          product_table: string
+          title: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          delta: number
+          id?: never
+          new_stock?: number
+          previous_stock?: number
+          product_id: string
+          product_table: string
+          title: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          delta?: number
+          id?: never
+          new_stock?: number
+          previous_stock?: number
+          product_id?: string
+          product_table?: string
+          title?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           birth_date: string | null
@@ -3279,6 +3315,14 @@ export type Database = {
         Returns: {
           orders_processed: number
           points_credited: number
+        }[]
+      }
+      catalog_last_product_additions: {
+        Args: never
+        Returns: {
+          last_added_at: string
+          product_id: string
+          product_table: string
         }[]
       }
       catalog_last_stock_additions: {

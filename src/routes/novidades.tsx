@@ -1,19 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CatalogView } from "@/components/CatalogView";
+import { RecentOtherProducts } from "@/components/catalog/RecentOtherProducts";
 
 export const Route = createFileRoute("/novidades")({
   head: () => ({
     meta: [
-      { title: "Novidades — Cartas recém-chegadas | Sevii Colecionáveis" },
+      { title: "Novidades — Adicionados recentemente | Sevii Colecionáveis" },
       {
         name: "description",
         content:
-          "Veja as cartas Pokémon adicionadas e reabastecidas mais recentemente no estoque da Sevii Colecionáveis.",
+          "Veja as cartas, painéis, produtos lacrados e acessórios adicionados e reabastecidos mais recentemente no estoque da Sevii Colecionáveis.",
       },
-      { property: "og:title", content: "Novidades — Cartas recém-chegadas | Sevii Colecionáveis" },
+      { property: "og:title", content: "Novidades — Adicionados recentemente | Sevii Colecionáveis" },
       {
         property: "og:description",
-        content: "Cartas Pokémon que acabaram de chegar ou foram reabastecidas no estoque.",
+        content: "Cartas, painéis, produtos lacrados e acessórios que acabaram de chegar ou foram reabastecidos no estoque.",
       },
       { property: "og:url", content: "https://seviicolecionaveis.com.br/novidades" },
       { property: "og:type", content: "website" },
@@ -25,11 +26,14 @@ export const Route = createFileRoute("/novidades")({
 
 function NovidadesPage() {
   return (
-    <CatalogView
-      heading="Novidades — Cartas adicionadas e reabastecidas recentemente"
-      showBanners={false}
-      initialSort="newest"
-      recentOnlyDays={30}
-    />
+    <>
+      <CatalogView
+        heading="Novidades — Cartas adicionadas e reabastecidas recentemente"
+        showBanners={false}
+        initialSort="newest"
+        recentOnlyDays={30}
+      />
+      <RecentOtherProducts windowDays={30} limit={24} />
+    </>
   );
 }
