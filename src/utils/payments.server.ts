@@ -1428,12 +1428,15 @@ export async function payExistingOrderWithCardServer(
 ) {
   const { data: order, error } = await supabaseAdmin
     .from("orders")
-    .select("id, user_id, status, total_cents, email, recipient_name, cpf")
+    .select("id, user_id, status, total_cents, email, recipient_name, cpf, origin, auction_id")
     .eq("id", orderId)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!order || !(await canPayOrder(order.user_id, userId))) throw new Error("Pedido não encontrado");
   if (order.status !== "pending") throw new Error("Este pedido não está mais pendente.");
+  if (!cardPaymentAllowedForOrder(order.origin, order.auction_id)) {
+    throw new Error(AUCTION_CARD_DISABLED_MESSAGE);
+  }
 
   const creditAttempt = await prepareExistingCreditPayment(order.id, order.user_id, userId, options.storeCreditCents ?? 0);
   const providerDueCents = creditAttempt?.provider_cents ?? order.total_cents;
