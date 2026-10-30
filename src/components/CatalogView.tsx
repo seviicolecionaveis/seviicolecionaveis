@@ -14,6 +14,7 @@ import { BannerCarousel } from "@/components/BannerCarousel";
 import { TrustBadges } from "@/components/TrustBadges";
 import { SiteFooter } from "@/components/SiteFooter";
 import { RecentlyViewed } from "@/components/catalog/RecentlyViewed";
+import { SearchOtherProducts } from "@/components/catalog/SearchOtherProducts";
 import { NewArrivals } from "@/components/catalog/NewArrivals";
 import { SiteNav } from "@/components/SiteNav";
 import logoUrl from "@/assets/logo.webp";
@@ -301,6 +302,8 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
               </select>
             </div>
           </div>
+
+          {query.trim() !== "" && <SearchOtherProducts query={query} />}
 
           {cardsLoading && filtered.length === 0 ? (
             <div className="grid place-items-center py-16 text-sm text-muted-foreground">
