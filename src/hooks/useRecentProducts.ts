@@ -18,6 +18,7 @@ interface Raw {
   panels: PanelWithCreated[];
   sealed: SealedWithCreated[];
   accessories: AccessoryWithCreated[];
+  lastAdded: Map<string, string>;
 }
 
 let cache: Raw | null = null;
@@ -55,6 +56,7 @@ async function loadRaw(): Promise<Raw> {
     panels: (p.data ?? []) as PanelWithCreated[],
     sealed: (s.data ?? []) as SealedWithCreated[],
     accessories: (a.data ?? []) as AccessoryWithCreated[],
+    lastAdded,
   };
 }
 
@@ -104,12 +106,11 @@ export function useRecentProducts(windowDays: number) {
     const out: OtherProductEntry[] = [];
 
     const activity = (created: string, key: string) => {
-      const added = lastAddedRaw.get(key);
+      const added = raw.lastAdded.get(key);
       const t1 = created ? new Date(created).getTime() : 0;
       const t2 = added ? new Date(added).getTime() : 0;
       return Math.max(t1, t2);
     };
-    const lastAddedRaw = collectLastAdded(raw);
 
     for (const panel of raw.panels) {
       if (panel.stock <= 0) continue;
