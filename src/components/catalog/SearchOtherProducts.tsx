@@ -80,7 +80,7 @@ export function SearchOtherProducts({ query }: Props) {
     ].filter((g) => g.items.length > 0);
   }, [q, panels, sealed, accessories]);
 
-  if (!q || groups.length === 0) return null;
+  if (!q || groups.length === 0) return <p data-testid="dbg">{`DBG q=${q} p=${panels.length} s=${sealed.length} a=${accessories.length} g=${groups.length}`}</p>;
 
   return (
     <div className="mb-10 rounded-xl border border-border p-4 sm:p-6">
