@@ -1,6 +1,7 @@
 import { reserveStoreCredit, attachCreditProvider, prepareExistingCreditPayment } from '@/lib/customer-finance.server';
 import { resolvePaymentCpf } from "@/lib/customer-payment";
 import { assertAuctionPaymentLink } from "@/lib/auction-payment-links.server";
+import { AUCTION_CARD_DISABLED_MESSAGE, cardPaymentAllowedForOrder } from "@/lib/auction-payment-methods";
 import { isPaidOrderStatus } from "@/lib/order-status";
 import { localParts, validateSchedule } from "@/lib/scheduling";
 import { type StripeEnv, createStripeClient } from "@/lib/stripe.server";
