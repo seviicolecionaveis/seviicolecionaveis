@@ -14,6 +14,7 @@ import { BannerCarousel } from "@/components/BannerCarousel";
 import { TrustBadges } from "@/components/TrustBadges";
 import { SiteFooter } from "@/components/SiteFooter";
 import { RecentlyViewed } from "@/components/catalog/RecentlyViewed";
+import { SearchOtherProducts } from "@/components/catalog/SearchOtherProducts";
 import { NewArrivals } from "@/components/catalog/NewArrivals";
 import { SiteNav } from "@/components/SiteNav";
 import logoUrl from "@/assets/logo.webp";
