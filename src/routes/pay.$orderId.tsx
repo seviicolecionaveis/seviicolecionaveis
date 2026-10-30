@@ -33,6 +33,8 @@ export const Route = createFileRoute("/pay/$orderId")({
   component: PayOrderPage,
 });
 
+import { auctionOrder } from "@/lib/auction-payment-methods";
+
 type Method = "pix" | "card";
 
 interface PixState {
@@ -102,7 +104,7 @@ function PayOrderPage() {
       try { await (supabase as any).rpc("claim_my_whatsapp_orders"); } catch {}
       const { data } = await supabase
         .from("orders")
-        .select("id, status, total_cents, store_credit_cents, payment_method, pix_qr_code, pix_qr_code_base64, pix_expires_at, mercadopago_payment_id, recipient_name")
+        .select("id, status, total_cents, store_credit_cents, payment_method, pix_qr_code, pix_qr_code_base64, pix_expires_at, mercadopago_payment_id, recipient_name, origin, auction_id")
         .eq("id", orderId)
         .maybeSingle();
       setOrder(data);
@@ -119,7 +121,7 @@ function PayOrderPage() {
           });
           setMethod("pix");
         }
-      } else if (data?.payment_method === "mercadopago_card") {
+      } else if (data?.payment_method === "mercadopago_card" && !auctionOrder(data.origin, data.auction_id)) {
         setMethod("card");
       }
     })();
@@ -181,6 +183,7 @@ function PayOrderPage() {
     );
   }
 
+  const isAuction = paymentToken ? true : auctionOrder(order.origin, order.auction_id);
   const total = (order.total_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 
   return (
@@ -213,13 +216,15 @@ function PayOrderPage() {
                 <p className="text-xs text-muted-foreground">Aprovação instantânea — QR Code e copia e cola.</p>
               </div>
             </label>
-            <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
-              <input type="radio" name="pm" checked={method === "card"} onChange={() => setMethod("card")} className="mt-1" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold flex items-center gap-2"><CreditCard className="h-4 w-4" /> Cartão de crédito</p>
-                <p className="text-xs text-muted-foreground">Até 12x via Mercado Pago.</p>
-              </div>
-            </label>
+            {!isAuction && (
+              <label className="flex items-start gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-secondary/50">
+                <input type="radio" name="pm" checked={method === "card"} onChange={() => setMethod("card")} className="mt-1" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold flex items-center gap-2"><CreditCard className="h-4 w-4" /> Cartão de crédito</p>
+                  <p className="text-xs text-muted-foreground">Até 12x via Mercado Pago.</p>
+                </div>
+              </label>
+            )}
           </div>
 
           <div className="mt-4 flex gap-2">
