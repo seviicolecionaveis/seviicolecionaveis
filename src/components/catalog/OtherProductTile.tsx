@@ -1,8 +1,15 @@
-import type { OtherProductEntry } from "@/hooks/useRecentProducts";
+import type { Sealed } from "./SealedModal";
+import type { Panel } from "./PanelModal";
+import type { Accessory } from "./AccessoryModal";
 import { parseVariants } from "@/lib/accessory-variants";
 
+export type OtherProductTileEntry =
+  | { kind: "panel"; panel: Panel }
+  | { kind: "sealed"; sealed: Sealed }
+  | { kind: "accessory"; accessory: Accessory };
+
 interface Props {
-  entry: OtherProductEntry;
+  entry: OtherProductTileEntry;
   onClick: () => void;
 }
 

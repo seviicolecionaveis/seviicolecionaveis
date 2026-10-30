@@ -20,7 +20,7 @@ interface Props {
 
 type Entry =
   | { kind: "card"; t: number; card: Card }
-  | { kind: "panel"; t: number; panel: Parameters<typeof PanelModal>[0]["panel"] & object }
+  | { kind: "panel"; t: number; panel: Panel }
   | { kind: "sealed"; t: number; sealed: Sealed }
   | { kind: "accessory"; t: number; accessory: Accessory };
 
