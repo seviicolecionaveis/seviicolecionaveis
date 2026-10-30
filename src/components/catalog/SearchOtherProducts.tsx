@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { SealedModal, type Sealed } from "./SealedModal";
@@ -21,15 +21,14 @@ export function SearchOtherProducts({ query }: Props) {
   const [panels, setPanels] = useState<Panel[]>([]);
   const [sealed, setSealed] = useState<Sealed[]>([]);
   const [accessories, setAccessories] = useState<Accessory[]>([]);
-  const [loaded, setLoaded] = useState(false);
   const [activePanel, setActivePanel] = useState<Panel | null>(null);
   const [activeSealed, setActiveSealed] = useState<Sealed | null>(null);
   const [activeAccessory, setActiveAccessory] = useState<Accessory | null>(null);
+  const startedRef = useRef(false);
 
   useEffect(() => {
-    if (!q || loaded) return;
-    let cancelled = false;
-    setLoaded(true);
+    if (!q || startedRef.current) return;
+    startedRef.current = true;
     (async () => {
       const [p, s, a] = await Promise.all([
         supabase
@@ -51,15 +50,11 @@ export function SearchOtherProducts({ query }: Props) {
           .order("sort_order", { ascending: true })
           .order("created_at", { ascending: false }),
       ]);
-      if (cancelled) return;
       setPanels((p.data ?? []) as Panel[]);
       setSealed((s.data ?? []) as Sealed[]);
       setAccessories((a.data ?? []) as Accessory[]);
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, [q, loaded]);
+  }, [q]);
 
   const groups = useMemo(() => {
     if (!q) return [];
