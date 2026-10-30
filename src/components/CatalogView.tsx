@@ -303,6 +303,8 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
             </div>
           </div>
 
+          {query.trim() !== "" && <SearchOtherProducts query={query} />}
+
           {cardsLoading && filtered.length === 0 ? (
             <div className="grid place-items-center py-16 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
