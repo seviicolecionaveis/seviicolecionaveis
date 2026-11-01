@@ -18,6 +18,7 @@ export const Route = createFileRoute("/novidades")({
       },
       { property: "og:url", content: "https://seviicolecionaveis.com.br/novidades" },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "https://seviicolecionaveis.com.br/novidades" }],
   }),
@@ -26,14 +27,12 @@ export const Route = createFileRoute("/novidades")({
 
 function NovidadesPage() {
   return (
-    <>
-      <CatalogView
+    <CatalogView
         heading="Novidades — Cartas adicionadas e reabastecidas recentemente"
         showBanners={false}
         initialSort="newest"
         recentOnlyDays={30}
+        beforeCatalog={<RecentOtherProducts windowDays={30} limit={24} />}
       />
-      <RecentOtherProducts windowDays={30} limit={24} />
-    </>
   );
 }

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { type Card } from "@/data/cards";
 import { useCardsCatalog, cardCreatedAt, cardLastActivity } from "@/hooks/useCardsCatalog";
@@ -49,9 +49,10 @@ interface Props {
   initialSort?: Sort;
   /** Quando definido, mostra apenas cartas adicionadas ou reabastecidas nos últimos N dias. */
   recentOnlyDays?: number;
+  beforeCatalog?: ReactNode;
 }
 
-export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii Colecionáveis", showBanners = true, initialSort, recentOnlyDays }: Props) {
+export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii Colecionáveis", showBanners = true, initialSort, recentOnlyDays, beforeCatalog }: Props) {
   const { cards: CARDS, loading: cardsLoading } = useCardsCatalog();
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [query, setQuery] = useState("");
@@ -247,6 +248,8 @@ export function CatalogView({ heading = "Catálogo de Cartas Pokémon — Sevii 
       {showBanners && query.trim() === "" && <NewArrivals />}
 
       <h1 className="sr-only">{heading}</h1>
+
+      {beforeCatalog}
 
       <main className="mx-auto max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:flex">
         <aside className="hidden lg:block w-64 shrink-0">
