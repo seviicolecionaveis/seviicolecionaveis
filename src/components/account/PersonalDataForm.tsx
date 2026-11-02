@@ -63,7 +63,7 @@ export function PersonalDataForm() {
       })
       .eq("user_id", user.id);
     setSaving(false);
-    if (error) toast.error("Erro ao salvar");
+    if (error) toast.error(error.message?.includes("CPF") ? error.message : "Erro ao salvar");
     else toast.success("Dados atualizados");
   };
 
