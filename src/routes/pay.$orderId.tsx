@@ -197,7 +197,7 @@ function PayOrderPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-xl px-4 py-8 space-y-6">
+      <main className="mx-auto max-w-xl px-4 py-8 pb-32 sm:pb-8 space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Concluir pagamento</h1>
           <p className="text-sm text-muted-foreground mt-1">

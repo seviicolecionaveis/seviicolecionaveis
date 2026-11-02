@@ -1430,7 +1430,7 @@ function PixScreen({ pix }: { pix: PixState }) {
           <Link to="/" className="text-sm font-bold uppercase tracking-widest">Sevii Colecionáveis</Link>
         </div>
       </header>
-      <main className="mx-auto max-w-xl px-4 py-8 space-y-6">
+      <main className="mx-auto max-w-xl px-4 py-8 pb-32 sm:pb-8 space-y-6">
         <div className="text-center">
           <QrCode className="h-8 w-8 mx-auto mb-2" />
           <h1 className="text-2xl font-bold">Pague com Pix</h1>
