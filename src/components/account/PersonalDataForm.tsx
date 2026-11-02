@@ -63,7 +63,7 @@ export function PersonalDataForm() {
       })
       .eq("user_id", user.id);
     setSaving(false);
-    if (error) toast.error("Erro ao salvar");
+    if (error) toast.error(error.message?.includes("CPF") ? error.message : "Erro ao salvar");
     else toast.success("Dados atualizados");
   };
 
@@ -107,7 +107,7 @@ export function PersonalDataForm() {
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wide mb-1">WhatsApp</label>
+            <label className="block text-xs font-medium uppercase tracking-wide mb-1">Telefone / WhatsApp</label>
             <input
               value={whatsapp}
               onChange={(e) => setWhatsapp(maskWhatsapp(e.target.value))}

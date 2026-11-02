@@ -68,8 +68,8 @@ function AdminClienteDetail() {
       setForm({
         fullName: d.full_name ?? "",
         cpf: d.cpf ?? "",
-        phone: d.phone ?? "",
-        whatsapp: d.whatsapp ?? "",
+        phone: d.whatsapp ?? d.phone ?? "",
+        whatsapp: "",
         birthDate: d.birth_date ?? "",
         email: d.email ?? "",
       });
@@ -102,7 +102,7 @@ function AdminClienteDetail() {
           fullName: form.fullName,
           cpf: form.cpf || null,
           phone: form.phone || null,
-          whatsapp: form.whatsapp || null,
+          whatsapp: form.phone || null,
           birthDate: form.birthDate || null,
           email: form.email,
         },
@@ -236,8 +236,7 @@ function AdminClienteDetail() {
         <form onSubmit={handleSaveProfile} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {field("Nome completo", "fullName")}
           {field("CPF", "cpf", { hint: "Somente dígitos." })}
-          {field("Telefone", "phone")}
-          {field("WhatsApp", "whatsapp")}
+          {field("Telefone / WhatsApp", "phone")}
           {field("Nascimento", "birthDate", { type: "date" })}
           {field("E-mail (login)", "email", { type: "email", hint: "É o e-mail que o cliente usa para entrar no site. Alterar aqui já vale na hora." })}
           <div className="sm:col-span-2">

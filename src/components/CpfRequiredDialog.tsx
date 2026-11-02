@@ -40,7 +40,7 @@ export function CpfRequiredDialog() {
     setErr(null);
     const { error } = await supabase.from("profiles").update({ cpf: clean }).eq("user_id", user!.id);
     setSaving(false);
-    if (error) return setErr("Não foi possível salvar. Tente novamente.");
+    if (error) return setErr(error.message?.includes("CPF") ? error.message : "Não foi possível salvar. Tente novamente.");
     setMissing(false);
   };
 

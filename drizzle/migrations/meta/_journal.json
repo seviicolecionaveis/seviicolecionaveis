@@ -211,6 +211,13 @@
       "when": 1793639594220,
       "tag": "0029_signup_cpf",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1793639861812,
+      "tag": "0030_profile_phone_whatsapp_cpf_guard",
+      "breakpoints": true
     }
   ]
 }
