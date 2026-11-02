@@ -27,7 +27,7 @@ export function FinanceCustomerPicker({ onSelect, onClear }: {
       if (query === text.trim() && page === 0) void results.refetch();
     }}>
       <input className="w-full max-w-md rounded-md border border-border bg-background px-3 py-2 text-sm"
-        aria-label="Buscar cliente por nome ou e-mail" placeholder="Nome, e-mail, CPF ou telefone" maxLength={120}
+        aria-label="Buscar cliente por nome, e-mail, CPF, telefone ou ID" placeholder="Nome, e-mail, CPF, telefone ou ID" maxLength={120}
         value={text} onChange={event => { setText(event.target.value); setQuery(null); setSelectedId(''); onClear(); }} />
       <Button type="submit" variant="outline" disabled={results.isFetching}><Search className="h-4 w-4 mr-2" />Consultar</Button>
     </form>
