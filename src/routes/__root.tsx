@@ -15,6 +15,7 @@ import { CompareBar } from "@/components/CompareBar";
 import { PwaInstallBanner } from "@/components/PwaInstallBanner";
 import { SitePopups } from "@/components/SitePopups";
 import { Toaster } from "@/components/ui/sonner";
+import { CpfRequiredDialog } from "@/components/CpfRequiredDialog";
 
 function NotFoundComponent() {
   return (
@@ -161,6 +162,7 @@ function RootComponent() {
             <CompareBar />
             <PwaInstallBanner />
             <SitePopups />
+            <CpfRequiredDialog />
             <Toaster />
         </CartProvider>
       </WishlistProvider>
