@@ -218,6 +218,13 @@
       "when": 1793639861812,
       "tag": "0030_profile_phone_whatsapp_cpf_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1793644771908,
+      "tag": "0031_migration",
+      "breakpoints": true
     }
   ]
 }
