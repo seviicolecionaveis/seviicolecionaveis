@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { oauthReturnPath } from "@/lib/oauth-return-path";
+import { validCpf } from "@/lib/customer-payment";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -37,6 +38,7 @@ function AuthPage() {
   const [fullName, setFullName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [cpf, setCpf] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -48,12 +50,14 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
+        const cleanCpf = validCpf(cpf);
+        if (!cleanCpf) throw new Error("Informe um CPF válido.");
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: new URL(redirect ?? "/", window.location.origin).href,
-            data: { full_name: fullName, whatsapp, birth_date: birthDate || null },
+            data: { full_name: fullName, whatsapp, birth_date: birthDate || null, cpf: cleanCpf },
           },
         });
         if (error) throw error;
@@ -131,6 +135,23 @@ function AuthPage() {
                   className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-foreground"
                 />
               </div>
+            </div>
+          )}
+          {mode === "signup" && (
+            <div>
+              <label className="block text-xs font-medium uppercase tracking-wide mb-1">CPF</label>
+              <input
+                required
+                inputMode="numeric"
+                value={cpf}
+                onChange={(e) => {
+                  const d = e.target.value.replace(/\D/g, "").slice(0, 11);
+                  const m = d.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+                  setCpf(m);
+                }}
+                placeholder="000.000.000-00"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-foreground"
+              />
             </div>
           )}
           <div>
