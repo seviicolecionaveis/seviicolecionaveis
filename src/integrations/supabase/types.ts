@@ -3567,6 +3567,10 @@ export type Database = {
       }
       merge_whatsapp_accounts_into: { Args: { _real: string }; Returns: number }
       normalize_br_phone: { Args: { _raw: string }; Returns: string }
+      public_event_confirmed_count: {
+        Args: { _event_id: string }
+        Returns: number
+      }
       raffle_expire_reservations: { Args: never; Returns: number }
       raffle_join: {
         Args: { _raffle_id: string }

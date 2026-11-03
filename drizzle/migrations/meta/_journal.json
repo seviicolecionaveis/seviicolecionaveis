@@ -239,6 +239,13 @@
       "when": 1793727603124,
       "tag": "0033_fix_public_event_registration_email",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1793727793236,
+      "tag": "0034_public_event_confirmed_count",
+      "breakpoints": true
     }
   ]
 }

@@ -52,6 +52,7 @@ import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
 import { Route as AdminEventoRouteImport } from './routes/admin.evento'
 import { Route as AdminEventosRouteImport } from './routes/admin.eventos'
+import { Route as AdminEventosLojaRouteImport } from './routes/admin.eventos-loja'
 import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
 import { Route as AdminLeiloesRouteImport } from './routes/admin.leiloes'
 import { Route as AdminLeiloesWhatsappRouteImport } from './routes/admin.leiloes-whatsapp'
@@ -96,11 +97,13 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as DotwellKnownOauthProtectedResourceMcpRouteImport } from './routes/[.]well-known.oauth-protected-resource.mcp'
 import { Route as AdminClientesIndexRouteImport } from './routes/admin.clientes.index'
 import { Route as AdminClientesIdRouteImport } from './routes/admin.clientes.$id'
+import { Route as AdminEventosLojaEventIdRouteImport } from './routes/admin.eventos-loja.$eventId'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as DotwellKnownOauthProtectedResourceApiMcpRouteImport } from './routes/[.]well-known.oauth-protected-resource.api.mcp'
+import { Route as AdminEventosLojaEventIdImprimirRouteImport } from './routes/admin.eventos-loja.$eventId_.imprimir'
 import { Route as ApiPublicBotStatusRouteImport } from './routes/api/public/bot/status'
 import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api/public/hooks/auto-cancel-unpaid'
 import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
@@ -355,6 +358,11 @@ const AdminEventosRoute = AdminEventosRouteImport.update({
   path: '/eventos',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminEventosLojaRoute = AdminEventosLojaRouteImport.update({
+  id: '/eventos-loja',
+  path: '/eventos-loja',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminIntegrationsRoute = AdminIntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
@@ -576,6 +584,11 @@ const AdminClientesIdRoute = AdminClientesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminClientesRoute,
 } as any)
+const AdminEventosLojaEventIdRoute = AdminEventosLojaEventIdRouteImport.update({
+  id: '/$eventId',
+  path: '/$eventId',
+  getParentRoute: () => AdminEventosLojaRoute,
+} as any)
 const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
   id: '/orders/$orderId',
   path: '/orders/$orderId',
@@ -601,6 +614,12 @@ const DotwellKnownOauthProtectedResourceApiMcpRoute =
     id: '/api/mcp',
     path: '/api/mcp',
     getParentRoute: () => Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  } as any)
+const AdminEventosLojaEventIdImprimirRoute =
+  AdminEventosLojaEventIdImprimirRouteImport.update({
+    id: '/$eventId_/imprimir',
+    path: '/$eventId/imprimir',
+    getParentRoute: () => AdminEventosLojaRoute,
   } as any)
 const ApiPublicBotStatusRoute = ApiPublicBotStatusRouteImport.update({
   id: '/api/public/bot/status',
@@ -852,6 +871,7 @@ export interface FileRoutesByFullPath {
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/evento': typeof AdminEventoRoute
   '/admin/eventos': typeof AdminEventosRoute
+  '/admin/eventos-loja': typeof AdminEventosLojaRouteWithChildren
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/leiloes': typeof AdminLeiloesRoute
   '/admin/leiloes-whatsapp': typeof AdminLeiloesWhatsappRoute
@@ -895,12 +915,14 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.well-known/oauth-protected-resource/mcp': typeof DotwellKnownOauthProtectedResourceMcpRoute
   '/admin/clientes/$id': typeof AdminClientesIdRoute
+  '/admin/eventos-loja/$eventId': typeof AdminEventosLojaEventIdRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin/clientes/': typeof AdminClientesIndexRoute
   '/.well-known/oauth-protected-resource/api/mcp': typeof DotwellKnownOauthProtectedResourceApiMcpRoute
+  '/admin/eventos-loja/$eventId/imprimir': typeof AdminEventosLojaEventIdImprimirRoute
   '/api/public/bot/status': typeof ApiPublicBotStatusRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
@@ -978,6 +1000,7 @@ export interface FileRoutesByTo {
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/evento': typeof AdminEventoRoute
   '/admin/eventos': typeof AdminEventosRoute
+  '/admin/eventos-loja': typeof AdminEventosLojaRouteWithChildren
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/leiloes': typeof AdminLeiloesRoute
   '/admin/leiloes-whatsapp': typeof AdminLeiloesWhatsappRoute
@@ -1021,12 +1044,14 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.well-known/oauth-protected-resource/mcp': typeof DotwellKnownOauthProtectedResourceMcpRoute
   '/admin/clientes/$id': typeof AdminClientesIdRoute
+  '/admin/eventos-loja/$eventId': typeof AdminEventosLojaEventIdRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin/clientes': typeof AdminClientesIndexRoute
   '/.well-known/oauth-protected-resource/api/mcp': typeof DotwellKnownOauthProtectedResourceApiMcpRoute
+  '/admin/eventos-loja/$eventId/imprimir': typeof AdminEventosLojaEventIdImprimirRoute
   '/api/public/bot/status': typeof ApiPublicBotStatusRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
@@ -1109,6 +1134,7 @@ export interface FileRoutesById {
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/evento': typeof AdminEventoRoute
   '/admin/eventos': typeof AdminEventosRoute
+  '/admin/eventos-loja': typeof AdminEventosLojaRouteWithChildren
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/leiloes': typeof AdminLeiloesRoute
   '/admin/leiloes-whatsapp': typeof AdminLeiloesWhatsappRoute
@@ -1152,12 +1178,14 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.well-known/oauth-protected-resource/mcp': typeof DotwellKnownOauthProtectedResourceMcpRoute
   '/admin/clientes/$id': typeof AdminClientesIdRoute
+  '/admin/eventos-loja/$eventId': typeof AdminEventosLojaEventIdRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin/clientes/': typeof AdminClientesIndexRoute
   '/.well-known/oauth-protected-resource/api/mcp': typeof DotwellKnownOauthProtectedResourceApiMcpRoute
+  '/admin/eventos-loja/$eventId_/imprimir': typeof AdminEventosLojaEventIdImprimirRoute
   '/api/public/bot/status': typeof ApiPublicBotStatusRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
@@ -1241,6 +1269,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/evento'
     | '/admin/eventos'
+    | '/admin/eventos-loja'
     | '/admin/integrations'
     | '/admin/leiloes'
     | '/admin/leiloes-whatsapp'
@@ -1284,12 +1313,14 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.well-known/oauth-protected-resource/mcp'
     | '/admin/clientes/$id'
+    | '/admin/eventos-loja/$eventId'
     | '/admin/orders/$orderId'
     | '/api/public/mcp'
     | '/api/public/sitemap.xml'
     | '/lovable/email/events'
     | '/admin/clientes/'
     | '/.well-known/oauth-protected-resource/api/mcp'
+    | '/admin/eventos-loja/$eventId/imprimir'
     | '/api/public/bot/status'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
@@ -1367,6 +1398,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/evento'
     | '/admin/eventos'
+    | '/admin/eventos-loja'
     | '/admin/integrations'
     | '/admin/leiloes'
     | '/admin/leiloes-whatsapp'
@@ -1410,12 +1442,14 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.well-known/oauth-protected-resource/mcp'
     | '/admin/clientes/$id'
+    | '/admin/eventos-loja/$eventId'
     | '/admin/orders/$orderId'
     | '/api/public/mcp'
     | '/api/public/sitemap.xml'
     | '/lovable/email/events'
     | '/admin/clientes'
     | '/.well-known/oauth-protected-resource/api/mcp'
+    | '/admin/eventos-loja/$eventId/imprimir'
     | '/api/public/bot/status'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
@@ -1497,6 +1531,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/evento'
     | '/admin/eventos'
+    | '/admin/eventos-loja'
     | '/admin/integrations'
     | '/admin/leiloes'
     | '/admin/leiloes-whatsapp'
@@ -1540,12 +1575,14 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.well-known/oauth-protected-resource/mcp'
     | '/admin/clientes/$id'
+    | '/admin/eventos-loja/$eventId'
     | '/admin/orders/$orderId'
     | '/api/public/mcp'
     | '/api/public/sitemap.xml'
     | '/lovable/email/events'
     | '/admin/clientes/'
     | '/.well-known/oauth-protected-resource/api/mcp'
+    | '/admin/eventos-loja/$eventId_/imprimir'
     | '/api/public/bot/status'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
@@ -1972,6 +2009,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEventosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/eventos-loja': {
+      id: '/admin/eventos-loja'
+      path: '/eventos-loja'
+      fullPath: '/admin/eventos-loja'
+      preLoaderRoute: typeof AdminEventosLojaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/integrations': {
       id: '/admin/integrations'
       path: '/integrations'
@@ -2280,6 +2324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClientesIdRouteImport
       parentRoute: typeof AdminClientesRoute
     }
+    '/admin/eventos-loja/$eventId': {
+      id: '/admin/eventos-loja/$eventId'
+      path: '/$eventId'
+      fullPath: '/admin/eventos-loja/$eventId'
+      preLoaderRoute: typeof AdminEventosLojaEventIdRouteImport
+      parentRoute: typeof AdminEventosLojaRoute
+    }
     '/admin/orders/$orderId': {
       id: '/admin/orders/$orderId'
       path: '/orders/$orderId'
@@ -2314,6 +2365,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/.well-known/oauth-protected-resource/api/mcp'
       preLoaderRoute: typeof DotwellKnownOauthProtectedResourceApiMcpRouteImport
       parentRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+    }
+    '/admin/eventos-loja/$eventId_/imprimir': {
+      id: '/admin/eventos-loja/$eventId_/imprimir'
+      path: '/$eventId/imprimir'
+      fullPath: '/admin/eventos-loja/$eventId/imprimir'
+      preLoaderRoute: typeof AdminEventosLojaEventIdImprimirRouteImport
+      parentRoute: typeof AdminEventosLojaRoute
     }
     '/api/public/bot/status': {
       id: '/api/public/bot/status'
@@ -2584,6 +2642,19 @@ const AdminClientesRouteWithChildren = AdminClientesRoute._addFileChildren(
   AdminClientesRouteChildren,
 )
 
+interface AdminEventosLojaRouteChildren {
+  AdminEventosLojaEventIdRoute: typeof AdminEventosLojaEventIdRoute
+  AdminEventosLojaEventIdImprimirRoute: typeof AdminEventosLojaEventIdImprimirRoute
+}
+
+const AdminEventosLojaRouteChildren: AdminEventosLojaRouteChildren = {
+  AdminEventosLojaEventIdRoute: AdminEventosLojaEventIdRoute,
+  AdminEventosLojaEventIdImprimirRoute: AdminEventosLojaEventIdImprimirRoute,
+}
+
+const AdminEventosLojaRouteWithChildren =
+  AdminEventosLojaRoute._addFileChildren(AdminEventosLojaRouteChildren)
+
 interface AdminRouteChildren {
   AdminAccessoriesRoute: typeof AdminAccessoriesRoute
   AdminAcompanharLeilaoRoute: typeof AdminAcompanharLeilaoRoute
@@ -2597,6 +2668,7 @@ interface AdminRouteChildren {
   AdminEmailsRoute: typeof AdminEmailsRoute
   AdminEventoRoute: typeof AdminEventoRoute
   AdminEventosRoute: typeof AdminEventosRoute
+  AdminEventosLojaRoute: typeof AdminEventosLojaRouteWithChildren
   AdminIntegrationsRoute: typeof AdminIntegrationsRoute
   AdminLeiloesRoute: typeof AdminLeiloesRoute
   AdminLeiloesWhatsappRoute: typeof AdminLeiloesWhatsappRoute
@@ -2633,6 +2705,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminEmailsRoute: AdminEmailsRoute,
   AdminEventoRoute: AdminEventoRoute,
   AdminEventosRoute: AdminEventosRoute,
+  AdminEventosLojaRoute: AdminEventosLojaRouteWithChildren,
   AdminIntegrationsRoute: AdminIntegrationsRoute,
   AdminLeiloesRoute: AdminLeiloesRoute,
   AdminLeiloesWhatsappRoute: AdminLeiloesWhatsappRoute,
