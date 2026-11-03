@@ -71,6 +71,7 @@ function PrintPresenceListPage() {
       <style>{`
         @media print {
           .no-print { display: none !important; }
+          .fixed { display: none !important; }
           body { background: white !important; }
           @page { size: A4; margin: 14mm; }
           thead { display: table-header-group; }
