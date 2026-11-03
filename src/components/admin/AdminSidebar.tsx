@@ -9,6 +9,7 @@ import {
   Boxes,
 
   CalendarClock,
+  CalendarDays,
   Contact,
   CreditCard,
   Gamepad2,

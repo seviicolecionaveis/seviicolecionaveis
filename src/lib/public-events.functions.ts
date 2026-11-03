@@ -61,19 +61,15 @@ async function requireAdmin(context: { supabase: any; userId: string }) {
   if (!isAdmin) throw new Error("Forbidden");
 }
 
-/** Contagem de confirmados por evento (somente leitura, via cliente público). */
+/** Contagem de confirmados por evento via RPC pública (anon não lê inscrições por RLS). */
 async function confirmedCounts(client: ReturnType<typeof publicClient>, eventIds: string[]) {
   const counts: Record<string, number> = {};
-  if (eventIds.length === 0) return counts;
-  const { data, error } = await client
-    .from("event_registrations")
-    .select("event_id")
-    .in("event_id", eventIds)
-    .eq("status", "confirmed");
-  if (error) return counts; // anon não lê inscrições; o cliente logado lê as próprias. Contagem vem do RPC abaixo.
-  for (const row of data ?? []) {
-    counts[row.event_id] = (counts[row.event_id] ?? 0) + 1;
-  }
+  await Promise.all(
+    eventIds.map(async (id) => {
+      const { data, error } = await client.rpc("public_event_confirmed_count", { _event_id: id });
+      if (!error && typeof data === "number") counts[id] = data;
+    }),
+  );
   return counts;
 }
 
