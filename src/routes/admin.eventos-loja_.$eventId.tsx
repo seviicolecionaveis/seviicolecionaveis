@@ -29,7 +29,7 @@ import {
   type PublicEvent,
 } from "@/lib/public-events";
 
-export const Route = createFileRoute("/admin/eventos-loja/$eventId")({
+export const Route = createFileRoute("/admin/eventos-loja_/$eventId")({
   head: () => ({
     meta: [
       { title: "Participantes do evento — Admin Sevii" },

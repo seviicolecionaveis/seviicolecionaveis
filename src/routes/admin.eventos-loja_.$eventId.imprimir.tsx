@@ -12,7 +12,7 @@ import {
 } from "@/lib/public-events";
 import logoUrl from "@/assets/logo.webp";
 
-export const Route = createFileRoute("/admin/eventos-loja/$eventId_/imprimir")({
+export const Route = createFileRoute("/admin/eventos-loja_/$eventId/imprimir")({
   head: () => ({
     meta: [
       { title: "Lista de presença — Sevii Colecionáveis" },
