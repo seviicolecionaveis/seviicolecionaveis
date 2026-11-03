@@ -232,6 +232,13 @@
       "when": 1793727569533,
       "tag": "0032_public_events_module",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1793727603124,
+      "tag": "0033_fix_public_event_registration_email",
+      "breakpoints": true
     }
   ]
 }
