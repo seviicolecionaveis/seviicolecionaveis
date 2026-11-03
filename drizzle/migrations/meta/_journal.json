@@ -246,6 +246,13 @@
       "when": 1793727793236,
       "tag": "0034_public_event_confirmed_count",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1793727961846,
+      "tag": "0035_fix_register_for_public_event_found_flag",
+      "breakpoints": true
     }
   ]
 }
