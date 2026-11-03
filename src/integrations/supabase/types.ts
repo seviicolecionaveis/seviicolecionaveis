@@ -1596,6 +1596,62 @@ export type Database = {
           },
         ]
       }
+      event_registrations: {
+        Row: {
+          cancelled_at: string | null
+          checked_in_at: string | null
+          checked_in_by: string | null
+          confirmed_at: string
+          created_at: string
+          email: string | null
+          event_id: string
+          full_name: string
+          id: string
+          phone: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          checked_in_at?: string | null
+          checked_in_by?: string | null
+          confirmed_at?: string
+          created_at?: string
+          email?: string | null
+          event_id: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          checked_in_at?: string | null
+          checked_in_by?: string | null
+          confirmed_at?: string
+          created_at?: string
+          email?: string | null
+          event_id?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           active: boolean
@@ -2515,6 +2571,66 @@ export type Database = {
         }
         Relationships: []
       }
+      public_events: {
+        Row: {
+          additional_info: string | null
+          address: string | null
+          capacity: number | null
+          cover_image: string | null
+          created_at: string
+          description: string | null
+          end_time: string
+          event_date: string
+          id: string
+          location_name: string | null
+          publication_status: string
+          registration_status: string
+          short_description: string | null
+          slug: string
+          start_time: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          additional_info?: string | null
+          address?: string | null
+          capacity?: number | null
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          end_time: string
+          event_date: string
+          id?: string
+          location_name?: string | null
+          publication_status?: string
+          registration_status?: string
+          short_description?: string | null
+          slug: string
+          start_time: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          additional_info?: string | null
+          address?: string | null
+          capacity?: number | null
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          end_time?: string
+          event_date?: string
+          id?: string
+          location_name?: string | null
+          publication_status?: string
+          registration_status?: string
+          short_description?: string | null
+          slug?: string
+          start_time?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string
@@ -3317,6 +3433,10 @@ export type Database = {
           points_credited: number
         }[]
       }
+      cancel_public_event_registration: {
+        Args: { _event_id: string }
+        Returns: Json
+      }
       catalog_last_product_additions: {
         Args: never
         Returns: {
@@ -3333,6 +3453,10 @@ export type Database = {
           collection: string
           last_added_at: string
         }[]
+      }
+      checkin_event_registration: {
+        Args: { _registration_id: string }
+        Returns: Json
       }
       claim_my_whatsapp_orders: { Args: never; Returns: number }
       clear_event_reserved: { Args: never; Returns: number }
@@ -3443,6 +3567,10 @@ export type Database = {
       }
       merge_whatsapp_accounts_into: { Args: { _real: string }; Returns: number }
       normalize_br_phone: { Args: { _raw: string }; Returns: string }
+      public_event_confirmed_count: {
+        Args: { _event_id: string }
+        Returns: number
+      }
       raffle_expire_reservations: { Args: never; Returns: number }
       raffle_join: {
         Args: { _raffle_id: string }
@@ -3459,7 +3587,9 @@ export type Database = {
         Args: { _action: string; _outcome: string }
         Returns: undefined
       }
+      register_for_public_event: { Args: { _event_id: string }; Returns: Json }
       set_event_reserved: { Args: { _items: Json }; Returns: number }
+      undo_event_checkin: { Args: { _registration_id: string }; Returns: Json }
       user_lifetime_earned: { Args: { _user_id: string }; Returns: number }
       user_points_balance: { Args: { _user_id: string }; Returns: number }
       user_tier: { Args: { _user_id: string }; Returns: string }
