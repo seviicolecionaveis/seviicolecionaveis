@@ -527,8 +527,7 @@ function AdminPilhaPage() {
             </button>
           </div>
         </div>
-
-
+        )}
 
         <FulfillmentFilters value={ff} onChange={setFf} count={tab === "orders" ? filteredServiceOrders.length : visibleStacks.length} />
 
