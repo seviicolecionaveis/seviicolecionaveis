@@ -446,13 +446,14 @@ function SolicitarPage() {
               <div className="space-y-2">
                 {(
                   [
-                    { v: "correios", label: "📦 Correios (Mini Envios)", desc: "Cobrança do frete via Pix" },
-                    { v: "app", label: "🛵 Entrega em mãos (somente em Aracaju)", desc: "Entregador parceiro às quintas, a partir das 19h — taxa R$ 15, combinar via WhatsApp" },
-                    { v: "presencial", label: "🏪 Retirada Presencial", desc: "Aruana ou Aeroporto — gratuito" },
-                    { v: "evento", label: "🎪 Retirada em Eventos", desc: "Retire no evento que você vai comparecer — gratuito" },
-                    
-                  ] as { v: Method; label: string; desc: string }[]
+                    { v: "correios", icon: "📦" },
+                    { v: "app", icon: "🛵" },
+                    { v: "presencial", icon: "🏪" },
+                    { v: "evento", icon: "🎪" },
+                  ] as { v: Method; icon: string }[]
                 ).filter((opt) => opt.v !== "app" || handDeliveryEligible).map((opt) => {
+                  const label = `${opt.icon} ${SERVICE_ORDER_METHOD_LABEL[opt.v]}`;
+                  const desc = SERVICE_ORDER_METHOD_DESC[opt.v];
                   const disabled = opt.v === "arte_em_cards" && hasSealedSelected;
                   return (
                     <label
@@ -563,33 +564,31 @@ function SolicitarPage() {
             )}
 
             {method === "app" && (
-              <section className="rounded-xl border border-amber-300 bg-amber-50 p-5 mb-6">
-                <p className="text-sm">
-                  Após criar a solicitação, você será direcionado ao WhatsApp da loja para combinar disponibilidade e custo do aplicativo de entrega.
-                </p>
+              <section className="rounded-xl border border-border bg-card p-5 mb-6 space-y-3">
+                <h2 className="text-sm font-semibold uppercase tracking-widest">Dia da entrega</h2>
+                <ScheduleSlotPicker kind="delivery" value={scheduleIso} onChange={setScheduleIso} />
+                <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 space-y-1">
+                  <p className="font-semibold">
+                    Taxa de entrega: R$ {(HAND_DELIVERY_FEE_CENTS / 100).toFixed(2).replace(".", ",")} via Pix
+                  </p>
+                  <p>
+                    Chave Pix: <span className="font-mono font-semibold">{HAND_DELIVERY_PIX_KEY}</span>
+                  </p>
+                  <p>
+                    Após criar a solicitação, envie o comprovante pelo WhatsApp da loja. A entrega só é
+                    confirmada quando a loja confirmar o pagamento.
+                  </p>
+                </div>
               </section>
             )}
 
             {method === "presencial" && (
               <section className="rounded-xl border border-border bg-card p-5 mb-6 space-y-2">
-                <h2 className="text-sm font-semibold uppercase tracking-widest">Ponto de retirada</h2>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Retirada gratuita. Horário: 14h às 18h em dias úteis, mediante contato com 24h de antecedência.
+                <h2 className="text-sm font-semibold uppercase tracking-widest">Dia e horário da retirada</h2>
+                <p className="text-xs text-muted-foreground">
+                  Retirada em mãos gratuita, de segunda a sexta, das 14h às 19h.
                 </p>
-                <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/30">
-                  <input type="radio" name="pickup" checked={pickupPoint === "aruana"} onChange={() => setPickupPoint("aruana")} className="mt-1" />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold">Aruana</p>
-                    <p className="text-xs text-muted-foreground">Rua Josepha Andrade Irmã Fontes, 600 — Residencial Vista Aruana</p>
-                  </div>
-                </label>
-                <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/30">
-                  <input type="radio" name="pickup" checked={pickupPoint === "aeroporto"} onChange={() => setPickupPoint("aeroporto")} className="mt-1" />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold">Aeroporto</p>
-                    <p className="text-xs text-muted-foreground">Av. Silvério Leite Fontes, 1128 — Palm Ville Residence</p>
-                  </div>
-                </label>
+                <ScheduleSlotPicker kind="pickup" value={scheduleIso} onChange={setScheduleIso} />
               </section>
             )}
 
