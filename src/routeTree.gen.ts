@@ -105,6 +105,7 @@ import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/e
 import { Route as DotwellKnownOauthProtectedResourceApiMcpRouteImport } from './routes/[.]well-known.oauth-protected-resource.api.mcp'
 import { Route as AdminEventosLojaEventIdImprimirRouteImport } from './routes/admin.eventos-loja_.$eventId_.imprimir'
 import { Route as AdminPilhaOsServiceOrderIdRouteImport } from './routes/admin.pilha_.os.$serviceOrderId'
+import { Route as AdminPilhaPilhaStackIdRouteImport } from './routes/admin.pilha_.pilha.$stackId'
 import { Route as ApiPublicBotStatusRouteImport } from './routes/api/public/bot/status'
 import { Route as ApiPublicHooksAutoCancelUnpaidRouteImport } from './routes/api/public/hooks/auto-cancel-unpaid'
 import { Route as ApiPublicHooksExpireLoyaltyPointsRouteImport } from './routes/api/public/hooks/expire-loyalty-points'
@@ -628,6 +629,11 @@ const AdminPilhaOsServiceOrderIdRoute =
     path: '/pilha/os/$serviceOrderId',
     getParentRoute: () => AdminRoute,
   } as any)
+const AdminPilhaPilhaStackIdRoute = AdminPilhaPilhaStackIdRouteImport.update({
+  id: '/pilha_/pilha/$stackId',
+  path: '/pilha/pilha/$stackId',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ApiPublicBotStatusRoute = ApiPublicBotStatusRouteImport.update({
   id: '/api/public/bot/status',
   path: '/api/public/bot/status',
@@ -931,6 +937,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource/api/mcp': typeof DotwellKnownOauthProtectedResourceApiMcpRoute
   '/admin/eventos-loja/$eventId/imprimir': typeof AdminEventosLojaEventIdImprimirRoute
   '/admin/pilha/os/$serviceOrderId': typeof AdminPilhaOsServiceOrderIdRoute
+  '/admin/pilha/pilha/$stackId': typeof AdminPilhaPilhaStackIdRoute
   '/api/public/bot/status': typeof ApiPublicBotStatusRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
@@ -1061,6 +1068,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource/api/mcp': typeof DotwellKnownOauthProtectedResourceApiMcpRoute
   '/admin/eventos-loja/$eventId/imprimir': typeof AdminEventosLojaEventIdImprimirRoute
   '/admin/pilha/os/$serviceOrderId': typeof AdminPilhaOsServiceOrderIdRoute
+  '/admin/pilha/pilha/$stackId': typeof AdminPilhaPilhaStackIdRoute
   '/api/public/bot/status': typeof ApiPublicBotStatusRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
@@ -1196,6 +1204,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource/api/mcp': typeof DotwellKnownOauthProtectedResourceApiMcpRoute
   '/admin/eventos-loja_/$eventId_/imprimir': typeof AdminEventosLojaEventIdImprimirRoute
   '/admin/pilha_/os/$serviceOrderId': typeof AdminPilhaOsServiceOrderIdRoute
+  '/admin/pilha_/pilha/$stackId': typeof AdminPilhaPilhaStackIdRoute
   '/api/public/bot/status': typeof ApiPublicBotStatusRoute
   '/api/public/hooks/auto-cancel-unpaid': typeof ApiPublicHooksAutoCancelUnpaidRoute
   '/api/public/hooks/expire-loyalty-points': typeof ApiPublicHooksExpireLoyaltyPointsRoute
@@ -1332,6 +1341,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource/api/mcp'
     | '/admin/eventos-loja/$eventId/imprimir'
     | '/admin/pilha/os/$serviceOrderId'
+    | '/admin/pilha/pilha/$stackId'
     | '/api/public/bot/status'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
@@ -1462,6 +1472,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource/api/mcp'
     | '/admin/eventos-loja/$eventId/imprimir'
     | '/admin/pilha/os/$serviceOrderId'
+    | '/admin/pilha/pilha/$stackId'
     | '/api/public/bot/status'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
@@ -1596,6 +1607,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource/api/mcp'
     | '/admin/eventos-loja_/$eventId_/imprimir'
     | '/admin/pilha_/os/$serviceOrderId'
+    | '/admin/pilha_/pilha/$stackId'
     | '/api/public/bot/status'
     | '/api/public/hooks/auto-cancel-unpaid'
     | '/api/public/hooks/expire-loyalty-points'
@@ -2393,6 +2405,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPilhaOsServiceOrderIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/pilha_/pilha/$stackId': {
+      id: '/admin/pilha_/pilha/$stackId'
+      path: '/pilha/pilha/$stackId'
+      fullPath: '/admin/pilha/pilha/$stackId'
+      preLoaderRoute: typeof AdminPilhaPilhaStackIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/api/public/bot/status': {
       id: '/api/public/bot/status'
       path: '/api/public/bot/status'
@@ -2700,6 +2719,7 @@ interface AdminRouteChildren {
   AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
   AdminEventosLojaEventIdImprimirRoute: typeof AdminEventosLojaEventIdImprimirRoute
   AdminPilhaOsServiceOrderIdRoute: typeof AdminPilhaOsServiceOrderIdRoute
+  AdminPilhaPilhaStackIdRoute: typeof AdminPilhaPilhaStackIdRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -2740,6 +2760,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
   AdminEventosLojaEventIdImprimirRoute: AdminEventosLojaEventIdImprimirRoute,
   AdminPilhaOsServiceOrderIdRoute: AdminPilhaOsServiceOrderIdRoute,
+  AdminPilhaPilhaStackIdRoute: AdminPilhaPilhaStackIdRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

@@ -22,7 +22,7 @@ import {
   fmtMoney,
 } from "@/components/admin/pilha-detail";
 
-export const Route = createFileRoute("/admin/pilha/pilha/$stackId")({
+export const Route = createFileRoute("/admin/pilha_/pilha/$stackId")({
   head: () => ({ meta: [{ title: "Pilha — Sevii Admin" }] }),
   component: AdminStackDetailPage,
 });

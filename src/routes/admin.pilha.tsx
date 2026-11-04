@@ -20,6 +20,7 @@ import {
   type AdminStackItem,
 } from "@/lib/admin-pilha.functions";
 import { serviceOrderMatchesSearch, stackMatchesSearch } from "@/lib/pilha-search";
+import { serviceOrderMethodLabel, SERVICE_ORDER_METHOD_LABEL } from "@/lib/fulfillment-labels";
 
 
 export const Route = createFileRoute("/admin/pilha")({
@@ -27,13 +28,7 @@ export const Route = createFileRoute("/admin/pilha")({
   component: AdminPilhaPage,
 });
 
-const METHOD_LABEL: Record<string, string> = {
-  correios: "Envio Correios",
-  app: "Envio por App",
-  arte_em_cards: "Retirada Arte em Cards",
-  evento: "Retirada em Evento",
-  presencial: "Retirada Presencial",
-};
+const METHOD_LABEL: Record<string, string> = SERVICE_ORDER_METHOD_LABEL;
 
 const STATUS_LABEL: Record<string, string> = {
   awaiting_payment: "Aguardando pagamento",
@@ -604,6 +599,13 @@ function AdminPilhaPage() {
                           <p className="text-xs text-muted-foreground">
                             {new Date(o.created_at).toLocaleString("pt-BR")} · {fmtMoney(o.amount_cents)} · {totalCards} carta(s)
                           </p>
+                          <Link
+                            to="/admin/pilha/os/$serviceOrderId"
+                            params={{ serviceOrderId: o.id }}
+                            className="mt-1 inline-block text-xs font-semibold text-primary hover:underline"
+                          >
+                            Abrir página de detalhes →
+                          </Link>
                           {o.arte_em_cards_code && (
                             <p className="text-xs text-green-700 font-semibold mt-1">
                               Código Arte em Cards: {o.arte_em_cards_code}
@@ -825,6 +827,13 @@ function AdminPilhaPage() {
                           Iniciada {new Date(s.started_at).toLocaleDateString("pt-BR")} · Vence{" "}
                           {exp.toLocaleDateString("pt-BR")}
                         </p>
+                        <Link
+                          to="/admin/pilha/pilha/$stackId"
+                          params={{ stackId: s.id }}
+                          className="mt-1 inline-block text-xs font-semibold text-primary hover:underline"
+                        >
+                          Abrir página de detalhes →
+                        </Link>
                       </div>
                       <div
                         className={`text-right text-sm font-bold ${
