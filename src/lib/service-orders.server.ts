@@ -179,13 +179,29 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
       state: input.address?.state?.toUpperCase() ?? null,
       phone: input.address?.phone ?? null,
       event_id: input.method === "evento" ? (input.eventId ?? null) : null,
-      scheduled_at: input.method === "evento" ? (input.eventAt ?? null) : null,
+      scheduled_at:
+        input.method === "evento"
+          ? (input.eventAt ?? null)
+          : input.method === "presencial" || input.method === "app"
+            ? (input.scheduledAt ?? null)
+            : null,
+      schedule_kind:
+        input.method === "presencial"
+          ? "pickup"
+          : input.method === "app"
+            ? "delivery"
+            : input.method === "evento"
+              ? "event"
+              : null,
+      fee_status: input.method === "app" ? "pending" : null,
       notes:
         input.method === "evento"
           ? `Retirada em eventos: ${eventName}.${input.notes ? `\n\n${input.notes}` : ""}`
-          : input.method === "presencial" && input.pickupPoint
-          ? `Retirada presencial: ${input.pickupPoint === "aruana" ? "Aruana" : "Aeroporto"}.${input.notes ? `\n\n${input.notes}` : ""}`
-          : (input.notes ?? null),
+          : input.method === "app"
+            ? `Entrega em mãos — taxa de R$ 15,00 via Pix (chave: seviicolecionaveis@gmail.com), confirmada pela loja.${input.notes ? `\n\n${input.notes}` : ""}`
+            : input.method === "presencial" && input.pickupPoint
+              ? `Retirada em mãos: ${input.pickupPoint === "aruana" ? "Aruana" : "Aeroporto"}.${input.notes ? `\n\n${input.notes}` : ""}`
+              : (input.notes ?? null),
       arte_em_cards_code: arteCodeUsed,
     })
     .select("id, code")
