@@ -313,7 +313,7 @@ export const adminEditServiceOrder = createServerFn({ method: "POST" })
 
     const { error: updErr } = await supabaseAdmin
       .from("service_orders")
-      .update(updates)
+      .update(updates as any)
       .eq("id", so.id);
     if (updErr) throw new Error(updErr.message);
 
