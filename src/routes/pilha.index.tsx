@@ -3,6 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { getMyStack } from "@/lib/card-stack.functions";
+import { clientRescheduleServiceOrder } from "@/lib/service-orders.functions";
+import { SERVICE_ORDER_METHOD_LABEL } from "@/lib/fulfillment-labels";
+import { formatSchedule } from "@/lib/scheduling";
+import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import logoUrl from "@/assets/logo.webp";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +50,21 @@ function PilhaPage() {
     queryKey: ["card-stack", user?.id],
     queryFn: () => getMyStack(),
     enabled: !!user,
+  });
+
+  const { data: pendingOS, refetch: refetchOS } = useQuery({
+    queryKey: ["card-stack-pending-os", stack?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("service_orders")
+        .select("id, code, method, status, scheduled_at, schedule_kind")
+        .eq("stack_id", stack!.id)
+        .in("status", ["awaiting_payment", "paid", "preparing"])
+        .order("created_at", { ascending: false })
+        .limit(1);
+      return (data ?? [])[0] ?? null;
+    },
+    enabled: !!user && !!stack,
   });
 
   const { data: reopened } = useQuery({
@@ -176,6 +195,47 @@ function PilhaPage() {
                 ) : null}
               </div>
             </section>
+
+            {pendingOS && (
+              <section className="rounded-xl border border-primary/40 bg-primary/5 p-5 mb-6">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Solicitação em andamento · OS #{pendingOS.code}
+                    </p>
+                    <p className="text-sm font-semibold mt-1">
+                      {SERVICE_ORDER_METHOD_LABEL[pendingOS.method as keyof typeof SERVICE_ORDER_METHOD_LABEL] ?? pendingOS.method}
+                      {pendingOS.scheduled_at
+                        ? ` — ${formatSchedule(pendingOS.schedule_kind ?? "pickup", pendingOS.scheduled_at)}`
+                        : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Status: {pendingOS.status === "awaiting_payment" ? "aguardando pagamento" : pendingOS.status === "paid" ? "pago — a loja vai preparar" : "em preparação"}
+                    </p>
+                  </div>
+                  {(!pendingOS.scheduled_at ||
+                    new Date(pendingOS.scheduled_at).getTime() - Date.now() > 24 * 3_600_000) && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!window.confirm("Alterar a escolha? A solicitação atual será cancelada e as cartas voltam para a pilha (o prazo de 30 dias não muda).")) return;
+                        try {
+                          await clientRescheduleServiceOrder({ data: { serviceOrderId: pendingOS.id } });
+                          toast.success("Solicitação cancelada. Escolha novamente.");
+                          await refetchOS();
+                          nav({ to: "/pilha/solicitar", search: { stack: stack.id } });
+                        } catch (e: any) {
+                          toast.error(e?.message ?? "Não foi possível alterar.");
+                        }
+                      }}
+                      className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold hover:bg-secondary"
+                    >
+                      Alterar escolha
+                    </button>
+                  )}
+                </div>
+              </section>
+            )}
 
             {stack.items.length === 0 ? (
               <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">

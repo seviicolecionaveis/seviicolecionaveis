@@ -313,7 +313,7 @@ export const adminEditServiceOrder = createServerFn({ method: "POST" })
 
     const { error: updErr } = await supabaseAdmin
       .from("service_orders")
-      .update(updates)
+      .update(updates as any)
       .eq("id", so.id);
     if (updErr) throw new Error(updErr.message);
 
@@ -324,6 +324,7 @@ export const adminEditServiceOrder = createServerFn({ method: "POST" })
         .select("code, user_id, method, scheduled_at, schedule_kind, event_id, phone, recipient_name")
         .eq("id", so.id)
         .maybeSingle();
+      if (!full) throw new Error("OS não encontrada para alerta.");
       const { modalityOfServiceOrder } = await import("@/lib/fulfillment-alerts");
       const { formatSchedule } = await import("@/lib/scheduling");
       const { data: prof } = await supabaseAdmin
