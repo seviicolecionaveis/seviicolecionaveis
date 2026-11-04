@@ -223,7 +223,7 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
     let whatsappUrl: string | undefined;
     if (input.method === "app") {
       const lines = items.map((i) => `• ${i.quantity}× ${i.card_name}`).join("\n");
-      const msg = `Olá! Solicitação de entrega por aplicativo — OS #${created.code}\n\nItens:\n${lines}\n\nPor favor, me informem disponibilidade e custo.`;
+      const msg = `Olá! Solicitação de entrega em mãos — OS #${created.code}\n\nItens:\n${lines}\n\nSegue o comprovante do Pix de R$ 15,00 (taxa de entrega).`;
       whatsappUrl = `https://wa.me/${STORE_WHATSAPP}?text=${encodeURIComponent(msg)}`;
       await supabaseAdmin
         .from("service_orders")
