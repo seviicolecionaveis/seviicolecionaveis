@@ -196,6 +196,47 @@ function PilhaPage() {
               </div>
             </section>
 
+            {pendingOS && (
+              <section className="rounded-xl border border-primary/40 bg-primary/5 p-5 mb-6">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Solicitação em andamento · OS #{pendingOS.code}
+                    </p>
+                    <p className="text-sm font-semibold mt-1">
+                      {SERVICE_ORDER_METHOD_LABEL[pendingOS.method as keyof typeof SERVICE_ORDER_METHOD_LABEL] ?? pendingOS.method}
+                      {pendingOS.scheduled_at
+                        ? ` — ${formatSchedule(pendingOS.schedule_kind ?? "pickup", pendingOS.scheduled_at)}`
+                        : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Status: {pendingOS.status === "awaiting_payment" ? "aguardando pagamento" : pendingOS.status === "paid" ? "pago — a loja vai preparar" : "em preparação"}
+                    </p>
+                  </div>
+                  {(!pendingOS.scheduled_at ||
+                    new Date(pendingOS.scheduled_at).getTime() - Date.now() > 24 * 3_600_000) && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!window.confirm("Alterar a escolha? A solicitação atual será cancelada e as cartas voltam para a pilha (o prazo de 30 dias não muda).")) return;
+                        try {
+                          await clientRescheduleServiceOrder({ data: { serviceOrderId: pendingOS.id } });
+                          toast.success("Solicitação cancelada. Escolha novamente.");
+                          await refetchOS();
+                          nav({ to: "/pilha/solicitar", search: { stack: stack.id } });
+                        } catch (e: any) {
+                          toast.error(e?.message ?? "Não foi possível alterar.");
+                        }
+                      }}
+                      className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold hover:bg-secondary"
+                    >
+                      Alterar escolha
+                    </button>
+                  )}
+                </div>
+              </section>
+            )}
+
             {stack.items.length === 0 ? (
               <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
                 Nenhuma carta armazenada no momento.
