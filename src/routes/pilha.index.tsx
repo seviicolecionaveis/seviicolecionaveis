@@ -3,6 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { getMyStack } from "@/lib/card-stack.functions";
+import { clientRescheduleServiceOrder } from "@/lib/service-orders.functions";
+import { SERVICE_ORDER_METHOD_LABEL } from "@/lib/fulfillment-labels";
+import { formatSchedule } from "@/lib/scheduling";
+import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import logoUrl from "@/assets/logo.webp";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +50,21 @@ function PilhaPage() {
     queryKey: ["card-stack", user?.id],
     queryFn: () => getMyStack(),
     enabled: !!user,
+  });
+
+  const { data: pendingOS, refetch: refetchOS } = useQuery({
+    queryKey: ["card-stack-pending-os", stack?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("service_orders")
+        .select("id, code, method, status, scheduled_at, schedule_kind")
+        .eq("stack_id", stack!.id)
+        .in("status", ["awaiting_payment", "paid", "preparing"])
+        .order("created_at", { ascending: false })
+        .limit(1);
+      return (data ?? [])[0] ?? null;
+    },
+    enabled: !!user && !!stack,
   });
 
   const { data: reopened } = useQuery({
