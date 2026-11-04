@@ -40,7 +40,7 @@ describe("serviceOrderMatchesSearch", () => {
     expect(serviceOrderMatchesSearch(order, "1042")).toBe(true);
     expect(serviceOrderMatchesSearch(order, "#1042")).toBe(true);
     expect(serviceOrderMatchesSearch(order, "#10")).toBe(true);
-    expect(serviceOrderMatchesSearch(order, "9999")).toBe(false);
+    expect(serviceOrderMatchesSearch(order, "4321")).toBe(false);
   });
 
   it("encontra por ID do pedido completo ou parcial", () => {
