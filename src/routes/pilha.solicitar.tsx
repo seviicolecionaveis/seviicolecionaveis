@@ -12,11 +12,14 @@ import { getShippingQuotes } from "@/utils/shipping.functions";
 import { validateArteEmCardsCode, getMyArteEmCardsCode } from "@/lib/arte-em-cards.functions";
 import { Loader2, Copy, Check, QrCode } from "lucide-react";
 import { EventSlotPicker, type EventSelection } from "@/components/EventSlotPicker";
+import { ScheduleSlotPicker } from "@/components/ScheduleSlotPicker";
 import { listActiveEvents } from "@/lib/events.functions";
 import { validateEventSchedule, type PickupEvent } from "@/lib/events";
 import { toast } from "sonner";
 import { isHandDeliveryArea, HAND_DELIVERY_AREA_MESSAGE } from "@/lib/hand-delivery";
 import { copyToClipboard } from "@/lib/clipboard";
+import { HAND_DELIVERY_FEE_CENTS, HAND_DELIVERY_PIX_KEY, formatSchedule } from "@/lib/scheduling";
+import { SERVICE_ORDER_METHOD_LABEL, SERVICE_ORDER_METHOD_DESC } from "@/lib/fulfillment-labels";
 import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/pilha/solicitar")({
@@ -94,6 +97,7 @@ function SolicitarPage() {
   >({ state: "idle" });
   const [arteExisting, setArteExisting] = useState<{ code: string; cycleEnd: string } | null>(null);
   const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | null>(null);
+  const [scheduleIso, setScheduleIso] = useState<string | null>(null);
   const [eventSel, setEventSel] = useState<EventSelection | null>(null);
   const [pickupEvents, setPickupEvents] = useState<PickupEvent[]>([]);
 
