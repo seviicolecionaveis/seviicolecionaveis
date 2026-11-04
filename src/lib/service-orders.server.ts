@@ -30,6 +30,7 @@ export interface CreateServiceOrderInput {
   eventName?: string | null;
   eventId?: string | null;
   eventAt?: string | null;
+  scheduledAt?: string | null;
   notes?: string | null;
   cpf?: string | null;
 }
@@ -115,7 +116,11 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
       addr = saved ?? null;
     }
     if (!isHandDeliveryArea(addr)) throw new Error(HAND_DELIVERY_AREA_MESSAGE);
-    amountCents = 0;
+    if (!input.scheduledAt) throw new Error("Escolha a quinta-feira da entrega.");
+    const { validateSchedule } = await import("@/lib/scheduling");
+    const dErr = validateSchedule("delivery", input.scheduledAt);
+    if (dErr) throw new Error(dErr);
+    amountCents = 0; // taxa de R$ 15 paga via Pix e confirmada só pelo admin
   } else if (input.method === "evento") {
     if (!input.eventId || !input.eventAt) throw new Error("Escolha o evento, o dia e o horário da retirada.");
     const { data: ev } = await supabaseAdmin.from("events").select("*").eq("id", input.eventId).maybeSingle();
@@ -141,7 +146,14 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
     eventName = ev.name;
     amountCents = 0;
   } else if (input.method === "presencial") {
-    if (!input.pickupPoint) throw new Error("Selecione o ponto de retirada (Aruana ou Aeroporto).");
+    if (!input.scheduledAt && !input.pickupPoint) {
+      throw new Error("Escolha o dia e o horário da retirada.");
+    }
+    if (input.scheduledAt) {
+      const { validateSchedule } = await import("@/lib/scheduling");
+      const pErr = validateSchedule("pickup", input.scheduledAt);
+      if (pErr) throw new Error(pErr);
+    }
     amountCents = 0;
   }
 
@@ -167,13 +179,29 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
       state: input.address?.state?.toUpperCase() ?? null,
       phone: input.address?.phone ?? null,
       event_id: input.method === "evento" ? (input.eventId ?? null) : null,
-      scheduled_at: input.method === "evento" ? (input.eventAt ?? null) : null,
+      scheduled_at:
+        input.method === "evento"
+          ? (input.eventAt ?? null)
+          : input.method === "presencial" || input.method === "app"
+            ? (input.scheduledAt ?? null)
+            : null,
+      schedule_kind:
+        input.method === "presencial"
+          ? "pickup"
+          : input.method === "app"
+            ? "delivery"
+            : input.method === "evento"
+              ? "event"
+              : null,
+      fee_status: input.method === "app" ? "pending" : null,
       notes:
         input.method === "evento"
           ? `Retirada em eventos: ${eventName}.${input.notes ? `\n\n${input.notes}` : ""}`
-          : input.method === "presencial" && input.pickupPoint
-          ? `Retirada presencial: ${input.pickupPoint === "aruana" ? "Aruana" : "Aeroporto"}.${input.notes ? `\n\n${input.notes}` : ""}`
-          : (input.notes ?? null),
+          : input.method === "app"
+            ? `Entrega em mãos — taxa de R$ 15,00 via Pix (chave: seviicolecionaveis@gmail.com), confirmada pela loja.${input.notes ? `\n\n${input.notes}` : ""}`
+            : input.method === "presencial" && input.pickupPoint
+              ? `Retirada em mãos: ${input.pickupPoint === "aruana" ? "Aruana" : "Aeroporto"}.${input.notes ? `\n\n${input.notes}` : ""}`
+              : (input.notes ?? null),
       arte_em_cards_code: arteCodeUsed,
     })
     .select("id, code")
@@ -195,7 +223,7 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
     let whatsappUrl: string | undefined;
     if (input.method === "app") {
       const lines = items.map((i) => `• ${i.quantity}× ${i.card_name}`).join("\n");
-      const msg = `Olá! Solicitação de entrega por aplicativo — OS #${created.code}\n\nItens:\n${lines}\n\nPor favor, me informem disponibilidade e custo.`;
+      const msg = `Olá! Solicitação de entrega em mãos — OS #${created.code}\n\nItens:\n${lines}\n\nSegue o comprovante do Pix de R$ 15,00 (taxa de entrega).`;
       whatsappUrl = `https://wa.me/${STORE_WHATSAPP}?text=${encodeURIComponent(msg)}`;
       await supabaseAdmin
         .from("service_orders")

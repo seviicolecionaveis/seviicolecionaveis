@@ -253,6 +253,13 @@
       "when": 1793727961846,
       "tag": "0035_fix_register_for_public_event_found_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1793824861420,
+      "tag": "0036_pilha_detail_pages_fields",
+      "breakpoints": true
     }
   ]
 }

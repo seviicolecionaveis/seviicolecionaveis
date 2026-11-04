@@ -12,11 +12,14 @@ import { getShippingQuotes } from "@/utils/shipping.functions";
 import { validateArteEmCardsCode, getMyArteEmCardsCode } from "@/lib/arte-em-cards.functions";
 import { Loader2, Copy, Check, QrCode } from "lucide-react";
 import { EventSlotPicker, type EventSelection } from "@/components/EventSlotPicker";
+import { ScheduleSlotPicker } from "@/components/ScheduleSlotPicker";
 import { listActiveEvents } from "@/lib/events.functions";
 import { validateEventSchedule, type PickupEvent } from "@/lib/events";
 import { toast } from "sonner";
 import { isHandDeliveryArea, HAND_DELIVERY_AREA_MESSAGE } from "@/lib/hand-delivery";
 import { copyToClipboard } from "@/lib/clipboard";
+import { HAND_DELIVERY_FEE_CENTS, HAND_DELIVERY_PIX_KEY, formatSchedule } from "@/lib/scheduling";
+import { SERVICE_ORDER_METHOD_LABEL, SERVICE_ORDER_METHOD_DESC } from "@/lib/fulfillment-labels";
 import logoUrl from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/pilha/solicitar")({
@@ -94,6 +97,7 @@ function SolicitarPage() {
   >({ state: "idle" });
   const [arteExisting, setArteExisting] = useState<{ code: string; cycleEnd: string } | null>(null);
   const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | null>(null);
+  const [scheduleIso, setScheduleIso] = useState<string | null>(null);
   const [eventSel, setEventSel] = useState<EventSelection | null>(null);
   const [pickupEvents, setPickupEvents] = useState<PickupEvent[]>([]);
 
@@ -296,6 +300,10 @@ function SolicitarPage() {
         setErr("Preencha todos os campos do endereço de entrega, incluindo o WhatsApp.");
         return;
       }
+      if (!scheduleIso) {
+        setErr("Escolha a quinta-feira da entrega.");
+        return;
+      }
     }
     if (method === "correios") {
       if (!selectedQuote) {
@@ -320,8 +328,8 @@ function SolicitarPage() {
         return;
       }
     }
-    if (method === "presencial" && !pickupPoint) {
-      setErr("Selecione o ponto de retirada (Aruana ou Aeroporto).");
+    if (method === "presencial" && !scheduleIso && !pickupPoint) {
+      setErr("Escolha o dia e o horário da retirada.");
       return;
     }
     if (method === "arte_em_cards" && arteApplies) {
@@ -365,6 +373,8 @@ function SolicitarPage() {
               : null,
           arteEmCardsCode: arteCodeForSubmit,
           pickupPoint: method === "presencial" ? pickupPoint : null,
+          scheduledAt:
+            method === "presencial" || method === "app" ? (scheduleIso ?? null) : null,
           eventName: null,
           eventId: method === "evento" ? (eventSel?.eventId ?? null) : null,
           eventAt: method === "evento" ? (eventSel?.iso ?? null) : null,
@@ -427,6 +437,22 @@ function SolicitarPage() {
           {selectedIds.length} carta(s) selecionada(s) · {totalQty} unidade(s)
         </p>
 
+        {!result && selectedItems.length > 0 && (
+          <section className="rounded-xl border border-border bg-card p-4 mb-6">
+            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+              Incluído nesta solicitação
+            </h2>
+            <ul className="space-y-1 max-h-40 overflow-y-auto">
+              {selectedItems.map((i) => (
+                <li key={i.id} className="text-xs text-muted-foreground truncate">
+                  <span className="font-semibold text-foreground">{i.quantity}× {i.cardName}</span>
+                  {i.collection ? ` · ${i.collection}` : ""}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {result ? (
           <ResultView result={result} />
         ) : (
@@ -436,13 +462,14 @@ function SolicitarPage() {
               <div className="space-y-2">
                 {(
                   [
-                    { v: "correios", label: "📦 Correios (Mini Envios)", desc: "Cobrança do frete via Pix" },
-                    { v: "app", label: "🛵 Entrega em mãos (somente em Aracaju)", desc: "Entregador parceiro às quintas, a partir das 19h — taxa R$ 15, combinar via WhatsApp" },
-                    { v: "presencial", label: "🏪 Retirada Presencial", desc: "Aruana ou Aeroporto — gratuito" },
-                    { v: "evento", label: "🎪 Retirada em Eventos", desc: "Retire no evento que você vai comparecer — gratuito" },
-                    
-                  ] as { v: Method; label: string; desc: string }[]
+                    { v: "correios", icon: "📦" },
+                    { v: "app", icon: "🛵" },
+                    { v: "presencial", icon: "🏪" },
+                    { v: "evento", icon: "🎪" },
+                  ] as { v: Method; icon: string }[]
                 ).filter((opt) => opt.v !== "app" || handDeliveryEligible).map((opt) => {
+                  const label = `${opt.icon} ${SERVICE_ORDER_METHOD_LABEL[opt.v]}`;
+                  const desc = SERVICE_ORDER_METHOD_DESC[opt.v];
                   const disabled = opt.v === "arte_em_cards" && hasSealedSelected;
                   return (
                     <label
@@ -553,33 +580,31 @@ function SolicitarPage() {
             )}
 
             {method === "app" && (
-              <section className="rounded-xl border border-amber-300 bg-amber-50 p-5 mb-6">
-                <p className="text-sm">
-                  Após criar a solicitação, você será direcionado ao WhatsApp da loja para combinar disponibilidade e custo do aplicativo de entrega.
-                </p>
+              <section className="rounded-xl border border-border bg-card p-5 mb-6 space-y-3">
+                <h2 className="text-sm font-semibold uppercase tracking-widest">Dia da entrega</h2>
+                <ScheduleSlotPicker kind="delivery" value={scheduleIso} onChange={setScheduleIso} />
+                <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 space-y-1">
+                  <p className="font-semibold">
+                    Taxa de entrega: R$ {(HAND_DELIVERY_FEE_CENTS / 100).toFixed(2).replace(".", ",")} via Pix
+                  </p>
+                  <p>
+                    Chave Pix: <span className="font-mono font-semibold">{HAND_DELIVERY_PIX_KEY}</span>
+                  </p>
+                  <p>
+                    Após criar a solicitação, envie o comprovante pelo WhatsApp da loja. A entrega só é
+                    confirmada quando a loja confirmar o pagamento.
+                  </p>
+                </div>
               </section>
             )}
 
             {method === "presencial" && (
               <section className="rounded-xl border border-border bg-card p-5 mb-6 space-y-2">
-                <h2 className="text-sm font-semibold uppercase tracking-widest">Ponto de retirada</h2>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Retirada gratuita. Horário: 14h às 18h em dias úteis, mediante contato com 24h de antecedência.
+                <h2 className="text-sm font-semibold uppercase tracking-widest">Dia e horário da retirada</h2>
+                <p className="text-xs text-muted-foreground">
+                  Retirada em mãos gratuita, de segunda a sexta, das 14h às 19h.
                 </p>
-                <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/30">
-                  <input type="radio" name="pickup" checked={pickupPoint === "aruana"} onChange={() => setPickupPoint("aruana")} className="mt-1" />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold">Aruana</p>
-                    <p className="text-xs text-muted-foreground">Rua Josepha Andrade Irmã Fontes, 600 — Residencial Vista Aruana</p>
-                  </div>
-                </label>
-                <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/30">
-                  <input type="radio" name="pickup" checked={pickupPoint === "aeroporto"} onChange={() => setPickupPoint("aeroporto")} className="mt-1" />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold">Aeroporto</p>
-                    <p className="text-xs text-muted-foreground">Av. Silvério Leite Fontes, 1128 — Palm Ville Residence</p>
-                  </div>
-                </label>
+                <ScheduleSlotPicker kind="pickup" value={scheduleIso} onChange={setScheduleIso} />
               </section>
             )}
 
@@ -605,7 +630,9 @@ function SolicitarPage() {
                 <span className="font-bold">R$ {(totalCents / 100).toFixed(2).replace(".", ",")}</span>
               </div>
               {method === "app" && totalCents === 0 && (
-                <p className="text-xs text-muted-foreground mt-1">Sem cobrança online — combinar via WhatsApp.</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Sem cobrança online — a taxa de R$ {(HAND_DELIVERY_FEE_CENTS / 100).toFixed(2).replace(".", ",")} é paga via Pix e confirmada pela loja.
+                </p>
               )}
             </div>
 
@@ -619,6 +646,14 @@ function SolicitarPage() {
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {method === "app" ? "Criar solicitação" : totalCents > 0 ? "Gerar Pix" : (method === "presencial" || method === "evento" ? "Confirmar retirada" : "Confirmar solicitação")}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => nav({ to: "/pilha" })}
+              className="w-full mt-3 rounded-full border border-border bg-background px-5 py-3 text-sm font-semibold uppercase tracking-wide hover:bg-secondary"
+            >
+              Continuar guardando a pilha
             </button>
           </>
         )}
@@ -670,7 +705,10 @@ function SolicitarPage() {
 
         {result.whatsappUrl && (
           <div className="space-y-3">
-            <p className="text-sm">Solicitação registrada. Continue no WhatsApp para combinar o aplicativo de entrega:</p>
+            <p className="text-sm">
+              Solicitação registrada. Pague a taxa de R$ {(HAND_DELIVERY_FEE_CENTS / 100).toFixed(2).replace(".", ",")} via Pix
+              (chave: <span className="font-mono font-semibold">{HAND_DELIVERY_PIX_KEY}</span>) e envie o comprovante no WhatsApp da loja:
+            </p>
             <a
               href={result.whatsappUrl}
               target="_blank"
