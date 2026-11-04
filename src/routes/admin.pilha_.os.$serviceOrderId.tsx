@@ -29,7 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
-export const Route = createFileRoute("/admin/pilha/os/$serviceOrderId")({
+export const Route = createFileRoute("/admin/pilha_/os/$serviceOrderId")({
   head: () => ({ meta: [{ title: "Ordem de Serviço — Sevii Admin" }] }),
   component: AdminServiceOrderDetailPage,
 });
