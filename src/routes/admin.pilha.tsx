@@ -201,6 +201,8 @@ function AdminPilhaPage() {
   const bulkDeleteStackItems = useServerFn(adminBulkDeleteStackItems);
   const [orderInput, setOrderInput] = useState("");
   const [addingOrder, setAddingOrder] = useState(false);
+  const [showAddOrder, setShowAddOrder] = useState(false);
+  const [search, setSearch] = useState("");
   const [stackSelected, setStackSelected] = useState<Record<string, Set<string>>>({});
   const [stackMethod, setStackMethod] = useState<Record<string, "correios" | "app" | "arte_em_cards" | "presencial" | "evento">>({});
   const [stackStatus, setStackStatus] = useState<Record<string, "paid" | "preparing" | "dispatched" | "delivered">>({});
@@ -239,8 +241,9 @@ function AdminPilhaPage() {
   const { unreadTargets } = useAdminNotifications(300);
   const filteredServiceOrders = useMemo(
     () => data.serviceOrders.filter((o) => selectedOSStatuses.includes(o.status) &&
-      matchesFulfillmentFilter(ff, { id: o.id, modality: modalityOfServiceOrder(o.method), eventId: (o as any).event_id, scheduledAt: (o as any).scheduled_at }, unreadTargets)),
-    [data.serviceOrders, selectedOSStatuses, ff, unreadTargets],
+      matchesFulfillmentFilter(ff, { id: o.id, modality: modalityOfServiceOrder(o.method), eventId: (o as any).event_id, scheduledAt: (o as any).scheduled_at }, unreadTargets) &&
+      serviceOrderMatchesSearch(o, search)),
+    [data.serviceOrders, selectedOSStatuses, ff, unreadTargets, search],
   );
   // Pilhas que já escolheram a modalidade e aguardam ação da loja (OS paga ou em preparação).
   const pendingOSByStack = useMemo(() => {
@@ -258,8 +261,9 @@ function AdminPilhaPage() {
   };
   const visibleStacks = useMemo(
     () => (showEmptyStacks ? data.stacks : data.stacks.filter((s) => s.items.length > 0))
-      .filter((s) => matchesFulfillmentFilter(ff, stackRow(s), unreadTargets)),
-    [data.stacks, showEmptyStacks, ff, unreadTargets, pendingOSByStack],
+      .filter((s) => matchesFulfillmentFilter(ff, stackRow(s), unreadTargets))
+      .filter((s) => stackMatchesSearch(s, search)),
+    [data.stacks, showEmptyStacks, ff, unreadTargets, pendingOSByStack, search],
   );
   const hiddenEmptyCount = data.stacks.length - data.stacks.filter((s) => s.items.length > 0).length;
 
