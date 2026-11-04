@@ -300,6 +300,10 @@ function SolicitarPage() {
         setErr("Preencha todos os campos do endereço de entrega, incluindo o WhatsApp.");
         return;
       }
+      if (!scheduleIso) {
+        setErr("Escolha a quinta-feira da entrega.");
+        return;
+      }
     }
     if (method === "correios") {
       if (!selectedQuote) {
@@ -324,8 +328,8 @@ function SolicitarPage() {
         return;
       }
     }
-    if (method === "presencial" && !pickupPoint) {
-      setErr("Selecione o ponto de retirada (Aruana ou Aeroporto).");
+    if (method === "presencial" && !scheduleIso && !pickupPoint) {
+      setErr("Escolha o dia e o horário da retirada.");
       return;
     }
     if (method === "arte_em_cards" && arteApplies) {
@@ -369,6 +373,8 @@ function SolicitarPage() {
               : null,
           arteEmCardsCode: arteCodeForSubmit,
           pickupPoint: method === "presencial" ? pickupPoint : null,
+          scheduledAt:
+            method === "presencial" || method === "app" ? (scheduleIso ?? null) : null,
           eventName: null,
           eventId: method === "evento" ? (eventSel?.eventId ?? null) : null,
           eventAt: method === "evento" ? (eventSel?.iso ?? null) : null,
