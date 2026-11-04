@@ -948,10 +948,10 @@ function AdminPilhaPage() {
                               }
                               className="rounded-md border border-border bg-background px-2 py-1 text-xs"
                             >
-                              <option value="presencial">Retirada Presencial</option>
-                              <option value="arte_em_cards">Retirada Arte em Cards</option>
-                              <option value="app">Envio por App</option>
-                              <option value="correios">Envio Correios</option>
+                              <option value="presencial">{serviceOrderMethodLabel("presencial")}</option>
+                              <option value="arte_em_cards">{serviceOrderMethodLabel("arte_em_cards")}</option>
+                              <option value="app">{serviceOrderMethodLabel("app")}</option>
+                              <option value="correios">{serviceOrderMethodLabel("correios")}</option>
                             </select>
                           </label>
                           <label className="text-xs">
