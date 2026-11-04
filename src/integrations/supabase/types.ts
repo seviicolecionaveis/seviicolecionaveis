@@ -787,6 +787,8 @@ export type Database = {
           language: string | null
           order_id: string | null
           order_item_id: string | null
+          picked_at: string | null
+          picked_by: string | null
           quantity: number
           service_order_id: string | null
           stack_id: string
@@ -810,6 +812,8 @@ export type Database = {
           language?: string | null
           order_id?: string | null
           order_item_id?: string | null
+          picked_at?: string | null
+          picked_by?: string | null
           quantity: number
           service_order_id?: string | null
           stack_id: string
@@ -833,6 +837,8 @@ export type Database = {
           language?: string | null
           order_id?: string | null
           order_item_id?: string | null
+          picked_at?: string | null
+          picked_by?: string | null
           quantity?: number
           service_order_id?: string | null
           stack_id?: string
@@ -2972,7 +2978,9 @@ export type Database = {
           code: number
           complement: string | null
           created_at: string
+          edit_history: Json
           event_id: string | null
+          fee_status: string | null
           id: string
           method: string
           neighborhood: string | null
@@ -2981,6 +2989,7 @@ export type Database = {
           payment_order_id: string | null
           phone: string | null
           recipient_name: string | null
+          schedule_kind: string | null
           scheduled_at: string | null
           shipping_cost_cents: number
           stack_id: string
@@ -3002,7 +3011,9 @@ export type Database = {
           code?: number
           complement?: string | null
           created_at?: string
+          edit_history?: Json
           event_id?: string | null
+          fee_status?: string | null
           id?: string
           method: string
           neighborhood?: string | null
@@ -3011,6 +3022,7 @@ export type Database = {
           payment_order_id?: string | null
           phone?: string | null
           recipient_name?: string | null
+          schedule_kind?: string | null
           scheduled_at?: string | null
           shipping_cost_cents?: number
           stack_id: string
@@ -3032,7 +3044,9 @@ export type Database = {
           code?: number
           complement?: string | null
           created_at?: string
+          edit_history?: Json
           event_id?: string | null
+          fee_status?: string | null
           id?: string
           method?: string
           neighborhood?: string | null
@@ -3041,6 +3055,7 @@ export type Database = {
           payment_order_id?: string | null
           phone?: string | null
           recipient_name?: string | null
+          schedule_kind?: string | null
           scheduled_at?: string | null
           shipping_cost_cents?: number
           stack_id?: string
