@@ -319,12 +319,42 @@ export const adminEditServiceOrder = createServerFn({ method: "POST" })
 
     // Avisa cliente e loja pelo ponto central de alertas de modalidade.
     try {
+      const { data: full } = await supabaseAdmin
+        .from("service_orders")
+        .select("code, user_id, method, scheduled_at, schedule_kind, event_id, phone, recipient_name")
+        .eq("id", so.id)
+        .maybeSingle();
+      const { modalityOfServiceOrder } = await import("@/lib/fulfillment-alerts");
+      const { formatSchedule } = await import("@/lib/scheduling");
+      const { data: prof } = await supabaseAdmin
+        .from("profiles")
+        .select("full_name, phone")
+        .eq("user_id", full.user_id)
+        .maybeSingle();
+      let custEmail: string | null = null;
+      try {
+        const { data: u } = await supabaseAdmin.auth.admin.getUserById(full.user_id);
+        custEmail = u?.user?.email ?? null;
+      } catch {
+        // ignore
+      }
       const { notifyFulfillmentChange } = await import("@/lib/fulfillment-alerts.server");
       await notifyFulfillmentChange({
-        kind: "service_order",
-        serviceOrderId: so.id,
+        targetType: "service_order",
+        targetId: so.id,
+        code: `OS #${full.code}`,
         action: "changed",
-        reason: data.reason,
+        source: "admin",
+        modality: modalityOfServiceOrder(full.method),
+        customerName: prof?.full_name ?? full.recipient_name ?? null,
+        customerEmail: custEmail,
+        customerPhone: full.phone ?? prof?.phone ?? null,
+        scheduledAt: full.scheduled_at ?? null,
+        when: full.scheduled_at
+          ? formatSchedule(full.schedule_kind ?? "pickup", full.scheduled_at)
+          : null,
+        eventId: full.event_id ?? null,
+        dedupeExtra: `${Date.now()}`,
       });
     } catch (e) {
       console.error("[adminEditServiceOrder] alerta falhou:", e);
