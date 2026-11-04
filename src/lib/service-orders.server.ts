@@ -30,6 +30,7 @@ export interface CreateServiceOrderInput {
   eventName?: string | null;
   eventId?: string | null;
   eventAt?: string | null;
+  scheduledAt?: string | null;
   notes?: string | null;
   cpf?: string | null;
 }
@@ -115,7 +116,11 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
       addr = saved ?? null;
     }
     if (!isHandDeliveryArea(addr)) throw new Error(HAND_DELIVERY_AREA_MESSAGE);
-    amountCents = 0;
+    if (!input.scheduledAt) throw new Error("Escolha a quinta-feira da entrega.");
+    const { validateSchedule } = await import("@/lib/scheduling");
+    const dErr = validateSchedule("delivery", input.scheduledAt);
+    if (dErr) throw new Error(dErr);
+    amountCents = 0; // taxa de R$ 15 paga via Pix e confirmada só pelo admin
   } else if (input.method === "evento") {
     if (!input.eventId || !input.eventAt) throw new Error("Escolha o evento, o dia e o horário da retirada.");
     const { data: ev } = await supabaseAdmin.from("events").select("*").eq("id", input.eventId).maybeSingle();
@@ -141,7 +146,14 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
     eventName = ev.name;
     amountCents = 0;
   } else if (input.method === "presencial") {
-    if (!input.pickupPoint) throw new Error("Selecione o ponto de retirada (Aruana ou Aeroporto).");
+    if (!input.scheduledAt && !input.pickupPoint) {
+      throw new Error("Escolha o dia e o horário da retirada.");
+    }
+    if (input.scheduledAt) {
+      const { validateSchedule } = await import("@/lib/scheduling");
+      const pErr = validateSchedule("pickup", input.scheduledAt);
+      if (pErr) throw new Error(pErr);
+    }
     amountCents = 0;
   }
 
