@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ImageOff } from "lucide-react";
+import { ImageOff, Search } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { FulfillmentFilters, ModalityBadge, matchesFulfillmentFilter, DEFAULT_FULFILLMENT_FILTER } from "@/components/admin/FulfillmentFilters";
 import { useAdminNotifications } from "@/hooks/useAdminNotifications";
@@ -19,6 +19,7 @@ import {
   type AdminStack,
   type AdminStackItem,
 } from "@/lib/admin-pilha.functions";
+import { serviceOrderMatchesSearch, stackMatchesSearch } from "@/lib/pilha-search";
 
 
 export const Route = createFileRoute("/admin/pilha")({
