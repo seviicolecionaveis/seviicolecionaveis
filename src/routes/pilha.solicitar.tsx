@@ -437,6 +437,22 @@ function SolicitarPage() {
           {selectedIds.length} carta(s) selecionada(s) · {totalQty} unidade(s)
         </p>
 
+        {!result && selectedItems.length > 0 && (
+          <section className="rounded-xl border border-border bg-card p-4 mb-6">
+            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+              Incluído nesta solicitação
+            </h2>
+            <ul className="space-y-1 max-h-40 overflow-y-auto">
+              {selectedItems.map((i) => (
+                <li key={i.id} className="text-xs text-muted-foreground truncate">
+                  <span className="font-semibold text-foreground">{i.quantity}× {i.cardName}</span>
+                  {i.collection ? ` · ${i.collection}` : ""}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {result ? (
           <ResultView result={result} />
         ) : (
@@ -614,7 +630,9 @@ function SolicitarPage() {
                 <span className="font-bold">R$ {(totalCents / 100).toFixed(2).replace(".", ",")}</span>
               </div>
               {method === "app" && totalCents === 0 && (
-                <p className="text-xs text-muted-foreground mt-1">Sem cobrança online — combinar via WhatsApp.</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Sem cobrança online — a taxa de R$ {(HAND_DELIVERY_FEE_CENTS / 100).toFixed(2).replace(".", ",")} é paga via Pix e confirmada pela loja.
+                </p>
               )}
             </div>
 
@@ -628,6 +646,14 @@ function SolicitarPage() {
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {method === "app" ? "Criar solicitação" : totalCents > 0 ? "Gerar Pix" : (method === "presencial" || method === "evento" ? "Confirmar retirada" : "Confirmar solicitação")}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => nav({ to: "/pilha" })}
+              className="w-full mt-3 rounded-full border border-border bg-background px-5 py-3 text-sm font-semibold uppercase tracking-wide hover:bg-secondary"
+            >
+              Continuar guardando a pilha
             </button>
           </>
         )}
@@ -679,7 +705,10 @@ function SolicitarPage() {
 
         {result.whatsappUrl && (
           <div className="space-y-3">
-            <p className="text-sm">Solicitação registrada. Continue no WhatsApp para combinar o aplicativo de entrega:</p>
+            <p className="text-sm">
+              Solicitação registrada. Pague a taxa de R$ {(HAND_DELIVERY_FEE_CENTS / 100).toFixed(2).replace(".", ",")} via Pix
+              (chave: <span className="font-mono font-semibold">{HAND_DELIVERY_PIX_KEY}</span>) e envie o comprovante no WhatsApp da loja:
+            </p>
             <a
               href={result.whatsappUrl}
               target="_blank"
