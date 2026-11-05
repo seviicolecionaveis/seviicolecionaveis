@@ -251,7 +251,7 @@ export function AuctionOrdersPage() {
       totalRevenue: totalRevenueCents / 100,
       pendingRevenue: pendingRevenueCents / 100,
     };
-  }, [orders]);
+  }, [auctionScopedOrders]);
 
   // Filtering
   const filteredOrders = useMemo(() => {
@@ -438,10 +438,10 @@ export function AuctionOrdersPage() {
                   : "bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
             >
-              Todos ({orders.length})
+              Todos ({auctionScopedOrders.length})
             </button>
             {Object.entries(STATUS_CONFIG).map(([key, config]) => {
-              const count = orders.filter((o) => o.status === key).length;
+              const count = auctionScopedOrders.filter((o) => o.status === key).length;
               if (count === 0 && selectedStatus !== key) return null;
               return (
                 <button
