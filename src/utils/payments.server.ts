@@ -1360,7 +1360,7 @@ export async function regeneratePixForExistingOrderServer(orderId: string, userI
   const { data: order, error } = await supabaseAdmin
     .from("orders")
     .select(
-      "id, user_id, status, total_cents, email, recipient_name, cpf",
+      "id, user_id, status, total_cents, email, recipient_name, cpf, auction_id, subtotal_cents, discount_cents, pix_discount_cents",
     )
     .eq("id", orderId)
     .maybeSingle();
@@ -1369,6 +1369,28 @@ export async function regeneratePixForExistingOrderServer(orderId: string, userI
   if (paymentToken) await assertAuctionPaymentLink(orderId, paymentToken);
   else if (!userId || !(await canPayOrder(order.user_id, userId))) throw new Error("Pedido não encontrado");
   if (order.status !== "pending") throw new Error("Este pedido não está mais pendente.");
+
+  // Leilão: 3% no Pix gerado até 23h59 (Fortaleza) do dia do encerramento.
+  if (order.auction_id) {
+    const { auctionPixDiscountEligible, computeAuctionPixDiscountCents } = await import("@/lib/auction-pix-discount");
+    const { data: auction } = await supabaseAdmin.from("auctions").select("closed_at, scheduled_end").eq("id", order.auction_id).maybeSingle();
+    const endIso = auction?.closed_at ?? auction?.scheduled_end ?? null;
+    const prevPix = order.pix_discount_cents ?? 0;
+    const otherDiscount = (order.discount_cents ?? 0) - prevPix;
+    const newPix = auctionPixDiscountEligible(endIso ? new Date(endIso) : null, new Date())
+      ? computeAuctionPixDiscountCents(order.subtotal_cents ?? 0, otherDiscount)
+      : 0;
+    if (newPix !== prevPix) {
+      const newTotal = Math.max(0, order.total_cents + prevPix - newPix);
+      const { error: updErr } = await supabaseAdmin.from("orders").update({
+        pix_discount_cents: newPix,
+        discount_cents: otherDiscount + newPix,
+        total_cents: newTotal,
+      }).eq("id", order.id).eq("status", "pending");
+      if (updErr) throw new Error(updErr.message);
+      order.total_cents = newTotal;
+    }
+  }
 
   const payer = await resolveExistingOrderPayer(order);
   if (!payer.cpf) throw new Error('Complete ou corrija o CPF em Minha conta antes de gerar o Pix.');
