@@ -230,11 +230,17 @@ export function AuctionOrdersPage() {
     else toast.error("Permita abrir a janela do WhatsApp ou copie o link de pagamento.");
   };
 
+  // Orders scoped to the selected auction (drives KPIs and status counts)
+  const auctionScopedOrders = useMemo(() => {
+    if (selectedAuctionId === "all") return orders;
+    return orders.filter((o) => o.auction_id === selectedAuctionId);
+  }, [orders, selectedAuctionId]);
+
   // KPIs
   const kpis = useMemo(() => {
-    const totalCount = orders.length;
-    const pendingOrders = orders.filter((o) => o.status === "pending");
-    const paidOrders = orders.filter((o) => ["paid", "preparing", "shipped", "delivered"].includes(o.status));
+    const totalCount = auctionScopedOrders.length;
+    const pendingOrders = auctionScopedOrders.filter((o) => o.status === "pending");
+    const paidOrders = auctionScopedOrders.filter((o) => ["paid", "preparing", "shipped", "delivered"].includes(o.status));
     const totalRevenueCents = paidOrders.reduce((sum, o) => sum + (o.total_cents || 0), 0);
     const pendingRevenueCents = pendingOrders.reduce((sum, o) => sum + (o.total_cents || 0), 0);
 
@@ -245,7 +251,7 @@ export function AuctionOrdersPage() {
       totalRevenue: totalRevenueCents / 100,
       pendingRevenue: pendingRevenueCents / 100,
     };
-  }, [orders]);
+  }, [auctionScopedOrders]);
 
   // Filtering
   const filteredOrders = useMemo(() => {
@@ -284,6 +290,14 @@ export function AuctionOrdersPage() {
       );
     });
   }, [orders, searchQuery, selectedStatus, selectedAuctionId]);
+
+  const selectedAuction = useMemo(
+    () => auctions.find((a) => a.id === selectedAuctionId) ?? null,
+    [auctions, selectedAuctionId]
+  );
+  const kpiScopeLabel = selectedAuction
+    ? `Leilão #${selectedAuction.auction_number}`
+    : "Todos os leilões";
 
   if (authLoading) {
     return (
@@ -344,7 +358,7 @@ export function AuctionOrdersPage() {
               <Package className="h-4 w-4" />
             </div>
             <p className="text-2xl font-extrabold">{kpis.totalCount}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Originados de leilões</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{kpiScopeLabel}</p>
           </div>
 
           <div className="rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20 p-4">
@@ -375,7 +389,7 @@ export function AuctionOrdersPage() {
             <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">
               R$ {kpis.totalRevenue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Arrecadação de leilões</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{kpiScopeLabel}</p>
           </div>
         </div>
 
@@ -432,10 +446,10 @@ export function AuctionOrdersPage() {
                   : "bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
             >
-              Todos ({orders.length})
+              Todos ({auctionScopedOrders.length})
             </button>
             {Object.entries(STATUS_CONFIG).map(([key, config]) => {
-              const count = orders.filter((o) => o.status === key).length;
+              const count = auctionScopedOrders.filter((o) => o.status === key).length;
               if (count === 0 && selectedStatus !== key) return null;
               return (
                 <button
