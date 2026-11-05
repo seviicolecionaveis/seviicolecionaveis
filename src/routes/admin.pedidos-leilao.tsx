@@ -230,11 +230,17 @@ export function AuctionOrdersPage() {
     else toast.error("Permita abrir a janela do WhatsApp ou copie o link de pagamento.");
   };
 
+  // Orders scoped to the selected auction (drives KPIs and status counts)
+  const auctionScopedOrders = useMemo(() => {
+    if (selectedAuctionId === "all") return orders;
+    return orders.filter((o) => o.auction_id === selectedAuctionId);
+  }, [orders, selectedAuctionId]);
+
   // KPIs
   const kpis = useMemo(() => {
-    const totalCount = orders.length;
-    const pendingOrders = orders.filter((o) => o.status === "pending");
-    const paidOrders = orders.filter((o) => ["paid", "preparing", "shipped", "delivered"].includes(o.status));
+    const totalCount = auctionScopedOrders.length;
+    const pendingOrders = auctionScopedOrders.filter((o) => o.status === "pending");
+    const paidOrders = auctionScopedOrders.filter((o) => ["paid", "preparing", "shipped", "delivered"].includes(o.status));
     const totalRevenueCents = paidOrders.reduce((sum, o) => sum + (o.total_cents || 0), 0);
     const pendingRevenueCents = pendingOrders.reduce((sum, o) => sum + (o.total_cents || 0), 0);
 
