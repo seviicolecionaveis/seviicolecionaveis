@@ -291,6 +291,14 @@ export function AuctionOrdersPage() {
     });
   }, [orders, searchQuery, selectedStatus, selectedAuctionId]);
 
+  const selectedAuction = useMemo(
+    () => auctions.find((a) => a.id === selectedAuctionId) ?? null,
+    [auctions, selectedAuctionId]
+  );
+  const kpiScopeLabel = selectedAuction
+    ? `Leilão #${selectedAuction.auction_number}`
+    : "Todos os leilões";
+
   if (authLoading) {
     return (
       <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">
