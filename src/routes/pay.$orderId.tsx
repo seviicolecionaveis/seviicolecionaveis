@@ -203,7 +203,6 @@ function PayOrderPage() {
           <p className="text-sm text-muted-foreground mt-1">
             Pedido <span className="font-mono">#{order.id.slice(0, 8).toUpperCase()}</span> · Total <span className="font-semibold text-foreground">R$ {total}</span>
           </p>
-          {isAuction && <p className="text-sm text-primary mt-1">3% de desconto no Pix gerado até 23h59 do dia do encerramento do leilão (aplicado ao gerar o Pix).</p>}
         </div>
 
         {user && <div className="space-y-2 border-b border-border pb-4"><p className="text-sm">Saldo disponível: R$ {((credit.data?credit.data.balanceCents-credit.data.reservedCents:0)/100).toFixed(2).replace('.',',')}</p><label className="text-sm">Usar saldo (R$)<input aria-label="Usar saldo" type="number" min="0" step="0.01" max={Math.min(order.total_cents,credit.data?credit.data.balanceCents-credit.data.reservedCents:0)/100} value={creditInput/100} onChange={e=>{setCreditInput(Math.max(0,Math.round(Number(e.target.value)*100)));setShowCard(false)}} className="block mt-2 w-full rounded-md border border-border bg-background p-2"/></label><p className="text-sm font-semibold">Restante a pagar: R$ {(Math.max(0,order.total_cents-creditInput)/100).toFixed(2).replace('.',',')}</p></div>}
