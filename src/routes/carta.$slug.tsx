@@ -186,6 +186,11 @@ function CardDetailPage() {
         )}
       </main>
 
+      {slug === "cri-caos-ascendente-122-086-mega-greninja-ex" && (
+        <div className="fixed inset-x-0 top-0 z-[1000] bg-destructive px-4 py-2 text-center text-sm font-bold text-destructive-foreground shadow-lg">
+          🔥 20% DE DESCONTO nesta carta! De <span className="line-through opacity-80">R$ 750,00</span> por R$ 600,00
+        </div>
+      )}
       {!blockedTestCard && (
         <CardModal card={card} onClose={() => setClosed(true)} />
       )}
