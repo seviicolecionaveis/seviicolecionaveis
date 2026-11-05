@@ -260,6 +260,13 @@
       "when": 1793824861420,
       "tag": "0036_pilha_detail_pages_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1793893203828,
+      "tag": "0037_auto_merge_whatsapp_on_signup",
+      "breakpoints": true
     }
   ]
 }

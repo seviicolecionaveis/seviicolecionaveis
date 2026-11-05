@@ -3581,6 +3581,7 @@ export type Database = {
         Returns: Json
       }
       merge_whatsapp_accounts_into: { Args: { _real: string }; Returns: number }
+      merge_whatsapp_into_internal: { Args: { _real: string }; Returns: number }
       normalize_br_phone: { Args: { _raw: string }; Returns: string }
       public_event_confirmed_count: {
         Args: { _event_id: string }
