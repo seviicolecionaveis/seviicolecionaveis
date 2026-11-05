@@ -11,6 +11,10 @@ describe("desconto Pix de leilão", () => {
   it("não vale a partir de 00h do dia seguinte", () => {
     expect(auctionPixDiscountEligible(end, new Date("2026-11-06T03:00:00Z"))).toBe(false);
   });
+  it("não vale para leilões já encerrados antes da regra", () => {
+    const old = new Date("2026-11-05T18:00:00Z");
+    expect(auctionPixDiscountEligible(old, new Date("2026-11-05T19:00:00Z"))).toBe(false);
+  });
   it("é 3% do valor das cartas", () => {
     expect(computeAuctionPixDiscountCents(10000, 0)).toBe(300);
   });
