@@ -15,6 +15,7 @@ import { getMpCustomerForCheckout } from "@/lib/saved-cards.functions";
 import { useQuery } from "@tanstack/react-query";
 import { getCreditStatement } from "@/lib/customer-finance.functions";
 import { toast } from "sonner";
+import { auctionPixDiscountEligible, AUCTION_PIX_DISCOUNT_PERCENT } from "@/lib/auction-pix-discount";
 import { copyToClipboard } from "@/lib/clipboard";
 import { Copy, Check, QrCode, CreditCard, ArrowLeft } from "lucide-react";
 
@@ -104,7 +105,7 @@ function PayOrderPage() {
       try { await (supabase as any).rpc("claim_my_whatsapp_orders"); } catch {}
       const { data } = await supabase
         .from("orders")
-        .select("id, status, total_cents, store_credit_cents, payment_method, pix_qr_code, pix_qr_code_base64, pix_expires_at, mercadopago_payment_id, recipient_name, origin, auction_id")
+        .select("id, status, total_cents, store_credit_cents, payment_method, pix_qr_code, pix_qr_code_base64, pix_expires_at, mercadopago_payment_id, recipient_name, origin, auction_id, created_at")
         .eq("id", orderId)
         .maybeSingle();
       setOrder(data);
@@ -184,6 +185,7 @@ function PayOrderPage() {
   }
 
   const isAuction = paymentToken ? true : auctionOrder(order.origin, order.auction_id);
+  const showAuctionPixDiscount = isAuction && order.status === "pending" && !!order.created_at && auctionPixDiscountEligible(new Date(order.created_at), new Date());
   const total = (order.total_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 
   return (
@@ -203,6 +205,7 @@ function PayOrderPage() {
           <p className="text-sm text-muted-foreground mt-1">
             Pedido <span className="font-mono">#{order.id.slice(0, 8).toUpperCase()}</span> · Total <span className="font-semibold text-foreground">R$ {total}</span>
           </p>
+          {showAuctionPixDiscount && <p className="text-sm text-primary mt-2 font-medium">{AUCTION_PIX_DISCOUNT_PERCENT}% de desconto no Pix gerado até 23h59 de hoje (dia do encerramento do leilão). O desconto é aplicado ao gerar o Pix.</p>}
         </div>
 
         {user && <div className="space-y-2 border-b border-border pb-4"><p className="text-sm">Saldo disponível: R$ {((credit.data?credit.data.balanceCents-credit.data.reservedCents:0)/100).toFixed(2).replace('.',',')}</p><label className="text-sm">Usar saldo (R$)<input aria-label="Usar saldo" type="number" min="0" step="0.01" max={Math.min(order.total_cents,credit.data?credit.data.balanceCents-credit.data.reservedCents:0)/100} value={creditInput/100} onChange={e=>{setCreditInput(Math.max(0,Math.round(Number(e.target.value)*100)));setShowCard(false)}} className="block mt-2 w-full rounded-md border border-border bg-background p-2"/></label><p className="text-sm font-semibold">Restante a pagar: R$ {(Math.max(0,order.total_cents-creditInput)/100).toFixed(2).replace('.',',')}</p></div>}
