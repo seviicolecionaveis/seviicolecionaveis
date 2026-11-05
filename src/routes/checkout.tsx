@@ -23,6 +23,7 @@ import { Copy, Check, QrCode, CreditCard, Loader2, ShieldCheck, Sparkles, Messag
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
 import { computeBundleDiscount } from "@/lib/bundles";
+import { noDiscountSubtotalCents } from "@/lib/no-discount-items";
 import { copyToClipboard } from "@/lib/clipboard";
 import { ScheduleSlotPicker } from "@/components/ScheduleSlotPicker";
 import { EventSlotPicker, type EventSelection } from "@/components/EventSlotPicker";
@@ -361,7 +362,8 @@ function CheckoutPage() {
   const bundleDiscountCents = bundle.bundleDiscountCents;
   const bundleSubtotalCents = bundle.bundleSubtotalCents;
   // Base sobre a qual cupom e Pix podem incidir (exclui itens em combo)
-  const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundleSubtotalCents);
+  const noDiscountCents = noDiscountSubtotalCents(items);
+  const nonBundleSubtotalCents = Math.max(0, subtotalCents - bundleSubtotalCents - noDiscountCents);
 
   // Valida cupom no servidor (debounced) — cobre cupons da tabela `coupons` (vales-presente, broadcasts)
   useEffect(() => {
@@ -394,12 +396,12 @@ function CheckoutPage() {
   // Pontos resgatados — base = subtotal − combo − cupom, limitado ao
   // valor das cartas avulsas (lacrados, acessórios, videogames e painéis
   // acumulam pontos, mas não podem ser pagos com pontos).
-  const singlesCents = singlesSubtotalCents(items);
+  const singlesCents = Math.max(0, singlesSubtotalCents(items) - noDiscountCents);
   const pointsMaxDiscountableCents = Math.min(
     singlesCents,
     Math.max(
       0,
-      subtotalCents - bundleDiscountCents - couponDiscountCents,
+      subtotalCents - noDiscountCents - bundleDiscountCents - couponDiscountCents,
     ),
   );
   const pointsRedeemed = normalizeRedeemPoints(pointsInput, pointsBalance, pointsMaxDiscountableCents);
