@@ -358,7 +358,7 @@ export function AuctionOrdersPage() {
               <Package className="h-4 w-4" />
             </div>
             <p className="text-2xl font-extrabold">{kpis.totalCount}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Originados de leilões</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{kpiScopeLabel}</p>
           </div>
 
           <div className="rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20 p-4">
@@ -389,7 +389,7 @@ export function AuctionOrdersPage() {
             <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">
               R$ {kpis.totalRevenue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Arrecadação de leilões</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{kpiScopeLabel}</p>
           </div>
         </div>
 
