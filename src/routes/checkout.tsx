@@ -175,6 +175,10 @@ function CheckoutPage() {
   const [stackTermsAccepted, setStackTermsAccepted] = useState(false);
   const [stackTermsOpen, setStackTermsOpen] = useState(false);
   const [pickupPoint, setPickupPoint] = useState<"aruana" | "aeroporto" | "app" | "evento" | null>(null);
+  const aracajuNoCorreios = isAracajuCep(form.cep);
+  useEffect(() => {
+    if (aracajuNoCorreios && shipping === "fixed") setShipping("arrange");
+  }, [aracajuNoCorreios, shipping]);
   const handDeliveryEligible = isHandDeliveryArea({ city: form.city, state: form.state, cep: form.cep });
   useEffect(() => {
     if (!handDeliveryEligible && pickupPoint === "app") {
@@ -983,6 +987,24 @@ function CheckoutPage() {
                 )}
               </div>
 
+              {aracajuNoCorreios ? (
+                <div className="rounded-lg border border-border p-4 space-y-2">
+                  <p className="text-sm font-semibold">🛵 Envio semanal por entregador (Aracaju)</p>
+                  <p className="text-xs text-muted-foreground">
+                    Para Aracaju não enviamos pelos Correios. Escolha retirada, entrega em mãos ou Pilha de cartas — ou combine o envio semanal por entregador (quintas-feiras), solicitando com pelo menos 24h de antecedência.
+                  </p>
+                  <Button asChild variant="outline" className="w-full">
+                    <a
+                      href={`https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent("Olá! Sou de Aracaju e quero programar o envio por entregador na quinta-feira.")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2"
+                    >
+                      <MessageCircle className="h-4 w-4" /> Programar envio no WhatsApp
+                    </a>
+                  </Button>
+                </div>
+              ) : (
               <div className="rounded-lg border border-border p-4">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-semibold">🚚 Frete rastreado (Superfrete)</p>

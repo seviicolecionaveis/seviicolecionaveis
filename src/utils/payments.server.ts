@@ -96,6 +96,10 @@ async function assertSchedule(data: {
   schedule?: { kind: "delivery" | "pickup" | "event"; at: string; eventId?: string | null } | null;
   address?: { city?: string | null; state?: string | null; cep?: string | null } | null;
 }) {
+  if (data.shippingMethod === "fixed") {
+    const { isAracajuCep, ARACAJU_NO_CORREIOS_MESSAGE } = await import("@/lib/hand-delivery");
+    if (isAracajuCep(data.address?.cep)) throw new Error(ARACAJU_NO_CORREIOS_MESSAGE);
+  }
   if (data.shippingMethod !== "arrange") return;
   if (data.schedule?.kind === "delivery") {
     const { isHandDeliveryArea, HAND_DELIVERY_AREA_MESSAGE } = await import("@/lib/hand-delivery");

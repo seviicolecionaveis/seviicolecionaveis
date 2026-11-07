@@ -36,3 +36,11 @@ export const HAND_DELIVERY_FEE_LABELS = {
 export function handDeliveryFeeLabel(status: string | null | undefined): string {
   return isHandDeliveryFeePaid(status) ? HAND_DELIVERY_FEE_LABELS.paid : HAND_DELIVERY_FEE_LABELS.pending;
 }
+
+/** CEP de Aracaju (49000-000 a 49099-999): Correios desabilitado, só retirada/entrega em mãos ou Pilha. */
+export function isAracajuCep(cep: string | null | undefined): boolean {
+  const d = (cep ?? "").replace(/\D/g, "");
+  return d.length === 8 && d.startsWith("490");
+}
+export const ARACAJU_NO_CORREIOS_MESSAGE =
+  "Para endereços de Aracaju o envio pelos Correios não está disponível. Escolha retirada, entrega em mãos ou Pilha de cartas.";
