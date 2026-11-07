@@ -989,6 +989,9 @@ function CheckoutPage() {
 
               {aracajuNoCorreios ? (
                 <div className="rounded-lg border border-border p-4 space-y-2">
+                  <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm font-semibold text-destructive">
+                    ⚠️ Não é permitido o envio pelos Correios para quem mora em Aracaju.
+                  </div>
                   <p className="text-sm font-semibold">🛵 Envio semanal por entregador (Aracaju)</p>
                   <p className="text-xs text-muted-foreground">
                     Para Aracaju não enviamos pelos Correios. Escolha retirada, entrega em mãos ou Pilha de cartas — ou combine o envio semanal por entregador (quintas-feiras), solicitando com pelo menos 24h de antecedência.
