@@ -18,7 +18,7 @@ import {
 import { getMpCustomerForCheckout } from "@/lib/saved-cards.functions";
 import { getShippingQuotes } from "@/utils/shipping.functions";
 import { toast } from "sonner";
-import { isHandDeliveryArea, HAND_DELIVERY_AREA_MESSAGE } from "@/lib/hand-delivery";
+import { isHandDeliveryArea, HAND_DELIVERY_AREA_MESSAGE, isAracajuCep } from "@/lib/hand-delivery";
 import { Copy, Check, QrCode, CreditCard, Loader2, ShieldCheck, Sparkles, MessageCircle, X } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { TrustBadges } from "@/components/TrustBadges";
