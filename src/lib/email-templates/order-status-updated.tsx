@@ -12,6 +12,7 @@ interface PartialCancellation {
   refundMethod?: 'mercadopago' | 'coupon' | 'manual' | 'customer_choice'
   couponCode?: string | null
   adminNote?: string | null
+  choiceLinks?: { label?: string; url?: string }[]
 }
 
 interface CancelledItem {
@@ -22,8 +23,9 @@ interface CancelledItem {
 interface FullCancellation {
   items?: CancelledItem[]
   refundCents?: number
-  refundMethod?: 'mercadopago' | 'coupon' | 'manual' | 'none'
+  refundMethod?: 'mercadopago' | 'coupon' | 'manual' | 'customer_choice' | 'none'
   couponCode?: string | null
+  choiceLinks?: { label?: string; url?: string }[]
 }
 
 interface OrderStatusUpdatedProps {
@@ -45,10 +47,29 @@ const REFUND_METHOD_LABEL: Record<string, string> = {
   mercadopago: 'estorno automático no Mercado Pago (cai em até 7 dias úteis)',
   coupon: 'cupom de desconto para uso futuro',
   manual: 'estorno manual (entraremos em contato)',
-  customer_choice: 'saldo Sevii ou forma original — você receberá um e-mail para escolher',
+  customer_choice: 'saldo Sevii ou forma original — escolha abaixo como prefere receber',
 }
 
 const STATUS_LABEL = ORDER_STATUS_LABELS;
+
+const ChoiceLinks = ({ links }: { links?: { label?: string; url?: string }[] }) => {
+  const valid = (links ?? []).filter((l) => l.url)
+  if (!valid.length) return null
+  return (
+    <Section style={{ marginTop: 12 }}>
+      <Text style={{ ...styles.text, margin: '0 0 8px' }}>
+        Escolha como quer receber: <strong>saldo Sevii</strong> (na hora, para usar em novas compras) ou <strong>devolução na forma de pagamento original</strong> (passa por análise da equipe). O link vale por 7 dias.
+      </Text>
+      {valid.map((l, i) => (
+        <Section key={i} style={{ margin: '0 0 8px' }}>
+          <Button href={l.url} style={{ background: '#111', color: '#fff', padding: '10px 18px', borderRadius: 6, fontWeight: 600, fontSize: 13 }}>
+            {valid.length > 1 ? `Escolher reembolso — ${l.label ?? 'item'}` : 'Escolher como receber o reembolso'}
+          </Button>
+        </Section>
+      ))}
+    </Section>
+  )
+}
 
 const STATUS_MESSAGE: Record<string, string> = {
   pending: 'Seu pedido está aguardando a confirmação do pagamento.',
@@ -148,6 +169,7 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
               Forma do reembolso: {REFUND_METHOD_LABEL[partialCancellation.refundMethod] ?? partialCancellation.refundMethod}
             </Text>
           )}
+          <ChoiceLinks links={partialCancellation.choiceLinks} />
           {partialCancellation.couponCode && (
             <Text style={{ ...styles.text, margin: '8px 0 0', fontFamily: 'monospace', fontWeight: 600 }}>
               Cupom: {partialCancellation.couponCode}
@@ -180,6 +202,7 @@ const OrderStatusUpdatedEmail: React.FC<OrderStatusUpdatedProps> = ({
               Forma do reembolso: {REFUND_METHOD_LABEL[cancellation.refundMethod] ?? cancellation.refundMethod}
             </Text>
           )}
+          <ChoiceLinks links={cancellation.choiceLinks} />
           {cancellation.couponCode && (
             <Text style={{ ...styles.text, margin: '8px 0 0', fontFamily: 'monospace', fontWeight: 600 }}>
               Cupom: {cancellation.couponCode}
