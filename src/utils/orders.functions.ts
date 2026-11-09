@@ -85,9 +85,10 @@ export const approveOrderCancellation = createServerFn({ method: "POST" })
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
     const order = await getOrderById(
       data.order_id,
-      "id, status, pre_cancel_status, email, recipient_name",
+      "id, status, pre_cancel_status, email, recipient_name, total_cents, refunded_cents",
     );
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
+    let choiceLinks: { label: string; url: string }[] = [];
     const cancelledItems = await getActiveOrderItems(order.id);
     let refund: { refundCents: number; couponCode: string | null; details: string } = {
       refundCents: 0,
