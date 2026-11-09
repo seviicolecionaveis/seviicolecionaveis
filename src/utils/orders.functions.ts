@@ -245,6 +245,7 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
             refundCents: refund.refundCents,
             refundMethod: refundError ? "none" : data.refund_method,
             couponCode: refund.couponCode,
+            choiceLinks,
           },
         },
       });
