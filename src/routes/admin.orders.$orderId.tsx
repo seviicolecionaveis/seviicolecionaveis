@@ -991,8 +991,8 @@ function FullCancelDialog({
   const POST_PAID = PAID_ORDER_STATUSES;
   const wasPaid = POST_PAID.includes(order.status) || POST_PAID.includes(order.pre_cancel_status ?? "");
   const pending = Math.max(0, (order.total_cents ?? 0) - (order.refunded_cents ?? 0));
-  const [method, setMethod] = useState<"mercadopago" | "coupon" | "manual" | "none">(
-    !wasPaid || pending <= 0 ? "none" : order.mercadopago_payment_id ? "mercadopago" : "coupon",
+  const [method, setMethod] = useState<"mercadopago" | "coupon" | "manual" | "customer_choice" | "none">(
+    !wasPaid || pending <= 0 ? "none" : "customer_choice",
   );
   const [restoreStock, setRestoreStock] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -1021,6 +1021,7 @@ function FullCancelDialog({
   };
 
   const opts: { value: typeof method; label: string; hint?: string }[] = [
+    { value: "customer_choice", label: "Saldo Sevii ou forma original — escolha do cliente", hint: "O cliente escolhe pelo link no e-mail de cancelamento" },
     { value: "mercadopago", label: "Estornar no Mercado Pago", hint: order.mercadopago_payment_id ? undefined : "Pedido sem pagamento MP vinculado" },
     { value: "coupon", label: "Gerar vale-presente (cupom)", hint: "Válido por 1 ano" },
     { value: "manual", label: "Reembolso manual", hint: "Apenas registra; você paga fora do sistema" },

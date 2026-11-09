@@ -48,12 +48,20 @@ export async function sendFinanceNotice(r: Refund, event: string, link?: string)
   }
   return result.success;
 }
-export async function createFinanceRefund(actor: string, input: { orderId: string; itemId?: string; amountCents: number; reason: string; key: string }) {
+export async function createFinanceRefund(actor: string, input: { orderId: string; itemId?: string; amountCents: number; reason: string; key: string }, opts?: { sendInvite?: boolean }) {
   await assertFinanceAdmin(actor);
   const token = randomBytes(32).toString('hex');
   const { data, error } = await db.rpc('finance_create_refund', { p_order: input.orderId, p_item: input.itemId ?? null as unknown as string, p_actor: actor, p_amount: input.amountCents, p_reason: input.reason, p_hash: hashRefundToken(token), p_key: input.key });
   if (error) throw new Error('Não foi possível criar: confira pagamento confirmado, item e limite disponível.');
+  if (opts?.sendInvite === false) return { refund: objectResult<Refund>(data), sent: false };
   return notifyCreatedFinanceRefund(data, token);
+}
+/** Gera um link novo (token renovado) para o cliente escolher a forma de reembolso; usado no próprio e-mail de cancelamento. */
+export async function issueRefundChoiceLink(actor: string, refundId: string) {
+  const token = randomBytes(32).toString('hex');
+  const r = await financeAction(refundId, actor, 'renew', 'Link incluído no e-mail de cancelamento', { hash: hashRefundToken(token) });
+  await db.from('customer_refunds').update({ email_status: 'sent' }).eq('id', r.id);
+  return `https://seviicolecionaveis.com.br/reembolso/${r.id}#${token}`;
 }
 async function notifyCreatedFinanceRefund(data: Json, token: string) {
   const r = objectResult<Refund>(data);
@@ -63,7 +71,7 @@ async function notifyCreatedFinanceRefund(data: Json, token: string) {
   const sent = await sendFinanceNotice(r, 'invite', `https://seviicolecionaveis.com.br/reembolso/${r.id}#${token}`);
   return { refund: r, sent };
 }
-export async function cancelItemWithFinanceRefund(client: import('@supabase/supabase-js').SupabaseClient<Database>, input: { orderId: string; itemId: string; quantity: number; reason: string; key: string }) {
+export async function cancelItemWithFinanceRefund(client: import('@supabase/supabase-js').SupabaseClient<Database>, input: { orderId: string; itemId: string; quantity: number; reason: string; key: string }, opts?: { sendInvite?: boolean }) {
   const token = randomBytes(32).toString('hex');
   // The RPC derives the administrator from the verified JWT, never from a supplied actor UUID.
   const { data, error } = await client.rpc('finance_cancel_item_refund', {
@@ -72,6 +80,7 @@ export async function cancelItemWithFinanceRefund(client: import('@supabase/supa
   });
   if (error) throw new Error('Cancelamento não realizado: confira permissão, quantidade, pagamento e limite de reembolso disponível.');
   const r = objectResult<Refund>(data);
+  if (opts?.sendInvite === false) return { refund: r, sent: true }; // O link vai no e-mail de cancelamento.
   try { return await notifyCreatedFinanceRefund(data, token); }
   catch { return { refund: r, sent: false }; } // Cancellation is committed; email failure must not look like a failed write.
 }

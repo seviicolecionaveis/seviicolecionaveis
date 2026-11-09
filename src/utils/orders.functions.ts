@@ -65,7 +65,7 @@ export const approveOrderCancellation = createServerFn({ method: "POST" })
     z
       .object({
         order_id: z.string().uuid(),
-        refund_method: z.enum(["mercadopago", "coupon", "manual", "none"]).default("none"),
+        refund_method: z.enum(["mercadopago", "coupon", "manual", "customer_choice", "none"]).default("none"),
         restore_stock: z.boolean().default(true),
       })
       .parse(d),
@@ -85,9 +85,10 @@ export const approveOrderCancellation = createServerFn({ method: "POST" })
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
     const order = await getOrderById(
       data.order_id,
-      "id, status, pre_cancel_status, email, recipient_name",
+      "id, status, pre_cancel_status, email, recipient_name, total_cents, refunded_cents",
     );
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
+    let choiceLinks: { label: string; url: string }[] = [];
     const cancelledItems = await getActiveOrderItems(order.id);
     let refund: { refundCents: number; couponCode: string | null; details: string } = {
       refundCents: 0,
@@ -96,7 +97,18 @@ export const approveOrderCancellation = createServerFn({ method: "POST" })
     };
     let refundError: string | null = null;
     try {
-      refund = await refundEntireOrder(order.id, data.refund_method);
+      if (data.refund_method === "customer_choice") {
+        const amount = Math.max(0, (order.total_cents ?? 0) - (order.refunded_cents ?? 0));
+        if (amount <= 0) throw new Error("Não há valor pago pendente de reembolso.");
+        const { createFinanceRefund, issueRefundChoiceLink } = await import("@/lib/customer-finance.server");
+        const created = await createFinanceRefund(context.userId, {
+          orderId: order.id, amountCents: amount, reason: "Cancelamento do pedido", key: `order-cancel:${order.id}`,
+        }, { sendInvite: false });
+        choiceLinks = [{ label: "Escolher como receber o reembolso", url: await issueRefundChoiceLink(context.userId, created.refund.id) }];
+        refund = { refundCents: amount, couponCode: null, details: "Cliente escolhe entre saldo Sevii e forma original pelo link do e-mail." };
+      } else {
+        refund = await refundEntireOrder(order.id, data.refund_method as "mercadopago" | "coupon" | "manual" | "none");
+      }
     } catch (e: any) {
       // O cancelamento não pode ficar preso por uma falha de estorno.
       refundError =
@@ -120,6 +132,7 @@ export const approveOrderCancellation = createServerFn({ method: "POST" })
             refundCents: refund.refundCents,
             refundMethod: refundError ? "none" : data.refund_method,
             couponCode: refund.couponCode,
+            choiceLinks,
           },
         },
       });
@@ -165,7 +178,7 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
     z
       .object({
         order_id: z.string().uuid(),
-        refund_method: z.enum(["mercadopago", "coupon", "manual", "none"]).default("none"),
+        refund_method: z.enum(["mercadopago", "coupon", "manual", "customer_choice", "none"]).default("none"),
         restore_stock: z.boolean().default(true),
       })
       .parse(d),
@@ -185,10 +198,11 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
     if (!(await isAdmin(context.userId))) throw new Response("Acesso negado", { status: 403 });
     const order = await getOrderById(
       data.order_id,
-      "id, status, email, recipient_name",
+      "id, status, email, recipient_name, total_cents, refunded_cents",
     );
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
     if (order.status === "cancelled") return { ok: true };
+    let choiceLinks: { label: string; url: string }[] = [];
     const cancelledItems = await getActiveOrderItems(order.id);
     let refund: { refundCents: number; couponCode: string | null; details: string } = {
       refundCents: 0,
@@ -197,7 +211,18 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
     };
     let refundError: string | null = null;
     try {
-      refund = await refundEntireOrder(order.id, data.refund_method);
+      if (data.refund_method === "customer_choice") {
+        const amount = Math.max(0, (order.total_cents ?? 0) - (order.refunded_cents ?? 0));
+        if (amount <= 0) throw new Error("Não há valor pago pendente de reembolso.");
+        const { createFinanceRefund, issueRefundChoiceLink } = await import("@/lib/customer-finance.server");
+        const created = await createFinanceRefund(context.userId, {
+          orderId: order.id, amountCents: amount, reason: "Cancelamento do pedido", key: `order-cancel:${order.id}`,
+        }, { sendInvite: false });
+        choiceLinks = [{ label: "Escolher como receber o reembolso", url: await issueRefundChoiceLink(context.userId, created.refund.id) }];
+        refund = { refundCents: amount, couponCode: null, details: "Cliente escolhe entre saldo Sevii e forma original pelo link do e-mail." };
+      } else {
+        refund = await refundEntireOrder(order.id, data.refund_method as "mercadopago" | "coupon" | "manual" | "none");
+      }
     } catch (e: any) {
       refundError =
         e instanceof Response ? await e.text().catch(() => "Falha no reembolso") : (e?.message ?? "Falha no reembolso");
@@ -220,6 +245,7 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
             refundCents: refund.refundCents,
             refundMethod: refundError ? "none" : data.refund_method,
             couponCode: refund.couponCode,
+            choiceLinks,
           },
         },
       });
@@ -264,6 +290,22 @@ export const adminNotifyItemsCancelled = createServerFn({ method: "POST" })
     });
     if (!items.length) return { sent: false };
     const coupons = (data.coupon_codes ?? []).filter(Boolean);
+    const choiceLinks: { label: string; url: string }[] = [];
+    if (data.refund_method === "customer_choice") {
+      const { issueRefundChoiceLink } = await import("@/lib/customer-finance.server");
+      const { data: refunds } = await supabaseAdmin.from("customer_refunds")
+        .select("id, item_id, created_at").eq("order_id", order.id).eq("status", "awaiting_choice")
+        .in("item_id", data.items.map((i) => i.order_item_id)).order("created_at", { ascending: false });
+      const seen = new Set<string>();
+      for (const r of refunds ?? []) {
+        if (!r.item_id || seen.has(r.item_id)) continue;
+        seen.add(r.item_id);
+        const row = byId.get(r.item_id);
+        try {
+          choiceLinks.push({ label: row ? (row.card_number ? `${row.card_name} ${row.card_number}` : row.card_name) : "Item", url: await issueRefundChoiceLink(context.userId, r.id) });
+        } catch (e) { console.error("[adminNotifyItemsCancelled] link de reembolso", r.id, e); }
+      }
+    }
     await sendTransactionalEmailSafe({
       templateName: "order-status-updated",
       recipientEmail: order.email,
@@ -278,6 +320,7 @@ export const adminNotifyItemsCancelled = createServerFn({ method: "POST" })
           refundMethod: data.refund_method,
           couponCode: coupons.length ? coupons.join(", ") : null,
           adminNote: data.notes ?? null,
+          choiceLinks,
         },
       },
     });
@@ -309,7 +352,7 @@ export const adminPartialCancelItem = createServerFn({ method: "POST" })
       const result = await cancelItemWithFinanceRefund(context.supabase, {
         orderId: data.order_id, itemId: data.order_item_id, quantity: data.quantity,
         reason: data.notes, key: data.operation_key,
-      });
+      }, { sendInvite: !data.skip_email });
       return { ok: true, refundCents: result.refund.amount_cents, couponCode: null,
         refundDetails: 'Solicitação registrada; aguardando escolha do cliente entre saldo Sevii e forma original.', refundSent: result.sent };
     }
