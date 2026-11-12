@@ -2,8 +2,8 @@
 - [ ] Substituir a imagem de fundo quando o usuário enviar o arquivo (medidas combinadas: 360x360 quadrada, PNG com fundo transparente, para o padrão repetido; 1920x1080 se for fundo único).
 
 ## Reinado Delta
-- [ ] Inserir as 141 cartas enviadas, sem estoque/preço, mapear tipos existentes e adicionar a coleção.
-- [ ] Conferir numeração, dados persistidos e imagens, incluindo 138 e 141.
+- [x] Inseridas 141 cartas via dados, sem estoque/preço; Grama → Planta e Escuridão → Sombrio; coleção adicionada.
+- [x] Conferidos 141 números únicos de 001/103 a 141/103 e dados persistidos; todas as 141 imagens responderam corretamente, incluindo 138 e 141; página mostra Preço pendente/Indisponível.
 
 # Confirmações de agendamento
 ## Reembolso no cancelamento de cartas
