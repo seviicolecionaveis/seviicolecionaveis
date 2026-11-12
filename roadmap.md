@@ -1,6 +1,10 @@
 # Fundo do site
 - [ ] Substituir a imagem de fundo quando o usuário enviar o arquivo (medidas combinadas: 360x360 quadrada, PNG com fundo transparente, para o padrão repetido; 1920x1080 se for fundo único).
 
+## Reinado Delta
+- [ ] Inserir as 141 cartas enviadas, sem estoque/preço, mapear tipos existentes e adicionar a coleção.
+- [ ] Conferir numeração, dados persistidos e imagens, incluindo 138 e 141.
+
 # Confirmações de agendamento
 ## Reembolso no cancelamento de cartas
 - [x] Integrar escolha de saldo/forma original ao cancelamento de item na página administrativa do pedido, com quantidade, justificativa e confirmação; formas anteriores preservadas.
