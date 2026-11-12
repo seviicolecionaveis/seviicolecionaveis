@@ -99,6 +99,7 @@ export interface Card {
 
 // Coleções adicionadas manualmente a pedido (mantidas mesmo sem estoque cadastrado)
 export const EXTRA_COLLECTIONS = [
+  "DLR - Reinado Delta",
   "CES - Tempestade Celestial",
   "CEC - Eclipse Cósmico",
   "MEW - 151",
