@@ -114,6 +114,10 @@ export const approveOrderCancellation = createServerFn({ method: "POST" })
       refundError =
         e instanceof Response ? await e.text().catch(() => "Falha no reembolso") : (e?.message ?? "Falha no reembolso");
       console.error("[approveOrderCancellation] falha no reembolso", refundError);
+      // Sem o link de escolha o cliente ficaria sem reembolso: não cancela.
+      if (data.refund_method === "customer_choice") {
+        throw new Error(`Não foi possível criar o reembolso com escolha do cliente (${refundError}). O pedido não foi cancelado.`);
+      }
     }
     await deleteStockReservations(order.id);
     if (data.restore_stock) await restoreStockIfPaid(order.id, order.pre_cancel_status ?? order.status);
@@ -227,6 +231,9 @@ export const adminCancelOrder = createServerFn({ method: "POST" })
       refundError =
         e instanceof Response ? await e.text().catch(() => "Falha no reembolso") : (e?.message ?? "Falha no reembolso");
       console.error("[adminCancelOrder] falha no reembolso", refundError);
+      if (data.refund_method === "customer_choice") {
+        throw new Error(`Não foi possível criar o reembolso com escolha do cliente (${refundError}). O pedido não foi cancelado.`);
+      }
     }
     await deleteStockReservations(order.id);
     if (data.restore_stock) await restoreStockIfPaid(order.id, order.status);
