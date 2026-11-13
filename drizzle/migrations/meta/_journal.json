@@ -281,6 +281,13 @@
       "when": 1794587623229,
       "tag": "0039_restrict_app_settings_public_read",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1794587880519,
+      "tag": "0040_refund_allow_cancellation_requested_paid",
+      "breakpoints": true
     }
   ]
 }
