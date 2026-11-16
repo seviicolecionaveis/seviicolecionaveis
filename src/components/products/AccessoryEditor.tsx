@@ -6,7 +6,17 @@ import { toast } from "sonner";
 import { Trash2, Plus, X, Upload, Link as LinkIcon, ArrowUp, ArrowDown } from "lucide-react";
 import { parseVariants, type AccessoryVariant } from "@/lib/accessory-variants";
 
-const CATEGORIES = ["Sleeves/Shields", "Dados", "Marcadores de dano", "Moedas", "Playmats", "Binders", "Top Loader", "Deck box", "Kit jogável"] as const;
+const CATEGORIES = [
+  "Sleeves/Shields",
+  "Dados",
+  "Marcadores de dano",
+  "Moedas",
+  "Playmats",
+  "Binders",
+  "Top Loader",
+  "Deck box",
+  "Kit jogável",
+] as const;
 
 type Accessory = {
   id: string;
@@ -24,7 +34,15 @@ type Accessory = {
   variants?: unknown;
 };
 
-export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; onClose: () => void; onSaved: () => void }) {
+export function AccessoryEditor({
+  item,
+  onClose,
+  onSaved,
+}: {
+  item: Accessory;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const [title, setTitle] = useState(item.title);
   const [sku, setSku] = useState(item.sku ?? "");
   const [tags, setTags] = useState((item.tags ?? []).join(", "));
@@ -42,7 +60,10 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
   const addUrl = () => {
     const url = imageUrl.trim();
     if (!url) return;
-    if (!/^https?:\/\//i.test(url)) { toast.error("URL inválida"); return; }
+    if (!/^https?:\/\//i.test(url)) {
+      toast.error("URL inválida");
+      return;
+    }
     setImages((arr) => [...arr, url]);
     setImageUrl("");
   };
@@ -79,18 +100,36 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
   const save = async () => {
     const priceCents = Math.round(Number(price.replace(",", ".")) * 100);
     const stockN = Number(stock);
-    if (!title.trim()) { toast.error("Título obrigatório"); return; }
-    if (!CATEGORIES.includes(category as any)) { toast.error("Categoria inválida"); return; }
-    if (!Number.isFinite(priceCents) || priceCents < 0) { toast.error("Preço inválido"); return; }
-    if (!Number.isInteger(stockN) || stockN < 0) { toast.error("Estoque inválido"); return; }
-    if (variants.some((v) => !v.name.trim())) { toast.error("Toda variação precisa de um nome"); return; }
+    if (!title.trim()) {
+      toast.error("Título obrigatório");
+      return;
+    }
+    if (!CATEGORIES.includes(category as any)) {
+      toast.error("Categoria inválida");
+      return;
+    }
+    if (!Number.isFinite(priceCents) || priceCents < 0) {
+      toast.error("Preço inválido");
+      return;
+    }
+    if (!Number.isInteger(stockN) || stockN < 0) {
+      toast.error("Estoque inválido");
+      return;
+    }
+    if (variants.some((v) => !v.name.trim())) {
+      toast.error("Toda variação precisa de um nome");
+      return;
+    }
     setSaving(true);
     const { error } = await supabase
       .from("accessories")
       .update({
         title: title.trim(),
         sku: sku.trim() || null,
-        tags: tags.split(",").map(t=>t.trim()).filter(Boolean),
+        tags: tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
         description: description.trim() || null,
         category,
         price_cents: priceCents,
@@ -101,7 +140,10 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
       } as never)
       .eq("id", item.id);
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Salvo");
     onSaved();
   };
@@ -109,29 +151,71 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4">
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-background p-6 shadow-xl">
-        <Button onClick={onClose} className="absolute right-4 top-4 rounded-full p-1 hover:bg-secondary" aria-label="Fechar">
+        <Button
+          onClick={onClose}
+          className="absolute right-4 top-4 rounded-full p-1 hover:bg-secondary"
+          aria-label="Fechar"
+        >
           <X className="h-5 w-5" />
         </Button>
         <h2 className="mb-5 text-lg font-bold">Editar acessório</h2>
 
         <div className="space-y-4">
-          <div><label className="text-xs font-semibold">SKU / código</label><input value={sku} onChange={e=>setSku(e.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"/></div>
-          <div><label className="text-xs font-semibold">Tags</label><input value={tags} onChange={e=>setTags(e.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"/></div>
-          {item.slug&&<p className="break-all text-xs text-muted-foreground">/acessorios/{item.slug}</p>}
-          <CommonProductFields title={title} description={description} price={price} stock={stock} active={active} onTitle={setTitle} onDescription={setDescription} onPrice={setPrice} onStock={setStock} onActive={setActive}/>
+          <div>
+            <label className="text-xs font-semibold">SKU / código</label>
+            <input
+              value={sku}
+              onChange={(e) => setSku(e.target.value)}
+              className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold">Tags</label>
+            <input
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          {item.slug && (
+            <p className="break-all text-xs text-muted-foreground">/acessorios/{item.slug}</p>
+          )}
+          <CommonProductFields
+            title={title}
+            description={description}
+            price={price}
+            stock={stock}
+            active={active}
+            onTitle={setTitle}
+            onDescription={setDescription}
+            onPrice={setPrice}
+            onStock={setStock}
+            onActive={setActive}
+          />
           <div>
             <label className="text-xs font-semibold uppercase tracking-widest">Categoria</label>
-            <select value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm">
-              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </div>
-
 
           <VariantsEditor variants={variants} onChange={setVariants} />
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-2">Imagens ({images.length})</p>
-            <p className="text-xs text-muted-foreground mb-3">A primeira imagem é a capa exibida no catálogo.</p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-2">
+              Imagens ({images.length})
+            </p>
+            <p className="text-xs text-muted-foreground mb-3">
+              A primeira imagem é a capa exibida no catálogo.
+            </p>
 
             <div className="mb-3 flex gap-2">
               <div className="flex-1 relative">
@@ -139,20 +223,36 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
                 <input
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addUrl(); } }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addUrl();
+                    }
+                  }}
                   placeholder="Cole a URL da imagem"
                   className="w-full rounded-md border border-border bg-background pl-9 pr-3 py-2 text-sm"
                 />
               </div>
-              <Button onClick={addUrl} className="rounded-md border border-border px-3 py-2 text-xs font-semibold">Adicionar</Button>
-              <label className={`cursor-pointer rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground inline-flex items-center gap-1 ${uploading ? "opacity-50" : ""}`}>
+              <Button
+                onClick={addUrl}
+                className="rounded-md border border-border px-3 py-2 text-xs font-semibold"
+              >
+                Adicionar
+              </Button>
+              <label
+                className={`cursor-pointer rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground inline-flex items-center gap-1 ${uploading ? "opacity-50" : ""}`}
+              >
                 <Upload className="h-3 w-3" /> {uploading ? "Enviando..." : "Upload"}
                 <input
                   type="file"
                   accept="image/*"
                   className="hidden"
                   disabled={uploading}
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) onUpload(f); e.target.value = ""; }}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) onUpload(f);
+                    e.target.value = "";
+                  }}
                 />
               </label>
             </div>
@@ -160,10 +260,15 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
             {images.length > 0 && (
               <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {images.map((url, i) => (
-                  <li key={`${url}-${i}`} className="relative rounded-md overflow-hidden border border-border bg-secondary aspect-square">
+                  <li
+                    key={`${url}-${i}`}
+                    className="relative rounded-md overflow-hidden border border-border bg-secondary aspect-square"
+                  >
                     <img src={url} alt="" className="h-full w-full object-cover" />
                     {i === 0 && (
-                      <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">Capa</span>
+                      <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                        Capa
+                      </span>
                     )}
                     <Button
                       onClick={() => removeImage(i)}
@@ -185,7 +290,14 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
                       </Button>
                       {i !== 0 && (
                         <Button
-                          onClick={() => setImages((arr) => { const next = [...arr]; const [it] = next.splice(i, 1); next.unshift(it); return next; })}
+                          onClick={() =>
+                            setImages((arr) => {
+                              const next = [...arr];
+                              const [it] = next.splice(i, 1);
+                              next.unshift(it);
+                              return next;
+                            })
+                          }
                           className="flex-1 rounded bg-background/90 py-1 text-[10px] font-bold"
                           aria-label="Definir como capa"
                           type="button"
@@ -211,8 +323,14 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
         </div>
 
         <div className="mt-6 flex justify-end gap-2">
-          <Button onClick={onClose} className="rounded-md border border-border px-4 py-2 text-sm">Cancelar</Button>
-          <Button onClick={save} disabled={saving} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+          <Button onClick={onClose} className="rounded-md border border-border px-4 py-2 text-sm">
+            Cancelar
+          </Button>
+          <Button
+            onClick={save}
+            disabled={saving}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+          >
             {saving ? "Salvando..." : "Salvar"}
           </Button>
         </div>
@@ -220,7 +338,6 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
     </div>
   );
 }
-
 
 function uploadAccessoryImage(file: File) {
   const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -249,7 +366,14 @@ function VariantsEditor({
   const addVariant = () =>
     onChange([
       ...variants,
-      { id: crypto.randomUUID(), name: "", color: "#000000", price_cents: null, stock: 0, images: [] },
+      {
+        id: crypto.randomUUID(),
+        name: "",
+        color: "#000000",
+        price_cents: null,
+        stock: 0,
+        images: [],
+      },
     ]);
 
   const move = (idx: number, dir: -1 | 1) => {
@@ -277,10 +401,12 @@ function VariantsEditor({
     <div className="rounded-lg border border-border p-4">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest">Variações ({variants.length})</p>
+          <p className="text-xs font-semibold uppercase tracking-widest">
+            Variações ({variants.length})
+          </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Use para cores/modelos. Cada variação tem cor, fotos, preço e estoque próprios.
-            Deixe o preço vazio para usar o preço base.
+            Use para cores/modelos. Cada variação tem cor, fotos, preço e estoque próprios. Deixe o
+            preço vazio para usar o preço base.
           </p>
         </div>
         <Button
@@ -293,14 +419,18 @@ function VariantsEditor({
       </div>
 
       {variants.length === 0 ? (
-        <p className="text-xs text-muted-foreground">Nenhuma variação — o produto usa preço, estoque e fotos principais.</p>
+        <p className="text-xs text-muted-foreground">
+          Nenhuma variação — o produto usa preço, estoque e fotos principais.
+        </p>
       ) : (
         <ul className="space-y-3">
           {variants.map((v, i) => (
             <li key={v.id} className="rounded-md border border-border bg-card p-3">
               <div className="flex flex-wrap items-end gap-3">
                 <div className="min-w-[140px] flex-1">
-                  <label className="text-[10px] font-semibold uppercase tracking-widest">Nome</label>
+                  <label className="text-[10px] font-semibold uppercase tracking-widest">
+                    Nome
+                  </label>
                   <input
                     value={v.name}
                     onChange={(e) => update(v.id, { name: e.target.value })}
@@ -326,12 +456,16 @@ function VariantsEditor({
                   </div>
                 </div>
                 <div>
-                  <label className="text-[10px] font-semibold uppercase tracking-widest">Preço (R$)</label>
+                  <label className="text-[10px] font-semibold uppercase tracking-widest">
+                    Preço (R$)
+                  </label>
                   <input
                     value={v.price_cents == null ? "" : (v.price_cents / 100).toFixed(2)}
                     onChange={(e) => {
                       const raw = e.target.value.trim().replace(",", ".");
-                      update(v.id, { price_cents: raw === "" ? null : Math.round(Number(raw) * 100) });
+                      update(v.id, {
+                        price_cents: raw === "" ? null : Math.round(Number(raw) * 100),
+                      });
                     }}
                     inputMode="decimal"
                     placeholder="Base"
@@ -339,19 +473,33 @@ function VariantsEditor({
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-semibold uppercase tracking-widest">Estoque</label>
+                  <label className="text-[10px] font-semibold uppercase tracking-widest">
+                    Estoque
+                  </label>
                   <input
                     value={String(v.stock)}
-                    onChange={(e) => update(v.id, { stock: Math.max(0, Number(e.target.value) || 0) })}
+                    onChange={(e) =>
+                      update(v.id, { stock: Math.max(0, Number(e.target.value) || 0) })
+                    }
                     inputMode="numeric"
                     className="mt-1 w-20 rounded-md border border-border bg-background px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="flex gap-1">
-                  <Button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-md border border-border px-2 py-2 disabled:opacity-30">
+                  <Button
+                    type="button"
+                    onClick={() => move(i, -1)}
+                    disabled={i === 0}
+                    className="rounded-md border border-border px-2 py-2 disabled:opacity-30"
+                  >
                     <ArrowUp className="h-3 w-3" />
                   </Button>
-                  <Button type="button" onClick={() => move(i, 1)} disabled={i === variants.length - 1} className="rounded-md border border-border px-2 py-2 disabled:opacity-30">
+                  <Button
+                    type="button"
+                    onClick={() => move(i, 1)}
+                    disabled={i === variants.length - 1}
+                    className="rounded-md border border-border px-2 py-2 disabled:opacity-30"
+                  >
                     <ArrowDown className="h-3 w-3" />
                   </Button>
                   <Button
@@ -367,15 +515,23 @@ function VariantsEditor({
 
               <div className="mt-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest">Fotos ({v.images.length})</p>
-                  <label className={`cursor-pointer rounded-md border border-border px-2 py-1 text-[11px] font-semibold inline-flex items-center gap-1 ${busy === v.id ? "opacity-50" : ""}`}>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest">
+                    Fotos ({v.images.length})
+                  </p>
+                  <label
+                    className={`cursor-pointer rounded-md border border-border px-2 py-1 text-[11px] font-semibold inline-flex items-center gap-1 ${busy === v.id ? "opacity-50" : ""}`}
+                  >
                     <Upload className="h-3 w-3" /> {busy === v.id ? "Enviando..." : "Upload"}
                     <input
                       type="file"
                       accept="image/*"
                       className="hidden"
                       disabled={busy === v.id}
-                      onChange={(e) => { const f = e.target.files?.[0]; if (f) addImage(v.id, f); e.target.value = ""; }}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) addImage(v.id, f);
+                        e.target.value = "";
+                      }}
                     />
                   </label>
                   <Button
@@ -383,7 +539,10 @@ function VariantsEditor({
                     onClick={() => {
                       const url = prompt("URL da imagem")?.trim();
                       if (!url) return;
-                      if (!/^https?:\/\//i.test(url)) { toast.error("URL inválida"); return; }
+                      if (!/^https?:\/\//i.test(url)) {
+                        toast.error("URL inválida");
+                        return;
+                      }
                       update(v.id, { images: [...v.images, url] });
                     }}
                     className="rounded-md border border-border px-2 py-1 text-[11px] font-semibold inline-flex items-center gap-1"
@@ -394,11 +553,16 @@ function VariantsEditor({
                 {v.images.length > 0 && (
                   <ul className="mt-2 flex flex-wrap gap-2">
                     {v.images.map((url, ii) => (
-                      <li key={`${url}-${ii}`} className="relative h-16 w-16 overflow-hidden rounded-md border border-border bg-secondary">
+                      <li
+                        key={`${url}-${ii}`}
+                        className="relative h-16 w-16 overflow-hidden rounded-md border border-border bg-secondary"
+                      >
                         <img src={url} alt="" className="h-full w-full object-cover" />
                         <Button
                           type="button"
-                          onClick={() => update(v.id, { images: v.images.filter((_, k) => k !== ii) })}
+                          onClick={() =>
+                            update(v.id, { images: v.images.filter((_, k) => k !== ii) })
+                          }
                           className="absolute right-0.5 top-0.5 rounded-full bg-background/90 p-0.5 text-destructive"
                           aria-label="Remover foto"
                         >

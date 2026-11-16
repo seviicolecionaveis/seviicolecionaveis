@@ -1,7 +1,8 @@
 ## Integração de Acessórios
 - [x] Investigar diferenças de páginas, catálogo, busca, estoque, pedidos e variações; preparar plano sem alterar dados, mantendo regra atual de cancelamento.
-- [ ] Implementação aguarda aprovação do plano e confirmação prévia das alterações de dados, com backup.
-- [ ] Validar páginas, busca, carrinho e concorrência em ambiente isolado, preservando cartas e lacrados.
+- [x] Plano aprovado; backups privados verificados dos 21 acessórios e definições; páginas/catálogo/editores compartilhados, busca integrada, pedidos manuais, reservas/baixa/reposição transacionais por variação, links e sitemap implementados.
+- [x] 10 testes automáticos; PostgreSQL descartável validou slugs/histórico, concorrência, idempotência, variações, claim atômico, permissões e auditoria; páginas reais/carrinho/zoom/cópia/celular e cartas/lacrados conferidos, admin com fixtures fictícias.
+- [ ] Compra paga completa, pedido manual persistido, Pilha e entrega de aviso de reposição: aguardam backend isolado e credenciais do provedor comprovadamente de teste; não cobrar/enviar e-mails nem alterar pedidos reais.
 
 # Fundo do site
 - [ ] Substituir a imagem de fundo quando o usuário enviar o arquivo (medidas combinadas: 360x360 quadrada, PNG com fundo transparente, para o padrão repetido; 1920x1080 se for fundo único).
