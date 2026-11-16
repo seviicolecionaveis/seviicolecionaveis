@@ -21,6 +21,7 @@ import { copyToClipboard } from "@/lib/clipboard";
 import { HAND_DELIVERY_FEE_CENTS, HAND_DELIVERY_PIX_KEY, formatSchedule } from "@/lib/scheduling";
 import { SERVICE_ORDER_METHOD_LABEL, SERVICE_ORDER_METHOD_DESC } from "@/lib/fulfillment-labels";
 import logoUrl from "@/assets/logo.webp";
+import { PICKUP_POINT_LABELS, type PickupPoint } from "@/lib/admin-shipping-edit";
 
 export const Route = createFileRoute("/pilha/solicitar")({
   validateSearch: (search: { items?: string; stack?: string }): { items?: string; stack?: string } => ({
@@ -328,8 +329,8 @@ function SolicitarPage() {
         return;
       }
     }
-    if (method === "presencial" && !scheduleIso && !pickupPoint) {
-      setErr("Escolha o dia e o horário da retirada.");
+    if (method === "presencial" && (!scheduleIso || !pickupPoint)) {
+      setErr("Escolha o local, o dia e o horário da retirada.");
       return;
     }
     if (method === "arte_em_cards" && arteApplies) {
@@ -605,6 +606,18 @@ function SolicitarPage() {
                   Retirada em mãos gratuita, de segunda a sexta, das 14h às 19h.
                 </p>
                 <ScheduleSlotPicker kind="pickup" value={scheduleIso} onChange={setScheduleIso} />
+                <fieldset className="space-y-2 pt-3">
+                  <legend className="text-sm font-semibold">Local da retirada</legend>
+                  {(Object.keys(PICKUP_POINT_LABELS) as PickupPoint[]).map((point) => (
+                    <label key={point} className={`flex items-start gap-3 rounded-md border p-3 cursor-pointer ${pickupPoint === point ? "border-primary bg-secondary" : "border-border"}`}>
+                      <input type="radio" name="pickup-point" value={point} checked={pickupPoint === point} onChange={() => setPickupPoint(point)} className="mt-1" />
+                      <span className="min-w-0 text-sm">
+                        <span className="block font-semibold">{point === "aruana" ? "Aruana" : "Aeroporto"}</span>
+                        <span className="block text-xs text-muted-foreground">{PICKUP_POINT_LABELS[point].split(" — ")[1]}</span>
+                      </span>
+                    </label>
+                  ))}
+                </fieldset>
               </section>
             )}
 
