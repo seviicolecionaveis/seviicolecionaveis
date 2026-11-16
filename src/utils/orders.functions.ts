@@ -8,6 +8,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
     z.object({
       order_id: z.string().uuid(),
       status: z.enum([...ORDER_STATUSES, "cancellation_requested"]),
+      groupAll: z.boolean().optional(),
       tracking_code: z.string().trim().max(60).optional().nullable(),
       carrier: z.enum(["correios", "latam", "pickup"]).optional().nullable(),
       tracking_url: z.preprocess(

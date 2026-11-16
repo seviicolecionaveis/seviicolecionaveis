@@ -503,9 +503,8 @@ export const adminCreateManualServiceOrder = createServerFn({ method: "POST" })
     const invalid = items.find((i: any) => i.status !== "stored" || i.service_order_id);
     if (invalid) throw new Error("Há itens já vinculados a outra ordem de serviço.");
 
-    const { data: created, error: createErr } = await supabaseAdmin
-      .from("service_orders")
-      .insert({
+    const { data: rawCreated, error: createErr } = await supabaseAdmin.rpc("fulfillment_create_service", {
+      p_items: data.itemIds, p_key: `admin-service:${stack.id}:${[...data.itemIds].sort().join(",")}`, p_so: {
         user_id: stack.user_id,
         stack_id: stack.id,
         method: data.method,
@@ -515,27 +514,12 @@ export const adminCreateManualServiceOrder = createServerFn({ method: "POST" })
         notes: data.notes
           ? `[Criada manualmente pelo admin]\n${data.notes}`
           : "[Criada manualmente pelo admin]",
-      })
-      .select("id, code")
-      .single();
+      }
+    });
+    const created = rawCreated as unknown as { id: string; code: number } | null;
     if (createErr || !created) throw new Error(createErr?.message ?? "Falha ao criar OS.");
-
-    const itemStatus =
-      data.status === "delivered"
-        ? "delivered"
-        : data.status === "dispatched"
-          ? "dispatched"
-          : "requested";
-
-    const { error: updErr } = await supabaseAdmin
-      .from("card_stack_items")
-      .update({
-        status: itemStatus,
-        service_order_id: created.id,
-        updated_at: new Date().toISOString(),
-      })
-      .in("id", data.itemIds);
-    if (updErr) throw new Error(updErr.message);
+    const { notifyServiceOrderChoice } = await import("./service-orders.server");
+    await notifyServiceOrderChoice(created.id, { source: "admin" });
 
     const { count: remaining } = await supabaseAdmin
       .from("card_stack_items")

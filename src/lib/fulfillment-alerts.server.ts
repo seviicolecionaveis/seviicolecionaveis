@@ -74,6 +74,7 @@ export async function notifyFulfillmentChange(c: FulfillmentChange): Promise<{ d
 
   // 1) Alerta no admin (persistido). Falha aqui não impede os e-mails.
   let notificationId: string | null = null;
+  let duplicate = false;
   try {
     const { data, error } = await db.from("admin_notifications").upsert({
       kind: "fulfillment", action: c.action, source: c.source,
@@ -85,7 +86,11 @@ export async function notifyFulfillmentChange(c: FulfillmentChange): Promise<{ d
       dedupe_key: dedupeKey,
     }, { onConflict: "dedupe_key", ignoreDuplicates: true }).select("id");
     if (error) console.error("[fulfillment-alert] notification", error.message);
-    else if (!data || data.length === 0) return { duplicate: true };
+    else if (!data || data.length === 0) {
+      duplicate = true;
+      const { data: existing } = await db.from("admin_notifications").select("id").eq("dedupe_key", dedupeKey).maybeSingle();
+      notificationId = existing?.id ?? null;
+    }
     else notificationId = data[0].id;
   } catch (e) {
     console.error("[fulfillment-alert] notification", e);
@@ -138,5 +143,5 @@ export async function notifyFulfillmentChange(c: FulfillmentChange): Promise<{ d
       details: { failed, status }, dedupe_key: `fail|${dedupeKey}`,
     }, { onConflict: "dedupe_key", ignoreDuplicates: true }).then(() => {}, () => {});
   }
-  return { duplicate: false };
+  return { duplicate };
 }

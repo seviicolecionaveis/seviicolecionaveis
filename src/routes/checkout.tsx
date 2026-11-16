@@ -118,6 +118,9 @@ const empty: Form = {
 type Step = "address" | "pix" | "card";
 type PaymentMethod = "pix" | "card" | "admin_test";
 
+import { listFulfillmentCandidates } from "@/lib/fulfillment-groups.functions";
+import { FulfillmentOrderSelection } from "@/components/FulfillmentOrderSelection";
+
 interface PixState {
   orderId: string;
   qrCode: string;
@@ -160,7 +163,7 @@ interface CardState {
   pointsToRedeem: number;
   storeCreditCents: number;
   arteEmCardsCode: string | null;
-  schedule: { kind: "delivery" | "pickup" | "event"; at: string; eventId?: string | null } | null;
+  schedule: { kind: "delivery" | "pickup" | "event"; at: string; eventId?: string | null; orderIds?: string[]; groupId?: string | null } | null;
 }
 
 function CheckoutPage() {
@@ -190,6 +193,13 @@ function CheckoutPage() {
   const [pickupEvents, setPickupEvents] = useState<PickupEvent[]>([]);
   const [scheduleAt, setScheduleAt] = useState<string | null>(null);
   const [deliveryInfo, setDeliveryInfo] = useState("");
+  const [groupOrders, setGroupOrders] = useState<any[]>([]);
+  const [groupSelected, setGroupSelected] = useState<string[]>([]);
+  const readGroupOrders = useServerFn(listFulfillmentCandidates);
+  useEffect(() => {
+    if (!user) return;
+    readGroupOrders({ data: {} }).then((rows) => { setGroupOrders(rows); setGroupSelected(rows.map((o) => o.id)); }).catch(() => {});
+  }, [user, readGroupOrders]);
   useEffect(() => {
     if (shipping === "arrange" && pickupPoint === "evento" && pickupEvents.length === 0) {
       listActiveEvents().then(setPickupEvents).catch(() => {});
@@ -198,9 +208,9 @@ function CheckoutPage() {
   const schedulePayload = () => {
     if (shipping !== "arrange") return null;
     if (pickupPoint === "evento")
-      return eventSel ? { kind: "event" as const, at: eventSel.iso, eventId: eventSel.eventId } : null;
+      return eventSel ? { kind: "event" as const, at: eventSel.iso, eventId: eventSel.eventId, orderIds: groupSelected } : null;
     return scheduleAt
-      ? { kind: (pickupPoint === "app" ? "delivery" : "pickup") as "delivery" | "pickup", at: scheduleAt }
+      ? { kind: (pickupPoint === "app" ? "delivery" : "pickup") as "delivery" | "pickup", at: scheduleAt, orderIds: groupSelected }
       : null;
   };
   const [quotes, setQuotes] = useState<ShippingQuote[]>([]);
@@ -873,6 +883,7 @@ function CheckoutPage() {
                 </label>
                 {shipping === "arrange" && pickupPoint === "app" && (
                   <div className="px-4 pb-4 space-y-3">
+                    <FulfillmentOrderSelection orders={groupOrders} selected={groupSelected} onChange={setGroupSelected} />
                     <ScheduleSlotPicker kind="delivery" value={scheduleAt} onChange={setScheduleAt} />
                     <div className="rounded-md border border-border p-3 text-xs">
                       <p className="font-semibold text-sm mb-1">Endereço de entrega</p>
@@ -919,6 +930,7 @@ function CheckoutPage() {
                 </label>
                 {shipping === "arrange" && pickupPoint !== "app" && pickupPoint !== "evento" && (
                   <div className="px-4 pb-4 space-y-2">
+                    <FulfillmentOrderSelection orders={groupOrders} selected={groupSelected} onChange={setGroupSelected} />
                     <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
                       <input
                         type="radio"
@@ -981,6 +993,7 @@ function CheckoutPage() {
                 </label>
                 {shipping === "arrange" && pickupPoint === "evento" && (
                   <div className="px-4 pb-4">
+                    <FulfillmentOrderSelection orders={groupOrders} selected={groupSelected} onChange={setGroupSelected} />
                     <p className="text-xs font-semibold mb-2">Escolha o evento, o dia e o horário da retirada</p>
                     <EventSlotPicker events={pickupEvents} value={eventSel} onChange={setEventSel} />
                   </div>

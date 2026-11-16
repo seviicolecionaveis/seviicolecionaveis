@@ -84,7 +84,7 @@ export async function adminEditOrderShipping(
   admin: { id: string; email: string | null },
   orderId: string,
   input: AdminShippingInput,
-  opts: { notifyClient: boolean; applyToStack: boolean; allowAnyMode?: boolean },
+  opts: { notifyClient: boolean; applyToStack: boolean; allowAnyMode?: boolean; selectedOrderIds?: string[]; operationKey?: string },
 ) {
   const err = validateAdminShippingInput(input);
   if (err) throw new Error(err);
@@ -92,7 +92,8 @@ export async function adminEditOrderShipping(
   const now = new Date();
   const { data: o } = await db.from("orders").select("*").eq("id", orderId).maybeSingle();
   if (!o) throw new Error("Pedido não encontrado.");
-  if (!opts.allowAnyMode && !canAdminEditShipping(o)) throw new Error("Este pedido não permite editar envio/retirada.");
+  const { effectiveFulfillment: effective } = await import("./fulfillment-groups");
+  if (!opts.allowAnyMode && !canAdminEditShipping(effective(o))) throw new Error("Este pedido não permite editar envio/retirada.");
 
   let ev: PickupEvent | null = null;
   if (input.mode === "event") {
@@ -101,6 +102,22 @@ export async function adminEditOrderShipping(
     ev = toEvent(row);
   }
   const warnings = adminShippingWarnings(input, ev, now);
+  if (opts.selectedOrderIds?.length) {
+    const { canGroupOrder, effectiveFulfillment } = await import("./fulfillment-groups");
+    const { data: selected, error: selectedError } = await db.from("orders").select("*").in("id", opts.selectedOrderIds);
+    if (selectedError || selected?.length !== opts.selectedOrderIds.length || selected.some((x: any) => x.user_id !== o.user_id || !canGroupOrder(x))) throw new Error("Há pedidos que não podem ser incluídos.");
+    if (input.mode === "tracked" && selected.length > 1) throw new Error("Frete agrupado exige uma nova cotação para todos os itens; confirme a cotação antes de continuar.");
+    const { applyGroup } = await import("./fulfillment-groups.server");
+    await applyGroup(opts.selectedOrderIds, {
+      shipping_method: input.mode === "stack" ? "card_stack" : input.mode === "tracked" ? "fixed" : "arrange",
+      schedule_kind: ["pickup", "event", "delivery"].includes(input.mode) ? input.mode : null,
+      scheduled_at: input.at ?? null, event_id: input.mode === "event" ? input.eventId : null,
+      notes: rebuildShippingNotes(effectiveFulfillment(o).notes, input, ev?.name),
+      ...input.address, group_shipping_cents: input.mode === "delivery" ? 1500 : input.mode === "tracked" ? input.shippingCents ?? 0 : 0,
+      hand_delivery_fee_status: input.mode === "delivery" ? input.feeStatus : null,
+    }, opts.operationKey ?? crypto.randomUUID(), { source: "admin", notifyClient: opts.notifyClient });
+    return { updated: selected.length, warnings, after: ADMIN_SHIPPING_MODE_LABELS[input.mode] };
+  }
 
   // Pedidos alvo: este, ou todos da mesma pilha com cartas guardadas.
   const targets: any[] = [o];

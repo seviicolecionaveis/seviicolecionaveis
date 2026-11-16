@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronRight } from "lucide-react";
+import { effectiveFulfillment } from "@/lib/fulfillment-groups";
+import { MODALITY_LABELS, modalityOfOrder, formatScheduleShort } from "@/lib/fulfillment-alerts";
+import { FulfillmentGroupBadge } from "@/components/FulfillmentGroupBadge";
 
 export const Route = createFileRoute("/orders/")({
   head: () => ({
@@ -40,6 +43,7 @@ function OrdersPage() {
   const nav = useNavigate();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [groupFilter, setGroupFilter] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/auth" });
@@ -51,11 +55,11 @@ function OrdersPage() {
     const load = async () => {
       const { data } = await supabase
         .from("orders")
-        .select("id, created_at, status, total_cents, order_items(id, card_name, card_image, quantity)")
+        .select("*, order_items(id, card_name, card_image, quantity)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (!cancelled) {
-        setOrders(data ?? []);
+        setOrders((data ?? []).map(effectiveFulfillment));
         setLoading(false);
       }
     };
@@ -90,11 +94,12 @@ function OrdersPage() {
       </header>
       <main className="mx-auto max-w-4xl px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">Meus pedidos</h1>
+        {groupFilter && <a href="#" onClick={(e) => { e.preventDefault(); setGroupFilter(null); }} className="block mb-3 text-sm underline">Mostrar todos os pedidos</a>}
         {orders.length === 0 ? (
           <p className="text-sm text-muted-foreground">Você ainda não fez nenhum pedido.</p>
         ) : (
           <div className="space-y-3">
-            {orders.map((o) => {
+            {orders.filter((o) => !groupFilter || o.fulfillment_group_id === groupFilter).map((o) => {
               const items = o.order_items ?? [];
               const totalQty = items.reduce((s: number, it: any) => s + (it.quantity ?? 0), 0);
               const visible = items.slice(0, 5);
@@ -135,10 +140,14 @@ function OrdersPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-xs font-mono text-muted-foreground">#{o.id.slice(0, 8)}</p>
+                      <FulfillmentGroupBadge order={o} count={orders.filter((x) => x.fulfillment_group_id === o.fulfillment_group_id).length} onClick={() => setGroupFilter(o.fulfillment_group_id)} />
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide ${STATUS_COLOR[o.status] ?? "bg-secondary"}`}>
                         {STATUS_LABEL[o.status] ?? o.status}
                       </span>
                     </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {MODALITY_LABELS[modalityOfOrder(o)]} {formatScheduleShort(o.scheduled_at)}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {new Date(o.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                       {" · "}

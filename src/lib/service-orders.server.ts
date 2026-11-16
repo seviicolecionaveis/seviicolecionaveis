@@ -160,9 +160,9 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
   const { data: userData } = await supabaseAdmin.auth.admin.getUserById(input.userId);
   const email = userData?.user?.email ?? "";
 
-  const { data: created, error: createErr } = await supabaseAdmin
-    .from("service_orders")
-    .insert({
+  const operationKey = `service:${input.userId}:${[...input.itemIds].sort().join(",")}`;
+  const { data: createdRaw, error: createErr } = await supabaseAdmin.rpc("fulfillment_create_service", {
+    p_items: input.itemIds, p_key: operationKey, p_so: {
       user_id: input.userId,
       stack_id: stackId,
       method: input.method,
@@ -203,17 +203,11 @@ export async function createServiceOrderServer(input: CreateServiceOrderInput): 
               ? `Retirada em mãos: ${input.pickupPoint === "aruana" ? "Aruana" : "Aeroporto"}.${input.notes ? `\n\n${input.notes}` : ""}`
               : (input.notes ?? null),
       arte_em_cards_code: arteCodeUsed,
-    })
-    .select("id, code")
-    .single();
+    },
+  });
+  const created = createdRaw as unknown as { id: string; code: number } | null;
 
   if (createErr || !created) throw new Error(createErr?.message ?? "Falha ao criar ordem de serviço.");
-
-  const { error: updErr } = await supabaseAdmin
-    .from("card_stack_items")
-    .update({ status: "requested", service_order_id: created.id, updated_at: new Date().toISOString() })
-    .in("id", input.itemIds);
-  if (updErr) throw new Error(updErr.message);
 
   console.log(`[service-orders] Nova OS #${created.code} criada (${input.method}) — ${items.length} item(s).`);
   await notifyServiceOrderChoice(created.id).catch((e: unknown) => console.error("[service-orders] alert", e));
@@ -319,6 +313,12 @@ export async function notifyServiceOrderChoice(
   const db = supabaseAdmin as any;
   const { data: so } = await db.from("service_orders").select("*").eq("id", serviceOrderId).maybeSingle();
   if (!so) return;
+  const { data: grouped } = await db.from("orders").select("fulfillment_group_id,fulfillment_operation_key").eq("fulfillment_service_order_id", so.id).not("fulfillment_group_id", "is", null).limit(1).maybeSingle();
+  if (grouped?.fulfillment_group_id) {
+    const { notifyGroup } = await import("./fulfillment-groups.server");
+    await notifyGroup(grouped.fulfillment_group_id, grouped.fulfillment_operation_key, opts?.source ?? "customer", opts?.notifyClient !== false);
+    return;
+  }
   const [{ data: its }, { data: userData }, ev] = await Promise.all([
     db.from("card_stack_items").select("card_name, quantity, order_id").eq("service_order_id", so.id),
     supabaseAdmin.auth.admin.getUserById(so.user_id),

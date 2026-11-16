@@ -11,6 +11,8 @@ import { isHandDeliveryArea, HAND_DELIVERY_OUT_OF_AREA_WARNING } from "@/lib/han
 import { FulfillmentFilters, ModalityBadge, matchesFulfillmentFilter, DEFAULT_FULFILLMENT_FILTER } from "@/components/admin/FulfillmentFilters";
 import { useAdminNotifications } from "@/hooks/useAdminNotifications";
 import { modalityOfOrder } from "@/lib/fulfillment-alerts";
+import { effectiveFulfillment } from "@/lib/fulfillment-groups";
+import { FulfillmentGroupBadge } from "@/components/FulfillmentGroupBadge";
 
 
 
@@ -52,6 +54,7 @@ function AdminPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [groupFilter, setGroupFilter] = useState<string | null>(null);
   const ALL_STATUSES = [...STATUSES, "cancellation_requested"] as const;
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>(() => {
     if (typeof window === "undefined") return [...ALL_STATUSES];
@@ -119,7 +122,7 @@ function AdminPage() {
       .from("orders")
       .select("*, order_items(*)")
       .order("created_at", { ascending: false });
-    setOrders(data ?? []);
+    setOrders((data ?? []).map(effectiveFulfillment));
     setLoading(false);
   };
 
@@ -187,6 +190,7 @@ function AdminPage() {
   const query = searchQuery.trim().toLowerCase();
 
   const filtered = orders.filter((o) => {
+    if (groupFilter && o.fulfillment_group_id !== groupFilter) return false;
     // Pedidos de leilão são geridos exclusivamente em /admin/pedidos-leilao
     if (o.origin === "auction") return false;
     if (!selectedStatuses.includes(o.status)) return false;
@@ -293,6 +297,7 @@ function AdminPage() {
 
 
         <div className="mb-4"><FulfillmentFilters value={ff} onChange={setFf} count={filtered.length} /></div>
+        {groupFilter && <a href="#" onClick={(e) => { e.preventDefault(); setGroupFilter(null); }} className="block mb-3 text-sm underline">Mostrar todos os pedidos</a>}
 
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -363,6 +368,7 @@ function AdminPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-xs font-mono text-muted-foreground">#{o.id.slice(0, 8)}</p>
+                      <FulfillmentGroupBadge order={o} count={orders.filter((x) => x.fulfillment_group_id === o.fulfillment_group_id).length} onClick={() => setGroupFilter(o.fulfillment_group_id)} />
                       {o.origin === "manual" && <span className="inline-block rounded bg-foreground text-background px-1.5 py-0.5 text-[10px] font-bold uppercase">Manual</span>}
                       <ModalityBadge modality={modalityOfOrder(o)} scheduledAt={o.scheduled_at} unread={unreadTargets.has(o.id)} />
                       {o.schedule_kind === "delivery" && <HandDeliveryFeeBadge status={(o as any).hand_delivery_fee_status} />}

@@ -309,6 +309,34 @@
       "when": 1794850836152,
       "tag": "0043_accessory_stock_claim_and_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1794853317728,
+      "tag": "0044_fulfillment_groups",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1794853440344,
+      "tag": "0045_fulfillment_group_actions",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1794853510480,
+      "tag": "0046_fulfillment_group_delivery",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1794853589519,
+      "tag": "0047_fulfillment_existing_service_links",
+      "breakpoints": true
     }
   ]
 }

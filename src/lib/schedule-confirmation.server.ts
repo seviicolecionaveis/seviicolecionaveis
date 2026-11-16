@@ -14,6 +14,11 @@ export async function sendScheduleConfirmations(
   const data = scheduleConfirmationData(order);
   if (!data) return;
   const o: any = order;
+  if (o.fulfillment_group_id) {
+    const { notifyGroup } = await import("./fulfillment-groups.server");
+    await notifyGroup(o.fulfillment_group_id, o.fulfillment_operation_key ?? _keySuffix, opts?.source ?? "customer", !opts?.skipClient, opts?.before);
+    return;
+  }
   const db = supabaseAdmin as any;
   const [{ data: items }, ev] = await Promise.all([
     db.from("order_items").select("card_name, quantity").eq("order_id", order.id),

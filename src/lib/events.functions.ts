@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { PickupEvent } from "./events";
+import { effectiveFulfillment } from "./fulfillment-groups";
 
 // Cliente público (somente leitura) para o calendário de eventos no checkout.
 function publicClient() {
@@ -139,13 +140,12 @@ export const listEventOrders = createServerFn({ method: "POST" })
     await requireAdmin(context);
     let q = context.supabase
       .from("orders")
-      .select("id, recipient_name, email, status, scheduled_at, schedule_kind, reschedule_required, total_cents, created_at, event_added_manually_at, order_items(quantity)")
-      .eq("event_id", data.eventId)
+      .select("*, order_items(quantity)")
       .order("scheduled_at", { ascending: true });
     if (!data.includeFinished) q = q.not("status", "in", '("delivered","cancelled")');
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return (rows ?? []).map((o: any) => ({
+    return (rows ?? []).map(effectiveFulfillment).filter((o: any) => o.event_id === data.eventId).map((o: any) => ({
       id: o.id as string,
       code: (o.id as string).slice(0, 8).toUpperCase(),
       recipientName: o.recipient_name as string | null,
@@ -165,13 +165,12 @@ export const countEventOrders = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ eventId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
-    const { count, error } = await context.supabase
+    const { data: rows, error } = await context.supabase
       .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("event_id", data.eventId)
+      .select("event_id, fulfillment_data")
       .not("status", "in", '("delivered","cancelled")');
     if (error) throw new Error(error.message);
-    return { count: count ?? 0 };
+    return { count: (rows ?? []).filter((o) => effectiveFulfillment(o).event_id === data.eventId).length };
   });
 
 /** Marca pedidos do evento cujo horário escolhido caiu fora do novo intervalo como "Reagendamento necessário". */

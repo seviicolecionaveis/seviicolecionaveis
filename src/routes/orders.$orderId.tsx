@@ -20,6 +20,8 @@ import { listActiveEvents } from "@/lib/events.functions";
 import { validateEventSchedule, type PickupEvent } from "@/lib/events";
 import { reschedulePickupFn } from "@/lib/pickup-reschedule.functions";
 import { isSlotBookable, SLOT_EXPIRED_MESSAGE } from "@/lib/scheduling";
+import { effectiveFulfillment, canGroupOrder } from "@/lib/fulfillment-groups";
+import { OrderFulfillmentChooser } from "@/components/OrderFulfillmentChooser";
 
 function RescheduleBox({ orderId, onDone }: { orderId: string; onDone: (at: string) => void }) {
   const [at, setAt] = useState<string | null>(null);
@@ -187,7 +189,7 @@ function OrderDetailPage() {
         .eq("id", orderId)
         .maybeSingle();
       if (!cancelled) {
-        setOrder(data);
+        setOrder(data ? { ...data, ...effectiveFulfillment(data), shipping_cost_cents: data.shipping_cost_cents } : null);
         setLoading(false);
       }
       if (data?.coupon_code) {
@@ -496,6 +498,8 @@ function OrderDetailPage() {
           {order.phone && <p className="text-muted-foreground mt-1">Tel: {order.phone}</p>}
         </section>
 
+        {canGroupOrder(order) && <OrderFulfillmentChooser order={order} onSaved={() => window.location.reload()} />}
+        {order.fulfillment_group_id && order.fulfillment_data && <p className="text-sm text-muted-foreground">Envio do grupo: R$ {((order.fulfillment_data.shipping_cost_cents ?? 0) / 100).toFixed(2).replace(".", ",")}{!order.is_group_primary && order.fulfillment_data.group_primary_order_id ? ` · incluído no grupo (pedido #${order.fulfillment_data.group_primary_order_id.slice(0, 8)})` : ""}</p>}
         {order.shipping_method === "arte_em_cards" && order.arte_em_cards_code && (
           <section className="rounded-xl border border-amber-300 bg-amber-50 p-5 text-sm space-y-2">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-900">

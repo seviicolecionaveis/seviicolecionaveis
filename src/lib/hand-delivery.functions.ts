@@ -19,6 +19,13 @@ export const setHandDeliveryFeeFn = createServerFn({ method: "POST" })
     const db = supabaseAdmin as any;
     const { data: o } = await db.from("orders").select("*").eq("id", data.orderId).maybeSingle();
     if (!o) throw new Error("Pedido não encontrado.");
+    if (o.fulfillment_group_id && o.fulfillment_data?.schedule_kind === "delivery") {
+      const { error } = await db.rpc("fulfillment_group_action", { p_order: o.id, p_action: "fee", p_value: { confirmed: data.confirmed, note: data.note ?? null, actor: context.userId } });
+      if (error) throw new Error("Não foi possível confirmar a taxa do grupo.");
+      const { notifyGroup } = await import("./fulfillment-groups.server");
+      await notifyGroup(o.fulfillment_group_id, `fee:${data.confirmed}:${o.fulfillment_operation_key}`, "admin", true, data.confirmed ? "Pagamento da taxa de entrega confirmado" : "Pagamento da taxa voltou a pendente");
+      return { ok: true };
+    }
     if (o.schedule_kind !== "delivery") throw new Error("Este pedido não é Entrega em mãos.");
     const { isHandDeliveryFeePaid } = await import("@/lib/hand-delivery");
     const wasPaid = isHandDeliveryFeePaid(o.hand_delivery_fee_status);
