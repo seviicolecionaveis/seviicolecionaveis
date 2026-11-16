@@ -1,3 +1,5 @@
+import { CommonProductFields } from "./CommonProductFields";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -107,42 +109,23 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4">
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-background p-6 shadow-xl">
-        <button onClick={onClose} className="absolute right-4 top-4 rounded-full p-1 hover:bg-secondary" aria-label="Fechar">
+        <Button onClick={onClose} className="absolute right-4 top-4 rounded-full p-1 hover:bg-secondary" aria-label="Fechar">
           <X className="h-5 w-5" />
-        </button>
+        </Button>
         <h2 className="mb-5 text-lg font-bold">Editar acessório</h2>
 
         <div className="space-y-4">
           <div><label className="text-xs font-semibold">SKU / código</label><input value={sku} onChange={e=>setSku(e.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"/></div>
           <div><label className="text-xs font-semibold">Tags</label><input value={tags} onChange={e=>setTags(e.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"/></div>
           {item.slug&&<p className="break-all text-xs text-muted-foreground">/acessorios/{item.slug}</p>}
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-widest">Título</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
-          </div>
+          <CommonProductFields title={title} description={description} price={price} stock={stock} active={active} onTitle={setTitle} onDescription={setDescription} onPrice={setPrice} onStock={setStock} onActive={setActive}/>
           <div>
             <label className="text-xs font-semibold uppercase tracking-widest">Categoria</label>
             <select value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm">
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-widest">Descrição</label>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-widest">Preço (R$)</label>
-              <input value={price} onChange={(e) => setPrice(e.target.value)} inputMode="decimal" className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
-            </div>
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-widest">Estoque</label>
-              <input value={stock} onChange={(e) => setStock(e.target.value)} inputMode="numeric" className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
-            </div>
-            <label className="flex items-end gap-2 text-sm pb-2">
-              <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> Ativo
-            </label>
-          </div>
+
 
           <VariantsEditor variants={variants} onChange={setVariants} />
 
@@ -161,7 +144,7 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
                   className="w-full rounded-md border border-border bg-background pl-9 pr-3 py-2 text-sm"
                 />
               </div>
-              <button onClick={addUrl} className="rounded-md border border-border px-3 py-2 text-xs font-semibold">Adicionar</button>
+              <Button onClick={addUrl} className="rounded-md border border-border px-3 py-2 text-xs font-semibold">Adicionar</Button>
               <label className={`cursor-pointer rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground inline-flex items-center gap-1 ${uploading ? "opacity-50" : ""}`}>
                 <Upload className="h-3 w-3" /> {uploading ? "Enviando..." : "Upload"}
                 <input
@@ -182,16 +165,16 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
                     {i === 0 && (
                       <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">Capa</span>
                     )}
-                    <button
+                    <Button
                       onClick={() => removeImage(i)}
                       className="absolute right-1 top-1 rounded-full bg-background/90 p-1 text-destructive shadow"
                       aria-label="Remover imagem"
                       type="button"
                     >
                       <Trash2 className="h-3 w-3" />
-                    </button>
+                    </Button>
                     <div className="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-foreground/70 p-1">
-                      <button
+                      <Button
                         onClick={() => moveImage(i, -1)}
                         disabled={i === 0}
                         className="flex-1 rounded bg-background/90 py-1 text-xs font-bold disabled:opacity-30"
@@ -199,18 +182,18 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
                         type="button"
                       >
                         ←
-                      </button>
+                      </Button>
                       {i !== 0 && (
-                        <button
+                        <Button
                           onClick={() => setImages((arr) => { const next = [...arr]; const [it] = next.splice(i, 1); next.unshift(it); return next; })}
                           className="flex-1 rounded bg-background/90 py-1 text-[10px] font-bold"
                           aria-label="Definir como capa"
                           type="button"
                         >
                           Capa
-                        </button>
+                        </Button>
                       )}
-                      <button
+                      <Button
                         onClick={() => moveImage(i, 1)}
                         disabled={i === images.length - 1}
                         className="flex-1 rounded bg-background/90 py-1 text-xs font-bold disabled:opacity-30"
@@ -218,7 +201,7 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
                         type="button"
                       >
                         →
-                      </button>
+                      </Button>
                     </div>
                   </li>
                 ))}
@@ -228,10 +211,10 @@ export function AccessoryEditor({ item, onClose, onSaved }: { item: Accessory; o
         </div>
 
         <div className="mt-6 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-md border border-border px-4 py-2 text-sm">Cancelar</button>
-          <button onClick={save} disabled={saving} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+          <Button onClick={onClose} className="rounded-md border border-border px-4 py-2 text-sm">Cancelar</Button>
+          <Button onClick={save} disabled={saving} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
             {saving ? "Salvando..." : "Salvar"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -300,13 +283,13 @@ function VariantsEditor({
             Deixe o preço vazio para usar o preço base.
           </p>
         </div>
-        <button
+        <Button
           type="button"
           onClick={addVariant}
           className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-semibold"
         >
           <Plus className="h-3 w-3" /> Nova variação
-        </button>
+        </Button>
       </div>
 
       {variants.length === 0 ? (
@@ -365,20 +348,20 @@ function VariantsEditor({
                   />
                 </div>
                 <div className="flex gap-1">
-                  <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-md border border-border px-2 py-2 disabled:opacity-30">
+                  <Button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-md border border-border px-2 py-2 disabled:opacity-30">
                     <ArrowUp className="h-3 w-3" />
-                  </button>
-                  <button type="button" onClick={() => move(i, 1)} disabled={i === variants.length - 1} className="rounded-md border border-border px-2 py-2 disabled:opacity-30">
+                  </Button>
+                  <Button type="button" onClick={() => move(i, 1)} disabled={i === variants.length - 1} className="rounded-md border border-border px-2 py-2 disabled:opacity-30">
                     <ArrowDown className="h-3 w-3" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
                     onClick={() => onChange(variants.filter((x) => x.id !== v.id))}
                     className="rounded-md border border-destructive/40 px-2 py-2 text-destructive"
                     aria-label="Remover variação"
                   >
                     <Trash2 className="h-3 w-3" />
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -395,7 +378,7 @@ function VariantsEditor({
                       onChange={(e) => { const f = e.target.files?.[0]; if (f) addImage(v.id, f); e.target.value = ""; }}
                     />
                   </label>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       const url = prompt("URL da imagem")?.trim();
@@ -406,21 +389,21 @@ function VariantsEditor({
                     className="rounded-md border border-border px-2 py-1 text-[11px] font-semibold inline-flex items-center gap-1"
                   >
                     <LinkIcon className="h-3 w-3" /> URL
-                  </button>
+                  </Button>
                 </div>
                 {v.images.length > 0 && (
                   <ul className="mt-2 flex flex-wrap gap-2">
                     {v.images.map((url, ii) => (
                       <li key={`${url}-${ii}`} className="relative h-16 w-16 overflow-hidden rounded-md border border-border bg-secondary">
                         <img src={url} alt="" className="h-full w-full object-cover" />
-                        <button
+                        <Button
                           type="button"
                           onClick={() => update(v.id, { images: v.images.filter((_, k) => k !== ii) })}
                           className="absolute right-0.5 top-0.5 rounded-full bg-background/90 p-0.5 text-destructive"
                           aria-label="Remover foto"
                         >
                           <Trash2 className="h-3 w-3" />
-                        </button>
+                        </Button>
                       </li>
                     ))}
                   </ul>
