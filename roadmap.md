@@ -1,3 +1,8 @@
+## Integração de Acessórios
+- [ ] Investigar diferenças de páginas, catálogo, busca, estoque, pedidos e variações; apresentar plano sem alterar dados.
+- [ ] Implementação aguarda aprovação do plano e confirmação prévia das alterações de dados, com backup.
+- [ ] Validar páginas, busca, carrinho e concorrência em ambiente isolado, preservando cartas e lacrados.
+
 # Fundo do site
 - [ ] Substituir a imagem de fundo quando o usuário enviar o arquivo (medidas combinadas: 360x360 quadrada, PNG com fundo transparente, para o padrão repetido; 1920x1080 se for fundo único).
 
