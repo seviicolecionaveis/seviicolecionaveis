@@ -1,8 +1,9 @@
+import type { Json } from '@/integrations/supabase/types';
 import { parseVariants } from '@/lib/accessory-variants';
 import { slugify } from '@/lib/slug';
 export type StoreProduct = {
  id: string; title: string; description: string | null; price_cents: number; stock: number; images: string[];
- slug?: string | null; sku?: string | null; tags?: string[]; category?: string; variants?: unknown;
+ slug?: string | null; sku?: string | null; tags?: string[]; category?: string; variants?: Json;
  active?: boolean; is_preorder?: boolean; release_date?: string | null; product_type?: string | null;
  collection?: string | null; language?: string | null; distribution?: string | null; condition?: string | null; age_rating?: string | null;
 };

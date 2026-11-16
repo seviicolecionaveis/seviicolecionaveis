@@ -1,3 +1,4 @@
+import { OrderProductLink } from "@/components/products/OrderProductLink";
 import { MANUAL_PAYMENT_METHODS } from "@/lib/manual-order";
 import { ORDER_STATUS_LABELS, canBuyerConfirmReceipt } from "@/lib/order-status";
 import { BuyerReceiptConfirmation } from "@/components/BuyerReceiptConfirmation";
@@ -348,7 +349,7 @@ function OrderDetailPage() {
                   {it.card_image ? (
                     <img
                       src={it.card_image}
-                      alt={it.card_name}
+                      alt=<OrderProductLink cardId={it.card_id} name={it.card_name}/>
                       className="h-full w-full object-cover"
                       loading="lazy"
                       referrerPolicy="no-referrer"
