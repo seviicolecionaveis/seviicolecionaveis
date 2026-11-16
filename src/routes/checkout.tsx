@@ -160,7 +160,7 @@ interface CardState {
   pointsToRedeem: number;
   storeCreditCents: number;
   arteEmCardsCode: string | null;
-  schedule: { kind: "delivery" | "pickup" | "event"; at: string; eventId?: string | null } | null;
+  schedule: { kind: "delivery" | "pickup" | "event"; at: string; eventId?: string | null; orderIds?: string[]; groupId?: string | null } | null;
 }
 
 function CheckoutPage() {
@@ -190,6 +190,8 @@ function CheckoutPage() {
   const [pickupEvents, setPickupEvents] = useState<PickupEvent[]>([]);
   const [scheduleAt, setScheduleAt] = useState<string | null>(null);
   const [deliveryInfo, setDeliveryInfo] = useState("");
+  const [groupOrders, setGroupOrders] = useState<any[]>([]);
+  const [groupSelected, setGroupSelected] = useState<string[]>([]);
   useEffect(() => {
     if (shipping === "arrange" && pickupPoint === "evento" && pickupEvents.length === 0) {
       listActiveEvents().then(setPickupEvents).catch(() => {});
@@ -198,9 +200,9 @@ function CheckoutPage() {
   const schedulePayload = () => {
     if (shipping !== "arrange") return null;
     if (pickupPoint === "evento")
-      return eventSel ? { kind: "event" as const, at: eventSel.iso, eventId: eventSel.eventId } : null;
+      return eventSel ? { kind: "event" as const, at: eventSel.iso, eventId: eventSel.eventId, orderIds: groupSelected } : null;
     return scheduleAt
-      ? { kind: (pickupPoint === "app" ? "delivery" : "pickup") as "delivery" | "pickup", at: scheduleAt }
+      ? { kind: (pickupPoint === "app" ? "delivery" : "pickup") as "delivery" | "pickup", at: scheduleAt, orderIds: groupSelected }
       : null;
   };
   const [quotes, setQuotes] = useState<ShippingQuote[]>([]);

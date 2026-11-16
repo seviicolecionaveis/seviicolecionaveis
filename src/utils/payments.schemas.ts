@@ -39,6 +39,8 @@ export const ScheduleSchema = z.object({
   kind: z.enum(["delivery", "pickup", "event"]),
   at: z.string().datetime(),
   eventId: z.string().uuid().optional().nullable(),
+  orderIds: z.array(z.string().uuid()).max(500).optional(),
+  groupId: z.string().uuid().nullable().optional(),
 });
 
 export const StripeInputSchema = z.object({
