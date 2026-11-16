@@ -1,3 +1,9 @@
+## Grupos de envio e retirada
+- [x] Ler documento atualizado, conferir os vínculos e apresentar plano antes de alterar dados.
+- [ ] Aprovação do plano e da atualização dos dados existentes: 43 OS, 41 com pedidos vinculados, 90 pedidos; nenhum pedido em mais de uma OS; 26 pedidos em andamento, 63 entregues e 1 cancelado.
+- [ ] Guardar e verificar backup privado; implementar grupos transacionais, seleção de pedidos, taxa única, edição/entrega/reabertura, avisos únicos e reprocessamento confirmado, sem mudar leilões nem a estrutura das OS.
+- [ ] Validar os cenários do documento em ambiente isolado e conferir telas de cliente/admin; não executar cobranças nem enviar avisos de teste a clientes reais.
+
 ## Integração de Acessórios
 - [x] Investigar diferenças de páginas, catálogo, busca, estoque, pedidos e variações; preparar plano sem alterar dados, mantendo regra atual de cancelamento.
 - [x] Plano aprovado; backups privados verificados dos 21 acessórios e definições; páginas/catálogo/editores compartilhados, busca integrada, pedidos manuais, reservas/baixa/reposição transacionais por variação, links e sitemap implementados.
