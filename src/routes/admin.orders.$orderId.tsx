@@ -1,4 +1,5 @@
 import { OrderProductLink } from "@/components/products/OrderProductLink";
+import { effectiveFulfillment } from "@/lib/fulfillment-groups";
 import { MANUAL_PAYMENT_METHODS, MANUAL_SOURCES } from "@/lib/manual-order";
 import { ORDER_STATUSES, ORDER_STATUS_LABELS, PAID_ORDER_STATUSES } from "@/lib/order-status";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -93,7 +94,7 @@ function AdminOrderDetailPage() {
       .select("*, order_items(*)")
       .eq("id", orderId)
       .maybeSingle();
-    setOrder(data);
+    setOrder(data ? { ...data, ...effectiveFulfillment(data), shipping_cost_cents: data.shipping_cost_cents } : null);
     if (data?.origin === "manual") {
       const { data: n } = await (supabase as any).from("order_admin_notes").select("internal_notes").eq("order_id", orderId).maybeSingle();
       setInternalNotes(n?.internal_notes ?? null);
