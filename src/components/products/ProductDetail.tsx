@@ -106,7 +106,7 @@ export function ProductDetail({
               </p>
             )}
             {item.description && (
-              <p className="mt-3 whitespace-pre-line text-sm text-muted-foreground">
+              <p className="mt-3 break-words whitespace-pre-line text-sm text-muted-foreground [overflow-wrap:anywhere]">
                 {item.description}
               </p>
             )}
