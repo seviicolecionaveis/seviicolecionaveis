@@ -38,7 +38,7 @@ async function loadRaw(): Promise<Raw> {
       .order("created_at", { ascending: false }),
     supabase
       .from("accessories")
-      .select("id, title, description, category, price_cents, stock, images, variants, created_at")
+      .select("id, title, description, category, price_cents, stock, images, variants, slug, sku, tags, created_at")
       .eq("active", true)
       .order("created_at", { ascending: false }),
     supabase.rpc("catalog_last_product_additions"),

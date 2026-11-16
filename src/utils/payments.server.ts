@@ -762,6 +762,13 @@ async function reserveStockForOrder(
   items: { cardId: string; quantity: number; finish: string }[],
   expiresAt: Date,
 ) {
+  const { error: accessoryError } = await supabaseAdmin.rpc('accessory_reserve_order', {
+    p_order: orderId, p_expires: expiresAt.toISOString(),
+  });
+  if (accessoryError) {
+    await cancelOrder(orderId);
+    throw new Error('Estoque insuficiente para reservar os acessórios.');
+  }
   const rows = items
     .filter(
       (i) =>

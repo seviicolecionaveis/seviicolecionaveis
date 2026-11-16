@@ -32,6 +32,8 @@ export async function restoreStockIfPaid(orderId: string, statusBefore: string) 
     .select("card_id, quantity, cancelled_quantity, card_name, collection, card_number, finish")
     .eq("order_id", orderId);
   if (!items) return;
+  const { error: accessoryError } = await supabaseAdmin.rpc('accessory_restore_order', { p_order: orderId });
+  if (accessoryError) throw new Error('Não foi possível devolver o estoque de acessórios.');
   const UUID_RE_LOCAL = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   for (const it of items as any[]) {
     // Só devolve a quantidade que ainda não foi cancelada individualmente.
@@ -55,14 +57,7 @@ export async function restoreStockIfPaid(orderId: string, statusBefore: string) 
       }
       continue;
     }
-    if (typeof cardId === "string" && cardId.startsWith("accessory:")) {
-      const aid = cardId.slice("accessory:".length);
-      if (UUID_RE_LOCAL.test(aid)) {
-        const { data: a } = await supabaseAdmin.from("accessories").select("stock").eq("id", aid).maybeSingle();
-        if (a) await supabaseAdmin.from("accessories").update({ stock: (a.stock ?? 0) + remaining }).eq("id", aid);
-      }
-      continue;
-    }
+    if (typeof cardId === "string" && cardId.startsWith("accessory:")) continue;
     if (typeof cardId === "string" && cardId.startsWith("videogame:")) {
       const vid = cardId.slice("videogame:".length);
       if (UUID_RE_LOCAL.test(vid)) {
@@ -109,6 +104,7 @@ export async function updateOrder(orderId: string, patch: Record<string, any>) {
 }
 
 export async function deleteStockReservations(orderId: string) {
+  await supabaseAdmin.from('accessory_stock_reservations').delete().eq('order_id', orderId);
   await supabaseAdmin.from("stock_reservations").delete().eq("order_id", orderId);
 }
 

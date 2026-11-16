@@ -69,6 +69,9 @@ export async function buildSitemapXml(origin: string): Promise<string> {
     urls.push({ loc: `${origin}/colecao/${slugify(name)}`, lastmod });
   }
 
+  const { data: accessories } = await supabaseAdmin.from('accessories').select('slug,updated_at').eq('active',true);
+  for (const a of accessories ?? []) if(a.slug) urls.push({ loc: `${origin}/acessorios/${a.slug}`, lastmod:a.updated_at });
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls

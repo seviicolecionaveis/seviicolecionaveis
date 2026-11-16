@@ -1,3 +1,5 @@
+import { useNavigate } from "@tanstack/react-router";
+import { productSlug } from "@/lib/product-catalog";
 import { useState } from "react";
 import { useRecentProducts } from "@/hooks/useRecentProducts";
 import { OtherProductTile } from "./OtherProductTile";
@@ -17,6 +19,7 @@ interface Props {
  * recentemente, exibidos na página de Novidades junto ao catálogo de cartas.
  */
 export function RecentOtherProducts({ windowDays = 30, limit = 24 }: Props) {
+  const navigate = useNavigate();
   const { entries, loading } = useRecentProducts(windowDays);
   const [activePanel, setActivePanel] = useState<Panel | null>(null);
   const [activeSealed, setActiveSealed] = useState<Sealed | null>(null);
@@ -43,7 +46,7 @@ export function RecentOtherProducts({ windowDays = 30, limit = 24 }: Props) {
             onClick={() => {
               if (entry.kind === "panel") setActivePanel(entry.panel);
               else if (entry.kind === "sealed") setActiveSealed(entry.sealed);
-              else setActiveAccessory(entry.accessory);
+              else navigate({to:"/acessorios/$slug",params:{slug:productSlug(entry.accessory)}});
             }}
           />
         ))}
