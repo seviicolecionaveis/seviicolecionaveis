@@ -3,6 +3,7 @@ import { PAID_ORDER_STATUSES } from "@/lib/order-status";
 export interface AdminOrderStatusInput {
   order_id: string;
   status: string;
+  groupAll?: boolean;
   tracking_code?: string | null;
   carrier?: "correios" | "latam" | "pickup" | null;
   tracking_url?: string | null;
@@ -14,8 +15,15 @@ export async function applyAdminOrderStatus(userId: string, data: AdminOrderStat
       await import("@/lib/order-cancellation.server");
     const { sendTransactionalEmailSafe } = await import("@/lib/email/send.server");
     if (!(await isAdmin(userId))) throw new Response("Acesso negado", { status: 403 });
-    const order = await getOrderById(data.order_id, "id, status, email, recipient_name, tracking_code, carrier, tracking_url");
+    const order = await getOrderById(data.order_id, "id, status, email, recipient_name, tracking_code, carrier, tracking_url, fulfillment_group_id");
     if (!order) throw new Response("Pedido não encontrado", { status: 404 });
+    if (data.status === "delivered" && order.fulfillment_group_id) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error } = await supabaseAdmin.rpc("fulfillment_deliver", { p_order: order.id, p_all: data.groupAll ?? false });
+      if (error) throw new Error(error.message);
+      if (order.email) await sendTransactionalEmailSafe({ templateName: "order-status-updated", recipientEmail: order.email, idempotencyKey: `group-delivered:${order.fulfillment_group_id}:${data.groupAll ? "all" : order.id}`, templateData: { recipientName: order.recipient_name, orderId: order.id, status: "delivered" } });
+      return { ok: true };
+    }
 
     const trackingProvided = typeof data.tracking_code === "string";
     const newTracking = trackingProvided ? (data.tracking_code?.trim() || null) : undefined;

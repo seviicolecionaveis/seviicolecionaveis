@@ -140,8 +140,9 @@ function AdminOrderDetailPage() {
   }, [isAdmin, orderId]);
 
   const updateStatus = async (status: string) => {
+    const groupAll = status === "delivered" && order.fulfillment_group_id ? window.confirm("Marcar Entregue em todos os pedidos do grupo? OK: grupo inteiro. Cancelar: somente este pedido.") : false;
     try {
-      await adminUpdateOrderStatus({ data: { order_id: orderId, status: status as any } });
+      await adminUpdateOrderStatus({ data: { order_id: orderId, status: status as any, groupAll } });
       toast.success("Status atualizado.");
       await load();
     } catch (e: any) {
