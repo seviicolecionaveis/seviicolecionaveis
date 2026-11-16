@@ -8,7 +8,7 @@ import { Trash2, Plus, X, Upload, Link as LinkIcon, ArrowUp, ArrowDown } from "l
 import { parseVariants, type AccessoryVariant } from "@/lib/accessory-variants";
 
 export const Route = createFileRoute("/admin/accessories")({
-  head: () => ({ meta: [{ title: "Acessórios — Admin" }] }),
+  head: () => ({ meta: [{title:"Acessórios — Administração Sevii Colecionáveis"},{name:"description",content:"Gestão de acessórios da Sevii Colecionáveis."},{property:"og:title",content:"Acessórios — Administração Sevii Colecionáveis"},{property:"og:description",content:"Gestão de produtos da Sevii Colecionáveis."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"},{name:"robots",content:"noindex"}] }),
   component: AccessoriesAdmin,
 });
 

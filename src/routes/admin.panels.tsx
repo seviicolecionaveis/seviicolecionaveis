@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Trash2, Plus, X, Upload, Link as LinkIcon, ArrowUp, ArrowDown } from "lucide-react";
 
 export const Route = createFileRoute("/admin/panels")({
-  head: () => ({ meta: [{ title: "Painéis — Admin" }] }),
+  head: () => ({ meta: [{title:"Painéis — Administração Sevii Colecionáveis"},{name:"description",content:"Gestão de painéis da Sevii Colecionáveis."},{property:"og:title",content:"Painéis — Administração Sevii Colecionáveis"},{property:"og:description",content:"Gestão de produtos da Sevii Colecionáveis."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"},{name:"robots",content:"noindex"}] }),
   component: PanelsAdmin,
 });
 

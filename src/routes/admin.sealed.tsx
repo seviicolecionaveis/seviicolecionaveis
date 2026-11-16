@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Trash2, Plus, X, Upload, Link as LinkIcon, ArrowUp, ArrowDown } from "lucide-react";
 
 export const Route = createFileRoute("/admin/sealed")({
-  head: () => ({ meta: [{ title: "Produtos Lacrados — Admin" }] }),
+  head: () => ({ meta: [{title:"Produtos Lacrados — Administração Sevii Colecionáveis"},{name:"description",content:"Gestão de produtos lacrados da Sevii Colecionáveis."},{property:"og:title",content:"Produtos Lacrados — Administração Sevii Colecionáveis"},{property:"og:description",content:"Gestão de produtos da Sevii Colecionáveis."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"},{name:"robots",content:"noindex"}] }),
   component: SealedAdmin,
 });
 
