@@ -2,6 +2,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
 import { formatSchedule, shouldReopenPickup, validateSchedule } from "@/lib/scheduling";
 import { sendScheduleConfirmations } from "@/lib/schedule-confirmation.server";
+import { effectiveFulfillment, canGroupOrder } from "./fulfillment-groups";
 
 type HistoryEntry = { scheduled_at: string; kind: string; outcome: string; recorded_at: string };
 
@@ -10,16 +11,25 @@ export async function reopenExpiredPickups(now = new Date()) {
   const db = supabaseAdmin as any;
   const { data, error } = await db
     .from("orders")
-    .select("id, email, recipient_name, status, scheduled_at, schedule_kind, reschedule_required, schedule_history")
-    .eq("schedule_kind", "pickup")
-    .eq("reschedule_required", false)
-    .not("scheduled_at", "is", null)
-    .lt("scheduled_at", now.toISOString())
-    .limit(200);
+    .select("*")
+    .not("status", "in", '("delivered","cancelled","shipped","refunded")');
   if (error) throw error;
   let reopened = 0;
-  for (const o of data ?? []) {
+  const handled = new Set<string>();
+  for (const raw of data ?? []) {
+    const o = effectiveFulfillment(raw);
+    if (o.schedule_kind !== "pickup" || o.reschedule_required || !o.scheduled_at) continue;
     if (!shouldReopenPickup(o, now)) continue;
+    if (o.fulfillment_group_id) {
+      if (handled.has(o.fulfillment_group_id)) continue;
+      handled.add(o.fulfillment_group_id);
+      const { error: groupError } = await db.rpc("fulfillment_group_action", { p_order: o.id, p_action: "reopen" });
+      if (groupError) throw new Error(groupError.message);
+      const { notifyGroup } = await import("./fulfillment-groups.server");
+      await notifyGroup(o.fulfillment_group_id, `reopen:${o.scheduled_at}`, "auto", true, "Não compareceu / não concluído — reagendamento necessário");
+      reopened++;
+      continue;
+    }
     const history: HistoryEntry[] = Array.isArray(o.schedule_history) ? o.schedule_history : [];
     history.push({ scheduled_at: o.scheduled_at, kind: "pickup", outcome: "Não compareceu / não concluído", recorded_at: now.toISOString() });
     const { data: upd } = await db
@@ -48,15 +58,11 @@ export async function reopenExpiredEventPickups(now = new Date()) {
   const db = supabaseAdmin as any;
   const { data, error } = await db
     .from("orders")
-    .select("id, email, recipient_name, status, scheduled_at, schedule_kind, reschedule_required, schedule_history, event_id")
-    .eq("schedule_kind", "event")
-    .eq("reschedule_required", false)
-    .not("event_id", "is", null)
-    .not("scheduled_at", "is", null)
-    .lt("scheduled_at", now.toISOString())
-    .limit(200);
+    .select("*")
+    .not("status", "in", '("delivered","cancelled","shipped","refunded")');
   if (error) throw error;
-  const eventIds = [...new Set((data ?? []).map((o: any) => o.event_id))];
+  const effective = (data ?? []).map(effectiveFulfillment).filter((o: any) => o.schedule_kind === "event" && !o.reschedule_required && o.event_id && o.scheduled_at);
+  const eventIds = [...new Set(effective.map((o: any) => o.event_id))];
   const { data: evs } = eventIds.length
     ? await db.from("events").select("*").in("id", eventIds)
     : { data: [] };
@@ -78,9 +84,20 @@ export async function reopenExpiredEventPickups(now = new Date()) {
     ]),
   );
   let reopened = 0;
-  for (const o of data ?? []) {
+  const handled = new Set<string>();
+  for (const o of effective) {
     const ev = eventsById.get(o.event_id);
     if (!ev || !shouldReopenEventOrder(o, ev as any, now)) continue;
+    if (o.fulfillment_group_id) {
+      if (handled.has(o.fulfillment_group_id)) continue;
+      handled.add(o.fulfillment_group_id);
+      const { error: groupError } = await db.rpc("fulfillment_group_action", { p_order: o.id, p_action: "reopen" });
+      if (groupError) throw new Error(groupError.message);
+      const { notifyGroup } = await import("./fulfillment-groups.server");
+      await notifyGroup(o.fulfillment_group_id, `reopen:${o.scheduled_at}`, "auto", true, "Não compareceu / não concluído — reagendamento necessário");
+      reopened++;
+      continue;
+    }
     const history: HistoryEntry[] = Array.isArray(o.schedule_history) ? o.schedule_history : [];
     history.push({ scheduled_at: o.scheduled_at, kind: "event", outcome: "Não compareceu / não concluído", recorded_at: now.toISOString() });
     const { data: upd } = await db
@@ -119,6 +136,15 @@ export async function reschedulePickup(
   const db = supabaseAdmin as any;
   const { data: o } = await db.from("orders").select("*").eq("id", orderId).maybeSingle();
   if (!o || o.user_id !== userId) throw new Error("Pedido não encontrado.");
+  if (o.fulfillment_group_id) {
+    const effective = effectiveFulfillment(o);
+    if (!effective.reschedule_required) throw new Error("Este pedido não precisa de reagendamento.");
+    const { data: members } = await db.from("orders").select("*").eq("fulfillment_group_id", o.fulfillment_group_id);
+    const ids = (members ?? []).filter(canGroupOrder).map((x: any) => x.id);
+    const { applyGroup } = await import("./fulfillment-groups.server");
+    await applyGroup(ids, { ...o.fulfillment_data, scheduled_at: at, schedule_kind: opts?.kind ?? "pickup", event_id: opts?.eventId ?? null, reschedule_required: false }, `reschedule:${o.fulfillment_group_id}:${at}`, { existingId: o.fulfillment_group_id, serviceId: o.fulfillment_service_order_id });
+    return { scheduled_at: at };
+  }
   if (!["pickup", "event"].includes(o.schedule_kind ?? "") || !o.reschedule_required)
     throw new Error("Este pedido não precisa de reagendamento.");
   const kind = opts?.kind ?? "pickup";
