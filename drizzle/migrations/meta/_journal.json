@@ -288,6 +288,27 @@
       "when": 1794587880519,
       "tag": "0040_refund_allow_cancellation_requested_paid",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1794850261125,
+      "tag": "0041_accessory_catalog_identity",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1794850411598,
+      "tag": "0042_accessory_atomic_stock",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1794850836152,
+      "tag": "0043_accessory_stock_claim_and_audit",
+      "breakpoints": true
     }
   ]
 }

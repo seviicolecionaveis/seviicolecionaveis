@@ -18,7 +18,9 @@ function slugify(s: string): string {
 export const Route = createFileRoute('/api/public/hooks/stock-back-check')({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({request}) => {
+        const { verifyCronAuth } = await import('@/lib/cron-auth.server');
+        const denied=verifyCronAuth(request); if(denied)return denied;
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
         const { sendTransactionalEmailSafe } = await import('@/lib/email/send.server')
 
@@ -52,6 +54,17 @@ export const Route = createFileRoute('/api/public/hooks/stock-back-check')({
 
         for (const [, group] of byKey) {
           const first = group[0]
+          if(first.card_key.startsWith('accessory:')) {
+            const {parseAccessoryCartId,parseVariants}=await import('@/lib/accessory-variants');
+            const {accessoryId,variantId}=parseAccessoryCartId(first.card_key);
+            const {data:a}=await admin.from('accessories').select('title,slug,stock,variants,images').eq('id',accessoryId).eq('active',true).maybeSingle();
+            if(!a?.slug)continue;
+            const variants=parseVariants(a.variants);const variant=variants.find(v=>v.id===variantId);
+            const available=variantId?(variant?.stock??0):variants.length?variants.reduce((s,v)=>s+v.stock,0):a.stock;
+            if(available<=0)continue;
+            for(const alert of group){const result=await sendTransactionalEmailSafe({templateName:'back-in-stock',recipientEmail:alert.email,idempotencyKey:`back-in-stock-${alert.id}`,templateData:{cardName:a.title,collection:'Acessórios',cardNumber:variant?.name??'—',cardImage:variant?.images[0]??a.images[0]??null,cardUrl:`${SITE_URL}/acessorios/${a.slug}`}});if(result.success){sentCount++;notifiedIds.push(alert.id);}}
+            continue;
+          }
           // card_key format pattern: name__collection__number ou similar.
           // Fazer query por (name, collection, card_number) para checar estoque total
           const { data: cards } = await admin

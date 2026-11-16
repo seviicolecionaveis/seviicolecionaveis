@@ -6,13 +6,16 @@ import { parseVariants, type AccessoryVariant } from "@/lib/accessory-variants";
 
 export type Accessory = {
   id: string;
+  slug?: string | null;
+  sku?: string | null;
+  tags?: string[];
   title: string;
   description: string | null;
   category: string;
   price_cents: number;
   stock: number;
   images: string[];
-  variants?: unknown;
+  variants?: import("@/integrations/supabase/types").Json;
 };
 
 interface Props {

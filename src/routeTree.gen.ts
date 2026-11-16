@@ -40,6 +40,8 @@ import { Route as TiposDeCartaRouteImport } from './routes/tipos-de-carta'
 import { Route as VideogamesRouteImport } from './routes/videogames'
 import { Route as DotwellKnownOauthAuthorizationServerRouteImport } from './routes/[.]well-known.oauth-authorization-server'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AcessoriosIndexRouteImport } from './routes/acessorios.index'
+import { Route as AcessoriosSlugRouteImport } from './routes/acessorios.$slug'
 import { Route as AdminAccessoriesRouteImport } from './routes/admin.accessories'
 import { Route as AdminAcompanharLeilaoRouteImport } from './routes/admin.acompanhar-leilao'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
@@ -50,6 +52,7 @@ import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminCriarLeilaoRouteImport } from './routes/admin.criar-leilao'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
+import { Route as AdminEstoqueRouteImport } from './routes/admin.estoque'
 import { Route as AdminEventoRouteImport } from './routes/admin.evento'
 import { Route as AdminEventosRouteImport } from './routes/admin.eventos'
 import { Route as AdminEventosLojaRouteImport } from './routes/admin.eventos-loja'
@@ -300,6 +303,16 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AcessoriosIndexRoute = AcessoriosIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AcessoriosRoute,
+} as any)
+const AcessoriosSlugRoute = AcessoriosSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => AcessoriosRoute,
+} as any)
 const AdminAccessoriesRoute = AdminAccessoriesRouteImport.update({
   id: '/accessories',
   path: '/accessories',
@@ -348,6 +361,11 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
 const AdminEmailsRoute = AdminEmailsRouteImport.update({
   id: '/emails',
   path: '/emails',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEstoqueRoute = AdminEstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminEventoRoute = AdminEventoRouteImport.update({
@@ -842,7 +860,7 @@ const ApiPublicBotSchedulesIdMarkRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/acessorios': typeof AcessoriosRoute
+  '/acessorios': typeof AcessoriosRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/avisos': typeof AvisosRoute
@@ -872,6 +890,7 @@ export interface FileRoutesByFullPath {
   '/videogames': typeof VideogamesRoute
   '/.well-known/oauth-authorization-server': typeof DotwellKnownOauthAuthorizationServerRouteWithChildren
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren
+  '/acessorios/$slug': typeof AcessoriosSlugRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/acompanhar-leilao': typeof AdminAcompanharLeilaoRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -882,6 +901,7 @@ export interface FileRoutesByFullPath {
   '/admin/criar-leilao': typeof AdminCriarLeilaoRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/estoque': typeof AdminEstoqueRoute
   '/admin/evento': typeof AdminEventoRoute
   '/admin/eventos': typeof AdminEventosRoute
   '/admin/eventos-loja': typeof AdminEventosLojaRoute
@@ -920,6 +940,7 @@ export interface FileRoutesByFullPath {
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/reembolso/$refundId': typeof ReembolsoRefundIdRoute
   '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
+  '/acessorios/': typeof AcessoriosIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
   '/pre-venda/': typeof PreVendaIndexRoute
@@ -977,7 +998,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/acessorios': typeof AcessoriosRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/avisos': typeof AvisosRoute
@@ -1004,6 +1024,7 @@ export interface FileRoutesByTo {
   '/videogames': typeof VideogamesRoute
   '/.well-known/oauth-authorization-server': typeof DotwellKnownOauthAuthorizationServerRouteWithChildren
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren
+  '/acessorios/$slug': typeof AcessoriosSlugRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/acompanhar-leilao': typeof AdminAcompanharLeilaoRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -1013,6 +1034,7 @@ export interface FileRoutesByTo {
   '/admin/criar-leilao': typeof AdminCriarLeilaoRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/estoque': typeof AdminEstoqueRoute
   '/admin/evento': typeof AdminEventoRoute
   '/admin/eventos': typeof AdminEventosRoute
   '/admin/eventos-loja': typeof AdminEventosLojaRoute
@@ -1051,6 +1073,7 @@ export interface FileRoutesByTo {
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/reembolso/$refundId': typeof ReembolsoRefundIdRoute
   '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
+  '/acessorios': typeof AcessoriosIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/pilha': typeof PilhaIndexRoute
   '/pre-venda': typeof PreVendaIndexRoute
@@ -1109,7 +1132,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/acessorios': typeof AcessoriosRoute
+  '/acessorios': typeof AcessoriosRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/avisos': typeof AvisosRoute
@@ -1139,6 +1162,7 @@ export interface FileRoutesById {
   '/videogames': typeof VideogamesRoute
   '/.well-known/oauth-authorization-server': typeof DotwellKnownOauthAuthorizationServerRouteWithChildren
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren
+  '/acessorios/$slug': typeof AcessoriosSlugRoute
   '/admin/accessories': typeof AdminAccessoriesRoute
   '/admin/acompanhar-leilao': typeof AdminAcompanharLeilaoRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -1149,6 +1173,7 @@ export interface FileRoutesById {
   '/admin/criar-leilao': typeof AdminCriarLeilaoRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/estoque': typeof AdminEstoqueRoute
   '/admin/evento': typeof AdminEventoRoute
   '/admin/eventos': typeof AdminEventosRoute
   '/admin/eventos-loja': typeof AdminEventosLojaRoute
@@ -1187,6 +1212,7 @@ export interface FileRoutesById {
   '/produtos-lacrados/$slug': typeof ProdutosLacradosSlugRoute
   '/reembolso/$refundId': typeof ReembolsoRefundIdRoute
   '/sorteios/$raffleId': typeof SorteiosRaffleIdRoute
+  '/acessorios/': typeof AcessoriosIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/pilha/': typeof PilhaIndexRoute
   '/pre-venda/': typeof PreVendaIndexRoute
@@ -1276,6 +1302,7 @@ export interface FileRouteTypes {
     | '/videogames'
     | '/.well-known/oauth-authorization-server'
     | '/.well-known/oauth-protected-resource'
+    | '/acessorios/$slug'
     | '/admin/accessories'
     | '/admin/acompanhar-leilao'
     | '/admin/banners'
@@ -1286,6 +1313,7 @@ export interface FileRouteTypes {
     | '/admin/criar-leilao'
     | '/admin/dashboard'
     | '/admin/emails'
+    | '/admin/estoque'
     | '/admin/evento'
     | '/admin/eventos'
     | '/admin/eventos-loja'
@@ -1324,6 +1352,7 @@ export interface FileRouteTypes {
     | '/produtos-lacrados/$slug'
     | '/reembolso/$refundId'
     | '/sorteios/$raffleId'
+    | '/acessorios/'
     | '/orders/'
     | '/pilha/'
     | '/pre-venda/'
@@ -1381,7 +1410,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/acessorios'
     | '/admin'
     | '/auth'
     | '/avisos'
@@ -1408,6 +1436,7 @@ export interface FileRouteTypes {
     | '/videogames'
     | '/.well-known/oauth-authorization-server'
     | '/.well-known/oauth-protected-resource'
+    | '/acessorios/$slug'
     | '/admin/accessories'
     | '/admin/acompanhar-leilao'
     | '/admin/banners'
@@ -1417,6 +1446,7 @@ export interface FileRouteTypes {
     | '/admin/criar-leilao'
     | '/admin/dashboard'
     | '/admin/emails'
+    | '/admin/estoque'
     | '/admin/evento'
     | '/admin/eventos'
     | '/admin/eventos-loja'
@@ -1455,6 +1485,7 @@ export interface FileRouteTypes {
     | '/produtos-lacrados/$slug'
     | '/reembolso/$refundId'
     | '/sorteios/$raffleId'
+    | '/acessorios'
     | '/orders'
     | '/pilha'
     | '/pre-venda'
@@ -1542,6 +1573,7 @@ export interface FileRouteTypes {
     | '/videogames'
     | '/.well-known/oauth-authorization-server'
     | '/.well-known/oauth-protected-resource'
+    | '/acessorios/$slug'
     | '/admin/accessories'
     | '/admin/acompanhar-leilao'
     | '/admin/banners'
@@ -1552,6 +1584,7 @@ export interface FileRouteTypes {
     | '/admin/criar-leilao'
     | '/admin/dashboard'
     | '/admin/emails'
+    | '/admin/estoque'
     | '/admin/evento'
     | '/admin/eventos'
     | '/admin/eventos-loja'
@@ -1590,6 +1623,7 @@ export interface FileRouteTypes {
     | '/produtos-lacrados/$slug'
     | '/reembolso/$refundId'
     | '/sorteios/$raffleId'
+    | '/acessorios/'
     | '/orders/'
     | '/pilha/'
     | '/pre-venda/'
@@ -1648,7 +1682,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AcessoriosRoute: typeof AcessoriosRoute
+  AcessoriosRoute: typeof AcessoriosRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   AvisosRoute: typeof AvisosRoute
@@ -1950,6 +1984,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/acessorios/': {
+      id: '/acessorios/'
+      path: '/'
+      fullPath: '/acessorios/'
+      preLoaderRoute: typeof AcessoriosIndexRouteImport
+      parentRoute: typeof AcessoriosRoute
+    }
+    '/acessorios/$slug': {
+      id: '/acessorios/$slug'
+      path: '/$slug'
+      fullPath: '/acessorios/$slug'
+      preLoaderRoute: typeof AcessoriosSlugRouteImport
+      parentRoute: typeof AcessoriosRoute
+    }
     '/admin/accessories': {
       id: '/admin/accessories'
       path: '/accessories'
@@ -2018,6 +2066,13 @@ declare module '@tanstack/react-router' {
       path: '/emails'
       fullPath: '/admin/emails'
       preLoaderRoute: typeof AdminEmailsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/estoque': {
+      id: '/admin/estoque'
+      path: '/estoque'
+      fullPath: '/admin/estoque'
+      preLoaderRoute: typeof AdminEstoqueRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/evento': {
@@ -2667,6 +2722,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AcessoriosRouteChildren {
+  AcessoriosSlugRoute: typeof AcessoriosSlugRoute
+  AcessoriosIndexRoute: typeof AcessoriosIndexRoute
+}
+
+const AcessoriosRouteChildren: AcessoriosRouteChildren = {
+  AcessoriosSlugRoute: AcessoriosSlugRoute,
+  AcessoriosIndexRoute: AcessoriosIndexRoute,
+}
+
+const AcessoriosRouteWithChildren = AcessoriosRoute._addFileChildren(
+  AcessoriosRouteChildren,
+)
+
 interface AdminClientesRouteChildren {
   AdminClientesIdRoute: typeof AdminClientesIdRoute
   AdminClientesIndexRoute: typeof AdminClientesIndexRoute
@@ -2692,6 +2761,7 @@ interface AdminRouteChildren {
   AdminCriarLeilaoRoute: typeof AdminCriarLeilaoRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEmailsRoute: typeof AdminEmailsRoute
+  AdminEstoqueRoute: typeof AdminEstoqueRoute
   AdminEventoRoute: typeof AdminEventoRoute
   AdminEventosRoute: typeof AdminEventosRoute
   AdminEventosLojaRoute: typeof AdminEventosLojaRoute
@@ -2733,6 +2803,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCriarLeilaoRoute: AdminCriarLeilaoRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEmailsRoute: AdminEmailsRoute,
+  AdminEstoqueRoute: AdminEstoqueRoute,
   AdminEventoRoute: AdminEventoRoute,
   AdminEventosRoute: AdminEventosRoute,
   AdminEventosLojaRoute: AdminEventosLojaRoute,
@@ -2862,7 +2933,7 @@ const Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AcessoriosRoute: AcessoriosRoute,
+  AcessoriosRoute: AcessoriosRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   AvisosRoute: AvisosRoute,

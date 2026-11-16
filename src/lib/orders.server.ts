@@ -2,7 +2,6 @@ import { settleStoreCredit, releaseStoreCreditIfTerminal } from '@/lib/customer-
 import { PAID_ORDER_STATUSES } from "@/lib/order-status";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
-import { parseVariants, parseAccessoryCartId } from "@/lib/accessory-variants";
 import { sendScheduleConfirmations } from "@/lib/schedule-confirmation.server";
 
 /**
@@ -121,14 +120,9 @@ export async function decrementOrderStock(orderId: string) {
   // Trava atômica: só um processamento consegue marcar stock_decremented de
   // false -> true. Webhooks repetidos/concorrentes do Mercado Pago não baixam
   // o estoque mais de uma vez.
-  const { data: claimed } = await supabaseAdmin
-    .from("orders")
-    .update({ stock_decremented: true })
-    .eq("id", orderId)
-    .eq("stock_decremented", false)
-    .select("id")
-    .maybeSingle();
-  const shouldDecrement = !!claimed;
+  const { data: claimed, error: claimError } = await supabaseAdmin.rpc('accessory_claim_order_stock', { p_order: orderId });
+  if (claimError) throw new Error('Não foi possível confirmar o estoque de acessórios.');
+  const shouldDecrement = claimed === true;
   if (!shouldDecrement) {
     console.warn("[markOrderPaid] estoque já decrementado, pulando baixa", orderId);
   }
@@ -174,29 +168,8 @@ export async function decrementOrderStock(orderId: string) {
         }
         continue;
       }
-      // Accessory (own stock in the accessories table)
-      if (typeof it.card_id === "string" && it.card_id.startsWith("accessory:")) {
-        const { accessoryId, variantId } = parseAccessoryCartId(it.card_id);
-        if (UUID_RE.test(accessoryId)) {
-          const { data: accessory } = await supabaseAdmin
-            .from("accessories")
-            .select("stock, variants")
-            .eq("id", accessoryId)
-            .maybeSingle();
-          if (accessory) {
-            if (variantId) {
-              const variants = parseVariants((accessory as { variants?: unknown }).variants).map((v) =>
-                v.id === variantId ? { ...v, stock: Math.max(0, v.stock - it.quantity) } : v,
-              );
-              await supabaseAdmin.from("accessories").update({ variants } as never).eq("id", accessoryId);
-            } else {
-              const newStock = Math.max(0, (accessory.stock ?? 0) - it.quantity);
-              await supabaseAdmin.from("accessories").update({ stock: newStock }).eq("id", accessoryId);
-            }
-          }
-        }
-        continue;
-      }
+      // Accessories are processed transactionally below, once per order.
+      if (typeof it.card_id === "string" && it.card_id.startsWith("accessory:")) continue;
       // Videogame (own stock in the videogames table)
       if (typeof it.card_id === "string" && it.card_id.startsWith("videogame:")) {
         const videogameId = it.card_id.slice("videogame:".length);
@@ -277,6 +250,7 @@ export async function markOrderPaid(
   await decrementOrderStock(orderId);
 
   await supabaseAdmin.from("stock_reservations").delete().eq("order_id", orderId);
+  await supabaseAdmin.from("accessory_stock_reservations").delete().eq("order_id", orderId);
 
   await supabaseAdmin
     .from("orders")
@@ -429,6 +403,7 @@ export async function cancelOrder(orderId: string) {
   if (!(await releaseStoreCreditIfTerminal(orderId))) return;
   if (o?.origin === "auction") return;
   await supabaseAdmin.from("stock_reservations").delete().eq("order_id", orderId);
+  await supabaseAdmin.from("accessory_stock_reservations").delete().eq("order_id", orderId);
   await supabaseAdmin
     .from("orders")
     .update({ status: "cancelled", updated_at: new Date().toISOString() })

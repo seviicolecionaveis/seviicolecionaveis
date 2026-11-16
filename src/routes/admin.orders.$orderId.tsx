@@ -1,3 +1,4 @@
+import { OrderProductLink } from "@/components/products/OrderProductLink";
 import { MANUAL_PAYMENT_METHODS, MANUAL_SOURCES } from "@/lib/manual-order";
 import { ORDER_STATUSES, ORDER_STATUS_LABELS, PAID_ORDER_STATUSES } from "@/lib/order-status";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -538,7 +539,7 @@ function AdminOrderDetailPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold">
-                          {it.card_name}
+                          <OrderProductLink cardId={it.card_id} name={it.card_name}/>
                           {it.card_number && <span className="text-muted-foreground font-normal"> · {it.card_number}</span>}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">

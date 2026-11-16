@@ -23,8 +23,11 @@ export type Database = {
           id: string
           images: string[]
           price_cents: number
+          sku: string | null
+          slug: string | null
           sort_order: number
           stock: number
+          tags: string[]
           title: string
           updated_at: string
           variants: Json
@@ -37,8 +40,11 @@ export type Database = {
           id?: string
           images?: string[]
           price_cents?: number
+          sku?: string | null
+          slug?: string | null
           sort_order?: number
           stock?: number
+          tags?: string[]
           title: string
           updated_at?: string
           variants?: Json
@@ -51,13 +57,117 @@ export type Database = {
           id?: string
           images?: string[]
           price_cents?: number
+          sku?: string | null
+          slug?: string | null
           sort_order?: number
           stock?: number
+          tags?: string[]
           title?: string
           updated_at?: string
           variants?: Json
         }
         Relationships: []
+      }
+      accessory_slug_history: {
+        Row: {
+          accessory_id: string
+          slug: string
+        }
+        Insert: {
+          accessory_id: string
+          slug: string
+        }
+        Update: {
+          accessory_id?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accessory_slug_history_accessory_id_fkey"
+            columns: ["accessory_id"]
+            isOneToOne: false
+            referencedRelation: "accessories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accessory_stock_movements: {
+        Row: {
+          accessory_id: string
+          order_id: string
+          quantity: number
+          restored: boolean
+          variant_id: string
+        }
+        Insert: {
+          accessory_id: string
+          order_id: string
+          quantity: number
+          restored?: boolean
+          variant_id?: string
+        }
+        Update: {
+          accessory_id?: string
+          order_id?: string
+          quantity?: number
+          restored?: boolean
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accessory_stock_movements_accessory_id_fkey"
+            columns: ["accessory_id"]
+            isOneToOne: false
+            referencedRelation: "accessories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accessory_stock_movements_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accessory_stock_reservations: {
+        Row: {
+          accessory_id: string
+          expires_at: string
+          order_id: string
+          quantity: number
+          variant_id: string
+        }
+        Insert: {
+          accessory_id: string
+          expires_at: string
+          order_id: string
+          quantity: number
+          variant_id?: string
+        }
+        Update: {
+          accessory_id?: string
+          expires_at?: string
+          order_id?: string
+          quantity?: number
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accessory_stock_reservations_accessory_id_fkey"
+            columns: ["accessory_id"]
+            isOneToOne: false
+            referencedRelation: "accessories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accessory_stock_reservations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       activation_codes: {
         Row: {
@@ -3399,6 +3509,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accessory_claim_order_stock: {
+        Args: { p_order: string }
+        Returns: boolean
+      }
+      accessory_decrement_order: {
+        Args: { p_order: string }
+        Returns: undefined
+      }
+      accessory_reserve_order: {
+        Args: { p_expires: string; p_order: string }
+        Returns: undefined
+      }
+      accessory_restore_order: { Args: { p_order: string }; Returns: undefined }
       admin_merge_customer_accounts: {
         Args: { _source: string; _target: string }
         Returns: Json

@@ -1,3 +1,4 @@
+import { OrderProductLink } from "@/components/products/OrderProductLink";
 import { MANUAL_PAYMENT_METHODS } from "@/lib/manual-order";
 import { ORDER_STATUS_LABELS, canBuyerConfirmReceipt } from "@/lib/order-status";
 import { BuyerReceiptConfirmation } from "@/components/BuyerReceiptConfirmation";
@@ -364,7 +365,7 @@ function OrderDetailPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">
-                    {it.card_name}
+                    <OrderProductLink cardId={it.card_id} name={it.card_name}/>
                     {it.card_number ? <span className="text-muted-foreground font-normal"> {it.card_number}</span> : null}
                   </p>
                   <p className="text-xs text-muted-foreground">

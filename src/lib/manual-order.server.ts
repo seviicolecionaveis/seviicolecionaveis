@@ -1,5 +1,8 @@
+import { manualAccessoryRows } from "@/lib/manual-accessory-catalog";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
+import { parseVariants, parseAccessoryCartId } from '@/lib/accessory-variants';
+import { normalizeProductSearch, productMatches } from '@/lib/product-catalog';
 import { isPaidOrderStatus, ORDER_STATUS_LABELS } from "@/lib/order-status";
 import { formatSchedule } from "@/lib/scheduling";
 import type { PickupEvent } from "@/lib/events";
@@ -68,12 +71,16 @@ export async function searchManualCatalog(q: string) {
   const term = q.trim();
   if (term.length < 2) return [];
   const like = `%${term.replace(/[%_,()]/g, "")}%`;
-  const [{ data: cards }, { data: sealed }] = await Promise.all([
+  const [{ data: cards }, { data: sealed }, {data: accessories}, {data: panels}] = await Promise.all([
     db.from("cards").select("id, name, card_number, collection, finish, language, condition, stock, base_price_cents, image")
       .or(`name.ilike.${like},card_number.ilike.${like}`).order("name").limit(30),
     db.from("sealed_products").select("id, title, price_cents, stock, images").ilike("title", like).limit(10),
+    db.from("accessories").select("id,title,description,category,price_cents,stock,images,variants,slug,sku,tags").eq("active",true),
+    db.from("panels").select("id,title,description,price_cents,stock,images").eq("active",true),
   ]);
   return [
+    ...(accessories??[]).filter((a:any)=>productMatches(a,term)).flatMap(manualAccessoryRows),
+    ...(panels??[]).filter((p:any)=>productMatches(p,term)).map((p:any)=>({cardId:`panel:${p.id}`,name:p.title,detail:'Painel',priceCents:p.price_cents,stock:p.stock,image:p.images[0]??null,type:'panel' as const})),
     ...(cards ?? []).map((c: any) => ({
       cardId: c.id, name: c.name, detail: [c.collection, `#${c.card_number}`, c.finish, c.language, c.condition].filter(Boolean).join(" · "),
       priceCents: c.base_price_cents ?? 0, stock: c.stock ?? 0, image: c.image ?? null, type: "card" as const,
@@ -114,6 +121,10 @@ async function availableStock(cardIds: string[]): Promise<Record<string, number>
     const { data } = await db.from("sealed_products").select("id, stock").in("id", sealed);
     for (const s of data ?? []) out[`sealed:${s.id}`] = s.stock ?? 0;
   }
+  const accessoryIds=cardIds.filter(id=>id.startsWith('accessory:'));
+  if(accessoryIds.length){const {data}=await db.from('accessories').select('id,stock,variants').in('id',[...new Set(accessoryIds.map(id=>parseAccessoryCartId(id).accessoryId))]);for(const id of accessoryIds){const {accessoryId,variantId}=parseAccessoryCartId(id);const a=(data??[]).find((a:any)=>a.id===accessoryId);if(!a)continue;const v=parseVariants(a.variants).find(v=>v.id===variantId);if(variantId&&!v)continue;out[id]=v?.stock??a.stock;}}
+  const panels=cardIds.filter(id=>id.startsWith('panel:'));
+  if(panels.length){const {data}=await db.from('panels').select('id,stock').in('id',panels.map(id=>id.slice(6)));for(const p of data??[])out[`panel:${p.id}`]=p.stock;}
   return out;
 }
 
@@ -245,12 +256,20 @@ export async function createManualOrder(admin: { id: string; email: string | nul
     ? await db.from("cards").select("id, image, collection, card_number, finish, language, condition, liga_subcategory").in("id", catalogIds.filter((id) => UUID_RE.test(id)))
     : { data: [] };
   const cardMap = new Map((cardRows ?? []).map((c: any) => [c.id, c]));
+  const productImages=new Map<string,string>();
+  for(const prefix of ['accessory','sealed','panel']) {
+    const ids=catalogIds.filter(id=>id.startsWith(prefix+':'));
+    if(!ids.length)continue;
+    const table=prefix==='accessory'?'accessories':prefix==='sealed'?'sealed_products':'panels';
+    const {data}=await db.from(table).select(prefix==='accessory'?'id,images,variants':'id,images').in('id',ids.map(id=>id.split(':')[1]));
+    for(const id of ids){const p=(data??[]).find((p:any)=>p.id===id.split(':')[1]);if(p){const variant=parseVariants(p.variants).find(v=>v.id===id.split(':')[2]);productImages.set(id,variant?.images[0]??p.images?.[0]??'');}}
+  }
   const rows = input.items.map((i, idx) => {
     const c: any = i.cardId ? cardMap.get(i.cardId) : null;
     return {
       order_id: order.id,
       card_id: i.kind === "catalog" ? i.cardId : `custom:${order.id.slice(0, 8)}-${idx}`,
-      card_name: i.name.trim(), card_image: c?.image ?? null, collection: c?.collection ?? null,
+      card_name: i.name.trim(), card_image: c?.image ?? (i.cardId?productImages.get(i.cardId):null) ?? null, collection: c?.collection ?? null,
       card_number: c?.card_number ?? null, finish: c?.finish ?? null, language: c?.language ?? null,
       condition: c?.condition ?? null, liga_subcategory: c?.liga_subcategory ?? null,
       quantity: i.quantity, unit_price_cents: Math.round(i.unitPriceCents),
@@ -263,6 +282,10 @@ export async function createManualOrder(admin: { id: string; email: string | nul
     throw new Error("Não foi possível salvar os itens do pedido.");
   }
 
+  if(input.decrementStock){
+    const {error:reserveError}=await db.rpc('accessory_reserve_order',{p_order:order.id,p_expires:new Date(Date.now()+60*60*1000).toISOString()});
+    if(reserveError){await db.from('orders').delete().eq('id',order.id);return {ok:false as const,error:'Estoque insuficiente para os acessórios selecionados.'};}
+  }
   if (input.internalNotes?.trim()) {
     await db.from("order_admin_notes").insert({ order_id: order.id, internal_notes: input.internalNotes.trim(), created_by: admin.id });
   }

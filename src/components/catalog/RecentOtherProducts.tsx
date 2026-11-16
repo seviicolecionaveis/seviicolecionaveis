@@ -1,9 +1,11 @@
+import { useNavigate } from "@tanstack/react-router";
+import { productSlug } from "@/lib/product-catalog";
 import { useState } from "react";
 import { useRecentProducts } from "@/hooks/useRecentProducts";
 import { OtherProductTile } from "./OtherProductTile";
 import { SealedModal, type Sealed } from "./SealedModal";
 import { PanelModal, type Panel } from "./PanelModal";
-import { AccessoryModal, type Accessory } from "./AccessoryModal";
+import type { Accessory } from "./AccessoryModal";
 
 interface Props {
   /** Janela em dias. Padrão 30. */
@@ -17,10 +19,10 @@ interface Props {
  * recentemente, exibidos na página de Novidades junto ao catálogo de cartas.
  */
 export function RecentOtherProducts({ windowDays = 30, limit = 24 }: Props) {
+  const navigate = useNavigate();
   const { entries, loading } = useRecentProducts(windowDays);
   const [activePanel, setActivePanel] = useState<Panel | null>(null);
   const [activeSealed, setActiveSealed] = useState<Sealed | null>(null);
-  const [activeAccessory, setActiveAccessory] = useState<Accessory | null>(null);
 
   if (loading || entries.length === 0) return null;
   const shown = entries.slice(0, limit);
@@ -43,14 +45,13 @@ export function RecentOtherProducts({ windowDays = 30, limit = 24 }: Props) {
             onClick={() => {
               if (entry.kind === "panel") setActivePanel(entry.panel);
               else if (entry.kind === "sealed") setActiveSealed(entry.sealed);
-              else setActiveAccessory(entry.accessory);
+              else navigate({to:"/acessorios/$slug",params:{slug:productSlug(entry.accessory)}});
             }}
           />
         ))}
       </div>
       <PanelModal panel={activePanel} onClose={() => setActivePanel(null)} />
       <SealedModal item={activeSealed} onClose={() => setActiveSealed(null)} />
-      <AccessoryModal item={activeAccessory} onClose={() => setActiveAccessory(null)} />
     </section>
   );
 }

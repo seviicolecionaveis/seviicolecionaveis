@@ -1,0 +1,74 @@
+export function CommonProductFields({
+  title,
+  description,
+  price,
+  stock,
+  active,
+  onTitle,
+  onDescription,
+  onPrice,
+  onStock,
+  onActive,
+}: {
+  title: string;
+  description: string;
+  price: string;
+  stock: string;
+  active: boolean;
+  onTitle: (s: string) => void;
+  onDescription: (s: string) => void;
+  onPrice: (s: string) => void;
+  onStock: (s: string) => void;
+  onActive: (b: boolean) => void;
+}) {
+  const input = "mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm";
+  return (
+    <>
+      <label className="block text-xs font-semibold">
+        Título
+        <input
+          aria-label="Título do produto"
+          value={title}
+          onChange={(e) => onTitle(e.target.value)}
+          className={input}
+        />
+      </label>
+      <label className="block text-xs font-semibold">
+        Descrição
+        <textarea
+          aria-label="Descrição do produto"
+          value={description}
+          onChange={(e) => onDescription(e.target.value)}
+          rows={3}
+          className={input}
+        />
+      </label>
+      <div className="grid grid-cols-3 gap-3">
+        <label className="text-xs font-semibold">
+          Preço (R$)
+          <input
+            aria-label="Preço do produto"
+            value={price}
+            onChange={(e) => onPrice(e.target.value)}
+            inputMode="decimal"
+            className={input}
+          />
+        </label>
+        <label className="text-xs font-semibold">
+          Estoque
+          <input
+            aria-label="Estoque do produto"
+            value={stock}
+            onChange={(e) => onStock(e.target.value)}
+            inputMode="numeric"
+            className={input}
+          />
+        </label>
+        <label className="flex items-end gap-2 pb-2 text-sm">
+          <input type="checkbox" checked={active} onChange={(e) => onActive(e.target.checked)} />
+          Ativo
+        </label>
+      </div>
+    </>
+  );
+}

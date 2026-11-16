@@ -3,7 +3,9 @@ import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { SealedModal, type Sealed } from "./SealedModal";
 import { PanelModal, type Panel } from "./PanelModal";
-import { AccessoryModal, type Accessory } from "./AccessoryModal";
+import type { Accessory } from "./AccessoryModal";
+import { useNavigate } from "@tanstack/react-router";
+import { normalizeProductSearch, productMatches, productSlug } from "@/lib/product-catalog";
 import { parseVariants } from "@/lib/accessory-variants";
 
 interface Props {
@@ -17,13 +19,13 @@ const PER_GROUP_LIMIT = 12;
  * Os dados são carregados uma única vez, na primeira busca, e ficam em cache.
  */
 export function SearchOtherProducts({ query }: Props) {
-  const q = query.trim().toLowerCase();
+  const navigate = useNavigate();
+  const q = normalizeProductSearch(query);
   const [panels, setPanels] = useState<Panel[]>([]);
   const [sealed, setSealed] = useState<Sealed[]>([]);
   const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [activePanel, setActivePanel] = useState<Panel | null>(null);
   const [activeSealed, setActiveSealed] = useState<Sealed | null>(null);
-  const [activeAccessory, setActiveAccessory] = useState<Accessory | null>(null);
   const startedRef = useRef(false);
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export function SearchOtherProducts({ query }: Props) {
           .order("created_at", { ascending: false }),
         supabase
           .from("accessories")
-          .select("id, title, description, category, price_cents, stock, images, variants")
+          .select("id, title, description, category, price_cents, stock, images, variants, slug, sku, tags")
           .eq("active", true)
           .order("sort_order", { ascending: true })
           .order("created_at", { ascending: false }),
@@ -58,14 +60,14 @@ export function SearchOtherProducts({ query }: Props) {
 
   const groups = useMemo(() => {
     if (!q) return [];
-    const hit = (text: string | null | undefined) => (text ?? "").toLowerCase().includes(q);
+    const hit = (text: string | null | undefined) => normalizeProductSearch(text ?? "").includes(q);
 
     const matchedPanels = panels.filter((p) => hit(p.title) || hit(p.description));
     const matchedSealed = sealed.filter(
       (s) => hit(s.title) || hit(s.description) || hit(s.collection) || hit(s.product_type),
     );
     const matchedAccessories = accessories.filter(
-      (a) => hit(a.title) || hit(a.description) || hit(a.category),
+      (a) => productMatches(a,q),
     );
 
     return [
@@ -182,7 +184,7 @@ export function SearchOtherProducts({ query }: Props) {
                   const minPrice = Math.min(...prices);
                   const out = vs.every((v) => (v.stock ?? 0) <= 0) && (a.stock ?? 0) <= 0;
                   return (
-                    <button key={a.id} onClick={() => setActiveAccessory(a)} className="group text-left">
+                    <button key={a.id} onClick={() => navigate({to:"/acessorios/$slug",params:{slug:productSlug(a)}})} className="group text-left">
                       <div className="relative aspect-square overflow-hidden rounded-lg bg-secondary">
                         {(vs.find((v) => v.images.length)?.images[0] ?? a.images[0]) ? (
                           <img
@@ -224,7 +226,6 @@ export function SearchOtherProducts({ query }: Props) {
 
       <PanelModal panel={activePanel} onClose={() => setActivePanel(null)} />
       <SealedModal item={activeSealed} onClose={() => setActiveSealed(null)} />
-      <AccessoryModal item={activeAccessory} onClose={() => setActiveAccessory(null)} />
     </div>
   );
 }
