@@ -1,5 +1,5 @@
 ## Correção dos locais de retirada na Pilha
-- [ ] Restaurar Aruana/Aeroporto junto ao calendário e conferir seleção no navegador sem criar solicitação real.
+- [x] Restaurar Aruana/Aeroporto junto ao calendário; seleção e permanência após escolher horário conferidas com conta conectada, também no celular, sem criar solicitação real.
 
 ## Grupos de envio e retirada
 - [x] Ler documento atualizado, conferir os vínculos e apresentar plano antes de alterar dados.
