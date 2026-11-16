@@ -3,6 +3,7 @@ import { ptBR } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import {
+  activePickupEvents,
   eventDays,
   eventSlotsForDay,
   eventTimeRangeLabel,
@@ -36,6 +37,7 @@ function fromYmd(s: string) {
 
 /** Calendário de retirada em eventos: só dias com evento ativo são clicáveis; blocos de 1h; fecha 24h antes. */
 export function EventSlotPicker({ events, value, onChange }: Props) {
+  const availableEvents = useMemo(() => activePickupEvents(events), [events]);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
@@ -44,9 +46,9 @@ export function EventSlotPicker({ events, value, onChange }: Props) {
 
   const byDay = useMemo(() => {
     const map = new Map<string, PickupEvent[]>();
-    for (const e of events) for (const d of eventDays(e)) map.set(d, [...(map.get(d) ?? []), e]);
+    for (const e of availableEvents) for (const d of eventDays(e)) map.set(d, [...(map.get(d) ?? []), e]);
     return map;
-  }, [events]);
+  }, [availableEvents]);
 
   const firstOpenDay = useMemo(() => {
     const days = [...byDay.keys()].sort();
@@ -62,12 +64,12 @@ export function EventSlotPicker({ events, value, onChange }: Props) {
   const dayKey = day ? ymd(day) : null;
   const dayEvents = dayKey ? (byDay.get(dayKey) ?? []) : [];
   const openEvents = dayEvents.filter((e) => !isEventDayClosed(e, dayKey!, now));
-  const selectedEvent = value ? events.find((e) => e.id === value.eventId) ?? null : null;
+  const selectedEvent = value ? availableEvents.find((e) => e.id === value.eventId) ?? null : null;
   const [pickedId, setPickedId] = useState<string | null>(null);
   const pickedEvent = pickedId ? openEvents.find((e) => e.id === pickedId) ?? null : null;
   const activeEvent = pickedEvent ?? (selectedEvent && dayKey && eventDays(selectedEvent).includes(dayKey) ? selectedEvent : openEvents[0] ?? null);
 
-  if (events.length === 0 || !firstOpenDay) {
+  if (availableEvents.length === 0 || !firstOpenDay) {
     return (
       <p className="rounded-md border border-border bg-secondary/30 p-3 text-xs text-muted-foreground">
         {NO_EVENTS_MESSAGE}

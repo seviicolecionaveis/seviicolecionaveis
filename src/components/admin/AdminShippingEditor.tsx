@@ -11,7 +11,7 @@ import {
   validateAdminShippingInput, type AdminShippingInput, type AdminShippingMode, type PickupPoint,
 } from "@/lib/admin-shipping-edit";
 import { formatSchedule, slotsFor, toIso, localParts } from "@/lib/scheduling";
-import { eventDays, eventSlotsForDay, formatYmd, type PickupEvent } from "@/lib/events";
+import { activePickupEvents, eventDays, eventSlotsForDay, formatYmd, type PickupEvent } from "@/lib/events";
 import { listFulfillmentCandidates } from "@/lib/fulfillment-groups.functions";
 import { FulfillmentOrderSelection } from "@/components/FulfillmentOrderSelection";
 
@@ -51,19 +51,20 @@ export function AdminShippingEditor({ order, onSaved }: { order: any; onSaved: (
     if (!open) return;
     setOperationKey(crypto.randomUUID());
     candidates({ data: { orderId: order.id } }).then((rows) => { setOrders(rows); setSelectedOrderIds(rows.map((o) => o.id)); }).catch(() => toast.error("Não foi possível consultar os pedidos."));
-    (supabase as any).from("events").select("*").order("start_date").then(({ data }: any) =>
+    (supabase as any).from("events").select("*").eq("active", true).order("start_date").then(({ data }: any) =>
       setEvents((data ?? []).map((e: any) => ({
         ...e, start_time: String(e.start_time).slice(0, 5), end_time: String(e.end_time).slice(0, 5),
       }))),
     );
   }, [open]);
 
-  const ev = events.find((e) => e.id === eventId) ?? null;
+  const availableEvents = useMemo(() => activePickupEvents(events), [events]);
+  const ev = availableEvents.find((e) => e.id === eventId) ?? null;
   const at = date && (mode === "delivery" || slot) ? toIso(date, mode === "delivery" ? "19:00" : slot) : null;
   const payload: AdminShippingInput = {
     mode, at: ["pickup", "event", "delivery"].includes(mode) ? at : null,
     pickupPoint: mode === "pickup" ? (pickupPoint || null) : null,
-    eventId: mode === "event" ? eventId || null : null,
+    eventId: mode === "event" ? ev?.id ?? null : null,
     address: mode === "delivery" || mode === "tracked" ? addr : null,
     deliveryInfo: mode === "delivery" ? deliveryInfo : null,
     feeStatus: mode === "delivery" ? feeStatus : null,
@@ -124,9 +125,9 @@ export function AdminShippingEditor({ order, onSaved }: { order: any; onSaved: (
           </div>}
 
           {mode === "event" && <div className="space-y-2">
-            <select className={input} value={eventId} onChange={(e) => { setEventId(e.target.value); setDate(""); setSlot(""); }}>
+            <select className={input} value={ev?.id ?? ""} onChange={(e) => { setEventId(e.target.value); setDate(""); setSlot(""); }}>
               <option value="">Evento…</option>
-              {events.map((e) => <option key={e.id} value={e.id}>{e.name} — {formatYmd(e.start_date)}{e.active ? "" : " (inativo)"}</option>)}
+              {availableEvents.map((e) => <option key={e.id} value={e.id}>{e.name} — {formatYmd(e.start_date)}</option>)}
             </select>
             {ev && <select className={input} value={date} onChange={(e) => { setDate(e.target.value); setSlot(""); }}>
               <option value="">Dia…</option>

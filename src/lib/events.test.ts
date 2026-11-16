@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  activePickupEvents,
   eventDays,
   eventEndIso,
   eventReopenDeadline,
@@ -26,6 +27,12 @@ const base: PickupEvent = {
 };
 
 describe("events", () => {
+  it("listas de retirada mostram somente eventos ativos", () => {
+    const inactive = { ...base, id: "inactive", active: false };
+    expect(activePickupEvents([inactive, base]).map((event) => event.id)).toEqual(["ev1"]);
+    expect(activePickupEvents([inactive])).toEqual([]);
+  });
+
   it("lista dias do evento, inclusive", () => {
     expect(eventDays(base)).toEqual(["2026-11-20", "2026-11-21"]);
   });

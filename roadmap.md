@@ -1,3 +1,6 @@
+## Eventos ativos nas opções de retirada
+- [ ] Filtrar eventos inativos no calendário do cliente e no editor mostrado na imagem; validar teste da regra.
+
 ## Correção dos locais de retirada na Pilha
 - [x] Restaurar Aruana/Aeroporto junto ao calendário; seleção e permanência após escolher horário conferidas com conta conectada, também no celular, sem criar solicitação real.
 
