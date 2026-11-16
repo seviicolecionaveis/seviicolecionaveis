@@ -5,7 +5,7 @@ import { useRecentProducts } from "@/hooks/useRecentProducts";
 import { OtherProductTile } from "./OtherProductTile";
 import { SealedModal, type Sealed } from "./SealedModal";
 import { PanelModal, type Panel } from "./PanelModal";
-import { AccessoryModal, type Accessory } from "./AccessoryModal";
+import type { Accessory } from "./AccessoryModal";
 
 interface Props {
   /** Janela em dias. Padrão 30. */
@@ -23,7 +23,6 @@ export function RecentOtherProducts({ windowDays = 30, limit = 24 }: Props) {
   const { entries, loading } = useRecentProducts(windowDays);
   const [activePanel, setActivePanel] = useState<Panel | null>(null);
   const [activeSealed, setActiveSealed] = useState<Sealed | null>(null);
-  const [activeAccessory, setActiveAccessory] = useState<Accessory | null>(null);
 
   if (loading || entries.length === 0) return null;
   const shown = entries.slice(0, limit);
@@ -53,7 +52,6 @@ export function RecentOtherProducts({ windowDays = 30, limit = 24 }: Props) {
       </div>
       <PanelModal panel={activePanel} onClose={() => setActivePanel(null)} />
       <SealedModal item={activeSealed} onClose={() => setActiveSealed(null)} />
-      <AccessoryModal item={activeAccessory} onClose={() => setActiveAccessory(null)} />
     </section>
   );
 }

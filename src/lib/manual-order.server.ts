@@ -1,3 +1,4 @@
+import { manualAccessoryRows } from "@/lib/manual-accessory-catalog";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
 import { parseVariants, parseAccessoryCartId } from '@/lib/accessory-variants';
@@ -78,10 +79,7 @@ export async function searchManualCatalog(q: string) {
     db.from("panels").select("id,title,description,price_cents,stock,images").eq("active",true),
   ]);
   return [
-    ...(accessories??[]).filter((a:any)=>productMatches(a,term)).flatMap((a:any)=>{
-      const vs=parseVariants(a.variants);
-      return (vs.length?vs:[null]).map(v=>({cardId:`accessory:${a.id}${v?':'+v.id:''}`,name:a.title+(v?' — '+v.name:''),detail:'Acessório'+(a.sku?' · '+a.sku:''),priceCents:v?.price_cents??a.price_cents,stock:v?.stock??a.stock,image:v?.images[0]??a.images[0]??null,type:'accessory' as const}));
-    }),
+    ...(accessories??[]).filter((a:any)=>productMatches(a,term)).flatMap(manualAccessoryRows),
     ...(panels??[]).filter((p:any)=>productMatches(p,term)).map((p:any)=>({cardId:`panel:${p.id}`,name:p.title,detail:'Painel',priceCents:p.price_cents,stock:p.stock,image:p.images[0]??null,type:'panel' as const})),
     ...(cards ?? []).map((c: any) => ({
       cardId: c.id, name: c.name, detail: [c.collection, `#${c.card_number}`, c.finish, c.language, c.condition].filter(Boolean).join(" · "),

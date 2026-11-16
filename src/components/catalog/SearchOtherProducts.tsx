@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { SealedModal, type Sealed } from "./SealedModal";
 import { PanelModal, type Panel } from "./PanelModal";
-import { AccessoryModal, type Accessory } from "./AccessoryModal";
+import type { Accessory } from "./AccessoryModal";
 import { useNavigate } from "@tanstack/react-router";
 import { normalizeProductSearch, productMatches, productSlug } from "@/lib/product-catalog";
 import { parseVariants } from "@/lib/accessory-variants";
@@ -26,7 +26,6 @@ export function SearchOtherProducts({ query }: Props) {
   const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [activePanel, setActivePanel] = useState<Panel | null>(null);
   const [activeSealed, setActiveSealed] = useState<Sealed | null>(null);
-  const [activeAccessory, setActiveAccessory] = useState<Accessory | null>(null);
   const startedRef = useRef(false);
 
   useEffect(() => {
@@ -227,7 +226,6 @@ export function SearchOtherProducts({ query }: Props) {
 
       <PanelModal panel={activePanel} onClose={() => setActivePanel(null)} />
       <SealedModal item={activeSealed} onClose={() => setActiveSealed(null)} />
-      <AccessoryModal item={activeAccessory} onClose={() => setActiveAccessory(null)} />
     </div>
   );
 }

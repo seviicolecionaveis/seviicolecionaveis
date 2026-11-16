@@ -1,3 +1,5 @@
+import { useNavigate } from "@tanstack/react-router";
+import { productSlug } from "@/lib/product-catalog";
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles } from "lucide-react";
@@ -8,7 +10,7 @@ import { CardModal } from "./CardModal";
 import { OtherProductTile } from "./OtherProductTile";
 import { SealedModal, type Sealed } from "./SealedModal";
 import { PanelModal, type Panel } from "./PanelModal";
-import { AccessoryModal, type Accessory } from "./AccessoryModal";
+import type { Accessory } from "./AccessoryModal";
 import type { Card } from "@/data/cards";
 
 interface Props {
@@ -25,12 +27,12 @@ type Entry =
   | { kind: "accessory"; t: number; accessory: Accessory };
 
 export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
+  const navigate = useNavigate();
   const { cards } = useCardsCatalog();
   const { entries: productEntries } = useRecentProducts(windowDays);
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [activePanel, setActivePanel] = useState<Panel | null>(null);
   const [activeSealed, setActiveSealed] = useState<Sealed | null>(null);
-  const [activeAccessory, setActiveAccessory] = useState<Accessory | null>(null);
 
   const items = useMemo<Entry[]>(() => {
     const cutoff = Date.now() - windowDays * 24 * 60 * 60 * 1000;
@@ -79,7 +81,7 @@ export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
                 onClick={() => {
                   if (entry.kind === "panel") setActivePanel(entry.panel);
                   else if (entry.kind === "sealed") setActiveSealed(entry.sealed);
-                  else setActiveAccessory(entry.accessory);
+                  else navigate({to:"/acessorios/$slug",params:{slug:productSlug(entry.accessory)}});
                 }}
               />
             )
@@ -101,7 +103,6 @@ export function NewArrivals({ windowDays = 21, limit = 12 }: Props) {
       <CardModal card={activeCard} onClose={() => setActiveCard(null)} />
       <PanelModal panel={activePanel} onClose={() => setActivePanel(null)} />
       <SealedModal item={activeSealed} onClose={() => setActiveSealed(null)} />
-      <AccessoryModal item={activeAccessory} onClose={() => setActiveAccessory(null)} />
     </section>
   );
 }
