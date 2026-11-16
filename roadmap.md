@@ -1,5 +1,5 @@
 ## Integração de Acessórios
-- [ ] Investigar diferenças de páginas, catálogo, busca, estoque, pedidos e variações; apresentar plano sem alterar dados.
+- [x] Investigar diferenças de páginas, catálogo, busca, estoque, pedidos e variações; preparar plano sem alterar dados, mantendo regra atual de cancelamento.
 - [ ] Implementação aguarda aprovação do plano e confirmação prévia das alterações de dados, com backup.
 - [ ] Validar páginas, busca, carrinho e concorrência em ambiente isolado, preservando cartas e lacrados.
 
