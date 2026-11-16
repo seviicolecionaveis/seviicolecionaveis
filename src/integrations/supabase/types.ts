@@ -3509,6 +3509,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accessory_claim_order_stock: {
+        Args: { p_order: string }
+        Returns: boolean
+      }
       accessory_decrement_order: {
         Args: { p_order: string }
         Returns: undefined
