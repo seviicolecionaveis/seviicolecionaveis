@@ -1,3 +1,6 @@
+## Correção dos locais de retirada na Pilha
+- [x] Restaurar Aruana/Aeroporto junto ao calendário; seleção e permanência após escolher horário conferidas com conta conectada, também no celular, sem criar solicitação real.
+
 ## Grupos de envio e retirada
 - [x] Ler documento atualizado, conferir os vínculos e apresentar plano antes de alterar dados.
 - [ ] Aprovação do plano e da atualização dos dados existentes: 43 OS, 41 com pedidos vinculados, 90 pedidos; nenhum pedido em mais de uma OS; 26 pedidos em andamento, 63 entregues e 1 cancelado.
