@@ -15,7 +15,7 @@ export type Accessory = {
   price_cents: number;
   stock: number;
   images: string[];
-  variants?: unknown;
+  variants?: import("@/integrations/supabase/types").Json;
 };
 
 interface Props {

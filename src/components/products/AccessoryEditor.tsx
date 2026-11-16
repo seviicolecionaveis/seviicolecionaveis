@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { Trash2, Plus, X, Upload, Link as LinkIcon, ArrowUp, ArrowDown } from "lucide-react";
 import { parseVariants, type AccessoryVariant } from "@/lib/accessory-variants";
 
+const CATEGORIES = ["Sleeves/Shields", "Dados", "Marcadores de dano", "Moedas", "Playmats", "Binders", "Top Loader", "Deck box", "Kit jogável"] as const;
+
 type Accessory = {
   id: string;
   slug?: string | null;

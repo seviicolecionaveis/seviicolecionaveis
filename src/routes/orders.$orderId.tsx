@@ -349,7 +349,7 @@ function OrderDetailPage() {
                   {it.card_image ? (
                     <img
                       src={it.card_image}
-                      alt=<OrderProductLink cardId={it.card_id} name={it.card_name}/>
+                      alt={it.card_name}
                       className="h-full w-full object-cover"
                       loading="lazy"
                       referrerPolicy="no-referrer"
@@ -365,7 +365,7 @@ function OrderDetailPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">
-                    {it.card_name}
+                    <OrderProductLink cardId={it.card_id} name={it.card_name}/>
                     {it.card_number ? <span className="text-muted-foreground font-normal"> {it.card_number}</span> : null}
                   </p>
                   <p className="text-xs text-muted-foreground">
