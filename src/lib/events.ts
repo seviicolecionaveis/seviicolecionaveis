@@ -20,6 +20,11 @@ export const NO_EVENTS_MESSAGE =
 
 const hhmm = (t: string) => t.slice(0, 5);
 
+/** Eventos disponíveis nas listas de escolha de retirada (não altera o histórico). */
+export function activePickupEvents(events: PickupEvent[]): PickupEvent[] {
+  return events.filter((event) => event.active === true);
+}
+
 /** Todos os dias do evento (YYYY-MM-DD), inclusive. */
 export function eventDays(e: PickupEvent): string[] {
   const out: string[] = [];
