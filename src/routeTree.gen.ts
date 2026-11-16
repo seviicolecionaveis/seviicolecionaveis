@@ -52,6 +52,7 @@ import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminCriarLeilaoRouteImport } from './routes/admin.criar-leilao'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
+import { Route as AdminEstoqueRouteImport } from './routes/admin.estoque'
 import { Route as AdminEventoRouteImport } from './routes/admin.evento'
 import { Route as AdminEventosRouteImport } from './routes/admin.eventos'
 import { Route as AdminEventosLojaRouteImport } from './routes/admin.eventos-loja'
@@ -360,6 +361,11 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
 const AdminEmailsRoute = AdminEmailsRouteImport.update({
   id: '/emails',
   path: '/emails',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEstoqueRoute = AdminEstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminEventoRoute = AdminEventoRouteImport.update({
@@ -895,6 +901,7 @@ export interface FileRoutesByFullPath {
   '/admin/criar-leilao': typeof AdminCriarLeilaoRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/estoque': typeof AdminEstoqueRoute
   '/admin/evento': typeof AdminEventoRoute
   '/admin/eventos': typeof AdminEventosRoute
   '/admin/eventos-loja': typeof AdminEventosLojaRoute
@@ -1027,6 +1034,7 @@ export interface FileRoutesByTo {
   '/admin/criar-leilao': typeof AdminCriarLeilaoRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/estoque': typeof AdminEstoqueRoute
   '/admin/evento': typeof AdminEventoRoute
   '/admin/eventos': typeof AdminEventosRoute
   '/admin/eventos-loja': typeof AdminEventosLojaRoute
@@ -1165,6 +1173,7 @@ export interface FileRoutesById {
   '/admin/criar-leilao': typeof AdminCriarLeilaoRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/emails': typeof AdminEmailsRoute
+  '/admin/estoque': typeof AdminEstoqueRoute
   '/admin/evento': typeof AdminEventoRoute
   '/admin/eventos': typeof AdminEventosRoute
   '/admin/eventos-loja': typeof AdminEventosLojaRoute
@@ -1304,6 +1313,7 @@ export interface FileRouteTypes {
     | '/admin/criar-leilao'
     | '/admin/dashboard'
     | '/admin/emails'
+    | '/admin/estoque'
     | '/admin/evento'
     | '/admin/eventos'
     | '/admin/eventos-loja'
@@ -1436,6 +1446,7 @@ export interface FileRouteTypes {
     | '/admin/criar-leilao'
     | '/admin/dashboard'
     | '/admin/emails'
+    | '/admin/estoque'
     | '/admin/evento'
     | '/admin/eventos'
     | '/admin/eventos-loja'
@@ -1573,6 +1584,7 @@ export interface FileRouteTypes {
     | '/admin/criar-leilao'
     | '/admin/dashboard'
     | '/admin/emails'
+    | '/admin/estoque'
     | '/admin/evento'
     | '/admin/eventos'
     | '/admin/eventos-loja'
@@ -2054,6 +2066,13 @@ declare module '@tanstack/react-router' {
       path: '/emails'
       fullPath: '/admin/emails'
       preLoaderRoute: typeof AdminEmailsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/estoque': {
+      id: '/admin/estoque'
+      path: '/estoque'
+      fullPath: '/admin/estoque'
+      preLoaderRoute: typeof AdminEstoqueRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/evento': {
@@ -2742,6 +2761,7 @@ interface AdminRouteChildren {
   AdminCriarLeilaoRoute: typeof AdminCriarLeilaoRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEmailsRoute: typeof AdminEmailsRoute
+  AdminEstoqueRoute: typeof AdminEstoqueRoute
   AdminEventoRoute: typeof AdminEventoRoute
   AdminEventosRoute: typeof AdminEventosRoute
   AdminEventosLojaRoute: typeof AdminEventosLojaRoute
@@ -2783,6 +2803,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCriarLeilaoRoute: AdminCriarLeilaoRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEmailsRoute: AdminEmailsRoute,
+  AdminEstoqueRoute: AdminEstoqueRoute,
   AdminEventoRoute: AdminEventoRoute,
   AdminEventosRoute: AdminEventosRoute,
   AdminEventosLojaRoute: AdminEventosLojaRoute,
