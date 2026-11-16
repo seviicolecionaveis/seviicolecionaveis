@@ -49,7 +49,7 @@ export function scheduleConfirmationData(order: ScheduledOrder) {
   const end = new Date(start.getTime() + (kind === "pickup" ? 30 : 60) * 60_000);
   const params = new URLSearchParams({
     action: "TEMPLATE", text: `${service} · Pedido ${shortId} · ${order.recipient_name ?? "Cliente"}`,
-    dates: `${compact(start)}/${compact(end)}`, ctz: "America/Maceio", details: description,
+    dates: `${compact(start)}/${compact(end)}`, ctz: "America/Fortaleza", details: description,
     location: address,
   });
   return {

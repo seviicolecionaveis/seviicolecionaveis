@@ -92,7 +92,8 @@ export async function adminEditOrderShipping(
   const now = new Date();
   const { data: o } = await db.from("orders").select("*").eq("id", orderId).maybeSingle();
   if (!o) throw new Error("Pedido não encontrado.");
-  if (!opts.allowAnyMode && !canAdminEditShipping(o)) throw new Error("Este pedido não permite editar envio/retirada.");
+  const { effectiveFulfillment: effective } = await import("./fulfillment-groups");
+  if (!opts.allowAnyMode && !canAdminEditShipping(effective(o))) throw new Error("Este pedido não permite editar envio/retirada.");
 
   let ev: PickupEvent | null = null;
   if (input.mode === "event") {

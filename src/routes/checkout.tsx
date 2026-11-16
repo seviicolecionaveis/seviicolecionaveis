@@ -993,6 +993,7 @@ function CheckoutPage() {
                 </label>
                 {shipping === "arrange" && pickupPoint === "evento" && (
                   <div className="px-4 pb-4">
+                    <FulfillmentOrderSelection orders={groupOrders} selected={groupSelected} onChange={setGroupSelected} />
                     <p className="text-xs font-semibold mb-2">Escolha o evento, o dia e o horário da retirada</p>
                     <EventSlotPicker events={pickupEvents} value={eventSel} onChange={setEventSel} />
                   </div>

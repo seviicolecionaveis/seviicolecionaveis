@@ -52,6 +52,13 @@ export const chooseOrderFulfillment = createServerFn({ method: "POST" })
       if (!isHandDeliveryArea(address)) throw new Error(HAND_DELIVERY_AREA_MESSAGE);
     }
     const { applyGroup } = await import("./fulfillment-groups.server");
+    if (data.existingId) {
+      const { data: members, error: groupError } = await context.supabase.from("orders").select("*").eq("fulfillment_group_id", data.existingId).eq("user_id", context.userId);
+      const active = (members ?? []).filter(canGroupOrder);
+      const existing = active[0] ? effectiveFulfillment(active[0]) : null;
+      if (groupError || !existing || existing.reschedule_required || existing.scheduled_at !== data.at || existing.schedule_kind !== data.kind || new Date(data.at).getTime() < Date.now() + 86400000) throw new Error("Este agendamento não está mais disponível.");
+      return applyGroup([...new Set([...data.orderIds, ...active.map((o) => o.id)])], existing.fulfillment_data as Record<string, unknown>, data.key, { existingId: data.existingId, serviceId: existing.fulfillment_service_order_id });
+    }
     return applyGroup(data.orderIds, {
       shipping_method: "arrange", schedule_kind: data.kind, scheduled_at: data.at, event_id: data.kind === "event" ? data.eventId : null,
       notes: data.kind === "event" ? `Retirada em eventos: ${eventName}.` : data.kind === "pickup" ? `Retirada em mãos: ${data.pickupPoint === "aeroporto" ? "Aeroporto" : "Aruana"}.` : "Entrega em mãos — taxa de R$15 via Pix.",

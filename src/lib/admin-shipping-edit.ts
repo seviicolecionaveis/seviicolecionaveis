@@ -111,6 +111,6 @@ export function currentShippingMode(o: { shipping_method: string | null; schedul
 
 /** Botão aparece em Pilha, Retirada em eventos ou Retirada em mãos, e nunca após "Entregue". */
 export function canAdminEditShipping(o: { status: string; shipping_method: string | null; schedule_kind: string | null }): boolean {
-  if (["delivered", "cancelled", "refunded"].includes(o.status)) return false;
-  return o.shipping_method === "card_stack" || o.shipping_method === "to_define" || o.schedule_kind === "event" || o.schedule_kind === "pickup";
+  if (["delivered", "cancelled", "shipped", "refunded"].includes(o.status)) return false;
+  return o.shipping_method === "card_stack" || o.shipping_method === "to_define" || o.shipping_method === "arrange" || o.shipping_method === "fixed" || o.schedule_kind === "event" || o.schedule_kind === "pickup" || o.schedule_kind === "delivery";
 }
