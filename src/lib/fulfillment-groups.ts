@@ -21,7 +21,9 @@ export function canGroupOrder(o: Pick<GroupOrder, "status" | "origin">): boolean
 /** The overlay is operational only: original tender, totals and auction fields stay intact. */
 export function effectiveFulfillment<T extends { fulfillment_data?: unknown }>(o: T): T & Record<string, any> {
   const d = o.fulfillment_data;
-  return d && typeof d === "object" && !Array.isArray(d) ? { ...o, ...d } : { ...o };
+  if (!d || typeof d !== "object" || Array.isArray(d)) return { ...o };
+  const allowed = new Set(["shipping_method", "schedule_kind", "scheduled_at", "event_id", "notes", "cep", "street", "number", "complement", "neighborhood", "city", "state", "recipient_name", "phone", "hand_delivery_fee_status", "shipping_cost_cents", "group_shipping_cents", "group_primary_order_id", "reschedule_required", "service_code"]);
+  return { ...o, ...Object.fromEntries(Object.entries(d).filter(([key]) => allowed.has(key))) };
 }
 
 export function groupPrimary(orders: GroupOrder[]): GroupOrder | undefined {

@@ -21,4 +21,10 @@ describe("fulfillment groups", () => {
     expect(effectiveFulfillment(original).total_cents).toBe(3456);
     expect(original.shipping_method).toBe("card_stack");
   });
+  it("rejects financial or lifecycle fields in the operational overlay", () => {
+    const order = { status: "paid", total_cents: 5000, fulfillment_data: { total_cents: 0, status: "cancelled", payment_paid_at: "forged", schedule_kind: "pickup" } };
+    expect(effectiveFulfillment(order).total_cents).toBe(5000);
+    expect(effectiveFulfillment(order).status).toBe("paid");
+    expect(effectiveFulfillment(order).payment_paid_at).toBeUndefined();
+  });
 });
