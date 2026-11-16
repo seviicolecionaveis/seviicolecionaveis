@@ -12,6 +12,8 @@ import {
 } from "@/lib/admin-shipping-edit";
 import { formatSchedule, slotsFor, toIso, localParts } from "@/lib/scheduling";
 import { eventDays, eventSlotsForDay, formatYmd, type PickupEvent } from "@/lib/events";
+import { listFulfillmentCandidates } from "@/lib/fulfillment-groups.functions";
+import { FulfillmentOrderSelection } from "@/components/FulfillmentOrderSelection";
 
 const MODES: AdminShippingMode[] = ["pickup", "event", "delivery", "tracked", "stack"];
 const input = "w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm";
@@ -40,9 +42,15 @@ export function AdminShippingEditor({ order, onSaved }: { order: any; onSaved: (
   const [notifyClient, setNotifyClient] = useState(true);
   const [applyToStack, setApplyToStack] = useState(false);
   const save = useServerFn(adminEditOrderShippingFn);
+  const candidates = useServerFn(listFulfillmentCandidates);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
+  const [operationKey, setOperationKey] = useState("");
 
   useEffect(() => {
     if (!open) return;
+    setOperationKey(crypto.randomUUID());
+    candidates({ data: { orderId: order.id } }).then((rows) => { setOrders(rows); setSelectedOrderIds(rows.map((o) => o.id)); }).catch(() => toast.error("Não foi possível consultar os pedidos."));
     (supabase as any).from("events").select("*").order("start_date").then(({ data }: any) =>
       setEvents((data ?? []).map((e: any) => ({
         ...e, start_time: String(e.start_time).slice(0, 5), end_time: String(e.end_time).slice(0, 5),
@@ -72,7 +80,7 @@ export function AdminShippingEditor({ order, onSaved }: { order: any; onSaved: (
   async function submit() {
     setBusy(true);
     try {
-      const r = await save({ data: { orderId: order.id, ...payload, notifyClient, applyToStack } as any });
+      const r = await save({ data: { orderId: order.id, ...payload, notifyClient, applyToStack, selectedOrderIds, operationKey } as any });
       toast.success(r.updated > 1 ? `Envio/retirada atualizado em ${r.updated} pedidos.` : "Envio/retirada atualizado.");
       setOpen(false); setStep("edit"); onSaved();
     } catch (e) {
@@ -161,6 +169,7 @@ export function AdminShippingEditor({ order, onSaved }: { order: any; onSaved: (
           </div>
           {warnings.map((w) => <p key={w} className="text-xs font-semibold text-destructive">{w} — confirmar mesmo assim?</p>)}
           {applyToStack && <p className="text-xs text-muted-foreground">Será aplicado a todos os pedidos desta pilha. O prazo de 30 dias não muda.</p>}
+          <FulfillmentOrderSelection orders={orders} selected={selectedOrderIds} onChange={setSelectedOrderIds} />
         </div>}
 
         <DialogFooter>
@@ -168,7 +177,7 @@ export function AdminShippingEditor({ order, onSaved }: { order: any; onSaved: (
             ? <><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
                 <Button disabled={!!error} onClick={() => setStep("review")}>Revisar</Button></>
             : <><Button variant="outline" disabled={busy} onClick={() => setStep("edit")}>Voltar</Button>
-                <Button disabled={busy} onClick={submit}>{busy && <Loader2 className="h-4 w-4 animate-spin" />}Confirmar alteração</Button></>}
+                <Button disabled={busy || !selectedOrderIds.length} onClick={submit}>{busy && <Loader2 className="h-4 w-4 animate-spin" />}Confirmar alteração</Button></>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

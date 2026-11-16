@@ -23,15 +23,17 @@ export const adminEditOrderShippingFn = createServerFn({ method: "POST" })
       shippingCents: z.number().int().min(0).max(1_000_000).nullable().optional(),
       notifyClient: z.boolean(),
       applyToStack: z.boolean(),
+      selectedOrderIds: z.array(z.string().uuid()).min(1).max(500).optional(),
+      operationKey: z.string().uuid().optional(),
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
     if (!isAdmin) throw new Error("Acesso negado.");
     const { adminEditOrderShipping } = await import("@/lib/admin-shipping-edit.server");
-    const { orderId, notifyClient, applyToStack, ...input } = data;
+    const { orderId, notifyClient, applyToStack, selectedOrderIds, operationKey, ...input } = data;
     return adminEditOrderShipping(
       { id: context.userId, email: (context.claims as any)?.email ?? null },
-      orderId, input, { notifyClient, applyToStack },
+      orderId, input, { notifyClient, applyToStack, selectedOrderIds, operationKey },
     );
   });

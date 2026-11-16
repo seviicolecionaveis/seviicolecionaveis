@@ -313,6 +313,12 @@ export async function notifyServiceOrderChoice(
   const db = supabaseAdmin as any;
   const { data: so } = await db.from("service_orders").select("*").eq("id", serviceOrderId).maybeSingle();
   if (!so) return;
+  const { data: grouped } = await db.from("orders").select("fulfillment_group_id,fulfillment_operation_key").eq("fulfillment_service_order_id", so.id).not("fulfillment_group_id", "is", null).limit(1).maybeSingle();
+  if (grouped?.fulfillment_group_id) {
+    const { notifyGroup } = await import("./fulfillment-groups.server");
+    await notifyGroup(grouped.fulfillment_group_id, grouped.fulfillment_operation_key, opts?.source ?? "customer", opts?.notifyClient !== false);
+    return;
+  }
   const [{ data: its }, { data: userData }, ev] = await Promise.all([
     db.from("card_stack_items").select("card_name, quantity, order_id").eq("service_order_id", so.id),
     supabaseAdmin.auth.admin.getUserById(so.user_id),
