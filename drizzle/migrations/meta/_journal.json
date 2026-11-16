@@ -295,6 +295,13 @@
       "when": 1794850261125,
       "tag": "0041_accessory_catalog_identity",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1794850411598,
+      "tag": "0042_accessory_atomic_stock",
+      "breakpoints": true
     }
   ]
 }

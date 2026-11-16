@@ -91,6 +91,84 @@ export type Database = {
           },
         ]
       }
+      accessory_stock_movements: {
+        Row: {
+          accessory_id: string
+          order_id: string
+          quantity: number
+          restored: boolean
+          variant_id: string
+        }
+        Insert: {
+          accessory_id: string
+          order_id: string
+          quantity: number
+          restored?: boolean
+          variant_id?: string
+        }
+        Update: {
+          accessory_id?: string
+          order_id?: string
+          quantity?: number
+          restored?: boolean
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accessory_stock_movements_accessory_id_fkey"
+            columns: ["accessory_id"]
+            isOneToOne: false
+            referencedRelation: "accessories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accessory_stock_movements_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accessory_stock_reservations: {
+        Row: {
+          accessory_id: string
+          expires_at: string
+          order_id: string
+          quantity: number
+          variant_id: string
+        }
+        Insert: {
+          accessory_id: string
+          expires_at: string
+          order_id: string
+          quantity: number
+          variant_id?: string
+        }
+        Update: {
+          accessory_id?: string
+          expires_at?: string
+          order_id?: string
+          quantity?: number
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accessory_stock_reservations_accessory_id_fkey"
+            columns: ["accessory_id"]
+            isOneToOne: false
+            referencedRelation: "accessories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accessory_stock_reservations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activation_codes: {
         Row: {
           code: string
@@ -3431,6 +3509,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accessory_decrement_order: {
+        Args: { p_order: string }
+        Returns: undefined
+      }
+      accessory_reserve_order: {
+        Args: { p_expires: string; p_order: string }
+        Returns: undefined
+      }
+      accessory_restore_order: { Args: { p_order: string }; Returns: undefined }
       admin_merge_customer_accounts: {
         Args: { _source: string; _target: string }
         Returns: Json
