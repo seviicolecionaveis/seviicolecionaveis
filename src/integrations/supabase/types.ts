@@ -23,8 +23,11 @@ export type Database = {
           id: string
           images: string[]
           price_cents: number
+          sku: string | null
+          slug: string | null
           sort_order: number
           stock: number
+          tags: string[]
           title: string
           updated_at: string
           variants: Json
@@ -37,8 +40,11 @@ export type Database = {
           id?: string
           images?: string[]
           price_cents?: number
+          sku?: string | null
+          slug?: string | null
           sort_order?: number
           stock?: number
+          tags?: string[]
           title: string
           updated_at?: string
           variants?: Json
@@ -51,13 +57,39 @@ export type Database = {
           id?: string
           images?: string[]
           price_cents?: number
+          sku?: string | null
+          slug?: string | null
           sort_order?: number
           stock?: number
+          tags?: string[]
           title?: string
           updated_at?: string
           variants?: Json
         }
         Relationships: []
+      }
+      accessory_slug_history: {
+        Row: {
+          accessory_id: string
+          slug: string
+        }
+        Insert: {
+          accessory_id: string
+          slug: string
+        }
+        Update: {
+          accessory_id?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accessory_slug_history_accessory_id_fkey"
+            columns: ["accessory_id"]
+            isOneToOne: false
+            referencedRelation: "accessories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       activation_codes: {
         Row: {

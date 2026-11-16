@@ -288,6 +288,13 @@
       "when": 1794587880519,
       "tag": "0040_refund_allow_cancellation_requested_paid",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1794850261125,
+      "tag": "0041_accessory_catalog_identity",
+      "breakpoints": true
     }
   ]
 }
