@@ -3718,6 +3718,10 @@ export type Database = {
         Args: { p_items: string[]; p_key: string; p_so: Json }
         Returns: Json
       }
+      fulfillment_deliver: {
+        Args: { p_all: boolean; p_order: string }
+        Returns: Json
+      }
       fulfillment_group_action: {
         Args: { p_action: string; p_order: string; p_value?: Json }
         Returns: Json
