@@ -120,21 +120,9 @@ export async function decrementOrderStock(orderId: string) {
   // Trava atômica: só um processamento consegue marcar stock_decremented de
   // false -> true. Webhooks repetidos/concorrentes do Mercado Pago não baixam
   // o estoque mais de uma vez.
-  const { data: claimed } = await supabaseAdmin
-    .from("orders")
-    .update({ stock_decremented: true })
-    .eq("id", orderId)
-    .eq("stock_decremented", false)
-    .select("id")
-    .maybeSingle();
-  const shouldDecrement = !!claimed;
-  if (shouldDecrement) {
-    const { error } = await supabaseAdmin.rpc('accessory_decrement_order', { p_order: orderId });
-    if (error) {
-      await supabaseAdmin.from('orders').update({ stock_decremented: false }).eq('id', orderId);
-      throw new Error('Não foi possível baixar o estoque de acessórios. ' + error.message);
-    }
-  }
+  const { data: claimed, error: claimError } = await supabaseAdmin.rpc('accessory_claim_order_stock', { p_order: orderId });
+  if (claimError) throw new Error('Não foi possível confirmar o estoque de acessórios.');
+  const shouldDecrement = claimed === true;
   if (!shouldDecrement) {
     console.warn("[markOrderPaid] estoque já decrementado, pulando baixa", orderId);
   }
