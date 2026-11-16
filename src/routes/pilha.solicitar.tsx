@@ -31,6 +31,11 @@ export const Route = createFileRoute("/pilha/solicitar")({
   head: () => ({
     meta: [
       { title: "Solicitar envio — Pilha de Cartas" },
+      { name: "description", content: "Escolha o envio ou o local e horário da retirada da sua Pilha de Cartas na Sevii Colecionáveis." },
+      { property: "og:title", content: "Solicitar envio — Pilha de Cartas | Sevii Colecionáveis" },
+      { property: "og:description", content: "Solicite o envio ou agende a retirada das cartas da sua Pilha." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -329,8 +334,8 @@ function SolicitarPage() {
         return;
       }
     }
-    if (method === "presencial" && (!scheduleIso || !pickupPoint)) {
-      setErr("Escolha o local, o dia e o horário da retirada.");
+    if (method === "presencial" && !scheduleIso && !pickupPoint) {
+      setErr("Escolha o dia e o horário da retirada.");
       return;
     }
     if (method === "arte_em_cards" && arteApplies) {
