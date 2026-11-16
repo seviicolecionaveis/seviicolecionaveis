@@ -51,6 +51,7 @@ export const ADMIN_NAV: NavGroup[] = [
   {
     label: "Catálogo",
     links: [
+      { to: "/admin/estoque", label: "Estoque integrado", icon: Boxes },
       { to: "/admin/manage-cards", label: "Gerenciar cartas", icon: Layers },
       { to: "/admin/reconhecer-cartas", label: "Reconhecer por foto", icon: Camera },
       { to: "/admin/panels", label: "Painéis", icon: LayoutGrid },
