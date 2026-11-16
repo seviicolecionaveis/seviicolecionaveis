@@ -96,7 +96,7 @@ export function ProductDetail({
             Voltar para {label}
           </Link>
         </Button>
-        <div className="grid gap-8 md:grid-cols-2">
+        <div className="grid min-w-0 grid-cols-1 gap-8 md:grid-cols-2">
           <ProductGallery images={images} title={item.title} />
           <div className="min-w-0">
             <h1 className="break-words text-2xl font-bold sm:text-3xl">{item.title}</h1>
