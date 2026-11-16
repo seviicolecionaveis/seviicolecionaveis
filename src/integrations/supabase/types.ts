@@ -2155,11 +2155,18 @@ export type Database = {
           event_id: string | null
           event_previous: Json | null
           finance_settled_at: string | null
+          fulfillment_data: Json | null
+          fulfillment_group_code: number | null
+          fulfillment_group_id: string | null
+          fulfillment_history: Json
+          fulfillment_operation_key: string | null
+          fulfillment_service_order_id: string | null
           hand_delivery_fee_confirmed_at: string | null
           hand_delivery_fee_confirmed_by: string | null
           hand_delivery_fee_history: Json
           hand_delivery_fee_status: string | null
           id: string
+          is_group_primary: boolean
           manual_adjustments: Json
           manual_created_at: string | null
           manual_created_by: string | null
@@ -2236,11 +2243,18 @@ export type Database = {
           event_id?: string | null
           event_previous?: Json | null
           finance_settled_at?: string | null
+          fulfillment_data?: Json | null
+          fulfillment_group_code?: number | null
+          fulfillment_group_id?: string | null
+          fulfillment_history?: Json
+          fulfillment_operation_key?: string | null
+          fulfillment_service_order_id?: string | null
           hand_delivery_fee_confirmed_at?: string | null
           hand_delivery_fee_confirmed_by?: string | null
           hand_delivery_fee_history?: Json
           hand_delivery_fee_status?: string | null
           id?: string
+          is_group_primary?: boolean
           manual_adjustments?: Json
           manual_created_at?: string | null
           manual_created_by?: string | null
@@ -2317,11 +2331,18 @@ export type Database = {
           event_id?: string | null
           event_previous?: Json | null
           finance_settled_at?: string | null
+          fulfillment_data?: Json | null
+          fulfillment_group_code?: number | null
+          fulfillment_group_id?: string | null
+          fulfillment_history?: Json
+          fulfillment_operation_key?: string | null
+          fulfillment_service_order_id?: string | null
           hand_delivery_fee_confirmed_at?: string | null
           hand_delivery_fee_confirmed_by?: string | null
           hand_delivery_fee_history?: Json
           hand_delivery_fee_status?: string | null
           id?: string
+          is_group_primary?: boolean
           manual_adjustments?: Json
           manual_created_at?: string | null
           manual_created_by?: string | null
@@ -2390,6 +2411,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_fulfillment_service_order_id_fkey"
+            columns: ["fulfillment_service_order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -3675,6 +3703,22 @@ export type Database = {
         Returns: boolean
       }
       find_user_by_phone: { Args: { _digits: string }; Returns: string }
+      fulfillment_apply: {
+        Args: {
+          p_data: Json
+          p_existing?: string
+          p_historical?: boolean
+          p_ids: string[]
+          p_key: string
+          p_service?: string
+        }
+        Returns: Json
+      }
+      fulfillment_create_service: {
+        Args: { p_items: string[]; p_key: string; p_so: Json }
+        Returns: Json
+      }
+      fulfillment_rebalance: { Args: { p_group: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
