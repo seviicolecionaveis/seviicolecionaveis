@@ -4,9 +4,18 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Radio, CheckCircle2, Megaphone, Play } from "lucide-react";
+import { AuctionWinnerChange } from '@/components/admin/AuctionWinnerChange';
 
 export const Route = createFileRoute("/admin/acompanhar-leilao")({
-  head: () => ({ meta: [{ title: "Acompanhar Leilão — Admin" }] }),
+  head: () => ({ meta: [
+    { title: "Acompanhar Leilão — Sevii Admin" },
+    { name: "description", content: "Lances, arrematantes e acompanhamento dos leilões da Sevii Colecionáveis." },
+    { property: "og:title", content: "Acompanhar Leilão — Sevii Admin" },
+    { property: "og:description", content: "Lances, arrematantes e acompanhamento dos leilões da Sevii Colecionáveis." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex, nofollow" },
+  ] }),
   validateSearch: (s: { id?: string }): { id?: string } => ({
     id: typeof s.id === "string" ? s.id : undefined,
   }),
@@ -240,6 +249,7 @@ function TrackAuctionPage() {
                   ) : null}
                 </div>
               </div>
+              {auction.status === 'finished' && it.final_bid && <AuctionWinnerChange items={[{ id: it.id, name: it.name }]} onChanged={() => void load()} />}
               {hist.length > 0 && (
                 <ul className="space-y-0.5 border-t border-border pt-2 text-[11px] text-muted-foreground">
                   {hist.map((b: any) => (

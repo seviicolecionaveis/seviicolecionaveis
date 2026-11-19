@@ -568,6 +568,90 @@ export type Database = {
           },
         ]
       }
+      auction_winner_changes: {
+        Row: {
+          actor_id: string
+          auction_item_id: string
+          created_at: string
+          id: string
+          new_bid_id: string
+          new_unit_price_cents: number
+          new_user_id: string
+          previous_bid_id: string
+          previous_unit_price_cents: number
+          previous_user_id: string
+          reason: string
+          source_order_id: string
+          target_order_id: string
+        }
+        Insert: {
+          actor_id: string
+          auction_item_id: string
+          created_at?: string
+          id: string
+          new_bid_id: string
+          new_unit_price_cents: number
+          new_user_id: string
+          previous_bid_id: string
+          previous_unit_price_cents: number
+          previous_user_id: string
+          reason: string
+          source_order_id: string
+          target_order_id: string
+        }
+        Update: {
+          actor_id?: string
+          auction_item_id?: string
+          created_at?: string
+          id?: string
+          new_bid_id?: string
+          new_unit_price_cents?: number
+          new_user_id?: string
+          previous_bid_id?: string
+          previous_unit_price_cents?: number
+          previous_user_id?: string
+          reason?: string
+          source_order_id?: string
+          target_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_winner_changes_auction_item_id_fkey"
+            columns: ["auction_item_id"]
+            isOneToOne: false
+            referencedRelation: "auction_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_winner_changes_new_bid_id_fkey"
+            columns: ["new_bid_id"]
+            isOneToOne: false
+            referencedRelation: "auction_bids"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_winner_changes_previous_bid_id_fkey"
+            columns: ["previous_bid_id"]
+            isOneToOne: false
+            referencedRelation: "auction_bids"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_winner_changes_source_order_id_fkey"
+            columns: ["source_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_winner_changes_target_order_id_fkey"
+            columns: ["target_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auctions: {
         Row: {
           auction_number: number
@@ -3603,8 +3687,24 @@ export type Database = {
         Returns: undefined
       }
       accessory_restore_order: { Args: { p_order: string }; Returns: undefined }
+      admin_change_auction_winner: {
+        Args: {
+          p_amount_cents: number
+          p_candidate_bid_id: string
+          p_item_id: string
+          p_operation_id: string
+          p_reason: string
+          p_source_order_id: string
+          p_target_user_id: string
+        }
+        Returns: Json
+      }
       admin_merge_customer_accounts: {
         Args: { _source: string; _target: string }
+        Returns: Json
+      }
+      admin_preview_auction_winner_change: {
+        Args: { p_item_id: string }
         Returns: Json
       }
       admin_search_customers: {
@@ -3642,6 +3742,10 @@ export type Database = {
       apply_recognized_stock: {
         Args: { _items: Json; _reason?: string }
         Returns: number
+      }
+      auction_order_reassignable: {
+        Args: { p_order: Database["public"]["Tables"]["orders"]["Row"] }
+        Returns: boolean
       }
       available_stock: { Args: { _card_id: string }; Returns: number }
       award_birthday_points_today: { Args: never; Returns: number }

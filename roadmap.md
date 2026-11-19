@@ -1,3 +1,8 @@
+## Troca de arrematante no painel
+- [x] Prévia e confirmação por carta em Pedidos Leilão e Acompanhar Leilão; maior lance anterior de outro cliente, operação atômica de admin e histórico; pedidos pagos/com pagamento iniciado bloqueados e conta de código interno selecionada explicitamente.
+- [x] Banco descartável validou transferência, totais, preservação dos demais itens/pedido pago, cancelamento vazio, identificação, autorização, bloqueios, rollback e idempotência; 12 testes existentes de leilões passaram e compilação OK.
+- [x] Painel autenticado e prévia real conferidos no computador/celular, sem salvar; histórico real permanece vazio. A transferência foi executada apenas nos testes isolados, não pela tela contra pedidos reais.
+
 ## Checkout abandonado e agendamentos anteriores
 - [x] Confirmar alteração prematura nos quatro caminhos de criação e ausência de restauração no cancelamento.
 - [x] Plano aprovado; intenção protegida persistida nos quatro caminhos, aplicada atomicamente após confirmação paga; seleção inicial vazia, aviso de revisão e recuperação no cron sem repetir finanças.

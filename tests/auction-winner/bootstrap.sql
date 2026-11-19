@@ -1,0 +1,17 @@
+CREATE SCHEMA auth;
+CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+CREATE TABLE auth.users(id uuid PRIMARY KEY,email text,deleted_at timestamptz,banned_until timestamptz);
+CREATE TABLE profiles(user_id uuid PRIMARY KEY,full_name text,phone text,whatsapp text);
+CREATE TYPE app_role AS ENUM('admin','user');
+CREATE TABLE user_roles(user_id uuid,role app_role);
+CREATE FUNCTION has_role(uuid,app_role) RETURNS boolean LANGUAGE sql AS $$ SELECT EXISTS(SELECT 1 FROM user_roles WHERE user_id=$1 AND role=$2) $$;
+CREATE FUNCTION finance_assert_admin(uuid) RETURNS void LANGUAGE plpgsql AS $$ BEGIN IF NOT has_role($1,'admin') THEN RAISE EXCEPTION 'Active administrator required'; END IF; END $$;
+CREATE FUNCTION normalize_br_phone(text) RETURNS text LANGUAGE sql AS $$ SELECT CASE WHEN length(regexp_replace($1,'\D','','g'))=13 THEN substring(regexp_replace($1,'\D','','g') from 3) WHEN length(regexp_replace($1,'\D','','g'))=11 THEN $1 ELSE NULL END $$;
+CREATE FUNCTION find_user_by_phone(text) RETURNS uuid LANGUAGE sql AS $$ SELECT CASE WHEN count(*)=1 THEN (array_agg(user_id))[1] END FROM profiles WHERE normalize_br_phone(coalesce(whatsapp,phone))=normalize_br_phone($1) $$;
+CREATE TABLE auctions(id uuid PRIMARY KEY,status text);
+CREATE TABLE auction_items(id uuid PRIMARY KEY,auction_id uuid,sequence integer,name text,quantity integer,final_bid numeric,winner_phone text,winner_name text,status text);
+CREATE TABLE auction_bids(id uuid PRIMARY KEY,auction_id uuid,item_id uuid,sequence integer,item_name text,phone text,bidder_name text,amount numeric,status text,order_id uuid,created_at timestamptz DEFAULT now());
+CREATE TABLE orders(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),user_id uuid,status text,origin text,auction_id uuid,stripe_session_id text,stripe_payment_intent text,mercadopago_payment_id text,pix_qr_code text,payment_paid_at timestamptz,finance_settled_at timestamptz,stock_decremented boolean DEFAULT false,fulfillment_group_id uuid,discount_cents integer DEFAULT 0,wallet_deduction_cents integer DEFAULT 0,store_credit_cents integer DEFAULT 0,refunded_cents integer DEFAULT 0,shipping_cost_cents integer DEFAULT 0,subtotal_cents integer,total_cents integer,payment_method text,shipping_method text,recipient_name text,phone text,email text,cep text,street text,number text,neighborhood text,city text,state text,notes text,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now());
+CREATE TABLE order_items(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),order_id uuid,card_id text,card_name text,quantity integer,unit_price_cents integer,cancelled_quantity integer DEFAULT 0);
+CREATE TABLE customer_payment_attempts(order_id uuid);
+CREATE TABLE card_stack_items(order_item_id uuid);

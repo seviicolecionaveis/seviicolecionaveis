@@ -351,6 +351,20 @@
       "when": 1795106938742,
       "tag": "0049_checkout_fulfillment_notification_recovery",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1795115218107,
+      "tag": "0050_admin_auction_winner_reassignment",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1795115345276,
+      "tag": "0051_auction_winner_change_variable_scope",
+      "breakpoints": true
     }
   ]
 }

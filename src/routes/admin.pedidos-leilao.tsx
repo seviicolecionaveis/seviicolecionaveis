@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { adminUpdateOrderStatus } from "@/utils/orders.functions";
 import { getAuctionPaymentLink } from "@/utils/payments.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { AuctionWinnerChange } from '@/components/admin/AuctionWinnerChange';
 import {
   Gavel,
   Search,
@@ -685,6 +686,9 @@ export function AuctionOrdersPage() {
                         <MessageCircle className="h-3.5 w-3.5" />
                         Cobrar no WhatsApp
                       </button>
+                      {order.status === 'pending' && items.some((it: any) => /^auction:[0-9a-f-]{36}$/i.test(it.card_id ?? '')) && (
+                        <AuctionWinnerChange items={items.filter((it: any) => /^auction:[0-9a-f-]{36}$/i.test(it.card_id ?? '')).map((it: any) => ({ id: it.card_id.slice(8), name: it.card_name }))} onChanged={() => void loadData()} />
+                      )}
                     </div>
 
                     <Link
