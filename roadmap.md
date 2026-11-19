@@ -1,3 +1,8 @@
+## Checkout abandonado e agendamentos anteriores
+- [x] Confirmar alteração prematura nos quatro caminhos de criação e ausência de restauração no cancelamento.
+- [ ] Aprovar plano para guardar a seleção sem mover pedidos antes do pagamento; aplicar com confirmação paga, idempotência e tratamento de horários indisponíveis.
+- [ ] Validar abandono, falhas, pagamento confirmado e repetição em ambiente isolado, sem cobranças nem alterações em pedidos reais.
+
 ## Eventos ativos nas opções de retirada
 - [x] Eventos inativos filtrados no calendário do cliente e no editor mostrado na imagem; 9 testes de eventos passaram e Pilha autenticada mostrou Sevii Day em 21/11 com horários, sem criar solicitação. Verificação adicional identificou teste antigo de frete rastreado incompatível com a regra atual (fora deste ajuste).
 
