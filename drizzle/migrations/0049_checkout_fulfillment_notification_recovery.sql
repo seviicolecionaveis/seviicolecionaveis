@@ -1,0 +1,1 @@
+ALTER TABLE public.checkout_fulfillment_intents ADD COLUMN notified_at timestamptz;

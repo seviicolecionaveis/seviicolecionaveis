@@ -27,3 +27,4 @@ Regular-order statuses, labels, and paid-stage classification live in the browse
 - Pilha admin detail pages: /admin/pilha/os/$id and /admin/pilha/pilha/$id (trailing-underscore routes); modality labels come from src/lib/fulfillment-labels.ts.
 - Fulfillment groups live only on orders with a separate operational overlay; apply effectiveFulfillment for fulfillment reads, never payment calculations. Atomic group operations own membership/primary allocation, preserving auction fields, historical financial totals and the existing service-order structure.
 - Pickup event selection UIs share activePickupEvents from the browser-safe events module to exclude inactive records without changing historical bookings.
+- Checkout grouping selections are stored in service-only intents and atomically applied only from the confirmed-paid pipeline, with retry independent of financial settlement; unpaid checkout must never move earlier orders.

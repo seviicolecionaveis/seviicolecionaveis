@@ -35,6 +35,7 @@ export interface FulfillmentChange {
   notifyClient?: boolean; // padrão: true
   notifyStore?: boolean; // padrão: true
   dedupeExtra?: string | null;
+  reviewMessage?: string | null;
 }
 
 const SOURCE_LABEL = { customer: "pelo cliente", admin: "pelo admin", auto: "automático" } as const;
@@ -82,7 +83,7 @@ export async function notifyFulfillmentChange(c: FulfillmentChange): Promise<{ d
       target_type: c.targetType, target_id: c.targetId, target_code: c.code,
       customer_name: c.customerName ?? null, customer_email: c.customerEmail ?? null,
       modality: c.modality, scheduled_at: c.scheduledAt ?? null, event_id: c.eventId ?? null, event_name: c.eventName ?? null,
-      details: { when: c.when ?? null, location: c.location ?? null, before: c.before ?? null, related_orders: c.relatedOrders ?? [] },
+      details: { when: c.when ?? null, location: c.location ?? null, before: c.before ?? null, related_orders: c.relatedOrders ?? [], review_message: c.reviewMessage ?? null },
       dedupe_key: dedupeKey,
     }, { onConflict: "dedupe_key", ignoreDuplicates: true }).select("id");
     if (error) console.error("[fulfillment-alert] notification", error.message);
@@ -98,6 +99,7 @@ export async function notifyFulfillmentChange(c: FulfillmentChange): Promise<{ d
 
   // 2) E-mails de cliente e loja, independentes entre si.
   const base = {
+    reviewMessage: c.reviewMessage ?? undefined,
     action: c.action, code: c.code, service, when: c.when ?? undefined, location: (c.modality === "event" ? c.eventName ?? c.location : c.location) ?? undefined,
     fee: c.fee ?? undefined, before: c.before ?? undefined, after, customerName: c.customerName ?? undefined,
     relatedOrders: c.relatedOrders?.length ? c.relatedOrders.join(", ") : undefined,

@@ -1162,6 +1162,59 @@ export type Database = {
           },
         ]
       }
+      checkout_fulfillment_intents: {
+        Row: {
+          choice: Json
+          created_at: string
+          existing_group_id: string | null
+          failure_reason: string | null
+          group_id: string | null
+          notified_at: string | null
+          order_id: string
+          previous_schedules: string | null
+          processed_at: string | null
+          selected_ids: string[]
+          state: string
+          user_id: string
+        }
+        Insert: {
+          choice: Json
+          created_at?: string
+          existing_group_id?: string | null
+          failure_reason?: string | null
+          group_id?: string | null
+          notified_at?: string | null
+          order_id: string
+          previous_schedules?: string | null
+          processed_at?: string | null
+          selected_ids: string[]
+          state?: string
+          user_id: string
+        }
+        Update: {
+          choice?: Json
+          created_at?: string
+          existing_group_id?: string | null
+          failure_reason?: string | null
+          group_id?: string | null
+          notified_at?: string | null
+          order_id?: string
+          previous_schedules?: string | null
+          processed_at?: string | null
+          selected_ids?: string[]
+          state?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkout_fulfillment_intents_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupons: {
         Row: {
           active: boolean
@@ -3758,6 +3811,10 @@ export type Database = {
       merge_whatsapp_accounts_into: { Args: { _real: string }; Returns: number }
       merge_whatsapp_into_internal: { Args: { _real: string }; Returns: number }
       normalize_br_phone: { Args: { _raw: string }; Returns: string }
+      process_checkout_fulfillment_intent: {
+        Args: { p_order: string }
+        Returns: Json
+      }
       public_event_confirmed_count: {
         Args: { _event_id: string }
         Returns: number
@@ -3779,6 +3836,16 @@ export type Database = {
         Returns: undefined
       }
       register_for_public_event: { Args: { _event_id: string }; Returns: Json }
+      save_checkout_fulfillment_intent: {
+        Args: {
+          p_choice: Json
+          p_existing?: string
+          p_ids: string[]
+          p_order: string
+          p_user: string
+        }
+        Returns: undefined
+      }
       set_event_reserved: { Args: { _items: Json }; Returns: number }
       undo_event_checkin: { Args: { _registration_id: string }; Returns: Json }
       user_lifetime_earned: { Args: { _user_id: string }; Returns: number }

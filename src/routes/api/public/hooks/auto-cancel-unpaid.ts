@@ -19,6 +19,8 @@ export const Route = createFileRoute("/api/public/hooks/auto-cancel-unpaid")({
 async function handler({ request }: { request: Request }) {
   const unauthorized = verifyCronAuth(request);
   if (unauthorized) return unauthorized;
+  const { retryPaidCheckoutFulfillment } = await import("@/lib/checkout-fulfillment.server");
+  await retryPaidCheckoutFulfillment();
   const {reconcileCreditPayments}=await import('@/lib/customer-finance.server');
   const creditReconciliation=await reconcileCreditPayments();
   const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();

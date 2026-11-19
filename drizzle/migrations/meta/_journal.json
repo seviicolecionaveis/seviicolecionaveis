@@ -337,6 +337,20 @@
       "when": 1794853589519,
       "tag": "0047_fulfillment_existing_service_links",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1795106846235,
+      "tag": "0048_defer_checkout_fulfillment_until_paid",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1795106938742,
+      "tag": "0049_checkout_fulfillment_notification_recovery",
+      "breakpoints": true
     }
   ]
 }

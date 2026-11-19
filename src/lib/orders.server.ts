@@ -3,6 +3,7 @@ import { PAID_ORDER_STATUSES } from "@/lib/order-status";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTransactionalEmailSafe } from "@/lib/email/send.server";
 import { sendScheduleConfirmations } from "@/lib/schedule-confirmation.server";
+import { processPaidCheckoutFulfillment } from "@/lib/checkout-fulfillment.server";
 
 /**
  * Debita o saldo de vale-presente carteira reservado em wallet_deduction_cents.
@@ -240,11 +241,13 @@ export async function markOrderPaid(
     .eq("id", orderId)
     .maybeSingle();
   if (!order) return;
-  if (order.status === "paid") return;
   // Pedidos que já passaram do pagamento (em preparo, enviado, entregue…) já
   // tiveram o estoque baixado — nunca baixar de novo.
   const POST_PAID = PAID_ORDER_STATUSES;
-  if (POST_PAID.includes(order.status)) return;
+  if (POST_PAID.includes(order.status)) {
+    await processPaidCheckoutFulfillment(orderId, notifyCustomer);
+    return;
+  }
 
   await settleStoreCredit(orderId, paymentRef);
   await decrementOrderStock(orderId);
@@ -252,7 +255,7 @@ export async function markOrderPaid(
   await supabaseAdmin.from("stock_reservations").delete().eq("order_id", orderId);
   await supabaseAdmin.from("accessory_stock_reservations").delete().eq("order_id", orderId);
 
-  await supabaseAdmin
+  const { error: paidError } = await supabaseAdmin
     .from("orders")
     .update({
       status: "paid",
@@ -266,6 +269,8 @@ export async function markOrderPaid(
         : {}),
     })
     .eq("id", orderId);
+  if (paidError) throw new Error(paidError.message);
+  const checkoutFulfillmentHandled = await processPaidCheckoutFulfillment(orderId, notifyCustomer);
 
   // Programa de Pontos: credita pontos ganhos e debita pontos resgatados.
   // Roda ANTES do débito de carteira porque precisa ler wallet_deduction_cents
@@ -289,7 +294,7 @@ export async function markOrderPaid(
   // Lookup do pedido (necessário para decidir Superfrete x Pilha)
   const { data: full } = await supabaseAdmin
     .from("orders")
-    .select("id, email, recipient_name, total_cents, user_id, shipping_method, shipping_cost_cents, arte_em_cards_code, scheduled_at, schedule_kind, street, number, complement, neighborhood, city, state, notes, hand_delivery_fee_status")
+    .select("id, email, recipient_name, total_cents, user_id, shipping_method, shipping_cost_cents, arte_em_cards_code, scheduled_at, schedule_kind, street, number, complement, neighborhood, city, state, notes, hand_delivery_fee_status, event_id, fulfillment_group_id, fulfillment_operation_key")
     .eq("id", orderId)
     .maybeSingle();
 
@@ -352,7 +357,7 @@ export async function markOrderPaid(
     }
   }
 
-  if (full?.scheduled_at) {
+  if (full?.scheduled_at && !checkoutFulfillmentHandled) {
     try { await sendScheduleConfirmations(full, "", { skipClient: !notifyCustomer }); }
     catch (error) { console.error("[markOrderPaid] schedule confirmation failed", error); }
   }

@@ -896,8 +896,8 @@ export async function createOrderCheckoutServer(data: StripeInput, userId: strin
   const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(await withLigaSubcategory(orderItems));
   if (itemsErr) throw new Error(itemsErr.message);
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
-  const { applyCheckoutFulfillment } = await import("@/lib/checkout-fulfillment.server");
-  await applyCheckoutFulfillment(order.id, userId, data);
+  const { saveCheckoutFulfillment } = await import("@/lib/checkout-fulfillment.server");
+  await saveCheckoutFulfillment(order.id, userId, data);
   await sendOrderReceivedEmail(order.id);
 
   const creditAttempt = await reserveStoreCredit(order.id, userId, data.storeCreditCents ?? 0, 'stripe', env);
@@ -1075,8 +1075,8 @@ export async function createPixOrderServer(data: PixInput, userId: string) {
   const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(await withLigaSubcategory(orderItems));
   if (itemsErr) throw new Error(itemsErr.message);
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
-  const { applyCheckoutFulfillment } = await import("@/lib/checkout-fulfillment.server");
-  await applyCheckoutFulfillment(order.id, userId, data);
+  const { saveCheckoutFulfillment } = await import("@/lib/checkout-fulfillment.server");
+  await saveCheckoutFulfillment(order.id, userId, data);
 
 
   const creditAttempt = await reserveStoreCredit(order.id, userId, data.storeCreditCents ?? 0, 'mercadopago');
@@ -1287,8 +1287,8 @@ export async function createCardOrderServer(data: CardInput, userId: string) {
   const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(await withLigaSubcategory(orderItems));
   if (itemsErr) throw new Error(itemsErr.message);
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
-  const { applyCheckoutFulfillment } = await import("@/lib/checkout-fulfillment.server");
-  await applyCheckoutFulfillment(order.id, userId, data);
+  const { saveCheckoutFulfillment } = await import("@/lib/checkout-fulfillment.server");
+  await saveCheckoutFulfillment(order.id, userId, data);
   await sendOrderReceivedEmail(order.id);
 
   const creditAttempt = await reserveStoreCredit(order.id, userId, data.storeCreditCents ?? 0, 'mercadopago');
@@ -1692,8 +1692,8 @@ export async function createAdminTestOrderServer(data: AdminTestInput, userId: s
   const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(await withLigaSubcategory(orderItems));
   if (itemsErr) throw new Error(itemsErr.message);
   await reserveStockForOrder(order.id, userId, items, new Date(Date.now() + 60 * 60 * 1000));
-  const { applyCheckoutFulfillment } = await import("@/lib/checkout-fulfillment.server");
-  await applyCheckoutFulfillment(order.id, userId, data);
+  const { saveCheckoutFulfillment } = await import("@/lib/checkout-fulfillment.server");
+  await saveCheckoutFulfillment(order.id, userId, data);
 
   await sendOrderReceivedEmail(order.id);
 

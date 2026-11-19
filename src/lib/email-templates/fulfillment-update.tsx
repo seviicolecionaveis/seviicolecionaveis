@@ -6,7 +6,8 @@ import { EmailLayout, styles } from "./_shared";
 interface Props {
   audience?: "client" | "store";
   subject?: string;
-  action?: "defined" | "changed" | "cancelled";
+  action?: "defined" | "changed" | "cancelled" | "needs_review";
+  reviewMessage?: string;
   sourceLabel?: string;
   code?: string;
   service?: string;
@@ -30,7 +31,9 @@ const WHATSAPP = "https://wa.me/5579981509552";
 function FulfillmentUpdateEmail(p: Props) {
   const store = p.audience === "store";
   const heading = p.subject ?? "Atualização do seu pedido";
-  const intro = store
+  const intro = p.action === "needs_review"
+    ? p.reviewMessage ?? "A inclusão dos pedidos precisa de revisão. Os agendamentos anteriores foram preservados. Entre em contato com a loja."
+    : store
     ? `${p.customerName ?? "Cliente"} — ${p.action === "cancelled" ? "agendamento cancelado" : p.action === "changed" ? "modalidade alterada" : "modalidade escolhida"}${p.sourceLabel ? ` (${p.sourceLabel})` : ""}.`
     : `${p.customerName ? `${p.customerName}, ` : ""}${p.action === "cancelled" ? "seu agendamento foi cancelado. Se quiser marcar outro, é só falar com a gente." : p.action === "changed" ? "a forma de retirada/envio do seu pedido foi atualizada." : "recebemos a sua escolha de retirada/envio."}`;
   return (
@@ -42,7 +45,7 @@ function FulfillmentUpdateEmail(p: Props) {
           <Text style={styles.text}><strong>Antes:</strong> {p.before}<br /><strong>Agora:</strong> {p.after ?? p.service}</Text>
         </Section>
       )}
-      {store && p.action !== "defined" && p.before && (
+      {store && (p.action === "changed" || p.action === "cancelled") && p.before && (
         <Text style={styles.muted}>O agendamento anterior foi substituído. Remova o evento antigo do calendário.</Text>
       )}
       <Section style={styles.card}>

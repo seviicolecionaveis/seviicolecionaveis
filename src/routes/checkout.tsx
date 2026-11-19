@@ -198,7 +198,8 @@ function CheckoutPage() {
   const readGroupOrders = useServerFn(listFulfillmentCandidates);
   useEffect(() => {
     if (!user) return;
-    readGroupOrders({ data: {} }).then((rows) => { setGroupOrders(rows); setGroupSelected(rows.map((o) => o.id)); }).catch(() => {});
+    setGroupSelected([]);
+    readGroupOrders({ data: {} }).then(setGroupOrders).catch(() => {});
   }, [user, readGroupOrders]);
   useEffect(() => {
     if (shipping === "arrange" && pickupPoint === "evento" && pickupEvents.length === 0) {
@@ -883,7 +884,7 @@ function CheckoutPage() {
                 </label>
                 {shipping === "arrange" && pickupPoint === "app" && (
                   <div className="px-4 pb-4 space-y-3">
-                    <FulfillmentOrderSelection orders={groupOrders} selected={groupSelected} onChange={setGroupSelected} />
+                    <FulfillmentOrderSelection afterPayment orders={groupOrders} selected={groupSelected} onChange={setGroupSelected} />
                     <ScheduleSlotPicker kind="delivery" value={scheduleAt} onChange={setScheduleAt} />
                     <div className="rounded-md border border-border p-3 text-xs">
                       <p className="font-semibold text-sm mb-1">Endereço de entrega</p>
@@ -930,7 +931,7 @@ function CheckoutPage() {
                 </label>
                 {shipping === "arrange" && pickupPoint !== "app" && pickupPoint !== "evento" && (
                   <div className="px-4 pb-4 space-y-2">
-                    <FulfillmentOrderSelection orders={groupOrders} selected={groupSelected} onChange={setGroupSelected} />
+                    <FulfillmentOrderSelection afterPayment orders={groupOrders} selected={groupSelected} onChange={setGroupSelected} />
                     <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
                       <input
                         type="radio"
@@ -993,7 +994,7 @@ function CheckoutPage() {
                 </label>
                 {shipping === "arrange" && pickupPoint === "evento" && (
                   <div className="px-4 pb-4">
-                    <FulfillmentOrderSelection orders={groupOrders} selected={groupSelected} onChange={setGroupSelected} />
+                    <FulfillmentOrderSelection afterPayment orders={groupOrders} selected={groupSelected} onChange={setGroupSelected} />
                     <p className="text-xs font-semibold mb-2">Escolha o evento, o dia e o horário da retirada</p>
                     <EventSlotPicker events={pickupEvents} value={eventSel} onChange={setEventSel} />
                   </div>

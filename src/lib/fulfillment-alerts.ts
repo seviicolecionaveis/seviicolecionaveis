@@ -1,7 +1,7 @@
 // Regras puras (browser-safe) dos alertas de modalidade de retirada/envio.
 
 export type Modality = "none" | "pickup" | "event" | "delivery" | "shipping";
-export type FulfillmentAction = "defined" | "changed" | "cancelled";
+export type FulfillmentAction = "defined" | "changed" | "cancelled" | "needs_review";
 
 export const MODALITIES: Modality[] = ["none", "pickup", "event", "delivery", "shipping"];
 export const MODALITY_LABELS: Record<Modality, string> = {
@@ -46,6 +46,7 @@ export function fulfillmentDedupeKey(p: {
 }
 
 export function fulfillmentTitle(action: FulfillmentAction, modality: Modality): string {
+  if (action === "needs_review") return "Inclusão no agendamento precisa de revisão";
   if (action === "cancelled") return "Agendamento cancelado";
   const base: Record<Modality, string> = {
     none: "Pedido na Pilha", pickup: "retirada em mãos", event: "retirada em evento",
@@ -56,6 +57,7 @@ export function fulfillmentTitle(action: FulfillmentAction, modality: Modality):
 }
 
 export function clientEmailSubject(action: FulfillmentAction, modality: Modality): string {
+  if (action === "needs_review") return "Precisamos revisar a inclusão dos seus pedidos";
   if (action === "cancelled") return "Seu agendamento foi cancelado";
   const word = modality === "shipping" || modality === "delivery" ? "entrega" : "retirada";
   const noun = modality === "shipping" ? "Seu envio" : modality === "delivery" ? "Sua entrega" : "Sua retirada";
