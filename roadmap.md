@@ -1,7 +1,8 @@
 ## Checkout abandonado e agendamentos anteriores
 - [x] Confirmar alteração prematura nos quatro caminhos de criação e ausência de restauração no cancelamento.
-- [ ] Aprovar plano para guardar a seleção sem mover pedidos antes do pagamento; aplicar com confirmação paga, idempotência e tratamento de horários indisponíveis.
-- [ ] Validar abandono, falhas, pagamento confirmado e repetição em ambiente isolado, sem cobranças nem alterações em pedidos reais.
+- [x] Plano aprovado; intenção protegida persistida nos quatro caminhos, aplicada atomicamente após confirmação paga; seleção inicial vazia, aviso de revisão e recuperação no cron sem repetir finanças.
+- [x] 45 testes automatizados passaram; PostgreSQL descartável validou abandono/cancelamento/recusa, seleção explícita, confirmação única, horário expirado, membro indisponível e autorização, preservando financeiro/leilão. Estrutura aplicada conferida, compilação OK.
+- [ ] Pagamento completo no navegador com pedidos anteriores: aguarda ambiente de aplicação isolado e provedor comprovadamente de teste. Checkout autenticado com carta real foi aberto sem submeter compra, sem erro e sem transbordamento no celular; lista não apareceu nessa conta, portanto seleção visual com pedidos não foi verificada.
 
 ## Eventos ativos nas opções de retirada
 - [x] Eventos inativos filtrados no calendário do cliente e no editor mostrado na imagem; 9 testes de eventos passaram e Pilha autenticada mostrou Sevii Day em 21/11 com horários, sem criar solicitação. Verificação adicional identificou teste antigo de frete rastreado incompatível com a regra atual (fora deste ajuste).
