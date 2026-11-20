@@ -1,3 +1,6 @@
+## Ajuste pontual de Apoiadores e listagem de Itens
+- [x] Backup verificado; 291 Apoiadores conferidos (266 preços alterados, 25 já no destino), quatro faixas sem cascata com R$ 0,25 na primeira; 93 Itens listados sem alterações. Testes de leitura persistida passaram; uma edição simultânea de estoque por admin foi confirmada no histórico, sem interferir nela.
+
 ## Troca de arrematante no painel
 - [x] Prévia e confirmação por carta em Pedidos Leilão e Acompanhar Leilão; maior lance anterior de outro cliente, operação atômica de admin e histórico; pedidos pagos/com pagamento iniciado bloqueados e conta de código interno selecionada explicitamente.
 - [x] Banco descartável validou transferência, totais, preservação dos demais itens/pedido pago, cancelamento vazio, identificação, autorização, bloqueios, rollback e idempotência; 12 testes existentes de leilões passaram e compilação OK.
