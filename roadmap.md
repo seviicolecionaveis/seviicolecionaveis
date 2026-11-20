@@ -1,3 +1,6 @@
+## Ajuste pontual de Treinadores para R$ 0,99
+- [x] Backup dos 997 registros; 33 preços de R$ 0,66–0,98 atualizados para R$ 0,99 (10 Apoiadores, 15 Itens, 2 Ferramentas Pokémon, 6 Estádios). Normal/Reverse Foil/Foil/Shattered Holo; leitura persistida validada, 964 preços fora do escopo preservados; uma edição simultânea de estoque confirmada no histórico, sem interferência.
+
 ## Ajuste pontual de Apoiadores e listagem de Itens
 - [x] Backup verificado; 291 Apoiadores conferidos (266 preços alterados, 25 já no destino), quatro faixas sem cascata com R$ 0,25 na primeira; 93 Itens listados sem alterações. Testes de leitura persistida passaram; uma edição simultânea de estoque por admin foi confirmada no histórico, sem interferir nela.
 
