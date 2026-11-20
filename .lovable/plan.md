@@ -32,8 +32,8 @@
 - Entrega em mãos: **R$15 por grupo, somente no site**, QR Code/copia e cola Mercado Pago, fechamento quarta às 19h e atualização da consulta. Sem Pix externo/comprovante WhatsApp nas telas ou e-mails; remover instruções antigas dos caminhos compartilhados.
 - Frete rastreado: cotar novamente no servidor para os itens/endereço selecionados e cobrar uma vez; não aceitar preço enviado pela tela como autoridade.
 - Taxa/frete separados das cartas quitadas, sem repetir estoque, pontos, desconto ou pagamento do pedido.
-- Mostrar pagamento pendente na página/e-mail e no grupo admin. Conferir valor/referência/estado no Mercado Pago; repetição não duplica cobrança.
-- Confirmação manual excepcional permanece só no admin, auditada; não é opção de pagamento externo oferecida ao cliente.
+- Pagamento pendente na página/e-mail/admin; conferir valor/referência/estado no Mercado Pago, sem duplicar cobrança.
+- Confirmação manual excepcional só no admin, auditada; nunca opção de pagamento externo ao cliente.
 - Sem pagamento até o fechamento: cancelar **o agendamento**, não os pedidos, manter histórico e deixá-los sem modalidade para nova escolha; avisar cliente/loja. Pagamento aprovado tardiamente gera pendência financeira para análise, nunca confirma um horário vencido nem perde o dinheiro recebido.
 - **Regra confirmada:** ao cancelar entrega paga com mais de 24h, manter os R$15 quitados e reagendar o mesmo grupo automaticamente para a próxima quinta disponível depois da data cancelada, respeitando 24h. Informar a nova data e permitir alteração pelo cliente dentro do prazo; nunca cobrar de novo. Se não for possível reagendar, registrar pendência para o admin sem perder o pagamento.
 
@@ -46,7 +46,7 @@
 - Separado, Pronto para retirada, Faltam cartas e Entregue com confirmação em pedido/grupo/lote; perguntar o alcance da entrega. Registrar responsável real pela separação, autor/hora/tela das ações e confirmação do comprador.
 - Checklist e “Pronto para sair” com todos separados e taxa paga; copiar/imprimir lista com conferência e impressão para PDF.
 - Admin pode agendar fora das 24h com aviso e motivo auditado. Entrega frustrada exige decisão administrativa entre reagendar e cobrar novamente; nunca cobra sozinha.
-- Modalidades antigas aparecem como Legado/Sem modalidade, preservando os dados para revisão manual.
+- Modalidades antigas: Legado/Sem modalidade, com dados preservados.
 
 ## 4. Automação e avisos
 - Ampliar o ponto central existente: confirmação/alteração/cancelamento, pagamento confirmado, pronto, rastreio, lembrete na véspera, reabertura e taxa próxima do fechamento.
