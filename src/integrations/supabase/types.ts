@@ -1997,6 +1997,152 @@ export type Database = {
           },
         ]
       }
+      hub_fee_payments: {
+        Row: {
+          amount_cents: number
+          attempt_number: number
+          created_at: string
+          expires_at: string | null
+          group_id: string
+          id: string
+          mercadopago_id: string | null
+          reference: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          attempt_number?: number
+          created_at?: string
+          expires_at?: string | null
+          group_id: string
+          id?: string
+          mercadopago_id?: string | null
+          reference: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          attempt_number?: number
+          created_at?: string
+          expires_at?: string | null
+          group_id?: string
+          id?: string
+          mercadopago_id?: string | null
+          reference?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hub_fee_payments_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "hub_group_progress"
+            referencedColumns: ["group_id"]
+          },
+        ]
+      }
+      hub_group_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          group_id: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          group_id: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          group_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      hub_group_progress: {
+        Row: {
+          created_at: string
+          group_id: string
+          schedule_state: string
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          schedule_state?: string
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          schedule_state?: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      hub_order_progress: {
+        Row: {
+          group_id: string
+          operational_status: string
+          order_id: string
+          received_at: string | null
+          separated_at: string | null
+          tracking_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          group_id: string
+          operational_status?: string
+          order_id: string
+          received_at?: string | null
+          separated_at?: string | null
+          tracking_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          group_id?: string
+          operational_status?: string
+          order_id?: string
+          received_at?: string | null
+          separated_at?: string | null
+          tracking_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hub_order_progress_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "hub_group_progress"
+            referencedColumns: ["group_id"]
+          },
+          {
+            foreignKeyName: "hub_order_progress_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       illustrators: {
         Row: {
           created_at: string

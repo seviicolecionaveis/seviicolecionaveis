@@ -365,6 +365,13 @@
       "when": 1795115345276,
       "tag": "0051_auction_winner_change_variable_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1795193707237,
+      "tag": "0052_hub_auxiliary_structure",
+      "breakpoints": true
     }
   ]
 }
