@@ -1,3 +1,11 @@
+## Hub de Retirada e Envio
+- [x] Investigar páginas, grupos, calendários, pagamentos, notificações e permissões existentes sem alterar dados ou fluxos; estrutura consultada em modo somente leitura.
+- [ ] Apresentar abordagem e obter confirmação para as mudanças de fluxos e estrutura; manter leilões pagos somente leitura nos campos originais.
+- [ ] Após aprovação, guardar backup e obter confirmação antes de cada migração; implementar página do cliente e hub admin com operações únicas por grupo.
+- [x] Regra definida: cancelamento antecipado de entrega paga reaproveita os R$15 e agenda automaticamente a próxima quinta disponível, permitindo alteração pelo cliente.
+- [ ] Implementar e testar reagendamento automático de entrega paga sem nova cobrança, após aprovação das mudanças.
+- [ ] Validar cenários de pagamento, prazos, acesso, entrega e preservação dos leilões em ambiente isolado; pagamento real exige provedor de teste confirmado.
+
 ## Ajuste pontual de Treinadores para R$ 0,99
 - [x] Backup dos 997 registros; 33 preços de R$ 0,66–0,98 atualizados para R$ 0,99 (10 Apoiadores, 15 Itens, 2 Ferramentas Pokémon, 6 Estádios). Normal/Reverse Foil/Foil/Shattered Holo; leitura persistida validada, 964 registros fora do escopo conferidos; uma edição simultânea de preço/estoque por admin confirmada nos históricos, sem interferência.
 
