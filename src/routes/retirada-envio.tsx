@@ -93,6 +93,7 @@ function RetiradaEnvioPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+      <div className="rounded-2xl border border-border bg-card p-5 sm:p-8 shadow-sm">
       <h1 className="text-2xl font-bold">Envios e Retirada</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Escolha como receber seus pedidos pagos: retirada em mãos, retirada em eventos ou entrega em mãos em Aracaju.
@@ -175,6 +176,7 @@ function RetiradaEnvioPage() {
           </Button>
         </div>
       )}
+      </div>
     </div>
   );
 }
