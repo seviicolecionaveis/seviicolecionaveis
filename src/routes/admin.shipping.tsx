@@ -5,6 +5,12 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { adminUpdateOrderStatus } from "@/utils/orders.functions";
+import { FulfillmentFilters, ModalityBadge, matchesFulfillmentFilter, DEFAULT_FULFILLMENT_FILTER } from "@/components/admin/FulfillmentFilters";
+import { modalityOfOrder } from "@/lib/fulfillment-alerts";
+import { useAdminNotifications } from "@/hooks/useAdminNotifications";
+import { ORDER_STATUS_LABELS, PAID_ORDER_STATUSES } from "@/lib/order-status";
+
+const OPEN_STATUSES = ["paid", "preparing", "separated", "awaiting_pickup", "cards_pending_delivery"];
 
 export const Route = createFileRoute("/admin/shipping")({
   head: () => ({ meta: [{ title: "Expedição — Sevii Admin" }] }),
@@ -20,6 +26,10 @@ function ShippingPage() {
   const [tracking, setTracking] = useState<Record<string, string>>({});
   const [shipping, setShipping] = useState<Set<string>>(new Set());
   const updateStatus = useServerFn(adminUpdateOrderStatus);
+  const [ff, setFf] = useState(DEFAULT_FULFILLMENT_FILTER);
+  const { unreadTargets } = useAdminNotifications(300);
+  const [statuses, setStatuses] = useState<string[]>(OPEN_STATUSES);
+  const [search, setSearch] = useState("");
 
   async function markShipped(orderId: string) {
     const code = (tracking[orderId] ?? "").trim();
@@ -31,7 +41,7 @@ function ShippingPage() {
     try {
       await updateStatus({ data: { order_id: orderId, status: "shipped", tracking_code: code } });
       toast.success("Pedido marcado como enviado. E-mail enviado ao cliente.");
-      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: "shipped", tracking_code: code } : o)));
       setSelected((prev) => {
         const n = new Set(prev);
         n.delete(orderId);
@@ -54,8 +64,9 @@ function ShippingPage() {
       const { data } = await supabase
         .from("orders")
         .select("*, order_items(*)")
-        .eq("status", "paid")
-        .order("created_at", { ascending: true });
+        .in("status", PAID_ORDER_STATUSES as string[])
+        .order("created_at", { ascending: true })
+        .limit(2000);
       const list = data ?? [];
       setOrders(list);
       setLoading(false);
@@ -82,16 +93,32 @@ function ShippingPage() {
     });
   };
 
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const qd = q.replace(/\D/g, "");
+    return orders.filter((o) => {
+      if (!statuses.includes(o.status)) return false;
+      if (!matchesFulfillmentFilter(ff, { id: o.id, modality: modalityOfOrder(o), eventId: o.event_id, scheduledAt: o.scheduled_at, feeStatus: o.hand_delivery_fee_status }, unreadTargets)) return false;
+      if (q) {
+        const hay = [o.id, o.recipient_name, o.email, o.city, o.neighborhood, o.tracking_code, ...(o.order_items ?? []).map((i: any) => i.card_name)]
+          .filter(Boolean).join(" ").toLowerCase();
+        const digits = [o.cep, o.phone].filter(Boolean).join(" ").replace(/\D/g, "");
+        if (!hay.includes(q) && !(qd.length >= 3 && digits.includes(qd))) return false;
+      }
+      return true;
+    });
+  }, [orders, statuses, ff, unreadTargets, search]);
+
   const toggleAll = () => {
     setSelected((prev) =>
-      prev.size === orders.length ? new Set() : new Set(orders.map((o) => o.id)),
+      filtered.length > 0 && filtered.every((o) => prev.has(o.id)) ? new Set() : new Set(filtered.map((o) => o.id)),
     );
   };
 
-  const toPrint = useMemo(
-    () => (selected.size === 0 ? orders : orders.filter((o) => selected.has(o.id))),
-    [orders, selected],
-  );
+  const toPrint = useMemo(() => {
+    const sel = filtered.filter((o) => selected.has(o.id));
+    return sel.length === 0 ? filtered : sel;
+  }, [filtered, selected]);
 
   if (authLoading) return null;
   if (!isAdmin) {
@@ -130,7 +157,7 @@ function ShippingPage() {
           <div>
             <h1 className="text-2xl font-bold">Pedidos prontos para envio</h1>
             <p className="text-sm text-muted-foreground">
-              {orders.length} pedido(s) pagos aguardando despacho.
+              {filtered.length} de {orders.length} pedido(s) pagos.
               {selected.size > 0 && ` ${selected.size} selecionado(s).`}
             </p>
           </div>
@@ -139,13 +166,13 @@ function ShippingPage() {
               onClick={toggleAll}
               className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold hover:bg-secondary"
             >
-              {selected.size === orders.length && orders.length > 0
+              {filtered.length > 0 && filtered.every((o) => selected.has(o.id))
                 ? "Limpar seleção"
                 : "Selecionar todos"}
             </button>
             <button
               onClick={() => window.print()}
-              disabled={orders.length === 0}
+              disabled={filtered.length === 0}
               className="rounded-md bg-foreground text-background px-4 py-1.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 disabled:opacity-40"
             >
               Imprimir {selected.size > 0 ? `(${selected.size})` : "todas"}
@@ -153,10 +180,39 @@ function ShippingPage() {
           </div>
         </div>
 
+        <div className="no-print mb-6 space-y-3">
+          <FulfillmentFilters value={ff} onChange={setFf} count={filtered.length} />
+          <div className="rounded-lg border border-border bg-card p-3 flex flex-wrap items-center gap-2 text-xs">
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar nº do pedido, cliente, e-mail, cidade, CEP, telefone ou carta"
+              className="flex-1 min-w-[220px] rounded-md border border-border bg-background px-3 py-1.5 text-sm"
+              aria-label="Buscar pedidos"
+            />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-2">Status</span>
+            {PAID_ORDER_STATUSES.map((st) => (
+              <label key={st} className="flex items-center gap-1 cursor-pointer rounded border border-border px-2 py-1">
+                <input
+                  type="checkbox"
+                  className="h-3.5 w-3.5 accent-foreground"
+                  checked={statuses.includes(st)}
+                  onChange={(e) => setStatuses((p) => (e.target.checked ? [...p, st] : p.filter((x) => x !== st)))}
+                />
+                {ORDER_STATUS_LABELS[st] ?? st}
+              </label>
+            ))}
+            <button type="button" onClick={() => { setStatuses(OPEN_STATUSES); setSearch(""); setFf(DEFAULT_FULFILLMENT_FILTER); }} className="underline text-muted-foreground hover:text-foreground">
+              Limpar filtros
+            </button>
+          </div>
+        </div>
+
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : orders.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum pedido pago aguardando envio.</p>
+        ) : filtered.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum pedido encontrado com esses filtros.</p>
         ) : (
           <div className="space-y-4">
             {toPrint.map((o) => (
@@ -183,6 +239,10 @@ function ShippingPage() {
                         <p className="text-xs text-muted-foreground">
                           {new Date(o.created_at).toLocaleDateString("pt-BR")}
                         </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                          <ModalityBadge modality={modalityOfOrder(o)} scheduledAt={o.scheduled_at} unread={unreadTargets.has(o.id)} />
+                          <span className="rounded border border-border px-1.5 py-0.5 text-[10px] font-semibold">{ORDER_STATUS_LABELS[o.status] ?? o.status}</span>
+                        </div>
                         {o.shipping_method === "arte_em_cards" && (
                           <span className="inline-block mt-1 rounded-md bg-purple-100 dark:bg-purple-950/40 text-purple-800 dark:text-purple-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
                             Retirada na Arte em Cards
