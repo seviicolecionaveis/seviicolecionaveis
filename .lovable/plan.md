@@ -29,11 +29,11 @@
 - Sucesso com resumo e WhatsApp `https://wa.me/5579981509552`.
 
 ## 2. Taxa e frete no site
-- Entrega em mãos: **R$15 por grupo**, QR Code/copia e cola, vencimento limitado pelo fechamento quarta às 19h, atualização manual da consulta e confirmação automática pelo Mercado Pago.
+- Entrega em mãos: **R$15 por grupo, somente no site**, QR Code/copia e cola Mercado Pago, fechamento quarta às 19h e atualização da consulta. Sem Pix externo/comprovante WhatsApp nas telas ou e-mails; remover instruções antigas dos caminhos compartilhados.
 - Frete rastreado: cotar novamente no servidor para os itens/endereço selecionados e cobrar uma vez; não aceitar preço enviado pela tela como autoridade.
 - Taxa/frete separados das cartas quitadas, sem repetir estoque, pontos, desconto ou pagamento do pedido.
-- Mostrar pagamento pendente na página/e-mail e em uma linha do grupo no admin. Confirmação externa exige conferir valor, referência e estado do pagamento; repetição nunca duplica cobrança/confirmação.
-- Admin conserva confirmação manual por grupo, com observação, autor, horário e estado anterior.
+- Mostrar pagamento pendente na página/e-mail e no grupo admin. Conferir valor/referência/estado no Mercado Pago; repetição não duplica cobrança.
+- Confirmação manual excepcional permanece só no admin, auditada; não é opção de pagamento externo oferecida ao cliente.
 - Sem pagamento até o fechamento: cancelar **o agendamento**, não os pedidos, manter histórico e deixá-los sem modalidade para nova escolha; avisar cliente/loja. Pagamento aprovado tardiamente gera pendência financeira para análise, nunca confirma um horário vencido nem perde o dinheiro recebido.
 - **Regra confirmada:** ao cancelar entrega paga com mais de 24h, manter os R$15 quitados e reagendar o mesmo grupo automaticamente para a próxima quinta disponível depois da data cancelada, respeitando 24h. Informar a nova data e permitir alteração pelo cliente dentro do prazo; nunca cobrar de novo. Se não for possível reagendar, registrar pendência para o admin sem perder o pagamento.
 

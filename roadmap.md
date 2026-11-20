@@ -3,6 +3,7 @@
 - [ ] Apresentar abordagem e obter confirmação para as mudanças de fluxos e estrutura; manter leilões pagos somente leitura nos campos originais.
 - [ ] Após aprovação, guardar backup e obter confirmação antes de cada migração; implementar página do cliente e hub admin com operações únicas por grupo.
 - [x] Regra definida: cancelamento antecipado de entrega paga reaproveita os R$15 e agenda automaticamente a próxima quinta disponível, permitindo alteração pelo cliente.
+- [ ] Entrega em mãos: pagamento somente no site; remover opções/instruções de Pix externo e comprovante no WhatsApp das telas e e-mails, após aprovação.
 - [ ] Implementar e testar reagendamento automático de entrega paga sem nova cobrança, após aprovação das mudanças.
 - [ ] Validar cenários de pagamento, prazos, acesso, entrega e preservação dos leilões em ambiente isolado; pagamento real exige provedor de teste confirmado.
 
