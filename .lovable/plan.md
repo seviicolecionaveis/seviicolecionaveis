@@ -7,7 +7,6 @@
 - **Avisos:** existe um ponto central com sino, e-mails independentes ao cliente/loja, log, retentativas, deduplicação e link Google Calendar. Grupos já recebem um aviso consolidado.
 - **Pagamento:** Mercado Pago já gera Pix, recebe confirmação assinada e atende pedidos/OS. **Entrega em mãos ainda usa Pix externo confirmado pelo admin**, não QR Code de R$15 dentro do site.
 - **Admin:** já existe Expedição em `/admin/shipping`, mas lista apenas status Pago e usa dados originais; não é uma agenda completa de grupos. Eventos e Pilha têm suas telas próprias, a serem reaproveitadas.
-- **Acesso:** o login atual já aceita destino de retorno; consultas autenticadas e permissões existentes identificam o dono/admin.
 
 ### Diferenças que impedem simplesmente reaproveitar tudo
 1. A lista atual de candidatos pode incluir pedidos normais ainda pendentes; o hub precisa exigir pagamento confirmado para todas as origens e excluir também rastreios já registrados.
@@ -25,14 +24,14 @@
 - Seleção explícita com selecionar todos/contador; Pilha ativa com prazo e inclusão opcional, sem duplicar pedidos. Itens de Pilha sem pedido vinculado usam a OS existente, sem inventar pedidos.
 - Confirmar substituição de agendamentos existentes antes de gravar.
 - Calendários e locais Aruana/Aeroporto existentes; entrega somente Aracaju/SE com endereço/observações; SEDEX em destaque e demais fretes rastreados fora de Aracaju. Aviso de bloqueio de Correios em Aracaju. Guardar na Pilha apenas com Pilha ativa.
-- Resumo com pedidos, data, endereço e cobrança única por grupo antes de confirmar. Revalidar dono, elegibilidade, cidade, cotação e horário no servidor, dentro da operação atômica.
+- Resumo de pedidos, data, endereço e cobrança única; confirmação atômica com revalidação no servidor.
 - “Meus agendamentos”: ativos, concluídos, cancelados e reabertos; alteração/cancelamento somente com **mais de 24h**, caso contrário WhatsApp. Confirmação de recebimento a partir do horário: tudo recebido ou falta de itens, com auditoria e aviso à loja.
 - Sucesso com resumo e WhatsApp `https://wa.me/5579981509552`.
 
 ## 2. Taxa e frete no site
 - Entrega em mãos: **R$15 por grupo**, QR Code/copia e cola, vencimento limitado pelo fechamento quarta às 19h, atualização manual da consulta e confirmação automática pelo Mercado Pago.
 - Frete rastreado: cotar novamente no servidor para os itens/endereço selecionados e cobrar uma vez; não aceitar preço enviado pela tela como autoridade.
-- Separar pagamento da taxa/frete dos pagamentos já quitados das cartas; não executar novamente baixa de estoque, pontos, desconto Pix de leilão ou quitação do pedido.
+- Taxa/frete separados das cartas quitadas, sem repetir estoque, pontos, desconto ou pagamento do pedido.
 - Mostrar pagamento pendente na página/e-mail e em uma linha do grupo no admin. Confirmação externa exige conferir valor, referência e estado do pagamento; repetição nunca duplica cobrança/confirmação.
 - Admin conserva confirmação manual por grupo, com observação, autor, horário e estado anterior.
 - Sem pagamento até o fechamento: cancelar **o agendamento**, não os pedidos, manter histórico e deixá-los sem modalidade para nova escolha; avisar cliente/loja. Pagamento aprovado tardiamente gera pendência financeira para análise, nunca confirma um horário vencido nem perde o dinheiro recebido.
@@ -60,7 +59,7 @@
 - Reutilizar `effectiveFulfillment`, `fulfillment_group_id`, referências às OS e histórico. Acrescentar estado operacional por membro/grupo para status, rastreio, separação, recebimento e leitura sem modificar campos originais de leilões pagos.
 - Ampliar as operações centrais com bloqueios determinísticos, transação tudo-ou-nada e chave vinculada à seleção/ação; validar novamente a elegibilidade após obter os bloqueios.
 - Tentativas de pagamento complementar ligadas ao grupo: valor, referência, ID externo, prazo e estado; **não substituem os grupos** nem criam outro gateway.
-- Funções autenticadas validam dono/admin no servidor; permissões por usuário e proteção de escrita financeira/operacional. Webhook existente ganha despacho para cobrança de grupo, sem encaminhá-la à quitação das cartas.
+- Validar dono/admin no servidor e proteger escritas. Webhook existente confirma a cobrança do grupo sem quitar novamente cartas.
 - Atualizar leituras/ações compartilhadas para status efetivos e avisos únicos; bot, lances e integração externa intactos.
 - **Mudanças somente aditivas. Antes de cada migração:** apresentar SQL/escopo em resumo, pedir confirmação explícita e guardar/verificar backup privado das definições e linhas afetadas. A aprovação geral deste plano autoriza o trabalho de implementação, mas **não dispensa essa confirmação por migração**.
 - Sem atualizar pedidos antigos em massa, cobrar clientes ou enviar avisos de teste reais. Reparos de dados exigem prévia/aprovação separadas.
@@ -74,4 +73,4 @@
 - Conferir cliente/admin em computador/celular. Pagamento e e-mail ponta a ponta exigem aplicação isolada e Mercado Pago comprovadamente de teste; o banco atual é compartilhado com a loja.
 
 ## Aprovação necessária agora
-Autorizar a criação das duas páginas e a adaptação dos fluxos compartilhados de grupos, pagamento complementar, leitura de status, eventos e avisos descritos acima. A execução de migrações e alterações de dados permanece condicionada às confirmações e backups separados.
+Autorizar as páginas e adaptações de grupos, pagamento complementar, status, eventos e avisos. Migrações e alterações de dados exigirão confirmação e backup separados.
