@@ -68,7 +68,7 @@ export function HeaderActions({ onCartOpen }: Props) {
                   <ShoppingBag className="h-4 w-4" /> Meus pedidos
                 </Link>
                 <Link
-                  to="/envios"
+                  to="/retirada-envio"
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
                 >

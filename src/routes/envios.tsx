@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { MapPin, Clock, Bike, CalendarCheck, AlertTriangle } from "lucide-react";
+import { MapPin, Clock, CalendarCheck, AlertTriangle } from "lucide-react";
 import logoUrl from "@/assets/logo.webp";
 
 const WHATSAPP_URL = "https://wa.me/557998150955";
@@ -14,13 +14,13 @@ export const Route = createFileRoute("/envios")({
       {
         name: "description",
         content:
-          "Como funciona a retirada e o envio dos pedidos da Sevii Colecionáveis em Aracaju: pontos de retirada, prazos, envio por aplicativo e presença em eventos.",
+          "Como funciona a retirada e o envio dos pedidos da Sevii Colecionáveis em Aracaju: pontos de retirada, prazos e presença em eventos.",
       },
       { property: "og:title", content: "Política de Envios e Retirada — Sevii Colecionáveis" },
       {
         property: "og:description",
           content:
-            "Retirada em Aruana e Aeroporto, envio por Uber Entrega e entregador parceiro da loja e presença em eventos. Atendimento via WhatsApp.",
+            "Retirada em Aruana e Aeroporto e presença em eventos. Atendimento via WhatsApp.",
       },
     ],
   }),
@@ -128,21 +128,6 @@ function EnviosPage() {
                 <span className="font-semibold">80% do valor pago</span>.
               </p>
             </div>
-          </PolicyCard>
-
-          <PolicyCard
-            icon={Bike}
-            title="Envio por aplicativo"
-            cta={{ label: "Falar pelo WhatsApp", href: WHATSAPP_URL }}
-          >
-            <p>
-              Trabalhamos com <span className="font-medium text-neutral-800">Uber Entrega</span> e{" "}
-              <span className="font-medium text-neutral-800">Entregador parceiro da loja</span>. O valor do
-              frete varia conforme a sua localização e é calculado no momento do envio.
-            </p>
-            <p className="mt-3">
-              Após a confirmação do pedido, combinamos os detalhes pelo WhatsApp.
-            </p>
           </PolicyCard>
 
           <PolicyCard

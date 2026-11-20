@@ -33,6 +33,7 @@ import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as PilhaRouteImport } from './routes/pilha'
 import { Route as ProdutosLacradosRouteImport } from './routes/produtos-lacrados'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RetiradaEnvioRouteImport } from './routes/retirada-envio'
 import { Route as SeladosRouteImport } from './routes/selados'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SobreRouteImport } from './routes/sobre'
@@ -264,6 +265,11 @@ const ProdutosLacradosRoute = ProdutosLacradosRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RetiradaEnvioRoute = RetiradaEnvioRouteImport.update({
+  id: '/retirada-envio',
+  path: '/retirada-envio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SeladosRoute = SeladosRouteImport.update({
@@ -883,6 +889,7 @@ export interface FileRoutesByFullPath {
   '/pilha': typeof PilhaRouteWithChildren
   '/produtos-lacrados': typeof ProdutosLacradosRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
+  '/retirada-envio': typeof RetiradaEnvioRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
@@ -1017,6 +1024,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/novidades': typeof NovidadesRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/retirada-envio': typeof RetiradaEnvioRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
@@ -1155,6 +1163,7 @@ export interface FileRoutesById {
   '/pilha': typeof PilhaRouteWithChildren
   '/produtos-lacrados': typeof ProdutosLacradosRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
+  '/retirada-envio': typeof RetiradaEnvioRoute
   '/selados': typeof SeladosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
@@ -1295,6 +1304,7 @@ export interface FileRouteTypes {
     | '/pilha'
     | '/produtos-lacrados'
     | '/reset-password'
+    | '/retirada-envio'
     | '/selados'
     | '/sitemap.xml'
     | '/sobre'
@@ -1429,6 +1439,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/novidades'
     | '/reset-password'
+    | '/retirada-envio'
     | '/selados'
     | '/sitemap.xml'
     | '/sobre'
@@ -1566,6 +1577,7 @@ export interface FileRouteTypes {
     | '/pilha'
     | '/produtos-lacrados'
     | '/reset-password'
+    | '/retirada-envio'
     | '/selados'
     | '/sitemap.xml'
     | '/sobre'
@@ -1705,6 +1717,7 @@ export interface RootRouteChildren {
   PilhaRoute: typeof PilhaRouteWithChildren
   ProdutosLacradosRoute: typeof ProdutosLacradosRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
+  RetiradaEnvioRoute: typeof RetiradaEnvioRoute
   SeladosRoute: typeof SeladosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
@@ -1933,6 +1946,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/retirada-envio': {
+      id: '/retirada-envio'
+      path: '/retirada-envio'
+      fullPath: '/retirada-envio'
+      preLoaderRoute: typeof RetiradaEnvioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/selados': {
@@ -2956,6 +2976,7 @@ const rootRouteChildren: RootRouteChildren = {
   PilhaRoute: PilhaRouteWithChildren,
   ProdutosLacradosRoute: ProdutosLacradosRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
+  RetiradaEnvioRoute: RetiradaEnvioRoute,
   SeladosRoute: SeladosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
