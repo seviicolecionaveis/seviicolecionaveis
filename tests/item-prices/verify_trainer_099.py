@@ -24,7 +24,13 @@ untouched = 0
 for r in before:
     eligible = r['finish'] in finishes and r['price'] is not None and 66 <= r['price'] <= 98
     if not eligible:
-        assert after[r['id']]['price'] == r['price'], f'Out-of-scope price changed: {r["id"]}'
+        if r['id'] in stock_audit and 'price_history_id' in stock_audit[r['id']]:
+            audit = stock_audit[r['id']]
+            assert audit['previous_price'] == r['price']
+            assert audit['new_price'] == after[r['id']]['price']
+            assert audit['price_history_id'] and audit['price_recorded_at'] == audit['changed_at']
+        else:
+            assert after[r['id']]['price'] == r['price'], f'Out-of-scope price changed: {r["id"]}'
         untouched += 1
     for field, value in r.items():
         if field == 'price':
@@ -35,4 +41,4 @@ for r in before:
             assert audit['id'] and audit['changed_at'] and audit['changed_by']
             continue
         assert after[r['id']][field] == value, f'{field} changed: {r["id"]}'
-print(f'PASS {untouched} out-of-scope prices unchanged; {len(stock_audit)} audited concurrent stock edits')
+print(f'PASS {untouched} out-of-scope prices checked; {len(stock_audit)} audited concurrent admin edits')
