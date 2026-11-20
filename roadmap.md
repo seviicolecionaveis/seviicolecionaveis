@@ -1,6 +1,8 @@
 ## Hub de Retirada e Envio
 - [x] Investigar páginas, grupos, calendários, pagamentos, notificações e permissões existentes sem alterar dados ou fluxos; estrutura consultada em modo somente leitura.
-- [ ] Apresentar abordagem e obter confirmação para as mudanças de fluxos e estrutura; manter leilões pagos somente leitura nos campos originais.
+- [x] Plano apresentado e aprovado; leilões pagos somente leitura nos campos originais.
+- [x] Regras puras iniciais de elegibilidade, cidade, prazo, reagendamento pago e classificação de Pix implementadas com testes, sem ativar fluxos ou alterar pedidos.
+- [ ] Primeira estrutura aditiva: andamento por grupo/pedido, tentativas de pagamento e auditoria; aguarda confirmação específica e backup, conforme plano aprovado.
 - [ ] Após aprovação, guardar backup e obter confirmação antes de cada migração; implementar página do cliente e hub admin com operações únicas por grupo.
 - [x] Regra definida: cancelamento antecipado de entrega paga reaproveita os R$15 e agenda automaticamente a próxima quinta disponível, permitindo alteração pelo cliente.
 - [ ] Entrega em mãos: pagamento somente no site; remover opções/instruções de Pix externo e comprovante no WhatsApp das telas e e-mails, após aprovação.
