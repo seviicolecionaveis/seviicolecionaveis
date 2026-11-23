@@ -9,11 +9,19 @@ import { FulfillmentFilters, ModalityBadge, matchesFulfillmentFilter, DEFAULT_FU
 import { modalityOfOrder } from "@/lib/fulfillment-alerts";
 import { useAdminNotifications } from "@/hooks/useAdminNotifications";
 import { ORDER_STATUS_LABELS, PAID_ORDER_STATUSES } from "@/lib/order-status";
+import { loadShippingPages } from "@/lib/shipping-pagination";
 
 const OPEN_STATUSES = ["paid", "preparing", "separated", "awaiting_pickup", "cards_pending_delivery"];
 
 export const Route = createFileRoute("/admin/shipping")({
-  head: () => ({ meta: [{ title: "Expedição — Sevii Admin" }] }),
+  head: () => ({ meta: [
+    { title: "Expedição — Sevii Admin" },
+    { name: "description", content: "Expedição administrativa de pedidos, envios e retiradas da Sevii Colecionáveis." },
+    { property: "og:title", content: "Expedição — Sevii Admin" },
+    { property: "og:description", content: "Expedição administrativa de pedidos, envios e retiradas da Sevii Colecionáveis." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: ShippingPage,
 });
 
@@ -22,6 +30,7 @@ function ShippingPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [coupons, setCoupons] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [tracking, setTracking] = useState<Record<string, string>>({});
   const [shipping, setShipping] = useState<Set<string>>(new Set());
@@ -60,16 +69,25 @@ function ShippingPage() {
 
   useEffect(() => {
     if (!isAdmin) return;
+    const controller = new AbortController();
+    setLoading(true);
+    setLoadError(false);
     (async () => {
-      const { data } = await supabase
-        .from("orders")
-        .select("*, order_items(*)")
-        .in("status", PAID_ORDER_STATUSES as string[])
-        .order("created_at", { ascending: true })
-        .limit(2000);
-      const list = data ?? [];
+      try {
+      const list = await loadShippingPages(async (from, to) => {
+        const { data, error } = await supabase
+          .from("orders")
+          .select("*, order_items(*)")
+          .in("status", PAID_ORDER_STATUSES as string[])
+          .order("created_at", { ascending: true })
+          .order("id", { ascending: true })
+          .range(from, to)
+          .abortSignal(controller.signal);
+        if (error) throw error;
+        return data ?? [];
+      });
+      if (controller.signal.aborted) return;
       setOrders(list);
-      setLoading(false);
       const codes = Array.from(
         new Set(list.map((o: any) => o.coupon_code).filter(Boolean) as string[]),
       );
@@ -82,7 +100,16 @@ function ShippingPage() {
         (cs ?? []).forEach((c: any) => { map[c.code.toUpperCase()] = c; });
         setCoupons(map);
       }
+      } catch {
+        if (!controller.signal.aborted) {
+          setOrders([]);
+          setLoadError(true);
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
     })();
+    return () => controller.abort();
   }, [isAdmin]);
 
   const toggle = (id: string) => {
@@ -211,6 +238,8 @@ function ShippingPage() {
 
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : loadError ? (
+          <p role="alert" className="text-sm text-destructive">Não foi possível carregar todos os pedidos. Atualize a página para tentar novamente.</p>
         ) : filtered.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhum pedido encontrado com esses filtros.</p>
         ) : (
