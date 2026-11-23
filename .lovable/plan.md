@@ -27,6 +27,7 @@ As classificações abaixo são baseadas na leitura das consultas atuais, não e
 | Avisos de cancelamento — `AdminCancellationBell.tsx` | Lista de cancelamentos recentes sem paginação. | Paginar cancelamentos; manter prévia explícita dos 50 pedidos novos. |
 | Verificação de avisos faltantes — `fulfillment-alerts.functions.ts` | Pedidos/OS limitados a 500 e histórico de notificações a 5.000; pode omitir pendências ou sugerir reenvio já feito. | Paginar leituras de ambos e preservar deduplicação existente. |
 | Pilha — `card-stack.functions.ts`, `admin-pilha-detail.functions.ts` e leitura de pedidos associados em `admin-shipping-edit.server.ts` | Leituras por conjuntos de IDs não percorrem páginas. | Completar leituras e dividir conjuntos grandes sem alterar seleção ou operações. |
+| Avisos de reagendamento na Pilha — `pilha.index.tsx` | Consulta sem paginação usada para mostrar um aviso por pedido reaberto. | Completar a lista antes de renderizar os avisos. |
 | Progresso de coleção — `collection-progress.functions.ts` | Pedidos pagos e itens consultados sem paginação. | Completar ambas as leituras, sem editar compras. |
 | Promoções já usadas — `SitePopups.tsx` | Histórico de cupons por conta sem paginação. | Completar leitura, sem alterar cupons ou regras de elegibilidade. |
 
@@ -50,7 +51,6 @@ As classificações abaixo são baseadas na leitura das consultas atuais, não e
 - `admin-pilha.functions.ts`: prévia dos 20 pedidos recentes e busca direta por ID/prefixo (até duas correspondências para rejeitar ambiguidade).
 - `coupons.server.ts`: prévia de até 200 usos recentes; não é seleção operacional de pedidos.
 - `WelcomeDialog.tsx` e validação de cupons em `payments.server.ts`: existência de um uso ou contagem no banco, sem necessidade de histórico inteiro.
-- Pilha `pilha.index.tsx`: a consulta de reagendamento é usada como sinal de existência; não é a lista de pedidos para expedição.
 - Detalhes de pedido, pagamento por link, recebimento, etiqueta, taxa, cancelamento, pedido manual, bots, MCP de alteração e serviços de estoque (`orders.$orderId.tsx`, `admin.orders.$orderId.tsx`, `pay.$orderId.tsx`, `orders.functions.ts`, `auction-payment.functions.ts`, `auction-payment-links.server.ts`, `buyer-receipt.functions.ts`, `superfrete-label.server.ts`, `hand-delivery.functions.ts`, `order-cancellation.server.ts`, `manual-order.server.ts`, `orders.server.ts`, `card-stack.server.ts`, `service-orders.server.ts` e endpoints de bot): consultas por ID ou conjuntos explícitos, não históricos completos ordenados e truncados. Validar limites dos itens associados na implementação, sem mudar transações.
 - Funções atuais do banco inspecionadas com `LIMIT/OFFSET`: `admin_search_customers` pagina e conta; `admin_search_orders_for_merge` filtra a busca antes da prévia de 30; `admin_change_auction_winner`, `admin_preview_auction_winner_change`, `admin_merge_customer_accounts`, `fulfillment_apply`, `fulfillment_create_service` e `fulfillment_rebalance` usam `LIMIT 1` para escolher um registro específico/representante, não para cortar uma lista de expedição. Nenhuma migration é proposta.
 
