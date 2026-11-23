@@ -1,3 +1,8 @@
+## Listas de pedidos sem truncamento
+- [x] Expedição corrigida com paginação integral; 14 testes e navegador autenticado computador/celular, sem alterar pedidos.
+- [x] Varredura de consultas relacionadas em telas, agrupamento, eventos, MCP e rotinas; limites e riscos registrados no plano.
+- [ ] Corrigir leituras relacionadas e avanço das rotinas com testes isolados; aguarda aprovação da ampliação que envolve pagamentos e comunicações. Não executar operações na loja nem alterar pedidos concluídos.
+
 ## Hub de Retirada e Envio
 - [x] Investigar páginas, grupos, calendários, pagamentos, notificações e permissões existentes sem alterar dados ou fluxos; estrutura consultada em modo somente leitura.
 - [x] Plano apresentado e aprovado; leilões pagos somente leitura nos campos originais.
