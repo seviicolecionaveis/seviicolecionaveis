@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { trackEvent } from "@/lib/analytics";
+import { findCartShortages } from "@/lib/cart-stock";
+import { fetchEventMode } from "@/lib/event-mode";
 import { supabase } from "@/integrations/supabase/client";
 import { trackCardInterestCart, removeCardInterestCart } from "@/hooks/useCardInterest";
 import {
@@ -127,19 +129,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (ids.length === 0) return [];
       const { data, error } = await supabase
         .from("cards")
-        .select("id, stock")
+        .select("id, stock, event_reserved")
         .in("id", ids);
       if (error || !data) return [];
-      const stockById = new Map(data.map((c) => [c.id, c.stock ?? 0]));
-      const offenders: OutOfStockEntry[] = [];
-      for (const it of items) {
-        if (!UUID_RE.test(it.cardId)) continue;
-        const available = stockById.get(it.cardId) ?? 0;
-        if (available < it.quantity) {
-          offenders.push({ item: it, available });
-        }
+      const offenders: OutOfStockEntry[] = findCartShortages(
+        items.filter((i) => UUID_RE.test(i.cardId)),
+        data,
+      );
+      if (offenders.length > 0) {
+        const byId = new Map(offenders.map((o) => [o.item.id, o.available]));
+        setItems((prev) =>
+          prev.flatMap((i) => {
+            if (!byId.has(i.id)) return [i];
+            const avail = byId.get(i.id) ?? 0;
+            return avail > 0 ? [{ ...i, quantity: avail, maxStock: avail }] : [];
+          }),
+        );
+        setOutOfStock(offenders);
       }
-      if (offenders.length > 0) setOutOfStock(offenders);
       return offenders;
     } finally {
       validatingRef.current = false;
@@ -156,11 +163,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, items.length]);
 
-  const dismissOutOfStock = () => {
-    const idsToRemove = new Set(outOfStock.map((o) => o.item.id));
-    setItems((prev) => prev.filter((i) => !idsToRemove.has(i.id)));
-    setOutOfStock([]);
-  };
+  // Revalida ao voltar para a aba, a cada minuto e quando a loja é pausada/liberada
+  // (ex.: admins bloqueiam o site para atualizar o estoque).
+  const validateRef = useRef(validateStock);
+  validateRef.current = validateStock;
+  const lastModeRef = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (!hydrated || items.length === 0) return;
+    const check = async () => {
+      try {
+        const mode = await fetchEventMode();
+        const prev = lastModeRef.current;
+        lastModeRef.current = mode.enabled;
+        if (prev !== null && prev !== mode.enabled) window.dispatchEvent(new CustomEvent("sevii:event-mode", { detail: mode }));
+      } catch {}
+      void validateRef.current();
+    };
+    const onVis = () => { if (document.visibilityState === "visible") void check(); };
+    const t = setInterval(check, 60_000);
+    window.addEventListener("focus", onVis);
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      clearInterval(t);
+      window.removeEventListener("focus", onVis);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, [hydrated, items.length]);
+
+  const dismissOutOfStock = () => setOutOfStock([]);
 
   return (
     <Ctx.Provider value={{ items, add, remove, setQty, clear, count, subtotal, validateStock }}>
@@ -175,8 +205,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
               <div className="space-y-2 text-sm">
                 <p>
                   {outOfStock.length === 1
-                    ? "O item abaixo foi esgotado enquanto estava no seu carrinho e será removido:"
-                    : "Os itens abaixo foram esgotados enquanto estavam no seu carrinho e serão removidos:"}
+                    ? "O item abaixo esgotou enquanto estava no seu carrinho. Seu carrinho foi atualizado automaticamente:"
+                    : "Os itens abaixo esgotaram enquanto estavam no seu carrinho. Seu carrinho foi atualizado automaticamente:"}
                 </p>
                 <ul className="list-disc pl-5 space-y-1">
                   {outOfStock.map((o) => (
@@ -186,7 +216,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                         ({o.item.collection} · #{o.item.number} · {o.item.finish} · {o.item.language} · {o.item.condition})
                       </span>
                       {o.available > 0 && o.available < o.item.quantity && (
-                        <span className="text-muted-foreground"> — restam apenas {o.available}, você tinha {o.item.quantity}</span>
+                        <span className="text-muted-foreground"> — restam apenas {o.available}, a quantidade foi ajustada</span>
                       )}
                     </li>
                   ))}
@@ -195,7 +225,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={dismissOutOfStock}>Entendi, remover</AlertDialogAction>
+            <AlertDialogAction onClick={dismissOutOfStock}>Entendi</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

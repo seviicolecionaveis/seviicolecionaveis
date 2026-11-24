@@ -50,7 +50,13 @@ export function useEventMode() {
     fetchEventMode()
       .then((v) => { if (active) setEventMode(v); })
       .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+    // Atualiza ao vivo quando o carrinho detecta pausa/liberação das vendas
+    const onChange = (e: Event) => {
+      const d = (e as CustomEvent<EventModeSetting>).detail;
+      if (active && d) setEventMode(d);
+    };
+    window.addEventListener("sevii:event-mode", onChange);
+    return () => { active = false; window.removeEventListener("sevii:event-mode", onChange); };
   }, []);
 
   return { eventMode, loading, reload };

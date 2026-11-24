@@ -168,7 +168,7 @@ interface CardState {
 
 function CheckoutPage() {
   const { user, session, isAdmin, loading: authLoading } = useAuth();
-  const { items, subtotal, clear } = useCart();
+  const { items, subtotal, clear, validateStock } = useCart();
   const nav = useNavigate();
   const readCredit=useServerFn(getCreditStatement);
   const creditQuery=useQuery({queryKey:["checkout-credit",user?.id],queryFn:()=>readCredit({data:{page:0}}),enabled:!!user});
@@ -526,6 +526,12 @@ function CheckoutPage() {
       return;
     }
     setErr(null);
+    // Confere o estoque ao vivo; se algo esgotou, o carrinho é ajustado e o aviso aparece.
+    const shortages = await validateStock();
+    if (shortages.length > 0) {
+      setErr("Alguns itens esgotaram e seu carrinho foi atualizado. Revise antes de pagar.");
+      return;
+    }
     trackEvent("begin_checkout", {
       currency: "BRL",
       value: subtotal,

@@ -654,6 +654,13 @@ async function ensureAvailableStock(
   items: { cardId: string; quantity: number; name: string; finish: string }[],
   opts?: { excludeOrderId?: string },
 ) {
+  // Loja pausada (atualização de estoque/evento): nenhuma compra pode ser criada,
+  // mesmo por quem já estava com o checkout aberto.
+  const { data: modeRow } = await supabaseAdmin
+    .from("app_settings").select("value").eq("key", "event_mode").maybeSingle();
+  if ((modeRow?.value as { enabled?: unknown } | null)?.enabled === true) {
+    throw new Error("As vendas estão temporariamente pausadas para atualização do estoque. Tente novamente em instantes.");
+  }
   const realCardIds = items
     .filter(
       (it) =>
