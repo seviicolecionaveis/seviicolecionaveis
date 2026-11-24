@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { trackEvent } from "@/lib/analytics";
-import { findCartShortages } from "@/lib/cart-stock";
+import { findCartShortages, type CartStockRow } from "@/lib/cart-stock";
+import { parseAccessoryCartId, parseVariants } from "@/lib/accessory-variants";
 import { fetchEventMode } from "@/lib/event-mode";
 import { supabase } from "@/integrations/supabase/client";
 import { trackCardInterestCart, removeCardInterestCart } from "@/hooks/useCardInterest";
@@ -126,16 +127,40 @@ export function CartProvider({ children }: { children: ReactNode }) {
     validatingRef.current = true;
     try {
       const ids = Array.from(new Set(items.map((i) => i.cardId).filter((id) => UUID_RE.test(id))));
-      if (ids.length === 0) return [];
-      const { data, error } = await supabase
-        .from("cards")
-        .select("id, stock, event_reserved")
-        .in("id", ids);
-      if (error || !data) return [];
-      const offenders: OutOfStockEntry[] = findCartShortages(
-        items.filter((i) => UUID_RE.test(i.cardId)),
-        data,
+      const rows: CartStockRow[] = [];
+      if (ids.length > 0) {
+        const { data, error } = await supabase.from("cards").select("id, stock, event_reserved").in("id", ids);
+        if (error || !data) return [];
+        rows.push(...data);
+      }
+      // Produtos com estoque próprio: painéis, lacrados, videogames e acessórios (com variação)
+      const prefixed = (prefix: string) =>
+        Array.from(new Set(items.filter((i) => i.cardId.startsWith(prefix)).map((i) => i.cardId.slice(prefix.length))));
+      for (const [prefix, table] of [["panel:", "panels"], ["sealed:", "sealed_products"], ["videogame:", "videogames"]] as const) {
+        const pIds = prefixed(prefix);
+        if (pIds.length === 0) continue;
+        const { data, error } = await supabase.from(table).select("id, stock").in("id", pIds);
+        if (error || !data) return [];
+        rows.push(...data.map((r) => ({ id: prefix + r.id, stock: r.stock })));
+      }
+      const accItems = items.filter((i) => i.cardId.startsWith("accessory:"));
+      if (accItems.length > 0) {
+        const accIds = Array.from(new Set(accItems.map((i) => parseAccessoryCartId(i.cardId).accessoryId)));
+        const { data, error } = await supabase.from("accessories").select("id, stock, variants").in("id", accIds);
+        if (error || !data) return [];
+        for (const it of accItems) {
+          const { accessoryId, variantId } = parseAccessoryCartId(it.cardId);
+          const acc = data.find((a) => a.id === accessoryId);
+          if (!acc) continue; // ausente = esgotado
+          const stock = variantId ? parseVariants(acc.variants).find((v) => v.id === variantId)?.stock ?? 0 : acc.stock;
+          rows.push({ id: it.cardId, stock });
+        }
+      }
+      const checkable = items.filter(
+        (i) => UUID_RE.test(i.cardId) || /^(panel|sealed|videogame|accessory):/.test(i.cardId),
       );
+      if (checkable.length === 0) return [];
+      const offenders: OutOfStockEntry[] = findCartShortages(checkable, rows);
       if (offenders.length > 0) {
         const byId = new Map(offenders.map((o) => [o.item.id, o.available]));
         setItems((prev) =>
