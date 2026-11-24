@@ -18,6 +18,7 @@ export function ProductCard({
 }) {
   const cover = productCover(product);
   const stock = productStock(product);
+  const soldOut = stock <= 0 && !product.is_preorder;
   return (
     <Link
       to={kind === "accessory" ? "/acessorios/$slug" : "/produtos-lacrados/$slug"}
@@ -30,17 +31,27 @@ export function ProductCard({
             src={cover}
             alt={product.title}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+            className={`h-full w-full object-cover transition-transform group-hover:scale-105${
+              soldOut ? " brightness-[0.55] saturate-50" : ""
+            }`}
           />
         ) : (
           <div className="grid h-full place-items-center text-muted-foreground">
             <Package className="h-12 w-12" aria-label="Sem imagem" />
           </div>
         )}
-        {(stock <= 3 || product.is_preorder) && (
-          <span className="absolute left-2 top-2 rounded bg-background/90 px-2 py-1 text-xs font-semibold">
-            {product.is_preorder ? "Pré-venda" : stockLabel(stock)}
+        {soldOut ? (
+          <span className="absolute inset-0 grid place-items-center">
+            <span className="rounded-md bg-background/95 px-4 py-2 text-sm font-bold uppercase tracking-wide text-foreground shadow-md">
+              Esgotado
+            </span>
           </span>
+        ) : (
+          (stock <= 3 || product.is_preorder) && (
+            <span className="absolute left-2 top-2 rounded bg-background/90 px-2 py-1 text-xs font-semibold">
+              {product.is_preorder ? "Pré-venda" : stockLabel(stock)}
+            </span>
+          )
         )}
       </div>
       <p className="mt-2 line-clamp-2 text-sm font-semibold">{product.title}</p>

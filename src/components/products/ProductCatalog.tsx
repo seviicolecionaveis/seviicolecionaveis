@@ -32,6 +32,9 @@ export function ProductCatalog({
     if (sort === "price-asc") result.sort((a, b) => productPrice(a) - productPrice(b));
     if (sort === "price-desc") result.sort((a, b) => productPrice(b) - productPrice(a));
     if (sort === "name") result.sort((a, b) => a.title.localeCompare(b.title, "pt-BR"));
+    // Produtos em estoque (ou pré-venda) sempre antes dos esgotados.
+    const inStock = (p: StoreProduct) => (productStock(p) > 0 || p.is_preorder ? 0 : 1);
+    result.sort((a, b) => inStock(a) - inStock(b));
     return result;
   }, [items, q, category, sort, stock]);
   return (
