@@ -14,6 +14,7 @@ import { formatSchedule, slotsFor, toIso, localParts } from "@/lib/scheduling";
 import { activePickupEvents, eventDays, eventSlotsForDay, formatYmd, type PickupEvent } from "@/lib/events";
 import { listFulfillmentCandidates } from "@/lib/fulfillment-groups.functions";
 import { FulfillmentOrderSelection } from "@/components/FulfillmentOrderSelection";
+import { ACTIVE_PICKUP_POINTS } from "@/lib/pickup-points";
 
 const MODES: AdminShippingMode[] = ["pickup", "event", "delivery", "tracked", "stack"];
 const input = "w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm";
@@ -115,7 +116,8 @@ export function AdminShippingEditor({ order, onSaved }: { order: any; onSaved: (
           {mode === "pickup" && <div className="space-y-2">
             <select className={input} value={pickupPoint} onChange={(e) => setPickupPoint(e.target.value as PickupPoint)}>
               <option value="">Local da retirada…</option>
-              {(Object.keys(PICKUP_POINT_LABELS) as PickupPoint[]).map((k) => <option key={k} value={k}>{PICKUP_POINT_LABELS[k]}</option>)}
+              {pickupPoint === "aruana" && <option value="aruana" disabled>Vista Aruana — desativado</option>}
+              {ACTIVE_PICKUP_POINTS.map((k) => <option key={k} value={k}>{PICKUP_POINT_LABELS[k]}</option>)}
             </select>
             <input type="date" className={input} value={date} onChange={(e) => setDate(e.target.value)} />
             <select className={input} value={slot} onChange={(e) => setSlot(e.target.value)}>

@@ -85,7 +85,6 @@ export function CardStackTermsDialog({ open, onAccept, onCancel }: Props) {
                   Retirada gratuita em um de nossos pontos:
                 </p>
                 <ul className="list-disc pl-5 mt-1 text-xs text-muted-foreground">
-                  <li>Aruana</li>
                   <li>Aeroporto</li>
                 </ul>
               </div>

@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { createPixPayment } from "@/lib/mercadopago.server";
+import { validatePickupPoint } from "./pickup-points";
 
 export const ARTE_EM_CARDS_FEE_CENTS = 500;
 const PIX_EXPIRES_MINUTES = 30;
@@ -87,6 +88,10 @@ export interface CreateServiceOrderResult {
 }
 
 export async function createServiceOrderServer(input: CreateServiceOrderInput): Promise<CreateServiceOrderResult> {
+  if (input.method === "presencial") {
+    const error = validatePickupPoint(input.pickupPoint);
+    if (error) throw new Error(error);
+  }
   const { stackId, items } = await loadItems(input.userId, input.itemIds);
 
   if (input.method === "arte_em_cards" && items.some((i) => i.card_id?.startsWith("sealed:"))) {

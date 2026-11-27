@@ -14,6 +14,7 @@ import { computeBundleDiscount } from "@/lib/bundles";
 import { TEST_ADMIN_CARD_ID } from "@/lib/test-card";
 import { parseVariants, parseAccessoryCartId } from "@/lib/accessory-variants";
 import { assertSalesOpen } from "@/lib/event-mode.server";
+import { validatePickupPoint } from "@/lib/pickup-points";
 
 async function sendOrderReceivedEmail(orderId: string) {
   const { data: order } = await supabaseAdmin
@@ -93,6 +94,7 @@ async function resolveArteEmCardsFee(
 
 async function assertSchedule(data: {
   shippingMethod: string;
+  notes?: string | null;
   schedule?: { kind: "delivery" | "pickup" | "event"; at: string; eventId?: string | null } | null;
   address?: { city?: string | null; state?: string | null; cep?: string | null } | null;
 }) {
@@ -101,6 +103,9 @@ async function assertSchedule(data: {
     if (isAracajuCep(data.address?.cep)) throw new Error(ARACAJU_NO_CORREIOS_MESSAGE);
   }
   if (data.shippingMethod !== "arrange") return;
+  if (data.schedule?.kind === "pickup" && /aruana/i.test(data.notes ?? "")) {
+    throw new Error(validatePickupPoint("aruana") ?? "Local desativado.");
+  }
   if (data.schedule?.kind === "delivery") {
     const { isHandDeliveryArea, HAND_DELIVERY_AREA_MESSAGE } = await import("@/lib/hand-delivery");
     if (!isHandDeliveryArea(data.address)) throw new Error(HAND_DELIVERY_AREA_MESSAGE);

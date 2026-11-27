@@ -10,6 +10,8 @@ const BRAND_HOVER = "#1b8eae";
 export const Route = createFileRoute("/envios")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Política de Envios e Retirada (Apenas Aracaju) — Sevii Colecionáveis" },
       {
         name: "description",
@@ -20,7 +22,7 @@ export const Route = createFileRoute("/envios")({
       {
         property: "og:description",
           content:
-            "Retirada em Aruana e Aeroporto e presença em eventos. Atendimento via WhatsApp.",
+            "Retirada no Aeroporto e presença em eventos. Atendimento via WhatsApp.",
       },
     ],
   }),
@@ -98,12 +100,8 @@ function EnviosPage() {
             title="Retirada no endereço"
             cta={{ label: "Falar pelo WhatsApp", href: WHATSAPP_URL }}
           >
-            <p>Realizamos retirada em dois pontos:</p>
+            <p>Realizamos retirada no seguinte ponto:</p>
             <ul className="mt-3 space-y-2">
-              <li>
-                <span className="font-medium text-neutral-800">Condomínio Vista de Aruana:</span>{" "}
-                R. Josepha Andrade Irmã Fontes, 600 — Aruana, Aracaju - SE
-              </li>
               <li>
                 <span className="font-medium text-neutral-800">Condomínio Palm Ville:</span>{" "}
                 Av. Silvério Leite Fontes, 1128 — Aeroporto, Aracaju - SE

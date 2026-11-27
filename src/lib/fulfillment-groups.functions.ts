@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { canGroupOrder, effectiveFulfillment } from "./fulfillment-groups";
+import { validatePickupPoint } from "./pickup-points";
 
 export const listFulfillmentCandidates = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -26,6 +27,10 @@ export const chooseOrderFulfillment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ orderIds: z.array(z.string().uuid()).min(1).max(500), key: z.string().uuid(), kind: z.enum(["pickup", "event", "delivery"]), at: z.string().datetime(), eventId: z.string().uuid().nullable().optional(), pickupPoint: z.enum(["aruana", "aeroporto"]).optional(), existingId: z.string().uuid().nullable().optional() }).parse(d))
   .handler(async ({ data, context }) => {
+    if (data.kind === "pickup") {
+      const pointError = validatePickupPoint(data.pickupPoint);
+      if (pointError) throw new Error(pointError);
+    }
     const { data: rows, error } = await context.supabase.from("orders").select("*").in("id", data.orderIds).eq("user_id", context.userId);
     if (error || rows?.length !== data.orderIds.length || rows.some((o) => !canGroupOrder(o))) throw new Error("Há pedidos que não podem ser incluídos.");
     const first = rows[0];
@@ -56,6 +61,7 @@ export const chooseOrderFulfillment = createServerFn({ method: "POST" })
       const { data: members, error: groupError } = await context.supabase.from("orders").select("*").eq("fulfillment_group_id", data.existingId).eq("user_id", context.userId);
       const active = (members ?? []).filter(canGroupOrder);
       const existing = active[0] ? effectiveFulfillment(active[0]) : null;
+      if (existing?.schedule_kind === "pickup" && /aruana/i.test(existing.notes ?? "")) throw new Error(validatePickupPoint("aruana") ?? "Local desativado.");
       if (groupError || !existing || existing.reschedule_required || existing.scheduled_at !== data.at || existing.schedule_kind !== data.kind || new Date(data.at).getTime() < Date.now() + 86400000) throw new Error("Este agendamento não está mais disponível.");
       return applyGroup([...new Set([...data.orderIds, ...active.map((o) => o.id)])], existing.fulfillment_data as Record<string, unknown>, data.key, { existingId: data.existingId, serviceId: existing.fulfillment_service_order_id });
     }

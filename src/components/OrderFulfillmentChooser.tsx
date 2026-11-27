@@ -17,7 +17,7 @@ export function OrderFulfillmentChooser({ order, onSaved }: { order: any; onSave
   const [orders, setOrders] = useState<any[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [kind, setKind] = useState<"pickup" | "delivery" | "event">("pickup");
-  const [point, setPoint] = useState<"aruana" | "aeroporto">("aruana");
+  const [point, setPoint] = useState<"aruana" | "aeroporto">("aeroporto");
   const [at, setAt] = useState<string | null>(null);
   const [events, setEvents] = useState<PickupEvent[]>([]);
   const [event, setEvent] = useState<EventSelection | null>(null);
@@ -45,7 +45,7 @@ export function OrderFulfillmentChooser({ order, onSaved }: { order: any; onSave
       <select aria-label="Modalidade" className="border border-border bg-background rounded-md p-2 text-sm" value={kind} onChange={(e) => { setKind(e.target.value as typeof kind); setAt(null); setExistingId(null); }}>
         <option value="pickup">Retirada em mãos</option><option value="event">Retirada em eventos</option>{isHandDeliveryArea(order) && <option value="delivery">Entrega em mãos · R$15</option>}
       </select>
-      {kind === "pickup" && <select aria-label="Ponto de retirada" className="border border-border bg-background rounded-md p-2 text-sm" value={point} onChange={(e) => setPoint(e.target.value as typeof point)}><option value="aruana">Aruana</option><option value="aeroporto">Aeroporto</option></select>}
+      {kind === "pickup" && <select aria-label="Ponto de retirada" className="border border-border bg-background rounded-md p-2 text-sm" value={point} onChange={(e) => setPoint(e.target.value as typeof point)}><option value="aeroporto">Aeroporto</option></select>}
       {kind === "event" ? <EventSlotPicker events={events} value={event} onChange={(v) => { setEvent(v); setAt(v?.iso ?? null); }} /> : <ScheduleSlotPicker kind={kind} value={at} onChange={setAt} />}
       <FulfillmentOrderSelection orders={orders} selected={selected} onChange={setSelected} />
       <DialogFooter><Button variant="outline" disabled={busy} onClick={() => setOpen(false)}>Cancelar</Button><Button disabled={busy || !at || !selected.length || (kind === "event" && !event)} onClick={async () => {

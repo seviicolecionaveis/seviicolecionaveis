@@ -3,6 +3,7 @@ import { formatSchedule, validateSchedule } from "./scheduling";
 import { validateEventSchedule, ymdOfIso, type PickupEvent } from "./events";
 import { localParts } from "./scheduling";
 import { isHandDeliveryArea, HAND_DELIVERY_AREA_MESSAGE } from "./hand-delivery";
+import { validatePickupPoint } from "./pickup-points";
 
 export type AdminShippingMode = "pickup" | "event" | "delivery" | "tracked" | "stack";
 
@@ -44,7 +45,7 @@ export function validateAdminShippingInput(i: AdminShippingInput): string | null
     !!a && !!a.street?.trim() && !!a.number?.trim() && !!a.city?.trim();
   switch (i.mode) {
     case "pickup":
-      if (!i.pickupPoint) return "Escolha o local da retirada (Aruana ou Aeroporto).";
+      if (validatePickupPoint(i.pickupPoint)) return validatePickupPoint(i.pickupPoint);
       if (!i.at) return "Escolha a data e o horário da retirada.";
       return null;
     case "event":

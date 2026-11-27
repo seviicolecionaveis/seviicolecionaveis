@@ -620,7 +620,7 @@ function CheckoutPage() {
       return "Selecione uma opção de frete (informe o CEP para carregar).";
     }
     if (shipping === "arrange" && !pickupPoint) {
-      return "Selecione uma opção: Aruana, Aeroporto, Entrega em mãos ou Retirada em eventos.";
+      return "Selecione uma opção: Aeroporto, Entrega em mãos ou Retirada em eventos.";
     }
     if (shipping === "arrange" && pickupPoint === "evento") {
       if (!eventSel) return "Escolha o evento, o dia e o horário da retirada.";
@@ -938,21 +938,6 @@ function CheckoutPage() {
                 {shipping === "arrange" && pickupPoint !== "app" && pickupPoint !== "evento" && (
                   <div className="px-4 pb-4 space-y-2">
                     <FulfillmentOrderSelection afterPayment orders={groupOrders} selected={groupSelected} onChange={setGroupSelected} />
-                    <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
-                      <input
-                        type="radio"
-                        name="pickup"
-                        checked={pickupPoint === "aruana"}
-                        onChange={() => setPickupPoint("aruana")}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold">Aruana</p>
-                        <p className="text-xs text-muted-foreground">
-                          Rua Josepha Andrade Irmã Fontes, 600 — Residencial Vista Aruana
-                        </p>
-                      </div>
-                    </label>
                     <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-secondary/50">
                       <input
                         type="radio"

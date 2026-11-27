@@ -38,7 +38,7 @@ function RetiradaEnvioPage() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<string[]>([]);
   const [kind, setKind] = useState<Kind>("pickup");
-  const [point, setPoint] = useState<"aruana" | "aeroporto">("aruana");
+  const [point, setPoint] = useState<"aruana" | "aeroporto">("aeroporto");
   const [at, setAt] = useState<string | null>(null);
   const [events, setEvents] = useState<PickupEvent[]>([]);
   const [eventSel, setEventSel] = useState<EventSelection | null>(null);
@@ -123,7 +123,7 @@ function RetiradaEnvioPage() {
                 className={`flex items-start gap-2 rounded-md border p-3 text-left text-sm transition-colors ${kind === "pickup" ? "border-primary bg-primary/5" : "border-border hover:bg-secondary"}`}
               >
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                <span><span className="font-medium">Retirada em mãos</span><span className="block text-xs text-muted-foreground">Aruana ou Aeroporto, seg–sex, 14h–19h</span></span>
+                <span><span className="font-medium">Retirada em mãos</span><span className="block text-xs text-muted-foreground">Aeroporto, seg–sex, 14h–19h</span></span>
               </button>
               <button
                 type="button"
@@ -150,7 +150,6 @@ function RetiradaEnvioPage() {
                 value={point}
                 onChange={(e) => setPoint(e.target.value as typeof point)}
               >
-                <option value="aruana">Condomínio Vista de Aruana</option>
                 <option value="aeroporto">Condomínio Palm Ville (Aeroporto)</option>
               </select>
             )}

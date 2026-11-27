@@ -24,7 +24,7 @@ describe("admin shipping edit", () => {
     expect(validateAdminShippingInput({ mode: "tracked", address: { cep: "49000", street: "R", number: "1", city: "Aracaju" } })).toMatch(/frete/);
   });
   it("pickup within 24h warns but is not a validation error", () => {
-    const i = { mode: "pickup" as const, pickupPoint: "aruana" as const, at: toIso("2026-10-22", "15:00") };
+    const i = { mode: "pickup" as const, pickupPoint: "aeroporto" as const, at: toIso("2026-10-22", "15:00") };
     expect(validateAdminShippingInput(i)).toBeNull();
     expect(adminShippingWarnings(i, null, now)).toContain(OUT_OF_WINDOW_WARNING);
   });
